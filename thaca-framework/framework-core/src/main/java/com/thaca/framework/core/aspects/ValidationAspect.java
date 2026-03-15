@@ -42,7 +42,7 @@ public class ValidationAspect {
             validator.setAccessible(true);
             validator.invoke(target, args);
         } catch (NoSuchMethodException ex) {
-            log.error("[ValidationAspect]:: no such method: ", ex);
+            log.error("[ValidationAspect] runValidator()]:: ", ex);
         }
     }
 

@@ -25,12 +25,13 @@
 		<apache-commons-version>3.20.0</apache-commons-version>
         <redisson-version>4.1.0</redisson-version>
         <dotenv-version>4.0.0</dotenv-version>
+        <jwt-version>0.12.6</jwt-version>
     </properties>
 
     <modules>
         <module>framework-core</module>
         <module>framework-blocking-starter</module>
-<!--        <module>framework-reactive-starter</module>-->
+        <module>framework-reactive-starter</module>
     </modules>
 
 </project>

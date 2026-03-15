@@ -32,7 +32,7 @@ public class RedisCacheService {
             Duration duration = Duration.of(ttl, timeUnit.toChronoUnit());
             this.getBucket(key.toString()).set(data, duration);
         } catch (Exception e) {
-            log.error("[RedisCacheService]:: exception: ", e);
+            log.error("[RedisCacheService] set()]:: ", e);
         }
     }
 
@@ -43,7 +43,7 @@ public class RedisCacheService {
             String data = JsonF.toJson(value);
             this.getBucket(key.toString()).set(data);
         } catch (Exception e) {
-            log.error("[RedisCacheService]:: exception: ", e);
+            log.error("[RedisCacheService] set()]:: ", e);
         }
     }
 
@@ -55,7 +55,7 @@ public class RedisCacheService {
             if (Objects.isNull(data)) return null;
             return JsonF.jsonToObject(data, clazz);
         } catch (Exception e) {
-            log.error("[RedisCacheService]:: exception: ", e);
+            log.error("[RedisCacheService] get()]:: ", e);
             return null;
         }
     }
@@ -66,7 +66,7 @@ public class RedisCacheService {
 
             this.getBucket(key.toString()).delete();
         } catch (Exception e) {
-            log.error("[RedisCacheService]:: exception: ", e);
+            log.error("[RedisCacheService] evict()]:: ", e);
         }
     }
 }

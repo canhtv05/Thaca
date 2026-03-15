@@ -92,6 +92,14 @@ public enum CommonErrorMessage implements ErrorMessageRule {
             "Hệ thống đang bảo trì hoặc quá tải",
             "Service unavailable",
             "Service temporarily unavailable"
+    ),
+
+    USER_SESSION_NOT_FOUND(
+            "40102",
+            "Không tìm thấy phiên đăng nhập",
+            "Không tìm thấy phiên đăng nhập của người dùng",
+            "Session not found",
+            "User authentication session not found"
     );
 
     private final String code;

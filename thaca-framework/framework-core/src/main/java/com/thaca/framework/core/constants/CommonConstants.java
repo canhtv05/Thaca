@@ -42,5 +42,6 @@ public class CommonConstants {
             .flatMap(Arrays::stream)
             .toArray(String[]::new);
 
-    public static final String COOKIE_NAME = "MY_MICROSERVICE";
+    public static final String COOKIE_NAME = "THACA_COOKIE";
+    public static final String CHANNEL_KEY = "channel";
 }
