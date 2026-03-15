@@ -1,6 +1,5 @@
 package com.thaca.framework.blocking.starter.services;
 
-import com.thaca.common.dtos.UserSession;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
