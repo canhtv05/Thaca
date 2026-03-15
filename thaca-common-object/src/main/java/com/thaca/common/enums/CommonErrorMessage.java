@@ -6,64 +6,88 @@ import lombok.Getter;
 @Getter
 public enum CommonErrorMessage implements ErrorMessageRule {
 
-    INTERNAL_SERVER(
-            "500",
+    INTERNAL_SERVER_ERROR(
+            "50001",
             "Lỗi hệ thống",
             "Đã xảy ra lỗi không xác định",
             "System error",
-            "Unknown error occurred"
+            "Unknown internal server error"
     ),
+
     BAD_REQUEST(
-            "400",
+            "40001",
             "Yêu cầu không hợp lệ",
             "Dữ liệu gửi lên không hợp lệ",
             "Bad request",
             "Invalid request data"
     ),
+
+    INVALID_REQUEST_BODY(
+            "40002",
+            "Dữ liệu request không hợp lệ",
+            "Body request không đúng định dạng hoặc không thể đọc",
+            "Invalid request body",
+            "Request body is malformed or unreadable"
+    ),
+
     UNAUTHORIZED(
-            "401",
+            "40101",
             "Chưa xác thực",
             "Bạn chưa đăng nhập hoặc token không hợp lệ",
             "Unauthorized",
             "Authentication required or invalid token"
     ),
+
     FORBIDDEN(
-            "403",
+            "40301",
             "Không có quyền",
             "Bạn không có quyền truy cập tài nguyên này",
             "Forbidden",
             "You do not have permission to access this resource"
     ),
+
     NOT_FOUND(
-            "404",
-            "Không tìm thấy dữ liệu",
+            "40401",
+            "Không tìm thấy tài nguyên",
             "Tài nguyên không tồn tại",
             "Not found",
-            "Resource not found"
+            "Requested resource not found"
     ),
+
     METHOD_NOT_ALLOWED(
-            "405",
+            "40501",
             "Phương thức không hợp lệ",
             "Phương thức HTTP không được hỗ trợ",
             "Method not allowed",
             "HTTP method is not supported"
     ),
+
     CONFLICT(
-            "409",
+            "40901",
             "Xung đột dữ liệu",
             "Dữ liệu đã tồn tại hoặc gây xung đột",
             "Conflict",
             "Data conflict or already exists"
     ),
+
     VALIDATION_FAILED(
-            "422",
+            "42201",
             "Dữ liệu không hợp lệ",
             "Dữ liệu không thỏa mãn điều kiện kiểm tra",
             "Validation failed",
             "Request validation failed"
     ),
+
+    BINDING_ERROR(
+            "42203",
+            "Lỗi ánh xạ dữ liệu",
+            "Không thể ánh xạ dữ liệu request",
+            "Binding error",
+            "Failed to bind request parameters"
+    ),
+
     SERVICE_UNAVAILABLE(
-            "503",
+            "50301",
             "Dịch vụ tạm thời không khả dụng",
             "Hệ thống đang bảo trì hoặc quá tải",
             "Service unavailable",

@@ -29,7 +29,7 @@ public class JsonF {
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            log.error("[JsonF] exception: ", e);
+            log.error("[JsonF]:: exception: ", e);
             return null;
         }
     }
@@ -41,7 +41,7 @@ public class JsonF {
         try {
             return objectMapper.readValue(str, clazz);
         } catch (Exception e) {
-            log.error("[JsonF] exception: ", e);
+            log.error("[JsonF]:: exception: ", e);
             return null;
         }
     }
@@ -53,7 +53,7 @@ public class JsonF {
         try {
             return objectMapper.readValue(str, type);
         } catch (Exception e) {
-            log.error("[JsonF] exception: ", e);
+            log.error("[JsonF]:: exception: ", e);
             return null;
         }
     }

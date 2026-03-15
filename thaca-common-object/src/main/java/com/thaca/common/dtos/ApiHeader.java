@@ -14,6 +14,7 @@ public class ApiHeader {
     private String transId;
     private String traceId;
     private String channel;
+    private String language;
 
     @Builder.Default
     private Long timestamp = System.currentTimeMillis();

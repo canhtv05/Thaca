@@ -23,11 +23,13 @@
         <aop-version>3.5.11</aop-version>
         <java-jwt-version>4.5.1</java-jwt-version>
 		<apache-commons-version>3.20.0</apache-commons-version>
+        <redisson-version>4.1.0</redisson-version>
+        <dotenv-version>4.0.0</dotenv-version>
     </properties>
 
     <modules>
         <module>framework-core</module>
-<!--        <module>framework-blocking-starter</module>-->
+        <module>framework-blocking-starter</module>
 <!--        <module>framework-reactive-starter</module>-->
     </modules>
 
