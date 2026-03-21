@@ -1,6 +1,8 @@
-package com.thaca.framework.blocking.starter.config;
+package com.thaca.framework.blocking.starter.configs;
 
 import com.thaca.framework.core.config.FrameworkProperties;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
@@ -10,14 +12,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(FrameworkProperties.class)
 public class RedisConfig {
-    
+
     private final FrameworkProperties frameworkProperties;
 
     @Bean
@@ -37,15 +36,15 @@ public class RedisConfig {
         if (!address.startsWith("redis://") && !address.startsWith("rediss://")) address = "redis://" + address;
 
         var single = config
-                .useSingleServer()
-                .setAddress(address)
-                .setConnectionPoolSize(frameworkProperties.getRedis().getMaxPoolSize())
-                .setTimeout(10000)
-                .setConnectTimeout(10000)
-                .setConnectionMinimumIdleSize(frameworkProperties.getRedis().getMinimumIdle());
+            .useSingleServer()
+            .setAddress(address)
+            .setConnectionPoolSize(frameworkProperties.getRedis().getMaxPoolSize())
+            .setTimeout(10000)
+            .setConnectTimeout(10000)
+            .setConnectionMinimumIdleSize(frameworkProperties.getRedis().getMinimumIdle());
 
         if (StringUtils.isNotBlank(frameworkProperties.getRedis().getClientName())) single.setClientName(
-                frameworkProperties.getRedis().getClientName()
+            frameworkProperties.getRedis().getClientName()
         );
         return config;
     }

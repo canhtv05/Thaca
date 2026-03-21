@@ -1,17 +1,16 @@
-package com.thaca.framework.blocking.starter.config.cache;
+package com.thaca.framework.blocking.starter.configs.cache;
 
 import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.JsonF;
+import java.time.Duration;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service

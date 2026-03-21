@@ -31,13 +31,22 @@ public class SecurityUtils {
         return null;
     }
 
-    public static boolean isAdmin() {
+    public static boolean isGlobalAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (
             authentication != null &&
             authentication.getPrincipal() instanceof UserPrincipal &&
-            ((UserPrincipal) authentication.getPrincipal()).isAdmin() &&
+            ((UserPrincipal) authentication.getPrincipal()).isGlobal() &&
             ((UserPrincipal) authentication.getPrincipal()).getRole().contains(AuthoritiesConstants.ADMIN)
+        );
+    }
+
+    public static boolean isGlobalUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (
+            authentication != null &&
+            authentication.getPrincipal() instanceof UserPrincipal &&
+            ((UserPrincipal) authentication.getPrincipal()).isGlobal()
         );
     }
 

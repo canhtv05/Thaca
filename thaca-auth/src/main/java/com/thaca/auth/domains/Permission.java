@@ -1,0 +1,44 @@
+package com.thaca.auth.domains;
+
+import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+@Setter
+@Getter
+@SuperBuilder
+@NoArgsConstructor
+@Entity
+@Table(name = "PERMISSIONS")
+public class Permission extends BaseEntityAudit {
+
+    @Id
+    @Column(name = "CODE", length = 50, unique = true, nullable = false)
+    private String code;
+
+    @Column(name = "TYPE", length = 20, nullable = false)
+    private String type;
+
+    @Column(name = "DESCRIPTION", nullable = false)
+    private String description;
+
+    @Column(name = "MODULE", nullable = false)
+    private String module;
+
+    @Column(name = "METHOD", length = 50)
+    private String method;
+
+    @Column(name = "PATH_PATTERN")
+    private String pathPattern;
+
+    @Column(name = "IS_GLOBAL", nullable = false)
+    @Builder.Default
+    private Boolean isGlobal = false;
+}

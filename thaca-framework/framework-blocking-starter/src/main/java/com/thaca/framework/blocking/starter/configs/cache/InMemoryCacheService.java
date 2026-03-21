@@ -1,13 +1,12 @@
-package com.thaca.framework.blocking.starter.config.cache;
+package com.thaca.framework.blocking.starter.configs.cache;
 
 import com.thaca.framework.core.utils.CommonUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -20,7 +19,7 @@ public class InMemoryCacheService<K, V> {
             if (CommonUtils.isEmpty(key, value)) return;
             cache.put(key, value);
         } catch (Exception e) {
-             log.error("[InMemoryCacheService] put()]:: ", e);
+            log.error("[InMemoryCacheService] put()]:: ", e);
         }
     }
 
@@ -29,7 +28,7 @@ public class InMemoryCacheService<K, V> {
             if (CommonUtils.isEmpty(key)) return Optional.empty();
             return Optional.ofNullable(cache.get(key));
         } catch (Exception e) {
-             log.error("[InMemoryCacheService] get()]:: ", e);
+            log.error("[InMemoryCacheService] get()]:: ", e);
             return Optional.empty();
         }
     }
@@ -39,7 +38,7 @@ public class InMemoryCacheService<K, V> {
             if (Objects.isNull(key)) return;
             cache.remove(key);
         } catch (Exception e) {
-             log.error("[InMemoryCacheService] evict()]:: ", e);
+            log.error("[InMemoryCacheService] evict()]:: ", e);
         }
     }
 
@@ -52,7 +51,7 @@ public class InMemoryCacheService<K, V> {
             if (Objects.isNull(key)) return;
             cache.remove(key);
         } catch (Exception e) {
-             log.error("[InMemoryCacheService] remove()]:: ", e);
+            log.error("[InMemoryCacheService] remove()]:: ", e);
         }
     }
 
@@ -60,7 +59,7 @@ public class InMemoryCacheService<K, V> {
         try {
             cache.clear();
         } catch (Exception e) {
-             log.error("[InMemoryCacheService] clear()]:: ", e);
+            log.error("[InMemoryCacheService] clear()]:: ", e);
         }
     }
 
@@ -68,7 +67,7 @@ public class InMemoryCacheService<K, V> {
         try {
             return cache.size();
         } catch (Exception e) {
-             log.error("[InMemoryCacheService] size()]:: ", e);
+            log.error("[InMemoryCacheService] size()]:: ", e);
             return 0;
         }
     }

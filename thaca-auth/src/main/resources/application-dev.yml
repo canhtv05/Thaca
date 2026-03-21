@@ -1,0 +1,22 @@
+logging:
+  level:
+    # disable log of InitializeUserDetailsBeanManagerConfigurer
+    '[org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer]': ERROR
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    # consumer:
+    #   group-id: auth-group
+    #   key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    #   value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer

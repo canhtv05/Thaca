@@ -1,0 +1,3 @@
+code;name;description;created_by
+ROLE_ADMIN;ROLE_ADMIN;Role cho admin;system
+ROLE_USER;ROLE_USER;Role cho user;system

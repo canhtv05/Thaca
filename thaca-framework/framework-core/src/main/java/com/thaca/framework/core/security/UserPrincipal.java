@@ -1,10 +1,9 @@
 package com.thaca.framework.core.security;
 
 public interface UserPrincipal {
-
     String getUsername();
 
-    boolean isAdmin();
+    boolean isGlobal();
 
     String getRole();
 
