@@ -9,7 +9,6 @@ import lombok.experimental.UtilityClass;
 public class CommonService {
 
     public String getCurrentUserLogin() {
-        return SecurityUtils.getCurrentUserLogin()
-                .orElseThrow(() -> new FwException(CommonErrorMessage.UNAUTHORIZED));
+        return SecurityUtils.getCurrentUsername().orElseThrow(() -> new FwException(CommonErrorMessage.UNAUTHORIZED));
     }
 }
