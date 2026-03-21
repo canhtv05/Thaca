@@ -7,13 +7,12 @@ import com.thaca.framework.core.config.FrameworkProperties;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.FwUtils;
 import com.thaca.framework.core.utils.JsonF;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -38,10 +37,10 @@ public class UserSessionService {
     public void cacheToken(String username, String channelType, String token) {
         try {
             redisService.set(
-                    sessionStore.getKeyToken(username, channelType),
-                    FwUtils.hexString(token),
-                    this.frameworkProperties.getSecurity().getValidDurationInSeconds(),
-                    TimeUnit.SECONDS
+                sessionStore.getKeyToken(username, channelType),
+                FwUtils.hexString(token),
+                this.frameworkProperties.getSecurity().getValidDurationInSeconds(),
+                TimeUnit.SECONDS
             );
         } catch (Exception e) {
             log.error("[UserSessionService] cacheToken()]:: ", e);
@@ -83,15 +82,6 @@ public class UserSessionService {
             throw new FwException(CommonErrorMessage.USER_SESSION_NOT_FOUND);
         } else {
             return sessionInfo;
-        }
-    }
-
-    public UserSession getUserSessionInfo() {
-        var currentUser = CommonService.getAuthInfo();
-        if (ObjectUtils.isEmpty(currentUser)) {
-            throw new FwException(CommonErrorMessage.USER_SESSION_NOT_FOUND);
-        } else {
-            return this.getUserSessionInfo(currentUser.getUsername(), currentUser.getChannel());
         }
     }
 }

@@ -1,0 +1,6 @@
+# Run lint-staged for JS/TS/CSS files
+npx lint-staged
+
+# Optional: Run Spotless check for Java files (uncomment if needed)
+# echo "Checking Java code formatting..."
+# mvn spotless:check -q
