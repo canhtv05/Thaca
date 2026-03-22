@@ -95,8 +95,13 @@ public enum CommonErrorMessage implements ErrorMessageRule {
         "User authentication session not found"
     ),
 
-    IMPORT_EXCEL_ERROR("42204", "Lỗi import excel", "Lỗi import excel", "Import excel error", "Import excel error"),
-    VALIDATION_ERROR("42205", "Dữ liệu không hợp lệ", "Dữ liệu không hợp lệ", "Validation error", "Validation error");
+    REQUEST_INVALID_PARAMS(
+        "42204",
+        "Dữ liệu request không hợp lệ",
+        "Dữ liệu request không hợp lệ",
+        "Request invalid params",
+        "Request invalid params"
+    );
 
     private final String code;
     private final String titleVi;

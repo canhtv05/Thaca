@@ -1,3 +1,7 @@
+spring:
+  application:
+    name: framework-core
+
 application:
   security:
     base64Secret: ${APPLICATION_SECURITY_BASE64SECRET:ASyTTcIvfHA8QsI2c1Fvc8vZUcaeUgRlHH1VhsElDSYHsJ0CS5N0y5/yvKte+WDvYS3lL0oBzPK+1E83ACSdvA==}
@@ -10,3 +14,9 @@ application:
     password: ${APPLICATION_REDIS_PASSWORD:}
     minimumIdle: ${APPLICATION_REDIS_MINIMUM_IDLE:2}
     maxPoolSize: ${APPLICATION_REDIS_MAX_POOL_SIZE:100}
+
+logging:
+  level:
+    '[root]': WARN
+    '[com.thaca]': INFO
+    '[org.springframework]': WARN

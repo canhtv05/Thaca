@@ -1,0 +1,64 @@
+{
+  "properties": [
+    {
+      "name": "application.security.base64Secret",
+      "type": "java.lang.String",
+      "description": "A description for 'application.security.base64Secret'"
+    },
+    {
+      "name": "application.security.validDurationInSeconds",
+      "type": "java.lang.String",
+      "description": "A description for 'application.security.validDurationInSeconds'"
+    },
+    {
+      "name": "application.security.refreshDurationInSeconds",
+      "type": "java.lang.String",
+      "description": "A description for 'application.security.refreshDurationInSeconds'"
+    },
+    {
+      "name": "application.security.cookieDomain",
+      "type": "java.lang.String",
+      "description": "A description for 'application.security.cookieDomain'"
+    },
+    {
+      "name": "application.redis.clientName",
+      "type": "java.lang.String",
+      "description": "A description for 'application.redis.clientName'"
+    },
+    {
+      "name": "application.redis.address",
+      "type": "java.lang.String",
+      "description": "A description for 'application.redis.address'"
+    },
+    {
+      "name": "application.redis.password",
+      "type": "java.lang.String",
+      "description": "A description for 'application.redis.password'"
+    },
+    {
+      "name": "application.redis.minimumIdle",
+      "type": "java.lang.String",
+      "description": "A description for 'application.redis.minimumIdle'"
+    },
+    {
+      "name": "application.redis.maxPoolSize",
+      "type": "java.lang.String",
+      "description": "A description for 'application.redis.maxPoolSize'"
+    },
+    {
+      "name": "spring.kafka.bootstrap-servers",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.kafka.bootstrap-servers'"
+    },
+    {
+      "name": "spring.kafka.producer.key-serializer",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.kafka.producer.key-serializer'"
+    },
+    {
+      "name": "spring.kafka.producer.value-serializer",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.kafka.producer.value-serializer'"
+    }
+  ]
+}
