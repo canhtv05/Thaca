@@ -2,25 +2,20 @@ package com.thaca.auth.dtos;
 
 import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.User;
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileDTO implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class UserProfileDTO {
 
     private String username;
     private String email;

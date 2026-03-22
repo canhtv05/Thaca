@@ -2,22 +2,19 @@ package com.thaca.auth.dtos;
 
 import com.thaca.auth.domains.UserPermission;
 import com.thaca.auth.enums.PermissionAction;
-import java.io.Serializable;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPermissionDTO implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class UserPermissionDTO {
 
     private String permissionCode;
     private PermissionAction action;

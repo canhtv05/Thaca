@@ -1,7 +1,5 @@
 package com.thaca.auth.dtos.res;
 
-import java.io.Serial;
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,10 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RefreshTokenRes implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class RefreshTokenRes {
 
     private String accessToken;
     private String refreshToken;

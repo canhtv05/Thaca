@@ -1,21 +1,15 @@
 package com.thaca.auth.dtos;
 
 import com.thaca.auth.enums.NotificationType;
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.Instant;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 
-@Data
+@Getter
+@Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class NotificationPayload<T> implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+@AllArgsConstructor
+public class NotificationPayload<T> {
 
     NotificationType type;
     String sessionId;

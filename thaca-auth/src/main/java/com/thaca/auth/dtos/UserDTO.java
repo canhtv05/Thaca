@@ -7,27 +7,22 @@ import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.User;
 import com.thaca.framework.core.utils.json.InstantToStringSerializer;
 import com.thaca.framework.core.utils.json.LowerCaseTrimDeserializer;
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Setter
 @Getter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDTO implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class UserDTO {
 
     private Long id;
     private String fullname;

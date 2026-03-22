@@ -1,5 +1,6 @@
 package com.thaca.auth.services;
 
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.context.AuthenticationContext;
 import com.thaca.auth.domains.Permission;
 import com.thaca.auth.domains.User;
@@ -16,8 +17,11 @@ import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.enums.AuthKey;
+import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
+import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
@@ -56,7 +60,19 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final JwtUtils jwtUtils;
 
-    @Transactional
+    @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
+    public void validateAuthenticate(
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
+        if (StringUtils.isBlank(loginReq.getUsername()) || StringUtils.isBlank(loginReq.getPassword())) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.HANDLE)
     public AuthenticateRes authenticate(
         LoginReq loginReq,
         HttpServletRequest httpServletRequest,
