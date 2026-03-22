@@ -36,7 +36,13 @@ public class ApiBody<T> {
             .transId(transId)
             .status("FAILED")
             .data(
-                ErrorData.builder().code(error.code()).messageVi(error.messageVi()).messageEn(error.messageEn()).build()
+                ErrorData.builder()
+                    .code(error.code())
+                    .titleVi(error.titleVi())
+                    .titleEn(error.titleEn())
+                    .messageVi(error.messageVi())
+                    .messageEn(error.messageEn())
+                    .build()
             )
             .build();
     }
