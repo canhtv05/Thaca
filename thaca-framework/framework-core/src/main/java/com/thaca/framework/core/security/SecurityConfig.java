@@ -2,6 +2,7 @@ package com.thaca.framework.core.security;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -20,7 +21,8 @@ public class SecurityConfig {
     private final List<SecurityCustomizer> securityCustomizers;
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
+    SecurityFilterChain frameworkSecurityFilterChain(HttpSecurity http) throws Exception {
         for (SecurityCustomizer customizer : securityCustomizers) {
             customizer.customize(http);
         }

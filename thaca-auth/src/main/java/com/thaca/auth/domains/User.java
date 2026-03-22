@@ -16,46 +16,46 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @Entity
-@Table(name = "USERS")
+@Table(name = "users", schema = "auth")
 public class User extends BaseEntityAudit {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_SEQ")
-    @SequenceGenerator(name = "USER_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "USERNAME", unique = true, nullable = false)
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
-    @Column(name = "EMAIL", unique = true, nullable = false)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @JsonIgnore
-    @Column(name = "PASSWORD", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "ACTIVATED", nullable = false)
+    @Column(name = "activated", nullable = false)
     @Builder.Default
     private boolean activated = false;
 
-    @Column(name = "IS_LOCKED", nullable = false)
+    @Column(name = "is_locked", nullable = false)
     @Builder.Default
     private boolean isLocked = false;
 
-    @Column(name = "IS_GLOBAL", nullable = false)
+    @Column(name = "is_global", nullable = false)
     @Builder.Default
     private Boolean isGlobal = false;
 
     @JsonIgnore
-    @Column(name = "REFRESH_TOKEN", columnDefinition = "TEXT")
+    @Column(name = "refresh_token", columnDefinition = "TEXT")
     String refreshToken;
 
     @JsonIgnore
     @ManyToMany
     @JoinTable(
-        name = "USER_ROLES",
-        joinColumns = { @JoinColumn(name = "USER_ID", referencedColumnName = "ID") },
-        inverseJoinColumns = { @JoinColumn(name = "ROLE_CODE", referencedColumnName = "CODE") }
+        name = "user_roles",
+        joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") },
+        inverseJoinColumns = { @JoinColumn(name = "role_code", referencedColumnName = "code") }
     )
     @Builder.Default
     private Set<Role> roles = new HashSet<>();

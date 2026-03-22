@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.thaca</groupId>
-	<artifactId>auth</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<artifactId>thaca-auth</artifactId>
+	<version>1.0.0</version>
+	<name>auth</name>
+	<description>Thaca auth for Spring Boot</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -28,8 +28,16 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+    <dotenv-version>5.1.0</dotenv-version>
+
 	</properties>
 	<dependencies>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
@@ -69,18 +77,16 @@
 			<version>1.0.0</version>
     </dependency>
 
-    <!-- Liquibase core -->
+    <!-- Liquibase starter -->
 		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-			<version>${liquibase.version}</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-liquibase</artifactId>
 		</dependency>
 
-		<!-- Liquibase Hibernate support -->
 		<dependency>
-			<groupId>org.liquibase.ext</groupId>
-			<artifactId>liquibase-hibernate6</artifactId>
-			<version>5.0.1</version>
+			<groupId>me.paulschwarz</groupId>
+			<artifactId>springboot4-dotenv</artifactId>
+			<version>${dotenv-version}</version>
 		</dependency>
 
     <dependency>

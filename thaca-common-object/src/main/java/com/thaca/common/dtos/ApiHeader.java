@@ -11,10 +11,10 @@ public class ApiHeader {
 
     private String username;
     private String location;
-    private String transId;
-    private String traceId;
     private String channel;
+    private String traceId;
     private String language;
+    private String apiKey;
 
     @Builder.Default
     private Long timestamp = System.currentTimeMillis();

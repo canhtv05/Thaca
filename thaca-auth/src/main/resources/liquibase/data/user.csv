@@ -1,3 +1,3 @@
-id;username;password;activated;created_by;modified_by;is_global;is_locked;email
-1;admin;$2a$10$gSAhZrxMllrbgj/kkK9UceBPpChGWJA7SYIb1Mqo.n5aNLq1/oRrC;true;system;system;true;false;admin@thaca.com
-2;user;$2a$10$SO35FHn1zZ8GqhMvyzGQauFS/h4eZSPK8AviyGdYJBtK83XmMZ0jq;true;system;system;false;false;user@thaca.com
+id;username;password;activated;is_locked;is_global;email;created_by;created_at;updated_by;updated_at
+1;admin;$2a$10$gSAhZrxMllrbgj/kkK9UceBPpChGWJA7SYIb1Mqo.n5aNLq1/oRrC;true;false;true;admin@thaca.com;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+2;user;$2a$10$SO35FHn1zZ8GqhMvyzGQauFS/h4eZSPK8AviyGdYJBtK83XmMZ0jq;true;false;false;user@thaca.com;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00

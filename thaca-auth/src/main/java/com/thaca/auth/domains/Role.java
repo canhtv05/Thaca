@@ -16,17 +16,17 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @Entity
-@Table(name = "ROLES")
+@Table(name = "roles", schema = "auth")
 public class Role extends BaseEntityAudit {
 
     @Id
-    @Column(name = "CODE", length = 50, unique = true, nullable = false)
+    @Column(name = "code", length = 50, unique = true, nullable = false)
     private String code;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "DESCRIPTION")
+    @Column(name = "description")
     private String description;
 
     @ManyToMany(mappedBy = "roles")
@@ -35,9 +35,9 @@ public class Role extends BaseEntityAudit {
     @JsonIgnore
     @ManyToMany
     @JoinTable(
-        name = "ROLE_PERMISSIONS",
-        joinColumns = { @JoinColumn(name = "ROLE_CODE", referencedColumnName = "CODE") },
-        inverseJoinColumns = { @JoinColumn(name = "PERMISSION_CODE", referencedColumnName = "CODE") }
+        name = "role_permissions",
+        joinColumns = { @JoinColumn(name = "role_code", referencedColumnName = "code") },
+        inverseJoinColumns = { @JoinColumn(name = "permission_code", referencedColumnName = "code") }
     )
     @Builder.Default
     private Set<Permission> permissions = new HashSet<Permission>();

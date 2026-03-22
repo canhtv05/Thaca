@@ -1,6 +1,6 @@
 package com.thaca.framework.blocking.starter.configs;
 
-import com.thaca.framework.core.config.FrameworkProperties;
+import com.thaca.framework.core.configs.FrameworkProperties;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;

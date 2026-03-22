@@ -14,7 +14,7 @@ import com.thaca.common.socket.WsMessage;
 import com.thaca.common.socket.WsSessionRevokedMessage;
 import com.thaca.framework.blocking.starter.services.RedisPubService;
 import com.thaca.framework.blocking.starter.services.UserSessionService;
-import com.thaca.framework.core.config.FrameworkProperties;
+import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.CommonConstants;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;

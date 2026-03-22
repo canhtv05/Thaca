@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @Entity
-@Table(name = "USER_PERMISSION")
+@Table(name = "user_permission", schema = "auth")
 public class UserPermission extends BaseEntityAudit {
 
     @Id

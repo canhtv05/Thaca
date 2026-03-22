@@ -2,7 +2,7 @@ package com.thaca.framework.blocking.starter.utils;
 
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.services.UserSessionService;
-import com.thaca.framework.core.config.FrameworkProperties;
+import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.constants.CommonConstants;
 import com.thaca.framework.core.utils.FwUtils;
@@ -12,6 +12,12 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,13 +25,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -47,11 +46,11 @@ public class JwtUtils {
     public Authentication getBasicAuthentication(String token) {
         Claims claims = this.parseToken(token);
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(
-                        claims.get(AuthoritiesConstants.AUTHORITIES_KEY).toString().split(",")
-                )
-                .filter(auth -> !auth.trim().isEmpty())
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+            claims.get(AuthoritiesConstants.AUTHORITIES_KEY).toString().split(",")
+        )
+            .filter(auth -> !auth.trim().isEmpty())
+            .map(SimpleGrantedAuthority::new)
+            .collect(Collectors.toList());
         return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, authorities);
     }
 

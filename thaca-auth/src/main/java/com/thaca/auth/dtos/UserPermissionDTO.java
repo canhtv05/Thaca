@@ -22,7 +22,7 @@ public class UserPermissionDTO implements Serializable {
     private String permissionCode;
     private PermissionAction action;
 
-    public UserPermission toEntity(Long userId) {
+    public UserPermission fromEntity(Long userId) {
         return UserPermission.builder()
             .id(UUID.randomUUID().toString())
             .userId(userId)

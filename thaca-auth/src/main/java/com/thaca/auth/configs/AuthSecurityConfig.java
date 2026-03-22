@@ -1,19 +1,44 @@
 package com.thaca.auth.configs;
 
+import com.thaca.auth.security.CustomAuthenticationProvider;
+import com.thaca.auth.security.jwt.JWTConfigurer;
+import com.thaca.auth.security.jwt.PermissionAuthorizationFilter;
+import com.thaca.auth.services.PublicApiService;
+import com.thaca.common.dtos.ApiResponse;
+import com.thaca.common.enums.CommonErrorMessage;
+import com.thaca.framework.blocking.starter.utils.JwtUtils;
+import com.thaca.framework.core.constants.CommonConstants;
+import com.thaca.framework.core.utils.JsonF;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class AuthSecurityConfig {
 
-    private final TokenProvider tokenProvider;
-    private final CookieUtil cookieUtil;
     private final CorsFilter corsFilter;
     private final JwtUtils jwtUtil;
     private final PublicApiService publicApiService;
@@ -47,7 +72,7 @@ public class AuthSecurityConfig {
     }
 
     private JWTConfigurer securityConfigurerAdapter() {
-        return new JWTConfigurer(tokenProvider, cookieUtil, jwtUtil);
+        return new JWTConfigurer(jwtUtil);
     }
 
     @Bean
@@ -70,24 +95,16 @@ public class AuthSecurityConfig {
     AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, authException) -> {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            if (authException instanceof CustomAuthenticationException ex) {
-                response.setStatus(ex.getHttpStatus().value());
+            if (authException instanceof AuthenticationException) {
+                response.setStatus(HttpStatus.BAD_REQUEST.value());
                 response
                     .getWriter()
-                    .write(
-                        Objects.requireNonNull(
-                            JsonF.toJson(
-                                ResponseObject.error(String.valueOf(ex.getHttpStatus().value()), ex.getMessage())
-                            )
-                        )
-                    );
+                    .write(Objects.requireNonNull(JsonF.toJson(ApiResponse.error(CommonErrorMessage.UNAUTHORIZED))));
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response
                     .getWriter()
-                    .write(
-                        Objects.requireNonNull(JsonF.toJson(ResponseObject.error("401", authException.getMessage())))
-                    );
+                    .write(Objects.requireNonNull(JsonF.toJson(ApiResponse.error(CommonErrorMessage.UNAUTHORIZED))));
             }
         };
     }
@@ -99,11 +116,7 @@ public class AuthSecurityConfig {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response
                 .getWriter()
-                .write(
-                    Objects.requireNonNull(
-                        JsonF.toJson(ResponseObject.error("403", accessDeniedException.getMessage()))
-                    )
-                );
+                .write(Objects.requireNonNull(JsonF.toJson(ApiResponse.error(CommonErrorMessage.FORBIDDEN))));
         };
     }
 }

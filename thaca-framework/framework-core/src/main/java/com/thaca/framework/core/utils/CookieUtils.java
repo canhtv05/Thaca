@@ -1,7 +1,7 @@
 package com.thaca.framework.core.utils;
 
 import com.thaca.common.dtos.TokenPair;
-import com.thaca.framework.core.config.FrameworkProperties;
+import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.CommonConstants;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

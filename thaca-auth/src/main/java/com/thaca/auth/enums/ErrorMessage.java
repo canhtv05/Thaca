@@ -100,6 +100,21 @@ public enum ErrorMessage implements ErrorMessageRule {
         "Token pair không hợp lệ",
         "Token pair invalid",
         "Token pair invalid"
+    ),
+    EMAIL_NOT_FOUND("40118", "Email không tồn tại", "Email không tồn tại", "Email not found", "Email not found"),
+    CURRENT_PASSWORD_INVALID(
+        "40119",
+        "Mật khẩu hiện tại không hợp lệ",
+        "Mật khẩu hiện tại không hợp lệ",
+        "Current password invalid",
+        "Current password invalid"
+    ),
+    PASSWORD_NEW_CANNOT_BE_SAME_AS_OLD(
+        "40120",
+        "Mật khẩu mới không được trùng với mật khẩu hiện tại",
+        "Mật khẩu mới không được trùng với mật khẩu hiện tại",
+        "Password new cannot be same as old",
+        "Password new cannot be same as old"
     );
 
     private final String code;

@@ -16,29 +16,29 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @Entity
-@Table(name = "PERMISSIONS")
+@Table(name = "permissions", schema = "auth")
 public class Permission extends BaseEntityAudit {
 
     @Id
-    @Column(name = "CODE", length = 50, unique = true, nullable = false)
+    @Column(name = "code", length = 50, unique = true, nullable = false)
     private String code;
 
-    @Column(name = "TYPE", length = 20, nullable = false)
+    @Column(name = "type", length = 20, nullable = false)
     private String type;
 
-    @Column(name = "DESCRIPTION", nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "MODULE", nullable = false)
+    @Column(name = "module", nullable = false)
     private String module;
 
-    @Column(name = "METHOD", length = 50)
+    @Column(name = "method", length = 50)
     private String method;
 
-    @Column(name = "PATH_PATTERN")
+    @Column(name = "path_pattern")
     private String pathPattern;
 
-    @Column(name = "IS_GLOBAL", nullable = false)
+    @Column(name = "is_global", nullable = false)
     @Builder.Default
     private Boolean isGlobal = false;
 }

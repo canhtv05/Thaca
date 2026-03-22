@@ -1,5 +1,6 @@
 package com.thaca.auth.services;
 
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.domains.UserPermission;
@@ -30,10 +31,18 @@ import com.thaca.common.dtos.events.UserCreationEvent;
 import com.thaca.common.dtos.events.VerificationEmailEvent;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
+import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
+import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.constants.AuthoritiesConstants;
+import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
+import com.thaca.framework.core.utils.DateUtils;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
 import java.io.ByteArrayOutputStream;
@@ -158,72 +167,26 @@ public class UserService {
     }
 
     @Transactional
-    public VerifyEmailTokenGrpcDTO activeUserByUserName(VerifyEmailTokenGrpcDTO request) {
+    public void resetPassword(ResetPasswordReq request) {
+        if (CommonUtils.isEmpty(request.getEmail(), request.getNewPassword(), request.getOTP())) {
+            throw new FwException(CommonErrorMessage.VALIDATION_ERROR);
+        }
+
         if (request.getEmail().contains("+")) {
             throw new FwException(ErrorMessage.EMAIL_INVALID);
         }
 
         User user = userRepository
-            .findByUsername(request.getUsername())
-            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setActivated(true);
-        userRepository.save(user);
-
-        // Send Kafka event to create user profile with fullname from verification token
-        kafkaProducerService.send(
-            EventConstants.USER_CREATED_TOPIC,
-            UserCreatedEvent.builder().userId(user.getUsername()).fullName(request.getFullname()).build()
-        );
-
-        return VerifyEmailTokenGrpcDTO.newBuilder()
-            .setUsername(user.getUsername())
-            .setEmail(request.getEmail())
-            .setFullname(request.getFullname())
-            .build();
-    }
-
-    @Transactional
-    public void forgotPasswordRequest(ForgotPasswordReq request) {
-        if (request.getEmail().contains("+")) {
-            throw new ApiException(ErrorMessage.EMAIL_INVALID);
-        }
-
-        User user = userRepository
             .findByEmail(request.getEmail())
-            .orElseThrow(() -> new ApiException(ErrorMessage.EMAIL_NOT_FOUND));
-
-        boolean hasOTP = hasOTP(user.getUsername());
-        if (hasOTP) {
-            throw new ApiException(ErrorMessage.FORGET_PASSWORD_OTP_ALREADY_SENT);
-        }
-
-        kafkaProducerService.send(
-            EventConstants.FORGOT_PASSWORD_TOPIC,
-            ForgotPasswordEvent.builder().to(request.getEmail()).username(user.getUsername()).build()
-        );
-    }
-
-    @Transactional
-    public void resetPassword(ResetPasswordReq request) {
-        if (CommonUtils.isEmpty(request.getEmail(), request.getNewPassword(), request.getOTP())) {
-            throw new ApiException(ErrorMessage.VALIDATION_ERROR);
-        }
-
-        if (request.getEmail().contains("+")) {
-            throw new ApiException(ErrorMessage.EMAIL_INVALID);
-        }
-
-        User user = userRepository
-            .findByEmail(request.getEmail())
-            .orElseThrow(() -> new ApiException(ErrorMessage.EMAIL_NOT_FOUND));
+            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
 
         boolean hasOTP = hasOTP(user.getUsername());
         if (!hasOTP) {
-            throw new ApiException(ErrorMessage.FORGET_PASSWORD_OTP_NOT_SENT_OR_EXPIRED);
+            throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_NOT_SENT_OR_EXPIRED);
         }
         String keyForgotPassword = sessionStore.getKeyForgotPassword(user.getUsername());
         if (!request.getOTP().equals(redisService.get(keyForgotPassword, String.class))) {
-            throw new ApiException(ErrorMessage.FORGET_PASSWORD_OTP_INVALID);
+            throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_INVALID);
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -234,60 +197,81 @@ public class UserService {
     @Transactional(readOnly = true)
     public void verifyForgotPasswordOTP(VerifyOTPReq request) {
         if (CommonUtils.isEmpty(request.getEmail(), request.getOTP())) {
-            throw new FwException(ErrorMessage.VALIDATION_ERROR);
+            throw new FwException(CommonErrorMessage.VALIDATION_ERROR);
         }
 
         if (request.getEmail().contains("+")) {
-            throw new ApiException(ErrorMessage.EMAIL_INVALID);
+            throw new FwException(ErrorMessage.EMAIL_INVALID);
         }
 
         User user = userRepository
             .findByEmail(request.getEmail())
-            .orElseThrow(() -> new ApiException(ErrorMessage.EMAIL_NOT_FOUND));
+            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
 
         String keyForgotPassword = sessionStore.getKeyForgotPassword(user.getUsername());
         String otp = redisService.get(keyForgotPassword, String.class);
         if (CommonUtils.isEmpty(otp)) {
-            throw new ApiException(ErrorMessage.FORGET_PASSWORD_OTP_NOT_SENT_OR_EXPIRED);
+            throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_NOT_SENT_OR_EXPIRED);
         }
 
         if (!otp.equals(request.getOTP())) {
-            throw new ApiException(ErrorMessage.FORGET_PASSWORD_OTP_INVALID);
+            throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_INVALID);
         }
     }
 
     @Transactional
     public void changePassword(String cookieValue, ChangePasswordReq req, HttpServletResponse response) {
         if (CommonUtils.isEmpty(req.getCurrentPassword(), req.getNewPassword())) {
-            throw new ApiException(ErrorMessage.VALIDATION_ERROR);
+            throw new FwException(CommonErrorMessage.VALIDATION_ERROR);
         }
-        String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() ->
-            new ApiException(ErrorMessage.UNAUTHENTICATED)
-        );
+        String userLogin = CommonService.getCurrentUserLogin();
         Optional<User> optionalUser = userRepository.findByUsername(userLogin);
         if (optionalUser.isEmpty()) {
-            throw new ApiException(ErrorMessage.USER_NOT_FOUND);
+            throw new FwException(ErrorMessage.USER_NOT_FOUND);
         }
         User user = optionalUser.get();
         if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
-            throw new ApiException(ErrorMessage.CURRENT_PASSWORD_INVALID);
+            throw new FwException(ErrorMessage.CURRENT_PASSWORD_INVALID);
         }
         if (passwordEncoder.matches(req.getNewPassword(), user.getPassword())) {
-            throw new ApiException(ErrorMessage.PASSWORD_NEW_CANNOT_BE_SAME_AS_OLD);
+            throw new FwException(ErrorMessage.PASSWORD_NEW_CANNOT_BE_SAME_AS_OLD);
         }
         user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         userRepository.save(user);
         authService.logout(cookieValue, req.getChannel(), response);
     }
 
+    @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.VALIDATE)
+    public void validateForgotPasswordRequest(ForgotPasswordReq request) {
+        if (request.getEmail().contains("+")) {
+            throw new FwException(ErrorMessage.EMAIL_INVALID);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.HANDLE)
+    public void forgotPasswordRequest(ForgotPasswordReq request) {
+        User user = userRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
+
+        boolean hasOTP = hasOTP(user.getUsername());
+        if (hasOTP) {
+            throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_ALREADY_SENT);
+        }
+
+        kafkaProducerService.send(
+            EventConstants.FORGOT_PASSWORD_TOPIC,
+            new ForgotPasswordEvent(request.getEmail(), user.getUsername())
+        );
+    }
+
     @Transactional
     public void updateUserProfile(UserProfileDTO request) {
-        String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() ->
-            new ApiException(ErrorMessage.UNAUTHENTICATED)
-        );
+        String userLogin = CommonService.getCurrentUserLogin();
         Optional<User> optionalUser = userRepository.findByUsername(userLogin);
         if (optionalUser.isEmpty()) {
-            throw new ApiException(ErrorMessage.USER_NOT_FOUND);
+            throw new FwException(ErrorMessage.USER_NOT_FOUND);
         }
         userRepository.save(optionalUser.get());
     }
@@ -335,14 +319,14 @@ public class UserService {
 
                 row.createCell(1).setCellValue(item.getUsername());
                 row.createCell(2).setCellValue(item.isActivated() ? "Hoạt động" : "Không hoạt động");
-                row.createCell(3).setCellValue(DateUtils.dateToString(item.getCreatedDate()));
+                row.createCell(3).setCellValue(DateUtils.dateToString(item.getCreatedAt()));
                 r++;
             }
             IntStream.range(1, headers.size()).forEach(sheet::autoSizeColumn);
             wb.write(out);
             return out.toByteArray();
         } catch (Exception e) {
-            throw new ApiException(ErrorMessage.UNHANDLED_ERROR, e.getMessage());
+            throw new FwException(CommonErrorMessage.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -352,7 +336,7 @@ public class UserService {
             .findAll()
             .stream()
             .map(Role::getCode)
-            .filter(t -> !AuthoritiesConstants.SUPER_ADMIN.equalsIgnoreCase(t))
+            .filter(t -> !AuthoritiesConstants.ADMIN.equalsIgnoreCase(t))
             .collect(Collectors.toList());
         ExcelTemplateConfig config = ExcelTemplateConfig.builder()
             .headers(List.of("Tên đăng nhập", "Email", "Vai trò"))

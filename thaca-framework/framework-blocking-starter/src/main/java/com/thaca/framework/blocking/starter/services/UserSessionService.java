@@ -3,7 +3,7 @@ package com.thaca.framework.blocking.starter.services;
 import com.thaca.common.dtos.UserSession;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
-import com.thaca.framework.core.config.FrameworkProperties;
+import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.FwUtils;
 import com.thaca.framework.core.utils.JsonF;
