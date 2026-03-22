@@ -28,19 +28,19 @@ services:
     volumes:
       - redis_ms:/data
 
-  mongo:
-    image: mongo:latest
-    container_name: mongo_ms
-    env_file:
-      - .env
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    ports:
-      - '${MONGO_PORT}:27017'
-    volumes:
-      - mongo_ms:/data/db
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+  # mongo:
+  #   image: mongo:latest
+  #   container_name: mongo_ms
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+  #   ports:
+  #     - '${MONGO_PORT}:27017'
+  #   volumes:
+  #     - mongo_ms:/data/db
+  #     - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
 
   # mongo-express:
   #   image: mongo-express:latest

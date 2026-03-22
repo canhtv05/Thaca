@@ -59,6 +59,11 @@
       "name": "spring.kafka.producer.value-serializer",
       "type": "java.lang.String",
       "description": "A description for 'spring.kafka.producer.value-serializer'"
+    },
+    {
+      "name": "application.security.base64-secret",
+      "type": "java.lang.String",
+      "description": "A description for 'application.security.base64-secret'"
     }
   ]
 }
