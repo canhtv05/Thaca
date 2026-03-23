@@ -39,10 +39,9 @@ public class UserJWTController {
     @PostMapping("/authenticate")
     @FwRequestMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = RequestType.PUBLIC)
     public ResponseEntity<ApiResponse<AuthenticateRes>> authenticate(
-        @RequestBody LoginReq loginReq,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
+            @RequestBody LoginReq loginReq,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) {
         AuthenticateRes authenticateRes = authService.authenticate(loginReq, httpServletRequest, httpServletResponse);
         return ResponseEntity.ok(ApiResponse.success(authenticateRes));
     }
@@ -50,24 +49,24 @@ public class UserJWTController {
     @PostMapping("/refresh-token")
     @FwRequestMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = RequestType.PROTECTED)
     public ResponseEntity<ApiResponse<RefreshTokenRes>> refreshToken(
-        @CookieValue(name = CommonConstants.COOKIE_NAME, required = false) String cookieValue,
-        @RequestBody LogoutReq req,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse response
-    ) {
+            @CookieValue(name = CommonConstants.COOKIE_NAME, required = false) String cookieValue,
+            @RequestBody LogoutReq req,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse response) {
         return ResponseEntity.ok(
-            ApiResponse.success(authService.refreshToken(cookieValue, req.getChannel(), httpServletRequest, response))
-        );
+                ApiResponse.success(
+                        authService.refreshToken(cookieValue, req.getChannel(), httpServletRequest, response)));
     }
 
+    // đôiv ưới API itnernal thì chauw cần viết @FWMode
     @PostMapping("/internal/verify")
     @FwRequestMode(name = ServiceMethod.AUTH_VERIFY_TOKEN, type = RequestType.INTERNAL)
     public ResponseEntity<ApiResponse<VerifyTokenRes>> verifyToken(
-        @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue
-    ) {
+            @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue) {
         return ResponseEntity.ok(ApiResponse.success(authService.verifyToken(cookieValue, false)));
     }
 
+    // click vào hàm mà endpoint sử dụng rồi viwwst @FW mode
     @PostMapping("/create")
     @FwRequestMode(name = ServiceMethod.AUTH_CREATE_USER, type = RequestType.PROTECTED)
     public ResponseEntity<ApiResponse<UserDTO>> createUser(@RequestBody UserDTO userDTO) {
@@ -78,10 +77,9 @@ public class UserJWTController {
     @PostMapping("/change-password")
     @FwRequestMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = RequestType.PROTECTED)
     public ResponseEntity<ApiResponse<Boolean>> changePassword(
-        @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
-        @RequestBody ChangePasswordReq req,
-        HttpServletResponse response
-    ) {
+            @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
+            @RequestBody ChangePasswordReq req,
+            HttpServletResponse response) {
         userService.changePassword(cookieValue, req, response);
         return ResponseEntity.ok(ApiResponse.success());
     }
@@ -117,10 +115,9 @@ public class UserJWTController {
     @PostMapping("/logout")
     @FwRequestMode(name = ServiceMethod.AUTH_LOGOUT, type = RequestType.PROTECTED)
     public ResponseEntity<ApiResponse<?>> logout(
-        @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
-        @RequestBody LogoutReq req,
-        HttpServletResponse response
-    ) {
+            @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
+            @RequestBody LogoutReq req,
+            HttpServletResponse response) {
         authService.logout(cookieValue, req.getChannel(), response);
         return ResponseEntity.ok(ApiResponse.success());
     }
@@ -128,9 +125,8 @@ public class UserJWTController {
     @PostMapping("/logout-all-devices")
     @FwRequestMode(name = ServiceMethod.AUTH_LOGOUT_ALL_DEVICES, type = RequestType.PROTECTED)
     public ResponseEntity<ApiResponse<?>> logoutAllDevices(
-        @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
-        HttpServletResponse response
-    ) {
+            @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
+            HttpServletResponse response) {
         authService.logoutAllDevices(cookieValue, response);
         return ResponseEntity.ok(ApiResponse.success());
     }

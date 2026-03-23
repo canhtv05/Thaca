@@ -9,6 +9,7 @@ public class ServiceMethod {
     public static final String AUTH_REFRESH_TOKEN = "auth.refreshToken";
     public static final String AUTH_VERIFY_TOKEN = "auth.verifyToken";
     public static final String AUTH_CREATE_USER = "auth.createUser";
+    public static final String AUTH_UPDATE_USER = "auth.updateUser";
     public static final String AUTH_CHANGE_PASSWORD = "auth.changePassword";
     public static final String AUTH_RESET_PASSWORD = "auth.resetPassword";
     public static final String AUTH_FORGOT_PASSWORD = "auth.forgotPassword";

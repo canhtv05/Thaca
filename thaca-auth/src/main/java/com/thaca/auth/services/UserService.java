@@ -63,15 +63,19 @@ public class UserService {
     private final SessionStore sessionStore;
 
     @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.ADMIN_GET_USER_BY_ID, type = ModeType.HANDLE)
     public UserDTO findById(Long id) {
         return userRepository
-            .findById(id)
-            .map(UserDTO::fromEntity)
-            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+                .findById(id)
+                .map(UserDTO::fromEntity)
+                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public UserDTO createUser(UserDTO request, boolean isAdmin) {
+    @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.VALIDATE)
+    public void validateCreateUser(UserDTO request, boolean isAdmin) {
+        if (CommonUtils.isEmpty(request.getUsername(), request.getEmail(), request.getPassword())) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
         if (userRepository.existsUserByUsername(request.getUsername())) {
             throw new FwException(ErrorMessage.USERNAME_ALREADY_EXITS);
         }
@@ -83,14 +87,19 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.HANDLE)
+    public UserDTO createUser(UserDTO request, boolean isAdmin) {
 
         User user = User.builder()
-            .username(request.getUsername())
-            .activated(isAdmin && request.isActivated())
-            .isGlobal(isAdmin ? request.getIsGlobal() : false)
-            .isLocked(false)
-            .email(request.getEmail())
-            .build();
+                .username(request.getUsername())
+                .activated(isAdmin && request.isActivated())
+                .isGlobal(isAdmin ? request.getIsGlobal() : false)
+                .isLocked(false)
+                .email(request.getEmail())
+                .build();
 
         String encryptedPassword = passwordEncoder.encode(request.getPassword());
         user.setPassword(encryptedPassword);
@@ -104,14 +113,12 @@ public class UserService {
         try {
             if (!isAdmin || !request.isActivated()) {
                 kafkaProducerService.send(
-                    EventConstants.VERIFICATION_EMAIL_TOPIC,
-                    new VerificationEmailEvent(request.getEmail(), request.getUsername(), request.getFullname())
-                );
+                        EventConstants.VERIFICATION_EMAIL_TOPIC,
+                        new VerificationEmailEvent(request.getEmail(), request.getUsername(), request.getFullname()));
             } else {
                 kafkaProducerService.send(
-                    EventConstants.USER_CREATED_TOPIC,
-                    new UserCreationEvent(user.getUsername(), request.getFullname())
-                );
+                        EventConstants.USER_CREATED_TOPIC,
+                        new UserCreationEvent(user.getUsername(), request.getFullname()));
             }
         } catch (Exception e) {
             throw new FwException(CommonErrorMessage.INTERNAL_SERVER_ERROR);
@@ -120,6 +127,7 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.AUTH_UPDATE_USER, type = ModeType.VALIDATE)
     public UserDTO updateUser(UserDTO request) {
         Optional<User> optionalUser = userRepository.findByUsername(request.getUsername());
         if (optionalUser.isEmpty()) {
@@ -139,6 +147,7 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.ADMIN_LOCK_USER, type = ModeType.HANDLE)
     public void changeLockUser(Long id, boolean isLocked) {
         User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
         user.setLocked(isLocked);
@@ -146,6 +155,7 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.VALIDATE)
     public void resetPassword(ResetPasswordReq request) {
         if (CommonUtils.isEmpty(request.getEmail(), request.getNewPassword(), request.getOTP())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -156,8 +166,8 @@ public class UserService {
         }
 
         User user = userRepository
-            .findByEmail(request.getEmail())
-            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
 
         boolean hasOTP = hasOTP(user.getUsername());
         if (!hasOTP) {
@@ -174,6 +184,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.AUTH_VERIFY_FORGOT_PASSWORD_OTP, type = ModeType.VALIDATE)
     public void verifyForgotPasswordOTP(VerifyOTPReq request) {
         if (CommonUtils.isEmpty(request.getEmail(), request.getOTP())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -184,8 +195,8 @@ public class UserService {
         }
 
         User user = userRepository
-            .findByEmail(request.getEmail())
-            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
 
         String keyForgotPassword = sessionStore.getKeyForgotPassword(user.getUsername());
         String otp = redisService.get(keyForgotPassword, String.class);
@@ -199,6 +210,7 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = ModeType.VALIDATE)
     public void changePassword(String cookieValue, ChangePasswordReq req, HttpServletResponse response) {
         if (CommonUtils.isEmpty(req.getCurrentPassword(), req.getNewPassword())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -231,8 +243,8 @@ public class UserService {
     @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.HANDLE)
     public void forgotPasswordRequest(ForgotPasswordReq request) {
         User user = userRepository
-            .findByEmail(request.getEmail())
-            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
 
         boolean hasOTP = hasOTP(user.getUsername());
         if (hasOTP) {
@@ -240,12 +252,12 @@ public class UserService {
         }
 
         kafkaProducerService.send(
-            EventConstants.FORGOT_PASSWORD_TOPIC,
-            new ForgotPasswordEvent(request.getEmail(), user.getUsername())
-        );
+                EventConstants.FORGOT_PASSWORD_TOPIC,
+                new ForgotPasswordEvent(request.getEmail(), user.getUsername()));
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.AUTH_UPDATE_USER_PROFILE, type = ModeType.VALIDATE)
     public void updateUserProfile(UserProfileDTO request) {
         String userLogin = CommonService.getCurrentUserLogin();
         Optional<User> optionalUser = userRepository.findByUsername(userLogin);
@@ -256,19 +268,18 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_USERS, type = ModeType.VALIDATE)
     public SearchResponse<UserDTO> searchDatatable(SearchRequest<UserSearchReq> request) {
         Specification<User> spec = createSpecification(request);
         Page<User> tenants = userRepository.findAll(spec, request.page().toPageable());
         return new SearchResponse<>(
-            tenants.getContent().stream().map(UserDTO::fromEntity).collect(Collectors.toList()),
-            PaginationResponse.of(
-                tenants.getNumber(),
-                tenants.getTotalPages(),
-                tenants.getSize(),
-                tenants.getNumberOfElements(),
-                (int) tenants.getTotalElements()
-            )
-        );
+                tenants.getContent().stream().map(UserDTO::fromEntity).collect(Collectors.toList()),
+                PaginationResponse.of(
+                        tenants.getNumber(),
+                        tenants.getTotalPages(),
+                        tenants.getSize(),
+                        tenants.getNumberOfElements(),
+                        (int) tenants.getTotalElements()));
     }
 
     private Specification<User> createSpecification(SearchRequest<UserSearchReq> criteria) {
@@ -276,37 +287,34 @@ public class UserService {
             List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.isNotBlank(criteria.filter().getUsername())) {
                 predicates.add(
-                    cb.or(
-                        cb.like(
-                            cb.lower(root.get("username")),
-                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
-                        ),
-                        cb.like(
-                            cb.lower(root.get("username")),
-                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
-                        )
-                    )
-                );
+                        cb.or(
+                                cb.like(
+                                        cb.lower(root.get("username")),
+                                        "%" + criteria.filter().getUsername().toLowerCase() + "%"),
+                                cb.like(
+                                        cb.lower(root.get("username")),
+                                        "%" + criteria.filter().getUsername().toLowerCase() + "%")));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 
     @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.ADMIN_GET_USER_PERMISSION, type = ModeType.VALIDATE)
     public Map<String, PermissionAction> getUserPermissions(Long userId) {
         List<UserPermission> data = userPermissionRepository.findAllByUserId(userId);
         return data.stream().collect(Collectors.toMap(UserPermission::getPermissionCode, UserPermission::getAction));
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.ADMIN_UPDATE_USER_PERMISSION, type = ModeType.VALIDATE)
     public void updateUserPermission(Long userId, List<UserPermissionDTO> request) {
         userPermissionRepository.deleteAllByUserId(userId);
         userPermissionRepository.saveAll(
-            request
-                .stream()
-                .map(item -> item.fromEntity(userId))
-                .collect(Collectors.toSet())
-        );
+                request
+                        .stream()
+                        .map(item -> item.fromEntity(userId))
+                        .collect(Collectors.toSet()));
     }
 
     private boolean hasOTP(String username) {
