@@ -3,14 +3,13 @@ package com.thaca.framework.core.utils;
 import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.enums.AuthKey;
 import com.thaca.framework.core.constants.CommonConstants;
-import org.apache.commons.lang3.ObjectUtils;
-
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.ObjectUtils;
 
 public class CommonUtils {
 
@@ -26,8 +25,8 @@ public class CommonUtils {
 
     public static <T> T getSafeObject(Object obj, Class<T> clazz, T defaultValue) {
         return obj == null || (obj instanceof String && ((String) obj).trim().isEmpty())
-                ? defaultValue
-                : clazz.cast(obj);
+            ? defaultValue
+            : clazz.cast(obj);
     }
 
     public static String toSlug(String value) {
@@ -65,10 +64,10 @@ public class CommonUtils {
         }
         String prefix = CommonConstants.COOKIE_NAME + "=";
         Optional<String> encodedOpt = Stream.of(cookieHeader.split(";"))
-                .map(String::trim)
-                .filter(s -> s.startsWith(prefix))
-                .map(s -> s.substring(prefix.length()))
-                .findFirst();
+            .map(String::trim)
+            .filter(s -> s.startsWith(prefix))
+            .map(s -> s.substring(prefix.length()))
+            .findFirst();
 
         if (encodedOpt.isEmpty()) {
             return Optional.empty();

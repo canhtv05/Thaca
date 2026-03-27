@@ -1,6 +1,5 @@
 package com.thaca.framework.core.utils.json;
 
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -12,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 public class InstantToStringSerializer extends JsonSerializer<Instant> {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(
-            ZoneId.systemDefault()
+        ZoneId.systemDefault()
     );
 
     @Override
@@ -24,4 +23,3 @@ public class InstantToStringSerializer extends JsonSerializer<Instant> {
         }
     }
 }
-

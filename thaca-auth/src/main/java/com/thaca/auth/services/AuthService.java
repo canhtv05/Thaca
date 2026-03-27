@@ -62,9 +62,10 @@ public class AuthService {
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
     public void validateAuthenticate(
-            LoginReq loginReq,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse) {
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
         if (StringUtils.isBlank(loginReq.getUsername()) || StringUtils.isBlank(loginReq.getPassword())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
@@ -73,24 +74,27 @@ public class AuthService {
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.HANDLE)
     public AuthenticateRes authenticate(
-            LoginReq loginReq,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse) {
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
         try {
             AuthenticationContext.setChannel(loginReq.getChannel());
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    loginReq.getUsername(),
-                    loginReq.getPassword());
+                loginReq.getUsername(),
+                loginReq.getPassword()
+            );
 
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String token = tokenProvider.createToken(
-                    authentication,
-                    httpServletRequest,
-                    httpServletResponse,
-                    loginReq.getChannel());
+                authentication,
+                httpServletRequest,
+                httpServletResponse,
+                loginReq.getChannel()
+            );
             if (StringUtils.isBlank(token)) {
                 throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
             }
@@ -109,10 +113,11 @@ public class AuthService {
 
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.VALIDATE)
     public void validateRefreshToken(
-            String cookieValue,
-            String channel,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse) {
+        String cookieValue,
+        String channel,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
         if (StringUtils.isBlank(cookieValue) || StringUtils.isBlank(channel)) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
@@ -126,10 +131,11 @@ public class AuthService {
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.HANDLE)
     public RefreshTokenRes refreshToken(
-            String cookieValue,
-            String channel,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse) {
+        String cookieValue,
+        String channel,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
         return tokenProvider.refreshToken(cookieValue, httpServletRequest, httpServletResponse, channel);
     }
 
@@ -145,35 +151,37 @@ public class AuthService {
         TokenStatus valid = jwtUtils.validateToken(tokenPair.accessToken());
         if (TokenStatus.VALID.equals(valid)) {
             return VerifyTokenRes.builder()
-                    .valid(TokenStatus.VALID.equals(valid))
-                    .accessToken(tokenPair.accessToken())
-                    .refreshToken(tokenPair.refreshToken())
-                    .build();
+                .valid(TokenStatus.VALID.equals(valid))
+                .accessToken(tokenPair.accessToken())
+                .refreshToken(tokenPair.refreshToken())
+                .build();
         }
 
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest httpServletRequest = attributes.getRequest();
         HttpServletResponse httpServletResponse = attributes.getResponse();
         Optional<TokenPair> cookieTokenPair = CommonUtils.tokenFromCookie(
-                httpServletRequest.getHeader(HttpHeaders.COOKIE));
+            httpServletRequest.getHeader(HttpHeaders.COOKIE)
+        );
         if (cookieTokenPair.isEmpty() || CommonUtils.isEmpty(cookieTokenPair.get().accessToken())) {
             throw new FwException(ErrorMessage.TOKEN_PAIR_INVALID);
         }
         RefreshTokenRes refreshTokenRes = refreshToken(
-                tokenPair.refreshToken(),
-                tokenPair.accessToken(),
-                httpServletRequest,
-                httpServletResponse);
+            tokenPair.refreshToken(),
+            tokenPair.accessToken(),
+            httpServletRequest,
+            httpServletResponse
+        );
         if (Objects.isNull(refreshTokenRes)) {
             throw new FwException(ErrorMessage.TOKEN_PAIR_INVALID);
         } else {
             valid = TokenStatus.VALID;
         }
         return VerifyTokenRes.builder()
-                .valid(TokenStatus.VALID.equals(valid))
-                .accessToken(refreshTokenRes.getAccessToken())
-                .refreshToken(refreshTokenRes.getRefreshToken())
-                .build();
+            .valid(TokenStatus.VALID.equals(valid))
+            .accessToken(refreshTokenRes.getAccessToken())
+            .refreshToken(refreshTokenRes.getRefreshToken())
+            .build();
     }
 
     @Transactional(readOnly = true)
@@ -182,10 +190,10 @@ public class AuthService {
         TokenStatus valid = jwtUtils.validateToken(accessToken);
         if (TokenStatus.VALID.equals(valid)) {
             return VerifyTokenRes.builder()
-                    .valid(TokenStatus.VALID.equals(valid))
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .build();
+                .valid(TokenStatus.VALID.equals(valid))
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
         }
 
         if (StringUtils.isBlank(refreshToken)) {
@@ -198,10 +206,10 @@ public class AuthService {
             valid = TokenStatus.VALID;
         }
         return VerifyTokenRes.builder()
-                .valid(TokenStatus.VALID.equals(valid))
-                .accessToken(refreshTokenRes.getAccessToken())
-                .refreshToken(refreshTokenRes.getRefreshToken())
-                .build();
+            .valid(TokenStatus.VALID.equals(valid))
+            .accessToken(refreshTokenRes.getAccessToken())
+            .refreshToken(refreshTokenRes.getRefreshToken())
+            .build();
     }
 
     @Transactional
@@ -232,27 +240,29 @@ public class AuthService {
     @Transactional(readOnly = true)
     public void mappingUserPermissions(UserProfileDTO userProfileDTO, User user) {
         Set<String> permissions = user
-                .getRoles()
-                .stream()
-                .filter(role -> !ObjectUtils.isEmpty(role.getPermissions()))
-                .flatMap(role -> role.getPermissions().stream())
-                .filter(Objects::nonNull)
-                .map(Permission::getCode)
-                .collect(Collectors.toSet());
+            .getRoles()
+            .stream()
+            .filter(role -> !ObjectUtils.isEmpty(role.getPermissions()))
+            .flatMap(role -> role.getPermissions().stream())
+            .filter(Objects::nonNull)
+            .map(Permission::getCode)
+            .collect(Collectors.toSet());
         List<UserPermission> userPermissions = userPermissionRepository.findAllByUserId(user.getId());
         if (!userPermissions.isEmpty()) {
             permissions.addAll(
-                    userPermissions
-                            .stream()
-                            .filter(pm -> PermissionAction.GRANT.equals(pm.getAction()))
-                            .map(UserPermission::getPermissionCode)
-                            .collect(Collectors.toSet()));
+                userPermissions
+                    .stream()
+                    .filter(pm -> PermissionAction.GRANT.equals(pm.getAction()))
+                    .map(UserPermission::getPermissionCode)
+                    .collect(Collectors.toSet())
+            );
             permissions.removeAll(
-                    userPermissions
-                            .stream()
-                            .filter(pm -> PermissionAction.DENY.equals(pm.getAction()))
-                            .map(UserPermission::getPermissionCode)
-                            .collect(Collectors.toSet()));
+                userPermissions
+                    .stream()
+                    .filter(pm -> PermissionAction.DENY.equals(pm.getAction()))
+                    .map(UserPermission::getPermissionCode)
+                    .collect(Collectors.toSet())
+            );
         }
         userProfileDTO.setPermissions(new ArrayList<>(permissions));
     }

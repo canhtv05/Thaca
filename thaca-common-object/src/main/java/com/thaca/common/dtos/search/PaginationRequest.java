@@ -5,13 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 
-public record PaginationRequest(
-        Integer page,
-        Integer size,
-        String sortField,
-        String sortOrder
-) {
-
+public record PaginationRequest(Integer page, Integer size, String sortField, String sortOrder) {
     private int safePage() {
         return (page == null || page < 1) ? 0 : page - 1;
     }
@@ -22,25 +16,14 @@ public record PaginationRequest(
 
     public Pageable toPageable() {
         if (StringUtils.hasText(sortField) && StringUtils.hasText(sortOrder)) {
-            return PageRequest.of(
-                    safePage(),
-                    safeSize(),
-                    Sort.Direction.fromString(sortOrder),
-                    sortField
-            );
+            return PageRequest.of(safePage(), safeSize(), Sort.Direction.fromString(sortOrder), sortField);
         }
         return PageRequest.of(safePage(), safeSize());
     }
 
     public Pageable toPageable(Sort.Direction defaultSort, String defaultField) {
-
         if (StringUtils.hasText(sortField) && StringUtils.hasText(sortOrder)) {
-            return PageRequest.of(
-                    safePage(),
-                    safeSize(),
-                    Sort.Direction.fromString(sortOrder),
-                    sortField
-            );
+            return PageRequest.of(safePage(), safeSize(), Sort.Direction.fromString(sortOrder), sortField);
         }
         if (defaultSort != null && StringUtils.hasText(defaultField)) {
             return PageRequest.of(safePage(), safeSize(), defaultSort, defaultField);

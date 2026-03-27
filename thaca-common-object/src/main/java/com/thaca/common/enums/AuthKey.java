@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum AuthKey {
-
     ACCESS_TOKEN("accessToken"),
     REFRESH_TOKEN("refreshToken");
 
@@ -14,4 +13,3 @@ public enum AuthKey {
         this.key = key;
     }
 }
-

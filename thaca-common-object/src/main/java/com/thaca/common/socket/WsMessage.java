@@ -19,27 +19,19 @@ public class WsMessage {
     private String data;
 
     public static WsMessage error(String messageVi, String messageEn) {
-        return WsMessage.builder()
-                .type(WsType.ERROR)
-                .messageVi(messageVi)
-                .messageEn(messageEn)
-                .build();
+        return WsMessage.builder().type(WsType.ERROR).messageVi(messageVi).messageEn(messageEn).build();
     }
 
     public static WsMessage error(String transId, String messageVi, String messageEn) {
         return WsMessage.builder()
-                .type(WsType.ERROR)
-                .transId(transId)
-                .messageVi(messageVi)
-                .messageEn(messageEn)
-                .build();
+            .type(WsType.ERROR)
+            .transId(transId)
+            .messageVi(messageVi)
+            .messageEn(messageEn)
+            .build();
     }
 
     public static WsMessage of(WsType type, String topic, String data) {
-        return WsMessage.builder()
-                .type(type)
-                .topic(topic)
-                .data(data)
-                .build();
+        return WsMessage.builder().type(type).topic(topic).data(data).build();
     }
 }

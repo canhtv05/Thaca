@@ -66,9 +66,9 @@ public class UserService {
     @FwMode(name = ServiceMethod.ADMIN_GET_USER_BY_ID, type = ModeType.HANDLE)
     public UserDTO findById(Long id) {
         return userRepository
-                .findById(id)
-                .map(UserDTO::fromEntity)
-                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+            .findById(id)
+            .map(UserDTO::fromEntity)
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.VALIDATE)
@@ -92,14 +92,13 @@ public class UserService {
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.HANDLE)
     public UserDTO createUser(UserDTO request, boolean isAdmin) {
-
         User user = User.builder()
-                .username(request.getUsername())
-                .activated(isAdmin && request.isActivated())
-                .isGlobal(isAdmin ? request.getIsGlobal() : false)
-                .isLocked(false)
-                .email(request.getEmail())
-                .build();
+            .username(request.getUsername())
+            .activated(isAdmin && request.isActivated())
+            .isGlobal(isAdmin ? request.getIsGlobal() : false)
+            .isLocked(false)
+            .email(request.getEmail())
+            .build();
 
         String encryptedPassword = passwordEncoder.encode(request.getPassword());
         user.setPassword(encryptedPassword);
@@ -113,12 +112,14 @@ public class UserService {
         try {
             if (!isAdmin || !request.isActivated()) {
                 kafkaProducerService.send(
-                        EventConstants.VERIFICATION_EMAIL_TOPIC,
-                        new VerificationEmailEvent(request.getEmail(), request.getUsername(), request.getFullname()));
+                    EventConstants.VERIFICATION_EMAIL_TOPIC,
+                    new VerificationEmailEvent(request.getEmail(), request.getUsername(), request.getFullname())
+                );
             } else {
                 kafkaProducerService.send(
-                        EventConstants.USER_CREATED_TOPIC,
-                        new UserCreationEvent(user.getUsername(), request.getFullname()));
+                    EventConstants.USER_CREATED_TOPIC,
+                    new UserCreationEvent(user.getUsername(), request.getFullname())
+                );
             }
         } catch (Exception e) {
             throw new FwException(CommonErrorMessage.INTERNAL_SERVER_ERROR);
@@ -166,8 +167,8 @@ public class UserService {
         }
 
         User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
 
         boolean hasOTP = hasOTP(user.getUsername());
         if (!hasOTP) {
@@ -195,8 +196,8 @@ public class UserService {
         }
 
         User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
 
         String keyForgotPassword = sessionStore.getKeyForgotPassword(user.getUsername());
         String otp = redisService.get(keyForgotPassword, String.class);
@@ -243,8 +244,8 @@ public class UserService {
     @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.HANDLE)
     public void forgotPasswordRequest(ForgotPasswordReq request) {
         User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
 
         boolean hasOTP = hasOTP(user.getUsername());
         if (hasOTP) {
@@ -252,8 +253,9 @@ public class UserService {
         }
 
         kafkaProducerService.send(
-                EventConstants.FORGOT_PASSWORD_TOPIC,
-                new ForgotPasswordEvent(request.getEmail(), user.getUsername()));
+            EventConstants.FORGOT_PASSWORD_TOPIC,
+            new ForgotPasswordEvent(request.getEmail(), user.getUsername())
+        );
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -273,13 +275,15 @@ public class UserService {
         Specification<User> spec = createSpecification(request);
         Page<User> tenants = userRepository.findAll(spec, request.page().toPageable());
         return new SearchResponse<>(
-                tenants.getContent().stream().map(UserDTO::fromEntity).collect(Collectors.toList()),
-                PaginationResponse.of(
-                        tenants.getNumber(),
-                        tenants.getTotalPages(),
-                        tenants.getSize(),
-                        tenants.getNumberOfElements(),
-                        (int) tenants.getTotalElements()));
+            tenants.getContent().stream().map(UserDTO::fromEntity).collect(Collectors.toList()),
+            PaginationResponse.of(
+                tenants.getNumber(),
+                tenants.getTotalPages(),
+                tenants.getSize(),
+                tenants.getNumberOfElements(),
+                (int) tenants.getTotalElements()
+            )
+        );
     }
 
     private Specification<User> createSpecification(SearchRequest<UserSearchReq> criteria) {
@@ -287,13 +291,17 @@ public class UserService {
             List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.isNotBlank(criteria.filter().getUsername())) {
                 predicates.add(
-                        cb.or(
-                                cb.like(
-                                        cb.lower(root.get("username")),
-                                        "%" + criteria.filter().getUsername().toLowerCase() + "%"),
-                                cb.like(
-                                        cb.lower(root.get("username")),
-                                        "%" + criteria.filter().getUsername().toLowerCase() + "%")));
+                    cb.or(
+                        cb.like(
+                            cb.lower(root.get("username")),
+                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
+                        ),
+                        cb.like(
+                            cb.lower(root.get("username")),
+                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
+                        )
+                    )
+                );
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
@@ -311,10 +319,11 @@ public class UserService {
     public void updateUserPermission(Long userId, List<UserPermissionDTO> request) {
         userPermissionRepository.deleteAllByUserId(userId);
         userPermissionRepository.saveAll(
-                request
-                        .stream()
-                        .map(item -> item.fromEntity(userId))
-                        .collect(Collectors.toSet()));
+            request
+                .stream()
+                .map(item -> item.fromEntity(userId))
+                .collect(Collectors.toSet())
+        );
     }
 
     private boolean hasOTP(String username) {

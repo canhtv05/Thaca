@@ -1,14 +1,13 @@
 package com.thaca.framework.core.utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.time.Instant;
-
 import com.thaca.framework.core.utils.json.InstantToStringSerializer;
 import com.thaca.framework.core.utils.json.StringToInstantDeserializer;
+import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
