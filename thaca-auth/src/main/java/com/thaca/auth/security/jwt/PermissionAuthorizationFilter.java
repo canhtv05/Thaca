@@ -9,6 +9,8 @@ import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,30 +22,37 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.filter.GenericFilterBean;
 
 @Slf4j
 @RequiredArgsConstructor
-public class PermissionAuthorizationFilter extends OncePerRequestFilter {
+public class PermissionAuthorizationFilter extends GenericFilterBean {
 
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final PublicApiService service;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+        throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+
         if (isPublicEndpoint(request)) {
             filterChain.doFilter(request, response);
             return;
         }
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
             throw new FwException(CommonErrorMessage.UNAUTHORIZED);
         }
+
         String path = request.getRequestURI();
         String method = request.getMethod();
-        // Validate permission
-        this.validatePermission(method, path, userDetails);
+
+        validatePermission(method, path, userDetails);
+
         filterChain.doFilter(request, response);
     }
 
@@ -51,11 +60,14 @@ public class PermissionAuthorizationFilter extends OncePerRequestFilter {
         if (SecurityUtils.isGlobalAdmin()) {
             return;
         }
+
         if (path.contains("/auth/me/p/logout")) {
             return;
         }
+
         List<PermissionSelect> permissions = service.getPermissionSelect();
         AtomicBoolean hasPermission = new AtomicBoolean(false);
+
         userDetails
             .getAuthorities()
             .forEach(authority -> {
@@ -64,10 +76,12 @@ public class PermissionAuthorizationFilter extends OncePerRequestFilter {
                     .filter(p -> p.code().equalsIgnoreCase(authority.getAuthority()))
                     .findFirst()
                     .orElse(null);
+
                 if (permission != null && match(permission.method(), permission.pathPattern(), method, path)) {
                     hasPermission.set(true);
                 }
             });
+
         if (!hasPermission.get()) {
             log.error("User {} does not have permission to access {} on {}", userDetails.getUsername(), method, path);
             throw new FwException(CommonErrorMessage.FORBIDDEN);
@@ -76,14 +90,12 @@ public class PermissionAuthorizationFilter extends OncePerRequestFilter {
 
     private boolean isPublicEndpoint(HttpServletRequest request) {
         String requestPath = request.getRequestURI();
-        final String path = requestPath.contains("?")
-            ? requestPath.substring(0, requestPath.indexOf("?"))
-            : requestPath;
+        String path = requestPath.contains("?") ? requestPath.substring(0, requestPath.indexOf("?")) : requestPath;
 
         return (
-            Arrays.asList(CommonConstants.PREFIX_AUTH_PUBLIC_ENDPOINTS)
-                .stream()
-                .anyMatch(endpoint -> path.equals(endpoint) || pathMatcher.match(endpoint, path)) ||
+            Arrays.stream(CommonConstants.PREFIX_AUTH_PUBLIC_ENDPOINTS).anyMatch(
+                endpoint -> path.equals(endpoint) || pathMatcher.match(endpoint, path)
+            ) ||
             path.startsWith("/ws")
         );
     }
@@ -96,7 +108,9 @@ public class PermissionAuthorizationFilter extends OncePerRequestFilter {
     ) {
         boolean methodMatch =
             permissionMethod == null || permissionMethod.isEmpty() || permissionMethod.equalsIgnoreCase(requestMethod);
+
         boolean pathMatch = pathMatcher.match(permissionPath, requestPath);
+
         return methodMatch && pathMatch;
     }
 }

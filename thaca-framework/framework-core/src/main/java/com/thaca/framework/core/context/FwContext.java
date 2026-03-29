@@ -1,6 +1,6 @@
 package com.thaca.framework.core.context;
 
-import com.thaca.common.dtos.ApiHeader;
+import com.thaca.framework.core.dtos.ApiHeader;
 
 public class FwContext {
 

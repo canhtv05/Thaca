@@ -1,8 +1,6 @@
 package com.thaca.auth.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.User;
 import com.thaca.framework.core.utils.json.InstantToStringSerializer;
@@ -15,6 +13,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 @Setter
 @Getter

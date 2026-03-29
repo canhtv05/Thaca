@@ -50,7 +50,7 @@ public class FwValidationAspect {
                     }
                     return isParameterCompatible(m.getParameterTypes(), argTypes);
                 })
-                .collect(Collectors.toList());
+                .toList();
 
             if (matched.size() > 1) {
                 throw new IllegalStateException(
@@ -60,7 +60,7 @@ public class FwValidationAspect {
                 );
             }
 
-            return matched.isEmpty() ? null : matched.get(0);
+            return matched.isEmpty() ? null : matched.getFirst();
         });
 
         if (Objects.isNull(validationMethod)) {

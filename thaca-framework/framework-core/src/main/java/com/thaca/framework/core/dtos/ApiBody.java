@@ -1,6 +1,7 @@
-package com.thaca.common.dtos;
+package com.thaca.framework.core.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.thaca.common.dtos.ErrorData;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.validations.ErrorMessageRule;
 import lombok.*;
