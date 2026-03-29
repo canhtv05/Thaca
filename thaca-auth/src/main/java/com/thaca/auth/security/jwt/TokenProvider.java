@@ -16,6 +16,7 @@ import com.thaca.framework.blocking.starter.services.RedisPubService;
 import com.thaca.framework.blocking.starter.services.UserSessionService;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.CommonConstants;
+import com.thaca.framework.core.context.FwContext;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
@@ -84,13 +85,16 @@ public class TokenProvider {
         this.refreshTokenValidityDuration = frameworkProperties.getSecurity().getRefreshDurationInSeconds();
     }
 
-    public String createToken(
-        Authentication authentication,
-        HttpServletRequest request,
-        HttpServletResponse response,
-        String channel
-    ) {
+    public String createToken(Authentication authentication, HttpServletResponse response) {
+        String channel = FwContext.get() != null ? FwContext.get().getChannel() : null;
+        if (channel == null) {
+            throw new FwException(CommonErrorMessage.CHANNEL_INVALID);
+        }
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        if (userDetails == null) {
+            throw new FwException(CommonErrorMessage.UNAUTHORIZED);
+        }
         String name = userDetails.getUsername();
         String oldToken = userSessionService.isUserOnline(name, channel);
         String sessionId = UUID.randomUUID().toString();

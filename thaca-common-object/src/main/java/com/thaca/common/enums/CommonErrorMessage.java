@@ -6,17 +6,23 @@ import lombok.Getter;
 @Getter
 public enum CommonErrorMessage implements ErrorMessageRule {
     INTERNAL_SERVER_ERROR(
-        "50001",
+        "INTERNAL.SERVER.ERROR",
         "Lỗi hệ thống",
         "Đã xảy ra lỗi không xác định",
         "System error",
         "Unknown internal server error"
     ),
 
-    BAD_REQUEST("40001", "Yêu cầu không hợp lệ", "Dữ liệu gửi lên không hợp lệ", "Bad request", "Invalid request data"),
+    BAD_REQUEST(
+        "BAD.REQUEST",
+        "Yêu cầu không hợp lệ",
+        "Dữ liệu gửi lên không hợp lệ",
+        "Bad request",
+        "Invalid request data"
+    ),
 
     INVALID_REQUEST_BODY(
-        "40002",
+        "INVALID.REQUEST.BODY",
         "Dữ liệu request không hợp lệ",
         "Body request không đúng định dạng hoặc không thể đọc",
         "Invalid request body",
@@ -24,7 +30,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     UNAUTHORIZED(
-        "40101",
+        "UNAUTHORIZED",
         "Chưa xác thực",
         "Bạn chưa đăng nhập hoặc token không hợp lệ",
         "Unauthorized",
@@ -32,7 +38,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     FORBIDDEN(
-        "40301",
+        "FORBIDDEN",
         "Không có quyền",
         "Bạn không có quyền truy cập tài nguyên này",
         "Forbidden",
@@ -40,7 +46,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     NOT_FOUND(
-        "40401",
+        "NOT.FOUND",
         "Không tìm thấy tài nguyên",
         "Tài nguyên không tồn tại",
         "Not found",
@@ -48,7 +54,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     METHOD_NOT_ALLOWED(
-        "40501",
+        "METHOD.NOT.ALLOWED",
         "Phương thức không hợp lệ",
         "Phương thức HTTP không được hỗ trợ",
         "Method not allowed",
@@ -56,7 +62,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     CONFLICT(
-        "40901",
+        "CONFLICT",
         "Xung đột dữ liệu",
         "Dữ liệu đã tồn tại hoặc gây xung đột",
         "Conflict",
@@ -64,7 +70,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     VALIDATION_FAILED(
-        "42201",
+        "VALIDATION.FAILED",
         "Dữ liệu không hợp lệ",
         "Dữ liệu không thỏa mãn điều kiện kiểm tra",
         "Validation failed",
@@ -72,7 +78,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     BINDING_ERROR(
-        "42203",
+        "BINDING.ERROR",
         "Lỗi ánh xạ dữ liệu",
         "Không thể ánh xạ dữ liệu request",
         "Binding error",
@@ -80,7 +86,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     SERVICE_UNAVAILABLE(
-        "50301",
+        "SERVICE.UNAVAILABLE",
         "Dịch vụ tạm thời không khả dụng",
         "Hệ thống đang bảo trì hoặc quá tải",
         "Service unavailable",
@@ -88,7 +94,7 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     USER_SESSION_NOT_FOUND(
-        "40102",
+        "USER.SESSION.NOT.FOUND",
         "Không tìm thấy phiên đăng nhập",
         "Không tìm thấy phiên đăng nhập của người dùng",
         "Session not found",
@@ -96,11 +102,19 @@ public enum CommonErrorMessage implements ErrorMessageRule {
     ),
 
     REQUEST_INVALID_PARAMS(
-        "42204",
+        "REQUEST.INVALID.PARAMS",
         "Dữ liệu request không hợp lệ",
         "Dữ liệu request không hợp lệ",
         "Request invalid params",
         "Request invalid params"
+    ),
+
+    CHANNEL_INVALID(
+        "CHANNEL.INVALID",
+        "Dữ liệu request không hợp lệ",
+        "Channel không hợp lệ",
+        "Request invalid params",
+        "Channel invalid params"
     );
 
     private final String code;

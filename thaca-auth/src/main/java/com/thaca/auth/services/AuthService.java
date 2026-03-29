@@ -1,7 +1,6 @@
 package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
-import com.thaca.auth.context.AuthenticationContext;
 import com.thaca.auth.domains.Permission;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.domains.UserPermission;
@@ -61,11 +60,7 @@ public class AuthService {
     private final JwtUtils jwtUtils;
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
-    public void validateAuthenticate(
-        LoginReq loginReq,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
+    public void validateAuthenticate(LoginReq loginReq, HttpServletResponse httpServletResponse) {
         if (StringUtils.isBlank(loginReq.getUsername()) || StringUtils.isBlank(loginReq.getPassword())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
@@ -73,35 +68,19 @@ public class AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.HANDLE)
-    public AuthenticateRes authenticate(
-        LoginReq loginReq,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
-        try {
-            AuthenticationContext.setChannel(loginReq.getChannel());
+    public AuthenticateRes authenticate(LoginReq loginReq, HttpServletResponse httpServletResponse) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+            loginReq.getUsername(),
+            loginReq.getPassword()
+        );
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                loginReq.getUsername(),
-                loginReq.getPassword()
-            );
-
-            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            String token = tokenProvider.createToken(
-                authentication,
-                httpServletRequest,
-                httpServletResponse,
-                loginReq.getChannel()
-            );
-            if (StringUtils.isBlank(token)) {
-                throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
-            }
-            return new AuthenticateRes(true);
-        } finally {
-            AuthenticationContext.clear();
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = tokenProvider.createToken(authentication, httpServletResponse);
+        if (StringUtils.isBlank(token)) {
+            throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
         }
+        return new AuthenticateRes(true);
     }
 
     // ví dụ cái này
@@ -269,7 +248,7 @@ public class AuthService {
 
     @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
-    private TokenPair getTokenPair(String cookieValueOrTokenString, boolean isInternal) {
+    public TokenPair getTokenPair(String cookieValueOrTokenString, boolean isInternal) {
         if (StringUtils.isBlank(cookieValueOrTokenString) || isInternal) {
             return new TokenPair(cookieValueOrTokenString, null);
         }
