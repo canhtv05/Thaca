@@ -1,6 +1,6 @@
 package com.thaca.auth.internal;
 
-import com.thaca.framework.core.dtos.ApiEnvelope;
+import com.thaca.framework.core.dtos.ApiPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,14 +22,14 @@ public class InternalDemoService {
      * The RestTemplateInterceptor will automatically add the 'Authorization: Basic
      * <apiKey>' header.
      */
-    public ApiEnvelope<Object> callOtherService() {
+    public ApiPayload<Object> callOtherService() {
         String url = "http://internal-product-service/api/v1/internal/data";
 
         log.info("[InternalDemoService] Calling other service at: {}", url);
 
         try {
             // The response is expected to be wrapped in ApiResponse
-            ApiEnvelope<Object> response = restTemplate.getForObject(url, ApiEnvelope.class);
+            ApiPayload<Object> response = restTemplate.getForObject(url, ApiPayload.class);
             return response;
         } catch (Exception e) {
             log.error("[InternalDemoService] Error calling other service: ", e);

@@ -7,10 +7,14 @@ import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -30,7 +34,10 @@ public class FwSecurityAspect {
         }
 
         if (Objects.nonNull(requestMode) && RequestType.PROTECTED.equals(requestMode.type())) {
-            SecurityUtils.getCurrentUsername().orElseThrow(() -> new FwException(CommonErrorMessage.UNAUTHORIZED));
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+                throw new FwException(CommonErrorMessage.UNAUTHORIZED);
+            }
             return joinPoint.proceed();
         }
 

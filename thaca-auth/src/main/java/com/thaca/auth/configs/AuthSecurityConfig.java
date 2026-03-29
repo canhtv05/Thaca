@@ -2,12 +2,9 @@ package com.thaca.auth.configs;
 
 import com.thaca.auth.security.CustomAuthenticationProvider;
 import com.thaca.auth.security.jwt.JWTConfigurer;
-import com.thaca.auth.security.jwt.PermissionAuthorizationFilter;
-import com.thaca.auth.services.PublicApiService;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
-import com.thaca.framework.core.constants.CommonConstants;
-import com.thaca.framework.core.dtos.ApiEnvelope;
+import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.utils.JsonF;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Objects;
@@ -39,10 +36,9 @@ public class AuthSecurityConfig {
 
     private final CorsFilter corsFilter;
     private final JwtUtils jwtUtil;
-    private final PublicApiService publicApiService;
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, PermissionAuthorizationFilter permissionAuthorizationFilter) {
+    SecurityFilterChain filterChain(HttpSecurity http) {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
@@ -54,15 +50,8 @@ public class AuthSecurityConfig {
             .sessionManagement(sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .authorizeHttpRequests(authorizeRequests ->
-                authorizeRequests
-                    .requestMatchers(CommonConstants.AUTH_PUBLIC_ENDPOINTS)
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated()
-            )
+            .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
             .apply(securityConfigurerAdapter());
-        http.addFilterAfter(permissionAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -73,11 +62,6 @@ public class AuthSecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
-    }
-
-    @Bean
-    PermissionAuthorizationFilter permissionAuthorizationFilter() {
-        return new PermissionAuthorizationFilter(publicApiService);
     }
 
     @Bean
@@ -92,7 +76,7 @@ public class AuthSecurityConfig {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             response
                 .getWriter()
-                .write(Objects.requireNonNull(JsonF.toJson(ApiEnvelope.error(CommonErrorMessage.UNAUTHORIZED))));
+                .write(Objects.requireNonNull(JsonF.toJson(ApiPayload.error(CommonErrorMessage.UNAUTHORIZED))));
         };
     }
 
@@ -103,7 +87,7 @@ public class AuthSecurityConfig {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response
                 .getWriter()
-                .write(Objects.requireNonNull(JsonF.toJson(ApiEnvelope.error(CommonErrorMessage.FORBIDDEN))));
+                .write(Objects.requireNonNull(JsonF.toJson(ApiPayload.error(CommonErrorMessage.FORBIDDEN))));
         };
     }
 }

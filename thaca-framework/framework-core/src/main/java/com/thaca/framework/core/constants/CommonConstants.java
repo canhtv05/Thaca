@@ -8,11 +8,11 @@ public class CommonConstants {
     private CommonConstants() {}
 
     public static final String[] AUTH_PUBLIC_ENDPOINTS = {
-        "/me/authenticate",
-        "/me/create",
-        "/me/forgot-password",
-        "/me/reset-password",
-        "/me/verify-forgot-password-otp"
+        "/login",
+        "/create",
+        "/forgot-password",
+        "/reset-password",
+        "/verify-forgot-password-otp"
     };
     public static final String[] NOTIFICATION_PUBLIC_ENDPOINTS = { "/verify-email", "/resend-verify-email" };
     public static final String[] PROFILE_PUBLIC_ENDPOINTS = { "/profile/**" };

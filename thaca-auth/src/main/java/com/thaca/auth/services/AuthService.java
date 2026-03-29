@@ -54,7 +54,6 @@ public class AuthService {
     private final CookieUtils cookieUtils;
     private final UserRepository userRepository;
     private final UserPermissionRepository userPermissionRepository;
-    // dùng AuthenticationManagerBuilder tránh vòng lặp phụ thuộc
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final JwtUtils jwtUtils;

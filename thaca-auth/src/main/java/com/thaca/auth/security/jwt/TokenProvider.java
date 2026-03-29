@@ -112,7 +112,7 @@ public class TokenProvider {
         response.addCookie(cookie);
 
         User user = userRepository.findByUsername(name).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setRefreshToken(refreshToken);
+        user.setRefreshToken(FwUtils.hexString(refreshToken));
         userRepository.save(user);
         return token;
     }
@@ -148,7 +148,10 @@ public class TokenProvider {
             .findByUsername(username)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
 
-        if (!Objects.equals(user.getRefreshToken(), refreshToken) || StringUtils.isBlank(user.getRefreshToken())) {
+        if (
+            !Objects.equals(user.getRefreshToken(), FwUtils.hexString(refreshToken)) ||
+            StringUtils.isBlank(user.getRefreshToken())
+        ) {
             throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
         }
 
@@ -269,9 +272,7 @@ public class TokenProvider {
     }
 
     public void revokeToken(String token, String channel) {
-        String username = SecurityUtils.getCurrentUsername().orElseThrow(() ->
-            new FwException(CommonErrorMessage.UNAUTHORIZED)
-        );
+        String username = SecurityUtils.getCurrentUsername();
         if (StringUtils.isNotBlank(username)) {
             User user = userRepository
                 .findByUsername(username)
@@ -289,9 +290,7 @@ public class TokenProvider {
     }
 
     public void revokeAllTokens(String token) {
-        String username = SecurityUtils.getCurrentUsername().orElseThrow(() ->
-            new FwException(CommonErrorMessage.UNAUTHORIZED)
-        );
+        String username = SecurityUtils.getCurrentUsername();
         User user = userRepository
             .findByUsername(username)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));

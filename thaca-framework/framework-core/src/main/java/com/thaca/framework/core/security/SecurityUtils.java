@@ -13,9 +13,11 @@ public class SecurityUtils {
 
     private SecurityUtils() {}
 
-    public static Optional<String> getCurrentUsername() {
+    public static String getCurrentUsername() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        return Optional.ofNullable(securityContext.getAuthentication()).map(SecurityUtils::extractPrincipal);
+        return Optional.ofNullable(securityContext.getAuthentication())
+            .map(SecurityUtils::extractPrincipal)
+            .orElse(null);
     }
 
     private static String extractPrincipal(Authentication authentication) {

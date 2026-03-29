@@ -3,7 +3,7 @@ package com.thaca.framework.core.filter;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.context.FwContext;
-import com.thaca.framework.core.dtos.ApiEnvelope;
+import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.utils.JsonF;
 import io.jsonwebtoken.Claims;
@@ -54,7 +54,7 @@ public class FwFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
 
         byte[] requestBody = requestWrapper.getCachedBody();
-        ApiEnvelope<?> envelope = JsonF.jsonToObject(requestBody, ApiEnvelope.class);
+        ApiPayload<?> envelope = JsonF.jsonToObject(requestBody, ApiPayload.class);
         String transId = UUID.randomUUID().toString().replace("-", "");
         String traceId = extractTraceId(requestBody);
         if (traceId == null) {
@@ -90,27 +90,11 @@ public class FwFilter extends OncePerRequestFilter {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-            ApiEnvelope<?> errorRes = ApiEnvelope.error(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+            ApiPayload<?> errorRes = ApiPayload.error(CommonErrorMessage.REQUEST_INVALID_PARAMS);
             if (envelope != null && envelope.getHeader() != null) {
                 errorRes.setHeader(envelope.getHeader());
             }
-
-            String responseStr = Objects.requireNonNull(JsonF.toJson(errorRes));
-            response.getWriter().write(responseStr);
-
-            long duration = System.currentTimeMillis() - startTime;
-            log.error(
-                "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}",
-                method,
-                uri,
-                username,
-                response.getStatus(),
-                duration,
-                responseStr.replaceAll("[\\r\\n]+", "")
-            );
-
-            MDC.clear();
-            FwContext.clear();
+            this.processLog(response, errorRes, startTime, method, uri, username);
             return;
         }
 
@@ -123,25 +107,10 @@ public class FwFilter extends OncePerRequestFilter {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-            ApiEnvelope<?> channelError = ApiEnvelope.error(CommonErrorMessage.CHANNEL_INVALID);
+            ApiPayload<?> channelError = ApiPayload.error(CommonErrorMessage.CHANNEL_INVALID);
             channelError.setHeader(envelope.getHeader());
 
-            String responseStr = Objects.requireNonNull(JsonF.toJson(channelError));
-            response.getWriter().write(responseStr);
-
-            long duration = System.currentTimeMillis() - startTime;
-            log.error(
-                "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}",
-                method,
-                uri,
-                username,
-                response.getStatus(),
-                duration,
-                responseStr.replaceAll("[\\r\\n]+", "")
-            );
-
-            MDC.clear();
-            FwContext.clear();
+            this.processLog(response, channelError, startTime, method, uri, username);
             return;
         }
 
@@ -164,6 +133,32 @@ public class FwFilter extends OncePerRequestFilter {
             MDC.clear();
             FwContext.clear();
         }
+    }
+
+    private void processLog(
+        HttpServletResponse response,
+        ApiPayload<?> channelError,
+        long startTime,
+        String method,
+        String uri,
+        String username
+    ) throws IOException {
+        String responseStr = Objects.requireNonNull(JsonF.toJson(channelError));
+        response.getWriter().write(responseStr);
+
+        long duration = System.currentTimeMillis() - startTime;
+        log.error(
+            "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}",
+            method,
+            uri,
+            username,
+            response.getStatus(),
+            duration,
+            responseStr.replaceAll("[\\r\\n]+", "")
+        );
+
+        MDC.clear();
+        FwContext.clear();
     }
 
     private String extractUsername(HttpServletRequest request) {

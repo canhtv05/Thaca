@@ -11,24 +11,21 @@ import org.slf4j.MDC;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ApiEnvelope<T> {
+public class ApiPayload<T> {
 
     private ApiHeader header;
     private ApiBody<T> body;
 
-    public static <T> ApiEnvelope<T> success(T data) {
-        return ApiEnvelope.<T>builder()
-            .header(fallbackHeader())
-            .body(ApiBody.success(MDC.get("transId"), data))
-            .build();
+    public static <T> ApiPayload<T> success(T data) {
+        return ApiPayload.<T>builder().header(fallbackHeader()).body(ApiBody.success(MDC.get("transId"), data)).build();
     }
 
-    public static <T> ApiEnvelope<T> success() {
-        return ApiEnvelope.<T>builder().header(fallbackHeader()).body(ApiBody.success(MDC.get("transId"))).build();
+    public static <T> ApiPayload<T> success() {
+        return ApiPayload.<T>builder().header(fallbackHeader()).body(ApiBody.success(MDC.get("transId"))).build();
     }
 
-    public static ApiEnvelope<ErrorData> error(ErrorMessageRule error) {
-        return ApiEnvelope.<ErrorData>builder()
+    public static ApiPayload<ErrorData> error(ErrorMessageRule error) {
+        return ApiPayload.<ErrorData>builder()
             .header(fallbackHeader())
             .body(ApiBody.error(MDC.get("transId"), error))
             .build();

@@ -1,9 +1,14 @@
 package com.thaca.framework.core.configs;
 
-import com.thaca.framework.core.dtos.ApiEnvelope;
+import com.thaca.common.dtos.search.PaginationResponse;
+import com.thaca.common.dtos.search.SearchResponse;
+import com.thaca.framework.core.dtos.ApiBody;
+import com.thaca.framework.core.dtos.ApiPayload;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.MDC;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -33,9 +38,20 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
         ServerHttpRequest request,
         ServerHttpResponse response
     ) {
-        if (body != null) {
-            return ApiEnvelope.success(body);
+        if (body instanceof ApiPayload) {
+            return body;
         }
-        return ApiEnvelope.success();
+
+        if (body instanceof SearchResponse<?>(List<?> data, PaginationResponse pagination)) {
+            return ApiPayload.builder()
+                .header(ApiPayload.fallbackHeader())
+                .body(ApiBody.success(MDC.get("transId"), data, pagination))
+                .build();
+        }
+
+        if (body != null) {
+            return ApiPayload.success(body);
+        }
+        return ApiPayload.success();
     }
 }
