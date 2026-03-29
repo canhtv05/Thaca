@@ -17,12 +17,12 @@ public class SecurityUtils {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         return Optional.ofNullable(securityContext.getAuthentication())
             .map(SecurityUtils::extractPrincipal)
-            .orElse(null);
+            .orElse("ANONYMOUS");
     }
 
     private static String extractPrincipal(Authentication authentication) {
         if (authentication == null) {
-            return null;
+            return "ANONYMOUS";
         } else if (authentication.getPrincipal() instanceof UserPrincipal springSecurityUser) {
             return springSecurityUser.getUsername();
         } else if (authentication.getPrincipal() instanceof String) {
@@ -30,7 +30,7 @@ public class SecurityUtils {
         } else if (Objects.nonNull(authentication.getName())) {
             return authentication.getName();
         }
-        return null;
+        return "ANONYMOUS";
     }
 
     public static boolean isGlobalAdmin() {
