@@ -5,112 +5,136 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorMessage implements ErrorMessageRule {
-    REFRESH_TOKEN_INVALID("40100", "Token hết hạn", "Token hết hạn", "Refresh token expired", "Refresh token expired"),
-    PASSWORD_INVALID("40101", "Mật khẩu không hợp lệ", "Mật khẩu không hợp lệ", "Password invalid", "Password invalid"),
+    REFRESH_TOKEN_INVALID(
+        "REFRESH.TOKEN.INVALID",
+        "Token hết hạn",
+        "Token hết hạn",
+        "Refresh token expired",
+        "Refresh token expired"
+    ),
+    PASSWORD_INVALID(
+        "PASSWORD.INVALID",
+        "Mật khẩu không hợp lệ",
+        "Mật khẩu không hợp lệ",
+        "Password invalid",
+        "Password invalid"
+    ),
     USER_NOT_FOUND(
-        "40102",
+        "USER.NOT.FOUND",
         "Tài khoản không tồn tại",
         "Tài khoản không tồn tại",
         "Account not found",
         "Account not found"
     ),
-    USER_LOCKED("40103", "Tài khoản đã bị khóa", "Tài khoản đã bị khóa", "Account locked", "Account locked"),
+    USER_LOCKED("USER.LOCKED", "Tài khoản đã bị khóa", "Tài khoản đã bị khóa", "Account locked", "Account locked"),
     USER_NOT_ACTIVATED(
-        "40104",
+        "USER.NOT.ACTIVATED",
         "Tài khoản chưa được kích hoạt",
         "Tài khoản chưa được kích hoạt",
         "Account not activated",
         "Account not activated"
     ),
     USERNAME_ALREADY_EXITS(
-        "40105",
+        "USERNAME.ALREADY.EXITS",
         "Tài khoản đã tồn tại",
         "Tài khoản đã tồn tại",
         "Account already exists",
         "Account already exists"
     ),
-    EMAIL_INVALID("40106", "Email không hợp lệ", "Email không hợp lệ", "Email invalid", "Email invalid"),
+    EMAIL_INVALID("EMAIL.INVALID", "Email không hợp lệ", "Email không hợp lệ", "Email invalid", "Email invalid"),
     EMAIL_ALREADY_EXITS(
-        "40107",
+        "EMAIL.ALREADY.EXITS",
         "Email đã tồn tại",
         "Email đã tồn tại",
         "Email already exists",
         "Email already exists"
     ),
     FORGET_PASSWORD_OTP_INVALID(
-        "40108",
+        "FORGET.PASSWORD.OTP.INVALID",
         "Mã OTP không hợp lệ",
         "Mã OTP không hợp lệ",
         "Forgot password OTP invalid",
         "Forgot password OTP invalid"
     ),
     FORGET_PASSWORD_OTP_NOT_SENT_OR_EXPIRED(
-        "40109",
+        "FORGET.PASSWORD.OTP.NOT.SENT.OR.EXPIRED",
         "Mã OTP không được gửi hoặc đã hết hạn",
         "Mã OTP không được gửi hoặc đã hết hạn",
         "Forgot password OTP not sent or expired",
         "Forgot password OTP not sent or expired"
     ),
     CHANGE_PASSWORD_OTP_INVALID(
-        "40110",
+        "CHANGE.PASSWORD.OTP.INVALID",
         "Mã OTP không hợp lệ",
         "Mã OTP không hợp lệ",
         "Change password OTP invalid",
         "Change password OTP invalid"
     ),
     CHANGE_PASSWORD_OTP_NOT_SENT_OR_EXPIRED(
-        "40111",
+        "CHANGE.PASSWORD.OTP.NOT.SENT.OR.EXPIRED",
         "Mã OTP không được gửi hoặc đã hết hạn",
         "Mã OTP không được gửi hoặc đã hết hạn",
         "Change password OTP not sent or expired",
         "Change password OTP not sent or expired"
     ),
     UPDATE_USER_PROFILE_OTP_INVALID(
-        "40112",
+        "UPDATE.USER.PROFILE.OTP.INVALID",
         "Mã OTP không hợp lệ",
         "Mã OTP không hợp lệ",
         "Update user profile OTP invalid",
         "Update user profile OTP invalid"
     ),
     UPDATE_USER_PROFILE_OTP_NOT_SENT_OR_EXPIRED(
-        "40113",
+        "UPDATE.USER.PROFILE.OTP.NOT.SENT.OR.EXPIRED",
         "Mã OTP không được gửi hoặc đã hết hạn",
         "Mã OTP không được gửi hoặc đã hết hạn",
         "Update user profile OTP not sent or expired",
         "Update user profile OTP not sent or expired"
     ),
     FORGET_PASSWORD_OTP_ALREADY_SENT(
-        "40114",
+        "FORGET.PASSWORD.OTP.ALREADY.SENT",
         "Mã OTP đã được gửi",
         "Mã OTP đã được gửi",
         "Forgot password OTP already sent",
         "Forgot password OTP already sent"
     ),
-    CHANNEL_INVALID("40115", "Channel không hợp lệ", "Channel không hợp lệ", "Channel invalid", "Channel invalid"),
+    CHANNEL_INVALID(
+        "CHANNEL.INVALID",
+        "Channel không hợp lệ",
+        "Channel không hợp lệ",
+        "Channel invalid",
+        "Channel invalid"
+    ),
     ACCESS_TOKEN_INVALID(
-        "40116",
+        "ACCESS.TOKEN.INVALID",
         "Access token không hợp lệ",
         "Access token không hợp lệ",
         "Access token invalid",
         "Access token invalid"
     ),
     TOKEN_PAIR_INVALID(
-        "40117",
+        "TOKEN.PAIR.INVALID",
         "Token pair không hợp lệ",
         "Token pair không hợp lệ",
         "Token pair invalid",
         "Token pair invalid"
     ),
-    EMAIL_NOT_FOUND("40118", "Email không tồn tại", "Email không tồn tại", "Email not found", "Email not found"),
+    EMAIL_NOT_FOUND(
+        "EMAIL.NOT.FOUND",
+        "Email không tồn tại",
+        "Email không tồn tại",
+        "Email not found",
+        "Email not found"
+    ),
     CURRENT_PASSWORD_INVALID(
-        "40119",
+        "CURRENT.PASSWORD.INVALID",
         "Mật khẩu hiện tại không hợp lệ",
         "Mật khẩu hiện tại không hợp lệ",
         "Current password invalid",
         "Current password invalid"
     ),
     PASSWORD_NEW_CANNOT_BE_SAME_AS_OLD(
-        "40120",
+        "PASSWORD.NEW.CANNOT.BE.SAME.AS.OLD",
         "Mật khẩu mới không được trùng với mật khẩu hiện tại",
         "Mật khẩu mới không được trùng với mật khẩu hiện tại",
         "Password new cannot be same as old",

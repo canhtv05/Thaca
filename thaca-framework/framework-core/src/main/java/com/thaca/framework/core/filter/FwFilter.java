@@ -4,6 +4,7 @@ import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.context.FwContext;
 import com.thaca.framework.core.dtos.ApiEnvelope;
+import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.utils.JsonF;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -53,33 +54,20 @@ public class FwFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
 
         byte[] requestBody = requestWrapper.getCachedBody();
-
         ApiEnvelope<?> envelope = JsonF.jsonToObject(requestBody, ApiEnvelope.class);
-        if (envelope == null || envelope.getHeader() == null || envelope.getBody() == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            response
-                .getWriter()
-                .write(
-                    Objects.requireNonNull(JsonF.toJson(ApiEnvelope.error(CommonErrorMessage.REQUEST_INVALID_PARAMS)))
-                );
-            return;
-        }
-
         String transId = UUID.randomUUID().toString().replace("-", "");
         String traceId = extractTraceId(requestBody);
         if (traceId == null) {
             traceId = UUID.randomUUID() + "-" + System.currentTimeMillis();
         }
-
         MDC.put("transId", transId);
         MDC.put("traceId", traceId);
-        if (requestBody.length > 0) {
+
+        if (envelope != null && envelope.getHeader() != null) {
             try {
                 FwContext.set(envelope.getHeader());
             } catch (Exception e) {
-                log.warn("Cannot parse request body as ApiEnvelope: {}", e.getMessage());
+                log.warn("Cannot set FwContext: {}", e.getMessage());
             }
         }
 
@@ -91,21 +79,87 @@ public class FwFilter extends OncePerRequestFilter {
 
         log.info("IN - URI: '[{}] {}', User: [{}], IP: [{}], Payload: {}", method, uri, username, clientIp, payload);
         long startTime = System.currentTimeMillis();
+
+        if (
+            envelope == null ||
+            envelope.getHeader() == null ||
+            envelope.getBody() == null ||
+            envelope.getBody().getData() == null
+        ) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+            ApiEnvelope<?> errorRes = ApiEnvelope.error(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+            if (envelope != null && envelope.getHeader() != null) {
+                errorRes.setHeader(envelope.getHeader());
+            }
+
+            String responseStr = Objects.requireNonNull(JsonF.toJson(errorRes));
+            response.getWriter().write(responseStr);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.error(
+                "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}",
+                method,
+                uri,
+                username,
+                response.getStatus(),
+                duration,
+                responseStr.replaceAll("[\\r\\n]+", "")
+            );
+
+            MDC.clear();
+            FwContext.clear();
+            return;
+        }
+
+        if (
+            requestBody.length > 0 &&
+            !ChannelType.WEB.name().equals(envelope.getHeader().getChannel()) &&
+            !ChannelType.MOBILE.name().equals(envelope.getHeader().getChannel())
+        ) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+            ApiEnvelope<?> channelError = ApiEnvelope.error(CommonErrorMessage.CHANNEL_INVALID);
+            channelError.setHeader(envelope.getHeader());
+
+            String responseStr = Objects.requireNonNull(JsonF.toJson(channelError));
+            response.getWriter().write(responseStr);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.error(
+                "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}",
+                method,
+                uri,
+                username,
+                response.getStatus(),
+                duration,
+                responseStr.replaceAll("[\\r\\n]+", "")
+            );
+
+            MDC.clear();
+            FwContext.clear();
+            return;
+        }
+
         try {
             filterChain.doFilter(requestWrapper, responseWrapper);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
             byte[] responseArray = responseWrapper.getContentAsByteArray();
             String responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
-            log.info(
-                "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}",
-                method,
-                uri,
-                username,
-                responseWrapper.getStatus(),
-                duration,
-                responseStr
-            );
+
+            int status = responseWrapper.getStatus();
+            String logMsg = "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}";
+            if (status >= 400) {
+                log.error(logMsg, method, uri, username, status, duration, responseStr);
+            } else {
+                log.info(logMsg, method, uri, username, status, duration, responseStr);
+            }
+
             responseWrapper.copyBodyToResponse();
             MDC.clear();
             FwContext.clear();

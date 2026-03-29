@@ -40,10 +40,9 @@ public class UserJWTController {
     @FwRequestMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = RequestType.PUBLIC)
     public AuthenticateRes authenticate(
         @RequestBody ApiEnvelope<LoginReq> loginReq,
-        HttpServletRequest httpServletRequest,
         HttpServletResponse httpServletResponse
     ) {
-        return authService.authenticate(loginReq.getBody().getData(), httpServletRequest, httpServletResponse);
+        return authService.authenticate(loginReq.getBody().getData(), httpServletResponse);
     }
 
     @PostMapping("/refresh-token")

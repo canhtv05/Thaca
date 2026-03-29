@@ -1,6 +1,5 @@
 package com.thaca.auth.security;
 
-import com.thaca.auth.context.AuthenticationContext;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.dtos.UserProfileDTO;
 import com.thaca.auth.enums.ErrorMessage;
@@ -8,11 +7,14 @@ import com.thaca.auth.services.AuthService;
 import com.thaca.auth.services.KafkaProducerService;
 import com.thaca.common.constants.EventConstants;
 import com.thaca.common.dtos.events.VerificationEmailEvent;
+import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -61,7 +63,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             grantedAuthorities,
             String.join(",", userProfileDTO.getRoles()),
             user.getIsGlobal(),
-            AuthenticationContext.getChannel()
+            StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name())
         );
     }
 }
