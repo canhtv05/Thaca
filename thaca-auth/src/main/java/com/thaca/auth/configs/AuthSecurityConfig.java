@@ -4,17 +4,16 @@ import com.thaca.auth.security.CustomAuthenticationProvider;
 import com.thaca.auth.security.jwt.JWTConfigurer;
 import com.thaca.auth.security.jwt.PermissionAuthorizationFilter;
 import com.thaca.auth.services.PublicApiService;
-import com.thaca.common.dtos.ApiResponse;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.constants.CommonConstants;
+import com.thaca.framework.core.dtos.ApiEnvelope;
 import com.thaca.framework.core.utils.JsonF;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +23,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -36,7 +34,7 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(securedEnabled = true)
 public class AuthSecurityConfig {
 
     private final CorsFilter corsFilter;
@@ -44,8 +42,7 @@ public class AuthSecurityConfig {
     private final PublicApiService publicApiService;
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, PermissionAuthorizationFilter permissionAuthorizationFilter)
-        throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, PermissionAuthorizationFilter permissionAuthorizationFilter) {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
@@ -59,8 +56,6 @@ public class AuthSecurityConfig {
             )
             .authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
-                    .requestMatchers(HttpMethod.OPTIONS, "/**")
-                    .permitAll()
                     .requestMatchers(CommonConstants.AUTH_PUBLIC_ENDPOINTS)
                     .permitAll()
                     .anyRequest()
@@ -86,8 +81,7 @@ public class AuthSecurityConfig {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(HttpSecurity http, CustomAuthenticationProvider customProvider)
-        throws Exception {
+    AuthenticationManager authenticationManager(HttpSecurity http, CustomAuthenticationProvider customProvider) {
         return http.getSharedObject(AuthenticationManagerBuilder.class).authenticationProvider(customProvider).build();
     }
 
@@ -95,17 +89,10 @@ public class AuthSecurityConfig {
     AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, authException) -> {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            if (authException instanceof AuthenticationException) {
-                response.setStatus(HttpStatus.BAD_REQUEST.value());
-                response
-                    .getWriter()
-                    .write(Objects.requireNonNull(JsonF.toJson(ApiResponse.error(CommonErrorMessage.UNAUTHORIZED))));
-            } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response
-                    .getWriter()
-                    .write(Objects.requireNonNull(JsonF.toJson(ApiResponse.error(CommonErrorMessage.UNAUTHORIZED))));
-            }
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            response
+                .getWriter()
+                .write(Objects.requireNonNull(JsonF.toJson(ApiEnvelope.error(CommonErrorMessage.UNAUTHORIZED))));
         };
     }
 
@@ -116,7 +103,7 @@ public class AuthSecurityConfig {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response
                 .getWriter()
-                .write(Objects.requireNonNull(JsonF.toJson(ApiResponse.error(CommonErrorMessage.FORBIDDEN))));
+                .write(Objects.requireNonNull(JsonF.toJson(ApiEnvelope.error(CommonErrorMessage.FORBIDDEN))));
         };
     }
 }

@@ -1,7 +1,6 @@
 package com.thaca.auth.configs;
 
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.StringSerializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -12,6 +11,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import tools.jackson.databind.ser.jackson.JsonValueSerializer;
 
 @Configuration
 @EnableKafka
@@ -25,7 +25,7 @@ public class KafkaConfig {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonValueSerializer.class);
         return new DefaultKafkaProducerFactory<>(config);
     }
 

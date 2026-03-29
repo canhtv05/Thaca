@@ -1,16 +1,19 @@
 package com.thaca.framework.core.utils.json;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.thaca.framework.core.utils.DateUtils;
-import java.io.IOException;
 import java.time.Instant;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
-public class StringToInstantDeserializer extends JsonDeserializer<Instant> {
+public class StringToInstantDeserializer extends StdDeserializer<Instant> {
+
+    public StringToInstantDeserializer() {
+        super(Instant.class);
+    }
 
     @Override
-    public Instant deserialize(JsonParser p, DeserializationContext context) throws IOException {
+    public Instant deserialize(JsonParser p, DeserializationContext context) {
         return DateUtils.stringToDate(p.getValueAsString());
     }
 }

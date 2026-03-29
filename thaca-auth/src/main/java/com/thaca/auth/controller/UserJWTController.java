@@ -14,9 +14,9 @@ import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.dtos.res.VerifyTokenRes;
 import com.thaca.auth.services.AuthService;
 import com.thaca.auth.services.UserService;
-import com.thaca.common.dtos.ApiResponse;
 import com.thaca.framework.core.annotations.FwRequestMode;
 import com.thaca.framework.core.constants.CommonConstants;
+import com.thaca.framework.core.dtos.ApiEnvelope;
 import com.thaca.framework.core.enums.RequestType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,102 +38,101 @@ public class UserJWTController {
 
     @PostMapping("/authenticate")
     @FwRequestMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = RequestType.PUBLIC)
-    public ResponseEntity<ApiResponse<AuthenticateRes>> authenticate(
-        @RequestBody LoginReq loginReq,
+    public AuthenticateRes authenticate(
+        @RequestBody ApiEnvelope<LoginReq> loginReq,
         HttpServletRequest httpServletRequest,
         HttpServletResponse httpServletResponse
     ) {
-        AuthenticateRes authenticateRes = authService.authenticate(loginReq, httpServletRequest, httpServletResponse);
-        return ResponseEntity.ok(ApiResponse.success(authenticateRes));
+        return authService.authenticate(loginReq.getBody().getData(), httpServletRequest, httpServletResponse);
     }
 
     @PostMapping("/refresh-token")
     @FwRequestMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiResponse<RefreshTokenRes>> refreshToken(
+    public ResponseEntity<ApiEnvelope<RefreshTokenRes>> refreshToken(
         @CookieValue(name = CommonConstants.COOKIE_NAME, required = false) String cookieValue,
         @RequestBody LogoutReq req,
         HttpServletRequest httpServletRequest,
         HttpServletResponse response
     ) {
         return ResponseEntity.ok(
-            ApiResponse.success(authService.refreshToken(cookieValue, req.getChannel(), httpServletRequest, response))
+            ApiEnvelope.success(authService.refreshToken(cookieValue, req.getChannel(), httpServletRequest, response))
         );
     }
 
     // đôiv ưới API itnernal thì chauw cần viết @FWMode
     @PostMapping("/internal/verify")
     @FwRequestMode(name = ServiceMethod.AUTH_VERIFY_TOKEN, type = RequestType.INTERNAL)
-    public ResponseEntity<ApiResponse<VerifyTokenRes>> verifyToken(
+    public ResponseEntity<ApiEnvelope<VerifyTokenRes>> verifyToken(
         @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue
     ) {
-        return ResponseEntity.ok(ApiResponse.success(authService.verifyToken(cookieValue, false)));
+        return ResponseEntity.ok(ApiEnvelope.success(authService.verifyToken(cookieValue, false)));
     }
 
     // click vào hàm mà endpoint sử dụng rồi viwwst @FW mode
     @PostMapping("/create")
     @FwRequestMode(name = ServiceMethod.AUTH_CREATE_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiResponse<UserDTO>> createUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<ApiEnvelope<UserDTO>> createUser(@RequestBody UserDTO userDTO) {
         UserDTO newUserDTO = userService.createUser(userDTO, false);
-        return ResponseEntity.ok(ApiResponse.success(newUserDTO));
+        return ResponseEntity.ok(ApiEnvelope.success(newUserDTO));
     }
 
     @PostMapping("/change-password")
     @FwRequestMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiResponse<Boolean>> changePassword(
+    public ResponseEntity<ApiEnvelope<Boolean>> changePassword(
         @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
         @RequestBody ChangePasswordReq req,
         HttpServletResponse response
     ) {
         userService.changePassword(cookieValue, req, response);
-        return ResponseEntity.ok(ApiResponse.success());
+        return ResponseEntity.ok(ApiEnvelope.success());
     }
 
     @PostMapping("/reset-password")
     @FwRequestMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = RequestType.PUBLIC)
-    public ResponseEntity<ApiResponse<Boolean>> resetPassword(@RequestBody ResetPasswordReq req) {
+    public ResponseEntity<ApiEnvelope<Boolean>> resetPassword(@RequestBody ResetPasswordReq req) {
         userService.resetPassword(req);
-        return ResponseEntity.ok(ApiResponse.success());
+        return ResponseEntity.ok(ApiEnvelope.success());
     }
 
     @PostMapping("/forgot-password")
     @FwRequestMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD, type = RequestType.PUBLIC)
-    public ResponseEntity<ApiResponse<Boolean>> forgotPassword(@RequestBody ForgotPasswordReq req) {
+    public ResponseEntity<ApiEnvelope<Boolean>> forgotPassword(@RequestBody ForgotPasswordReq req) {
         userService.forgotPasswordRequest(req);
-        return ResponseEntity.ok(ApiResponse.success());
+        return ResponseEntity.ok(ApiEnvelope.success());
     }
 
     @PostMapping("/verify-forgot-password-otp")
     @FwRequestMode(name = ServiceMethod.AUTH_VERIFY_FORGOT_PASSWORD_OTP, type = RequestType.PUBLIC)
-    public ResponseEntity<ApiResponse<Boolean>> verifyForgotPasswordOTP(@RequestBody VerifyOTPReq req) {
+    public ResponseEntity<ApiEnvelope<Boolean>> verifyForgotPasswordOTP(@RequestBody VerifyOTPReq req) {
         userService.verifyForgotPasswordOTP(req);
-        return ResponseEntity.ok(ApiResponse.success());
+        return ResponseEntity.ok(ApiEnvelope.success());
     }
 
     @PostMapping("/update")
     @FwRequestMode(name = ServiceMethod.AUTH_UPDATE_USER_PROFILE, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiResponse<Boolean>> updateUserProfile(@RequestBody UserProfileDTO req) {
+    public ResponseEntity<ApiEnvelope<Boolean>> updateUserProfile(@RequestBody UserProfileDTO req) {
         userService.updateUserProfile(req);
-        return ResponseEntity.ok(ApiResponse.success());
+        return ResponseEntity.ok(ApiEnvelope.success());
     }
 
     @PostMapping("/logout")
     @FwRequestMode(name = ServiceMethod.AUTH_LOGOUT, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiResponse<?>> logout(
+    public ResponseEntity<ApiEnvelope<?>> logout(
         @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
         @RequestBody LogoutReq req,
         HttpServletResponse response
     ) {
         authService.logout(cookieValue, req.getChannel(), response);
-        return ResponseEntity.ok(ApiResponse.success());
+        return ResponseEntity.ok(ApiEnvelope.success());
     }
 
     @PostMapping("/logout-all-devices")
     @FwRequestMode(name = ServiceMethod.AUTH_LOGOUT_ALL_DEVICES, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiResponse<?>> logoutAllDevices(
+    public ResponseEntity<ApiEnvelope<?>> logoutAllDevices(
         @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
         HttpServletResponse response
     ) {
         authService.logoutAllDevices(cookieValue, response);
-        return ResponseEntity.ok(ApiResponse.success());
+        return ResponseEntity.ok(ApiEnvelope.success());
     }
 }

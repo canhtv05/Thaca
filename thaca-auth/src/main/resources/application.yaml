@@ -9,7 +9,8 @@ spring:
     name: auth
 
   profiles:
-    active: dev,core,blocking
+    active: dev
+    include: core,blocking
 
   output:
     ansi:

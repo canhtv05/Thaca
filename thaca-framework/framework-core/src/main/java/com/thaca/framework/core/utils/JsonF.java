@@ -1,27 +1,26 @@
 package com.thaca.framework.core.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.thaca.framework.core.utils.json.InstantToStringSerializer;
 import com.thaca.framework.core.utils.json.StringToInstantDeserializer;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 @Slf4j
 public class JsonF {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper;
 
     static {
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JavaTimeModule jtm = new JavaTimeModule();
-        jtm.addSerializer(Instant.class, new InstantToStringSerializer());
-        jtm.addDeserializer(Instant.class, new StringToInstantDeserializer());
-        objectMapper.registerModule(jtm);
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        SimpleModule timeModule = new SimpleModule();
+        timeModule.addSerializer(Instant.class, new InstantToStringSerializer());
+        timeModule.addDeserializer(Instant.class, new StringToInstantDeserializer());
+
+        objectMapper = JsonMapper.builder().addModule(timeModule).findAndAddModules().build();
     }
 
     public static String toJson(Object obj) {
@@ -34,9 +33,7 @@ public class JsonF {
     }
 
     public static <T> T jsonToObject(String str, Class<T> clazz) {
-        if (str == null) {
-            return null;
-        }
+        if (str == null) return null;
         try {
             return objectMapper.readValue(str, clazz);
         } catch (Exception e) {
@@ -45,14 +42,32 @@ public class JsonF {
         }
     }
 
-    public static <T> T jsonToObject(String str, TypeReference<T> type) {
-        if (str == null) {
+    public static <T> T jsonToObject(byte[] bytes, Class<T> clazz) {
+        if (bytes == null || bytes.length == 0) return null;
+        try {
+            return objectMapper.readValue(bytes, clazz);
+        } catch (Exception e) {
+            log.error("[JsonF] jsonToObject(byte[]):: ", e);
             return null;
         }
+    }
+
+    public static <T> T jsonToObject(String str, TypeReference<T> type) {
+        if (str == null) return null;
         try {
             return objectMapper.readValue(str, type);
         } catch (Exception e) {
             log.error("[JsonF] jsonToObject()]:: ", e);
+            return null;
+        }
+    }
+
+    public static JsonNode readTree(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) return null;
+        try {
+            return objectMapper.readTree(bytes);
+        } catch (Exception e) {
+            log.error("[JsonF] readTree()]:: ", e);
             return null;
         }
     }

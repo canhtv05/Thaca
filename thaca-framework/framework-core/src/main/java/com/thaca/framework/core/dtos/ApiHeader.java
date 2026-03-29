@@ -1,4 +1,4 @@
-package com.thaca.common.dtos;
+package com.thaca.framework.core.dtos;
 
 import lombok.*;
 

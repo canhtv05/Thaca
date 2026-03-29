@@ -17,13 +17,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class FwSecurityAspect {
 
-    @Around(
-        "@annotation(com.thaca.framework.core.annotations.FwRequestMode) || @within(com.thaca.framework.core.annotations.FwRequestMode)"
-    )
+    @Around("@annotation(com.thaca.framework.core.annotations.FwRequestMode)")
     public Object checkSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         FwRequestMode requestMode = method.getAnnotation(FwRequestMode.class);
-        if (Objects.nonNull(requestMode)) {
+        if (Objects.isNull(requestMode)) {
             requestMode = joinPoint.getTarget().getClass().getAnnotation(FwRequestMode.class);
         }
 

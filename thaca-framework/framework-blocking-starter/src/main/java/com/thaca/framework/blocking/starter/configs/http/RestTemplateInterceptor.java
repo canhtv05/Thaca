@@ -1,10 +1,11 @@
 package com.thaca.framework.blocking.starter.configs.http;
 
-import com.thaca.common.dtos.ApiHeader;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.dtos.ApiHeader;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -18,8 +19,11 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
     private final FrameworkProperties frameworkProperties;
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-        throws IOException {
+    public @NullMarked ClientHttpResponse intercept(
+        HttpRequest request,
+        byte[] body,
+        ClientHttpRequestExecution execution
+    ) throws IOException {
         FrameworkProperties.HttpClientConfig config = frameworkProperties.getHttpClient();
 
         ApiHeader contextHeader = FwContext.get();
