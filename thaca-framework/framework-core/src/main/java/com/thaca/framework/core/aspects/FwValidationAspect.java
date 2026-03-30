@@ -80,7 +80,22 @@ public class FwValidationAspect {
     private boolean isParameterCompatible(Class<?>[] methodParams, Class<?>[] argTypes) {
         if (methodParams.length != argTypes.length) return false;
         for (int i = 0; i < methodParams.length; i++) {
-            if (!methodParams[i].isAssignableFrom(argTypes[i])) return false;
+            if (methodParams[i].isPrimitive()) {
+                Class<?> wrapper = switch (methodParams[i].getName()) {
+                    case "boolean" -> Boolean.class;
+                    case "int" -> Integer.class;
+                    case "long" -> Long.class;
+                    case "double" -> Double.class;
+                    case "float" -> Float.class;
+                    case "char" -> Character.class;
+                    case "byte" -> Byte.class;
+                    case "short" -> Short.class;
+                    default -> methodParams[i];
+                };
+                if (!wrapper.isAssignableFrom(argTypes[i])) return false;
+            } else if (!methodParams[i].isAssignableFrom(argTypes[i])) {
+                return false;
+            }
         }
         return true;
     }

@@ -34,9 +34,9 @@ public class User extends BaseEntityAudit {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "activated", nullable = false)
+    @Column(name = "is_activated", nullable = false)
     @Builder.Default
-    private boolean activated = false;
+    private Boolean isActivated = false;
 
     @Column(name = "is_locked", nullable = false)
     @Builder.Default

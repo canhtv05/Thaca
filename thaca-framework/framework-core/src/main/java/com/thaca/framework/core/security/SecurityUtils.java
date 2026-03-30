@@ -52,20 +52,6 @@ public class SecurityUtils {
         );
     }
 
-    public static Optional<String> getCurrentUserChannel() {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        return Optional.ofNullable(securityContext.getAuthentication()).map(SecurityUtils::extractChannel);
-    }
-
-    private static String extractChannel(Authentication authentication) {
-        if (authentication == null) {
-            return null;
-        } else if (authentication.getPrincipal() instanceof UserPrincipal springSecurityUser) {
-            return springSecurityUser.getChannel();
-        }
-        return null;
-    }
-
     public static void clear() {
         SecurityContextHolder.clearContext();
     }

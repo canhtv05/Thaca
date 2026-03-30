@@ -1,5 +1,6 @@
 package com.thaca.framework.blocking.starter.services;
 
+import com.thaca.framework.core.enums.ChannelType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -10,9 +11,9 @@ public class SessionStore {
 
     private final Environment environment;
 
-    public String getKeyToken(String username, String channel) {
+    public String getKeyToken(String username, ChannelType channel) {
         String envRunning = environment.getActiveProfiles()[0];
-        return String.format("%s:token:%s:%s", envRunning, username, channel);
+        return String.format("%s:token:%s:%s", envRunning, username, channel.name());
     }
 
     public String getKeyUser(String username, String channel) {

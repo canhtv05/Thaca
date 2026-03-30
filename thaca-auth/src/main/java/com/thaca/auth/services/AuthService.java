@@ -20,6 +20,7 @@ import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
@@ -33,7 +34,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.json.JsonParseException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -43,8 +43,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 @RequiredArgsConstructor
@@ -82,13 +80,6 @@ public class AuthService {
         return new AuthenticateRes(true);
     }
 
-    // ví dụ cái này
-    // phạm vi bao quanh của m là cái folder services kia
-    // ví dụ là hàm refresh token này m sẽ làm nhưu này tương tự ovoiws cái
-    // authenticate kia là handle và validate
-
-    // vis du nhu nay
-
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.VALIDATE)
     public void validateRefreshToken(
         String cookieValue,
@@ -99,12 +90,10 @@ public class AuthService {
         if (StringUtils.isBlank(cookieValue) || StringUtils.isBlank(channel)) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
+        if (!ChannelType.MOBILE.name().equals(channel) && !ChannelType.WEB.name().equals(channel)) {
+            throw new FwException(CommonErrorMessage.CHANNEL_INVALID);
+        }
     }
-
-    // hiện tại thì t biết 2 cái nếu như DB có lưu dùng save thì sẽ dùng
-    // @Transactional(rollbackFor = Exception.class)
-    // còn nếu hàm get dữ liệu thì giống
-    // @Transactional(readOnly = true)
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.HANDLE)
@@ -117,61 +106,12 @@ public class AuthService {
         return tokenProvider.refreshToken(cookieValue, httpServletRequest, httpServletResponse, channel);
     }
 
-    // làm tương tự với những cái này
-    @Transactional(readOnly = true)
-    // cái này ko gọi từ controler nên ko cần @FwMode
-    public VerifyTokenRes verifyToken(String cookieValueOrTokenString, boolean isInternal) {
-        TokenPair tokenPair = getTokenPair(cookieValueOrTokenString, isInternal);
-        if (CommonUtils.isEmpty(tokenPair.accessToken())) {
-            throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
-        }
-
-        TokenStatus valid = jwtUtils.validateToken(tokenPair.accessToken());
-        if (TokenStatus.VALID.equals(valid)) {
-            return VerifyTokenRes.builder()
-                .valid(TokenStatus.VALID.equals(valid))
-                .accessToken(tokenPair.accessToken())
-                .refreshToken(tokenPair.refreshToken())
-                .build();
-        }
-
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest httpServletRequest = attributes.getRequest();
-        HttpServletResponse httpServletResponse = attributes.getResponse();
-        Optional<TokenPair> cookieTokenPair = CommonUtils.tokenFromCookie(
-            httpServletRequest.getHeader(HttpHeaders.COOKIE)
-        );
-        if (cookieTokenPair.isEmpty() || CommonUtils.isEmpty(cookieTokenPair.get().accessToken())) {
-            throw new FwException(ErrorMessage.TOKEN_PAIR_INVALID);
-        }
-        RefreshTokenRes refreshTokenRes = refreshToken(
-            tokenPair.refreshToken(),
-            tokenPair.accessToken(),
-            httpServletRequest,
-            httpServletResponse
-        );
-        if (Objects.isNull(refreshTokenRes)) {
-            throw new FwException(ErrorMessage.TOKEN_PAIR_INVALID);
-        } else {
-            valid = TokenStatus.VALID;
-        }
-        return VerifyTokenRes.builder()
-            .valid(TokenStatus.VALID.equals(valid))
-            .accessToken(refreshTokenRes.getAccessToken())
-            .refreshToken(refreshTokenRes.getRefreshToken())
-            .build();
-    }
-
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.AUTH_VERIFY_TOKEN, type = ModeType.HANDLE)
-    public VerifyTokenRes verifyTokenInternal(String accessToken, String refreshToken, String channel) {
+    public VerifyTokenRes verifyTokenInternal(String accessToken, String refreshToken, ChannelType channel) {
         TokenStatus valid = jwtUtils.validateToken(accessToken);
         if (TokenStatus.VALID.equals(valid)) {
-            return VerifyTokenRes.builder()
-                .valid(TokenStatus.VALID.equals(valid))
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+            return VerifyTokenRes.builder().valid(true).accessToken(accessToken).refreshToken(refreshToken).build();
         }
 
         if (StringUtils.isBlank(refreshToken)) {
@@ -180,11 +120,9 @@ public class AuthService {
         RefreshTokenRes refreshTokenRes = tokenProvider.processRefreshInternal(refreshToken, channel);
         if (Objects.isNull(refreshTokenRes)) {
             throw new FwException(ErrorMessage.TOKEN_PAIR_INVALID);
-        } else {
-            valid = TokenStatus.VALID;
         }
         return VerifyTokenRes.builder()
-            .valid(TokenStatus.VALID.equals(valid))
+            .valid(true)
             .accessToken(refreshTokenRes.getAccessToken())
             .refreshToken(refreshTokenRes.getRefreshToken())
             .build();
@@ -192,9 +130,8 @@ public class AuthService {
 
     @Transactional
     @FwMode(name = ServiceMethod.AUTH_LOGOUT, type = ModeType.HANDLE)
-    public void logout(String cookieValue, String channel, HttpServletResponse response) {
-        TokenPair tokenPair = getTokenPair(cookieValue, false);
-        tokenProvider.revokeToken(tokenPair.accessToken(), channel);
+    public void logout(String channel, HttpServletResponse response) {
+        tokenProvider.revokeToken(ChannelType.valueOf(channel));
         cookieUtils.deleteCookie(response);
         SecurityUtils.clear();
     }
@@ -269,9 +206,8 @@ public class AuthService {
 
     @Transactional
     @FwMode(name = ServiceMethod.AUTH_LOGOUT_ALL_DEVICES, type = ModeType.HANDLE)
-    public void logoutAllDevices(String cookieValue, HttpServletResponse response) {
-        TokenPair tokenPair = getTokenPair(cookieValue, false);
-        tokenProvider.revokeAllTokens(tokenPair.accessToken());
+    public void logoutAllDevices(HttpServletResponse response) {
+        tokenProvider.revokeAllTokens();
         cookieUtils.deleteCookie(response);
         SecurityUtils.clear();
     }

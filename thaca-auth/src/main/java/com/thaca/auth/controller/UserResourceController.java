@@ -25,7 +25,7 @@ public class UserResourceController {
     private final UserService userService;
 
     @PostMapping("/users/r/search-datatable")
-    @FwRequestMode(name = ServiceMethod.ADMIN_SEARCH_USERS, type = RequestType.PUBLIC)
+    @FwRequestMode(name = ServiceMethod.ADMIN_SEARCH_USERS, type = RequestType.PROTECTED)
     public SearchResponse<UserDTO> search(@RequestBody ApiPayload<SearchRequest<UserSearchReq>> criteria) {
         return userService.searchDatatable(criteria.getBody().getData());
     }
@@ -39,9 +39,8 @@ public class UserResourceController {
 
     @PostMapping("/users/c/create")
     @FwRequestMode(name = ServiceMethod.ADMIN_CREATE_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiPayload<UserDTO>> createUser(@RequestBody ApiPayload<UserDTO> payload) {
-        UserDTO newUserDTO = userService.createUser(payload.getBody().getData(), true);
-        return ResponseEntity.ok(ApiPayload.success(newUserDTO));
+    public void createUser(@RequestBody ApiPayload<UserDTO> payload) {
+        userService.createUser(payload.getBody().getData(), true);
     }
 
     @PutMapping("/users/u/update")

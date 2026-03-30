@@ -4,6 +4,7 @@ import com.thaca.common.dtos.ErrorData;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.exceptions.FwException;
+import java.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,5 +68,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(
             ApiPayload.error(CommonErrorMessage.BINDING_ERROR)
         );
+    }
+
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<ApiPayload<ErrorData>> handleSignatureException(SignatureException ex) {
+        log.error("[GlobalExceptionHandler] handleSignatureException error]:: ", ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiPayload.error(CommonErrorMessage.UNAUTHORIZED));
     }
 }

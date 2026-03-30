@@ -28,6 +28,7 @@ import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
@@ -91,10 +92,10 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.HANDLE)
-    public UserDTO createUser(UserDTO request, boolean isAdmin) {
+    public void createUser(UserDTO request, boolean isAdmin) {
         User user = User.builder()
             .username(request.getUsername())
-            .activated(isAdmin && request.isActivated())
+            .isActivated(isAdmin && request.getIsActivated())
             .isGlobal(isAdmin ? request.getIsGlobal() : false)
             .isLocked(false)
             .email(request.getEmail())
@@ -108,23 +109,8 @@ public class UserService {
             user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(List.of("ROLE_USER"))));
         }
 
-        User res = userRepository.save(user);
-        try {
-            if (!isAdmin || !request.isActivated()) {
-                kafkaProducerService.send(
-                    EventConstants.VERIFICATION_EMAIL_TOPIC,
-                    new VerificationEmailEvent(request.getEmail(), request.getUsername(), request.getFullname())
-                );
-            } else {
-                kafkaProducerService.send(
-                    EventConstants.USER_CREATED_TOPIC,
-                    new UserCreationEvent(user.getUsername(), request.getFullname())
-                );
-            }
-        } catch (Exception e) {
-            throw new FwException(CommonErrorMessage.INTERNAL_SERVER_ERROR);
-        }
-        return UserDTO.fromEntity(res);
+        userRepository.save(user);
+        //        this.publishUserEvent(res, saved, isAdmin);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -135,7 +121,7 @@ public class UserService {
             throw new FwException(ErrorMessage.USER_NOT_FOUND);
         }
         User user = optionalUser.get();
-        user.setActivated(request.isActivated());
+        user.setIsActivated(request.getIsActivated());
         if (SecurityUtils.isGlobalUser()) {
             user.setIsGlobal(request.getIsGlobal());
         }
@@ -212,7 +198,8 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = ModeType.VALIDATE)
-    public void changePassword(String cookieValue, ChangePasswordReq req, HttpServletResponse response) {
+    public void changePassword(ApiPayload<ChangePasswordReq> request, HttpServletResponse response) {
+        ChangePasswordReq req = request.getBody().getData();
         if (CommonUtils.isEmpty(req.getCurrentPassword(), req.getNewPassword())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
@@ -230,7 +217,7 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         userRepository.save(user);
-        authService.logout(cookieValue, req.getChannel(), response);
+        authService.logout(request.getHeader().getChannel(), response);
     }
 
     @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.VALIDATE)
@@ -252,8 +239,9 @@ public class UserService {
             throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_ALREADY_SENT);
         }
 
-        kafkaProducerService.send(
+        kafkaProducerService.sendAndWait(
             EventConstants.FORGOT_PASSWORD_TOPIC,
+            user.getUsername(),
             new ForgotPasswordEvent(request.getEmail(), user.getUsername())
         );
     }
@@ -286,27 +274,6 @@ public class UserService {
         );
     }
 
-    private Specification<User> createSpecification(SearchRequest<UserSearchReq> criteria) {
-        return (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            if (StringUtils.isNotBlank(criteria.filter().getUsername())) {
-                predicates.add(
-                    cb.or(
-                        cb.like(
-                            cb.lower(root.get("username")),
-                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
-                        ),
-                        cb.like(
-                            cb.lower(root.get("username")),
-                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
-                        )
-                    )
-                );
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-    }
-
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.ADMIN_GET_USER_PERMISSION, type = ModeType.VALIDATE)
     public Map<String, PermissionAction> getUserPermissions(Long userId) {
@@ -329,5 +296,39 @@ public class UserService {
     private boolean hasOTP(String username) {
         String keyForgotPassword = sessionStore.getKeyForgotPassword(username);
         return StringUtils.isNotEmpty(redisService.get(keyForgotPassword, String.class));
+    }
+
+    private Specification<User> createSpecification(SearchRequest<UserSearchReq> criteria) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.isNotBlank(criteria.filter().getUsername())) {
+                predicates.add(
+                    cb.or(
+                        cb.like(
+                            cb.lower(root.get("username")),
+                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
+                        ),
+                        cb.like(
+                            cb.lower(root.get("username")),
+                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
+                        )
+                    )
+                );
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private void publishUserEvent(UserDTO request, User user, boolean isAdmin) {
+        String topic;
+        Object payload;
+        if (!isAdmin || !Boolean.TRUE.equals(request.getIsActivated())) {
+            topic = EventConstants.VERIFICATION_EMAIL_TOPIC;
+            payload = new VerificationEmailEvent(request.getEmail(), request.getUsername(), request.getFullname());
+        } else {
+            topic = EventConstants.USER_CREATED_TOPIC;
+            payload = new UserCreationEvent(user.getUsername(), request.getFullname());
+        }
+        kafkaProducerService.sendAndWait(topic, user.getUsername(), payload);
     }
 }

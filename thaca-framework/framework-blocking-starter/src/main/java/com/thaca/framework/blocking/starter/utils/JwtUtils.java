@@ -5,6 +5,7 @@ import com.thaca.framework.blocking.starter.services.UserSessionService;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.constants.CommonConstants;
+import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.utils.FwUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -63,7 +64,7 @@ public class JwtUtils {
             if (expiration.before(new Date())) {
                 return TokenStatus.EXPIRED;
             }
-            String tokenExisting = userSessionService.getOldToken(username, channel);
+            String tokenExisting = userSessionService.getOldToken(username, ChannelType.valueOf(channel));
             if (Objects.equals(tokenExisting, FwUtils.hexString(authToken))) {
                 return TokenStatus.VALID;
             } else {

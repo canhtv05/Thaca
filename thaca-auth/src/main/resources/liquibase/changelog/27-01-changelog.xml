@@ -89,7 +89,7 @@
             <column name="password" type="VARCHAR(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="activated" type="BOOLEAN">
+            <column name="is_activated" type="BOOLEAN">
                 <constraints nullable="false" />
             </column>
             <column name="is_locked" type="BOOLEAN">
@@ -220,7 +220,7 @@
             <column name="id" type="numeric" />
             <column name="username" type="string" />
             <column name="password" type="string" />
-            <column name="activated" type="boolean" />
+            <column name="is_activated" type="boolean" />
             <column name="is_locked" type="boolean" />
             <column name="is_global" type="boolean" />
             <column name="email" type="string" />

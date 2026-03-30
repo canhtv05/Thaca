@@ -17,9 +17,9 @@ import com.thaca.framework.blocking.starter.services.UserSessionService;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.CommonConstants;
 import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
-import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.CookieUtils;
 import com.thaca.framework.core.utils.FwUtils;
 import com.thaca.framework.core.utils.JsonF;
@@ -29,11 +29,11 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -86,7 +86,7 @@ public class TokenProvider {
     }
 
     public String createToken(Authentication authentication, HttpServletResponse response) {
-        String channel = FwContext.get() != null ? FwContext.get().getChannel() : null;
+        ChannelType channel = FwContext.get() != null ? ChannelType.valueOf(FwContext.get().getChannel()) : null;
         if (channel == null) {
             throw new FwException(CommonErrorMessage.CHANNEL_INVALID);
         }
@@ -101,9 +101,7 @@ public class TokenProvider {
 
         String token = this.generateToken(authentication, this.tokenValidityDuration, channel, sessionId);
         if (StringUtils.isNotBlank(oldToken)) {
-            Thread.startVirtualThread(() -> {
-                this.handleKickOldSessionAsync(name, token, oldToken, channel);
-            });
+            Thread.startVirtualThread(() -> this.handleKickOldSessionAsync(name, token, oldToken, channel));
         }
         String refreshToken = this.generateToken(authentication, this.refreshTokenValidityDuration, channel, sessionId);
         this.cacheUserToken(name, channel, sessionId, token);
@@ -117,161 +115,26 @@ public class TokenProvider {
         return token;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public RefreshTokenRes refreshToken(
         String cookieValue,
         HttpServletRequest request,
         HttpServletResponse response,
         String channel
     ) {
-        @SuppressWarnings("unchecked")
-        Map<String, String> tokenData = JsonF.jsonToObject(cookieValue, Map.class);
-        String refreshToken = "";
-
-        if (Objects.nonNull(tokenData)) {
-            refreshToken = tokenData.get(AuthKey.REFRESH_TOKEN.getKey());
-        }
-
-        if (StringUtils.isBlank(refreshToken)) {
-            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-            if (StringUtils.isNotBlank(authHeader) && authHeader.startsWith("Bearer ")) {
-                refreshToken = authHeader.substring(7);
-            }
-        }
-
-        if (StringUtils.isBlank(refreshToken)) {
-            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
-        }
-
-        Claims claims = jwtParser.parseSignedClaims(refreshToken).getPayload();
-        String username = claims.getSubject();
-        User user = userRepository
-            .findByUsername(username)
-            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-
-        if (
-            !Objects.equals(user.getRefreshToken(), FwUtils.hexString(refreshToken)) ||
-            StringUtils.isBlank(user.getRefreshToken())
-        ) {
-            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
-        }
-
-        Collection<? extends GrantedAuthority> authorities = user
-            .getRoles()
-            .stream()
-            .map(role -> new SimpleGrantedAuthority(role.getName()))
-            .collect(Collectors.toList());
-
-        String rolesStr = user.getRoles().stream().map(Role::getName).collect(Collectors.joining(","));
-
-        CustomUserDetails userDetails = new CustomUserDetails(
-            user.getUsername(),
-            user.getPassword(),
-            authorities,
-            rolesStr,
-            user.getIsGlobal(),
-            channel
-        );
-
-        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-        String sessionId = UUID.randomUUID().toString();
-        String newToken = this.generateToken(newAuthentication, this.tokenValidityDuration, channel, sessionId);
-        String newRefreshToken = this.generateToken(
-            newAuthentication,
-            this.refreshTokenValidityDuration,
-            channel,
-            sessionId
-        );
-        user.setRefreshToken(newRefreshToken);
-        userRepository.save(user);
-        this.cacheUserToken(username, channel, sessionId, newToken);
-
-        Cookie cookie = cookieUtils.setTokenCookie(newToken, newRefreshToken);
+        String refreshToken = this.extractRefreshToken(cookieValue, request);
+        RefreshTokenRes res = this.doRefresh(refreshToken, ChannelType.valueOf(channel), true);
+        Cookie cookie = cookieUtils.setTokenCookie(res.getAccessToken(), res.getRefreshToken());
         response.addCookie(cookie);
-
-        return RefreshTokenRes.builder().accessToken(newToken).refreshToken(newRefreshToken).build();
+        return res;
     }
 
-    @Transactional(readOnly = true)
-    public RefreshTokenRes processRefreshInternal(String refreshToken, String channel) {
-        if (CommonUtils.isEmpty(refreshToken)) {
-            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
-        }
-        if (CommonUtils.isEmpty(channel)) {
-            throw new FwException(ErrorMessage.CHANNEL_INVALID);
-        }
-
-        try {
-            Claims claims = jwtParser.parseSignedClaims(refreshToken).getPayload();
-            String username = claims.getSubject();
-            String id = claims.getId();
-
-            User user = userRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-
-            if (!Objects.equals(user.getRefreshToken(), refreshToken) || StringUtils.isBlank(user.getRefreshToken())) {
-                throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
-            }
-
-            Collection<? extends GrantedAuthority> authorities = user
-                .getRoles()
-                .stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
-
-            String rolesStr = user.getRoles().stream().map(Role::getName).collect(Collectors.joining(","));
-
-            CustomUserDetails userDetails = new CustomUserDetails(
-                user.getUsername(),
-                user.getPassword(),
-                authorities,
-                rolesStr,
-                user.getIsGlobal(),
-                channel
-            );
-
-            Authentication newAuthentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-            String newToken = this.generateToken(newAuthentication, this.tokenValidityDuration, channel, id);
-            String newRefreshToken = this.generateToken(
-                newAuthentication,
-                this.refreshTokenValidityDuration,
-                channel,
-                id
-            );
-            user.setRefreshToken(newRefreshToken);
-            userRepository.save(user);
-            this.cacheUserToken(username, channel, id, newToken);
-
-            return RefreshTokenRes.builder().accessToken(newToken).refreshToken(newRefreshToken).build();
-        } catch (JwtException e) {
-            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
-        } catch (FwException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
-        }
+    @Transactional(rollbackFor = Exception.class)
+    public RefreshTokenRes processRefreshInternal(String refreshToken, ChannelType channel) {
+        return this.doRefresh(refreshToken, channel, false);
     }
 
-    public Authentication getAuthentication(String token) {
-        Claims claims = jwtParser.parseSignedClaims(token).getPayload();
-        Collection<? extends GrantedAuthority> authorities = Arrays.stream(
-            claims.get(AUTHORITIES_KEY).toString().split(",")
-        )
-            .filter(auth -> !auth.trim().isEmpty())
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
-        CustomUserDetails principal = new CustomUserDetails(
-            claims.getSubject(),
-            "",
-            authorities,
-            claims.get(ROLES_KEY, String.class),
-            claims.get(USER_GLOBAL_KEY, Boolean.class),
-            claims.get(CommonConstants.CHANNEL_KEY, String.class)
-        );
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
-    }
-
-    public void revokeToken(String token, String channel) {
+    public void revokeToken(ChannelType channel) {
         String username = SecurityUtils.getCurrentUsername();
         if (StringUtils.isNotBlank(username)) {
             User user = userRepository
@@ -289,7 +152,7 @@ public class TokenProvider {
         }
     }
 
-    public void revokeAllTokens(String token) {
+    public void revokeAllTokens() {
         String username = SecurityUtils.getCurrentUsername();
         User user = userRepository
             .findByUsername(username)
@@ -298,15 +161,15 @@ public class TokenProvider {
         userRepository.save(user);
         // to sent notification to all devices
         Thread.startVirtualThread(() -> {
-            userSessionService.removeOldSessionByChanelType(username, "web");
-            userSessionService.removeOldSessionByChanelType(username, "mobile");
+            userSessionService.removeOldSessionByChanelType(username, ChannelType.WEB);
+            userSessionService.removeOldSessionByChanelType(username, ChannelType.MOBILE);
         });
     }
 
     private String generateToken(
         Authentication authentication,
         long validityTimeInSeconds,
-        String channel,
+        ChannelType channel,
         String sessionId
     ) {
         String authorities = authentication
@@ -333,24 +196,99 @@ public class TokenProvider {
             .compact();
     }
 
-    private void cacheUserToken(String username, String channel, String sessionId, String token) {
+    private void cacheUserToken(String username, ChannelType channel, String sessionId, String token) {
         UserSession userSessionDTO = UserSession.builder()
             .username(username)
             .sessionId(sessionId)
-            .channel(channel)
+            .channel(channel.name())
             .secretKey(FwUtils.generateSecretKey())
             .build();
         userSessionService.cacheUserSession(userSessionDTO);
         userSessionService.cacheToken(username, channel, token);
     }
 
-    public void handleKickOldSessionAsync(String userId, String newToken, String oldToken, String channelType) {
+    public void handleKickOldSessionAsync(String userId, String newToken, String oldToken, ChannelType channelType) {
         WsSessionRevokedMessage payload = WsSessionRevokedMessage.builder()
             .tokenSessionValid(newToken)
             .tokenSessionCurrent(oldToken)
-            .channelType(channelType)
+            .channelType(channelType.name())
             .build();
         WsMessage wsMessage = WsMessage.builder().type(WsType.KICK).userId(userId).data(JsonF.toJson(payload)).build();
         redisPubService.publish(wsMessage);
+    }
+
+    private RefreshTokenRes doRefresh(String refreshToken, ChannelType channel, boolean isGenerateNewSession) {
+        if (StringUtils.isBlank(refreshToken)) {
+            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
+        }
+        try {
+            Claims claims = jwtParser.parseSignedClaims(refreshToken).getPayload();
+            String username = claims.getSubject();
+            String sessionId = isGenerateNewSession ? UUID.randomUUID().toString() : claims.getId();
+
+            User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+
+            if (
+                StringUtils.isBlank(user.getRefreshToken()) ||
+                !Objects.equals(user.getRefreshToken(), FwUtils.hexString(refreshToken))
+            ) {
+                throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
+            }
+
+            Collection<? extends GrantedAuthority> authorities = user
+                .getRoles()
+                .stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
+
+            String rolesStr = user.getRoles().stream().map(Role::getName).collect(Collectors.joining(","));
+
+            CustomUserDetails userDetails = new CustomUserDetails(
+                user.getUsername(),
+                user.getPassword(),
+                authorities,
+                rolesStr,
+                user.getIsGlobal(),
+                channel.name()
+            );
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+
+            String newAccessToken = generateToken(authentication, tokenValidityDuration, channel, sessionId);
+
+            String newRefreshToken = generateToken(authentication, refreshTokenValidityDuration, channel, sessionId);
+
+            user.setRefreshToken(FwUtils.hexString(newRefreshToken));
+            userRepository.save(user);
+            cacheUserToken(username, channel, sessionId, newAccessToken);
+            return RefreshTokenRes.builder().accessToken(newAccessToken).refreshToken(newRefreshToken).build();
+        } catch (SignatureException e) {
+            throw new FwException(CommonErrorMessage.UNAUTHORIZED);
+        } catch (JwtException e) {
+            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
+        }
+    }
+
+    private String extractRefreshToken(String cookieValue, HttpServletRequest request) {
+        String refreshToken = null;
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, String> tokenData = JsonF.jsonToObject(cookieValue, Map.class);
+            if (Objects.nonNull(tokenData)) {
+                refreshToken = tokenData.get(AuthKey.REFRESH_TOKEN.getKey());
+            }
+        } catch (Exception ignored) {}
+        if (StringUtils.isBlank(refreshToken)) {
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (StringUtils.isNotBlank(authHeader) && authHeader.startsWith("Bearer ")) {
+                refreshToken = authHeader.substring(7);
+            }
+        }
+        if (StringUtils.isBlank(refreshToken)) {
+            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
+        }
+        return refreshToken;
     }
 }

@@ -4,6 +4,7 @@ import com.thaca.common.dtos.UserSession;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.core.configs.FrameworkProperties;
+import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.FwUtils;
 import com.thaca.framework.core.utils.JsonF;
@@ -34,7 +35,7 @@ public class UserSessionService {
         }
     }
 
-    public void cacheToken(String username, String channelType, String token) {
+    public void cacheToken(String username, ChannelType channelType, String token) {
         try {
             redisService.set(
                 sessionStore.getKeyToken(username, channelType),
@@ -47,27 +48,27 @@ public class UserSessionService {
         }
     }
 
-    public String getOldToken(String username, String channelType) {
+    public String getOldToken(String username, ChannelType channelType) {
         String keyToken = sessionStore.getKeyToken(username, channelType);
         return redisService.get(keyToken, String.class);
     }
 
-    public void removeOldSessionByChanelType(String username, String channelType) {
+    public void removeOldSessionByChanelType(String username, ChannelType channelType) {
         try {
             String keyToken = redisService.get(sessionStore.getKeyToken(username, channelType), String.class);
             if (StringUtils.isNotBlank(keyToken)) {
                 redisService.evict(sessionStore.getKeyToken(username, channelType));
             }
-            var keyUser = sessionStore.getKeyUser(username, channelType);
+            var keyUser = sessionStore.getKeyUser(username, channelType.name());
             if (StringUtils.isNotBlank(keyUser)) {
-                redisService.evict(sessionStore.getKeyUser(username, channelType));
+                redisService.evict(sessionStore.getKeyUser(username, channelType.name()));
             }
         } catch (Exception e) {
             log.error("[UserSessionService] removeOldSessionByChanelType()]:: ", e);
         }
     }
 
-    public String isUserOnline(String username, String channelType) {
+    public String isUserOnline(String username, ChannelType channelType) {
         try {
             return redisService.get(sessionStore.getKeyToken(username, channelType), String.class);
         } catch (Exception var4) {

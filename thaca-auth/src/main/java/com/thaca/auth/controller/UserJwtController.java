@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class UserJWTController {
+public class UserJwtController {
 
     private final AuthService authService;
     private final UserService userService;
@@ -42,9 +42,9 @@ public class UserJWTController {
     }
 
     @PostMapping("/sign-up")
-    @FwRequestMode(name = ServiceMethod.AUTH_CREATE_USER, type = RequestType.PROTECTED)
-    public UserDTO createUser(@RequestBody ApiPayload<UserDTO> userDTO) {
-        return userService.createUser(userDTO.getBody().getData(), false);
+    @FwRequestMode(name = ServiceMethod.AUTH_CREATE_USER, type = RequestType.PUBLIC)
+    public void createUser(@RequestBody ApiPayload<UserDTO> userDTO) {
+        userService.createUser(userDTO.getBody().getData(), false);
     }
 
     @PostMapping("/refresh-token")
@@ -60,7 +60,7 @@ public class UserJWTController {
 
     @PostMapping("/change-password")
     @FwRequestMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = RequestType.PROTECTED)
-    public void changePassword(@RequestBody ChangePasswordReq req, HttpServletResponse response) {
+    public void changePassword(@RequestBody ApiPayload<ChangePasswordReq> req, HttpServletResponse response) {
         userService.changePassword(req, response);
     }
 

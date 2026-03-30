@@ -7,10 +7,10 @@ import lombok.Getter;
 public enum ErrorMessage implements ErrorMessageRule {
     REFRESH_TOKEN_INVALID(
         "REFRESH.TOKEN.INVALID",
-        "Token hết hạn",
-        "Token hết hạn",
-        "Refresh token expired",
-        "Refresh token expired"
+        "Refresh token không hợp lệ",
+        "Refresh token không hợp lệ",
+        "Refresh token invalid",
+        "Refresh token invalid"
     ),
     PASSWORD_INVALID(
         "PASSWORD.INVALID",

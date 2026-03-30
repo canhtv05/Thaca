@@ -13,6 +13,7 @@ import com.thaca.framework.core.exceptions.FwException;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,7 +32,7 @@ public class DomainUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(final String login) {
+    public @NonNull UserDetails loadUserByUsername(final String login) {
         String lowercaseLogin = login.toLowerCase(Locale.ENGLISH);
         return authService
             .findOneWithAuthoritiesByUsername(lowercaseLogin)
@@ -44,9 +45,9 @@ public class DomainUserDetailsService implements UserDetailsService {
             throw new FwException(ErrorMessage.USER_LOCKED);
         }
 
-        if (!user.isActivated()) {
+        if (!user.getIsActivated()) {
             VerificationEmailEvent event = new VerificationEmailEvent(user.getEmail(), lowercaseLogin, null);
-            kafkaProducerService.send(EventConstants.VERIFICATION_EMAIL_TOPIC, event);
+            kafkaProducerService.sendAndWait(EventConstants.VERIFICATION_EMAIL_TOPIC, event.username(), event);
             throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
         }
 

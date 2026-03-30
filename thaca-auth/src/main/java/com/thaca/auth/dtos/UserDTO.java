@@ -36,7 +36,7 @@ public class UserDTO {
     @JsonDeserialize(using = LowerCaseTrimDeserializer.class)
     private String email;
 
-    private boolean activated;
+    private Boolean isActivated;
     private Boolean isGlobal;
     private List<String> roles;
     private List<String> roleLabels;
@@ -53,7 +53,7 @@ public class UserDTO {
             .username(user.getUsername())
             .password(null)
             .email(user.getEmail())
-            .activated(user.isActivated())
+            .isActivated(user.getIsActivated())
             .isGlobal(user.getIsGlobal())
             .roles(user.getRoles().stream().map(Role::getCode).collect(Collectors.toList()))
             .roleLabels(user.getRoles().stream().map(Role::getDescription).collect(Collectors.toList()))
