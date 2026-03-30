@@ -6,12 +6,10 @@ import com.thaca.auth.dtos.UserProfileDTO;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
 import com.thaca.auth.dtos.req.LoginReq;
-import com.thaca.auth.dtos.req.LogoutReq;
 import com.thaca.auth.dtos.req.ResetPasswordReq;
 import com.thaca.auth.dtos.req.VerifyOTPReq;
 import com.thaca.auth.dtos.res.AuthenticateRes;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
-import com.thaca.auth.dtos.res.VerifyTokenRes;
 import com.thaca.auth.services.AuthService;
 import com.thaca.auth.services.UserService;
 import com.thaca.framework.core.annotations.FwRequestMode;
@@ -25,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,8 +32,8 @@ public class UserJWTController {
     private final AuthService authService;
     private final UserService userService;
 
-    @PostMapping("/login")
-    @FwRequestMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = RequestType.PROTECTED)
+    @PostMapping("/sign-in")
+    @FwRequestMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = RequestType.PUBLIC)
     public AuthenticateRes authenticate(
         @RequestBody ApiPayload<LoginReq> loginReq,
         HttpServletResponse httpServletResponse
@@ -44,45 +41,27 @@ public class UserJWTController {
         return authService.authenticate(loginReq.getBody().getData(), httpServletResponse);
     }
 
+    @PostMapping("/sign-up")
+    @FwRequestMode(name = ServiceMethod.AUTH_CREATE_USER, type = RequestType.PROTECTED)
+    public UserDTO createUser(@RequestBody ApiPayload<UserDTO> userDTO) {
+        return userService.createUser(userDTO.getBody().getData(), false);
+    }
+
     @PostMapping("/refresh-token")
     @FwRequestMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiPayload<RefreshTokenRes>> refreshToken(
+    public RefreshTokenRes refreshToken(
         @CookieValue(name = CommonConstants.COOKIE_NAME, required = false) String cookieValue,
-        @RequestBody LogoutReq req,
+        @RequestBody ApiPayload<?> req,
         HttpServletRequest httpServletRequest,
         HttpServletResponse response
     ) {
-        return ResponseEntity.ok(
-            ApiPayload.success(authService.refreshToken(cookieValue, req.getChannel(), httpServletRequest, response))
-        );
-    }
-
-    // đôiv ưới API itnernal thì chauw cần viết @FWMode
-    @PostMapping("/internal/verify")
-    @FwRequestMode(name = ServiceMethod.AUTH_VERIFY_TOKEN, type = RequestType.INTERNAL)
-    public ResponseEntity<ApiPayload<VerifyTokenRes>> verifyToken(
-        @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue
-    ) {
-        return ResponseEntity.ok(ApiPayload.success(authService.verifyToken(cookieValue, false)));
-    }
-
-    // click vào hàm mà endpoint sử dụng rồi viwwst @FW mode
-    @PostMapping("/create")
-    @FwRequestMode(name = ServiceMethod.AUTH_CREATE_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiPayload<UserDTO>> createUser(@RequestBody UserDTO userDTO) {
-        UserDTO newUserDTO = userService.createUser(userDTO, false);
-        return ResponseEntity.ok(ApiPayload.success(newUserDTO));
+        return authService.refreshToken(cookieValue, req.getHeader().getChannel(), httpServletRequest, response);
     }
 
     @PostMapping("/change-password")
     @FwRequestMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiPayload<Boolean>> changePassword(
-        @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
-        @RequestBody ChangePasswordReq req,
-        HttpServletResponse response
-    ) {
-        userService.changePassword(cookieValue, req, response);
-        return ResponseEntity.ok(ApiPayload.success());
+    public void changePassword(@RequestBody ChangePasswordReq req, HttpServletResponse response) {
+        userService.changePassword(req, response);
     }
 
     @PostMapping("/reset-password")
@@ -115,22 +94,15 @@ public class UserJWTController {
 
     @PostMapping("/logout")
     @FwRequestMode(name = ServiceMethod.AUTH_LOGOUT, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiPayload<?>> logout(
-        @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
-        @RequestBody LogoutReq req,
-        HttpServletResponse response
-    ) {
-        authService.logout(cookieValue, req.getChannel(), response);
+    public ResponseEntity<ApiPayload<?>> logout(@RequestBody ApiPayload<?> req, HttpServletResponse response) {
+        authService.logout(req.getHeader().getChannel(), response);
         return ResponseEntity.ok(ApiPayload.success());
     }
 
     @PostMapping("/logout-all-devices")
     @FwRequestMode(name = ServiceMethod.AUTH_LOGOUT_ALL_DEVICES, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiPayload<?>> logoutAllDevices(
-        @CookieValue(name = CommonConstants.COOKIE_NAME) String cookieValue,
-        HttpServletResponse response
-    ) {
-        authService.logoutAllDevices(cookieValue, response);
+    public ResponseEntity<ApiPayload<?>> logoutAllDevices(HttpServletResponse response) {
+        authService.logoutAllDevices(response);
         return ResponseEntity.ok(ApiPayload.success());
     }
 }
