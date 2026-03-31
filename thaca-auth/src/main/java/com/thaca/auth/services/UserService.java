@@ -16,8 +16,12 @@ import com.thaca.auth.enums.PermissionAction;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.UserPermissionRepository;
 import com.thaca.auth.repositories.UserRepository;
+import com.thaca.auth.validators.core.Validator;
+import com.thaca.auth.validators.rules.EmailRule;
+import com.thaca.auth.validators.rules.FullnameRule;
+import com.thaca.auth.validators.rules.PasswordRule;
+import com.thaca.auth.validators.rules.UsernameRule;
 import com.thaca.common.constants.EventConstants;
-import com.thaca.common.dtos.events.ForgotPasswordEvent;
 import com.thaca.common.dtos.events.UserCreationEvent;
 import com.thaca.common.dtos.events.VerificationEmailEvent;
 import com.thaca.common.dtos.search.PaginationResponse;
@@ -28,7 +32,6 @@ import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
 import com.thaca.framework.core.annotations.FwMode;
-import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
@@ -74,17 +77,13 @@ public class UserService {
 
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.VALIDATE)
     public void validateCreateUser(UserDTO request, boolean isAdmin) {
-        if (CommonUtils.isEmpty(request.getUsername(), request.getEmail(), request.getPassword())) {
-            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
-        }
+        Validator<UserDTO> validator = new Validator<>(
+            List.of(new EmailRule<>(), new FullnameRule<>(), new PasswordRule<>(), new UsernameRule<>())
+        );
+        validator.validate(request);
         if (userRepository.existsUserByUsername(request.getUsername())) {
             throw new FwException(ErrorMessage.USERNAME_ALREADY_EXITS);
         }
-
-        if (request.getEmail().contains("+")) {
-            throw new FwException(ErrorMessage.EMAIL_INVALID);
-        }
-
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
         }
@@ -142,7 +141,7 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.HANDLE)
     public void resetPassword(ResetPasswordReq request) {
         if (CommonUtils.isEmpty(request.getEmail(), request.getNewPassword(), request.getOTP())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -196,13 +195,19 @@ public class UserService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = ModeType.VALIDATE)
-    public void changePassword(ApiPayload<ChangePasswordReq> request, HttpServletResponse response) {
-        ChangePasswordReq req = request.getBody().getData();
-        if (CommonUtils.isEmpty(req.getCurrentPassword(), req.getNewPassword())) {
+    public void validateChangePassword(ChangePasswordReq request, HttpServletResponse response) {
+        if (CommonUtils.isEmpty(request.getCurrentPassword().trim(), request.getNewPassword().trim())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
+        String newPwd = request.getNewPassword().trim();
+        Validator<UserDTO> validator = new Validator<>(List.of(new PasswordRule<>()));
+        validator.validate(UserDTO.builder().password(newPwd).build());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = ModeType.HANDLE)
+    public void changePassword(ChangePasswordReq req, HttpServletResponse response) {
         String userLogin = CommonService.getCurrentUserLogin();
         Optional<User> optionalUser = userRepository.findByUsername(userLogin);
         if (optionalUser.isEmpty()) {
@@ -217,7 +222,7 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         userRepository.save(user);
-        authService.logout(request.getHeader().getChannel(), response);
+        authService.logoutAllDevices(response);
     }
 
     @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.VALIDATE)
@@ -239,11 +244,11 @@ public class UserService {
             throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_ALREADY_SENT);
         }
 
-        kafkaProducerService.sendAndWait(
-            EventConstants.FORGOT_PASSWORD_TOPIC,
-            user.getUsername(),
-            new ForgotPasswordEvent(request.getEmail(), user.getUsername())
-        );
+        //        kafkaProducerService.sendAndWait(
+        //            EventConstants.FORGOT_PASSWORD_TOPIC,
+        //            user.getUsername(),
+        //            new ForgotPasswordEvent(request.getEmail(), user.getUsername())
+        //        );
     }
 
     @Transactional(rollbackFor = Exception.class)

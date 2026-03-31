@@ -43,8 +43,9 @@ public class UserJwtController {
 
     @PostMapping("/sign-up")
     @FwRequestMode(name = ServiceMethod.AUTH_CREATE_USER, type = RequestType.PUBLIC)
-    public void createUser(@RequestBody ApiPayload<UserDTO> userDTO) {
+    public ApiPayload<Void> createUser(@RequestBody ApiPayload<UserDTO> userDTO) {
         userService.createUser(userDTO.getBody().getData(), false);
+        return ApiPayload.success();
     }
 
     @PostMapping("/refresh-token")
@@ -60,22 +61,26 @@ public class UserJwtController {
 
     @PostMapping("/change-password")
     @FwRequestMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = RequestType.PROTECTED)
-    public void changePassword(@RequestBody ApiPayload<ChangePasswordReq> req, HttpServletResponse response) {
-        userService.changePassword(req, response);
-    }
-
-    @PostMapping("/reset-password")
-    @FwRequestMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = RequestType.PUBLIC)
-    public ResponseEntity<ApiPayload<Boolean>> resetPassword(@RequestBody ResetPasswordReq req) {
-        userService.resetPassword(req);
-        return ResponseEntity.ok(ApiPayload.success());
+    public ApiPayload<Void> changePassword(
+        @RequestBody ApiPayload<ChangePasswordReq> req,
+        HttpServletResponse response
+    ) {
+        userService.changePassword(req.getBody().getData(), response);
+        return ApiPayload.success();
     }
 
     @PostMapping("/forgot-password")
     @FwRequestMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD, type = RequestType.PUBLIC)
-    public ResponseEntity<ApiPayload<Boolean>> forgotPassword(@RequestBody ForgotPasswordReq req) {
-        userService.forgotPasswordRequest(req);
-        return ResponseEntity.ok(ApiPayload.success());
+    public ApiPayload<Void> forgotPassword(@RequestBody ApiPayload<ForgotPasswordReq> req) {
+        userService.forgotPasswordRequest(req.getBody().getData());
+        return ApiPayload.success();
+    }
+
+    @PostMapping("/reset-password")
+    @FwRequestMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = RequestType.PUBLIC)
+    public ApiPayload<Void> resetPassword(@RequestBody ResetPasswordReq req) {
+        userService.resetPassword(req);
+        return ApiPayload.success();
     }
 
     @PostMapping("/verify-forgot-password-otp")

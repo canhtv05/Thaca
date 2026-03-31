@@ -5,7 +5,6 @@ import com.thaca.auth.dtos.UserProfileDTO;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.services.AuthService;
 import com.thaca.auth.services.KafkaProducerService;
-import com.thaca.common.constants.EventConstants;
 import com.thaca.common.dtos.events.VerificationEmailEvent;
 import com.thaca.framework.core.context.FwContext;
 import com.thaca.framework.core.enums.ChannelType;
@@ -47,7 +46,7 @@ public class DomainUserDetailsService implements UserDetailsService {
 
         if (!user.getIsActivated()) {
             VerificationEmailEvent event = new VerificationEmailEvent(user.getEmail(), lowercaseLogin, null);
-            kafkaProducerService.sendAndWait(EventConstants.VERIFICATION_EMAIL_TOPIC, event.username(), event);
+            //            kafkaProducerService.sendAndWait(EventConstants.VERIFICATION_EMAIL_TOPIC, event.username(), event);
             throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
         }
 

@@ -5,8 +5,6 @@ import com.thaca.auth.domains.User;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.services.KafkaProducerService;
-import com.thaca.common.constants.EventConstants;
-import com.thaca.common.dtos.events.UserCreationEvent;
 import com.thaca.common.dtos.internal.VerifyEmailTokenDTO;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
@@ -44,11 +42,11 @@ public class InternalService {
         user.setIsActivated(true);
         userRepository.save(user);
 
-        kafkaProducerService.sendAndWait(
-            EventConstants.USER_CREATED_TOPIC,
-            user.getUsername(),
-            new UserCreationEvent(user.getUsername(), request.fullname())
-        );
+        //        kafkaProducerService.sendAndWait(
+        //            EventConstants.USER_CREATED_TOPIC,
+        //            user.getUsername(),
+        //            new UserCreationEvent(user.getUsername(), request.fullname())
+        //        );
 
         return new VerifyEmailTokenDTO(
             user.getUsername(),
