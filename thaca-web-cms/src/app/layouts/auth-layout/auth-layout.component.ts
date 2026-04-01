@@ -1,17 +1,19 @@
-import { Component, signal } from '@angular/core';
+import { Component, model } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { SelectModule } from 'primeng/select';
-import { ThacaSelectComponent } from '../../shared/components/thaca-select/thaca-select.component';
+import { FormsModule } from '@angular/forms';
+import { APP_CONFIG_ICONS } from '../../core/configs/app-config.icon';
 
 @Component({
   selector: 'app-auth-layout',
-  imports: [RouterOutlet, SelectModule, ThacaSelectComponent],
+  imports: [RouterOutlet, FormsModule],
   templateUrl: './auth-layout.component.html',
 })
 export class AuthLayoutComponent {
+  readonly APP_CONFIG_ICONS = APP_CONFIG_ICONS;
   cities = [
     { name: 'New York', code: 'NY' },
     { name: 'Rome', code: 'RM' },
   ];
-  selectedCity = signal<string>('NY');
+  /** Hai chiều với `[(ngModel)]` trên `app-thaca-select`. */
+  selectedCity = model<string>('NY');
 }
