@@ -2,7 +2,6 @@ package com.thaca.auth.controller;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.dtos.UserDTO;
-import com.thaca.auth.dtos.UserProfileDTO;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
 import com.thaca.auth.dtos.req.LoginReq;
