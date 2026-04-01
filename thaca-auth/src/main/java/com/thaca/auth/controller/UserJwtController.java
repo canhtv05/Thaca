@@ -72,36 +72,29 @@ public class UserJwtController {
     @PostMapping("/forgot-password")
     @FwRequestMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD, type = RequestType.PUBLIC)
     public ApiPayload<Void> forgotPassword(@RequestBody ApiPayload<ForgotPasswordReq> req) {
-        userService.forgotPasswordRequest(req.getBody().getData());
+        userService.handleForgotPasswordRequest(req.getBody().getData());
         return ApiPayload.success();
+    }
+
+    @PostMapping("/verify-otp-forgot-password")
+    @FwRequestMode(name = ServiceMethod.AUTH_VERIFY_OTP_FORGOT_PASSWORD, type = RequestType.PUBLIC)
+    public ResponseEntity<ApiPayload<Boolean>> verifyOTPForgotPassword(@RequestBody ApiPayload<VerifyOTPReq> req) {
+        userService.handleVerifyOTPForgotPassword(req.getBody().getData());
+        return ResponseEntity.ok(ApiPayload.success());
     }
 
     @PostMapping("/reset-password")
     @FwRequestMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = RequestType.PUBLIC)
-    public ApiPayload<Void> resetPassword(@RequestBody ResetPasswordReq req) {
-        userService.resetPassword(req);
+    public ApiPayload<Void> resetPassword(@RequestBody ApiPayload<ResetPasswordReq> req) {
+        userService.handleResetPassword(req.getBody().getData());
         return ApiPayload.success();
-    }
-
-    @PostMapping("/verify-forgot-password-otp")
-    @FwRequestMode(name = ServiceMethod.AUTH_VERIFY_FORGOT_PASSWORD_OTP, type = RequestType.PUBLIC)
-    public ResponseEntity<ApiPayload<Boolean>> verifyForgotPasswordOTP(@RequestBody VerifyOTPReq req) {
-        userService.verifyForgotPasswordOTP(req);
-        return ResponseEntity.ok(ApiPayload.success());
-    }
-
-    @PostMapping("/update")
-    @FwRequestMode(name = ServiceMethod.AUTH_UPDATE_USER_PROFILE, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiPayload<Boolean>> updateUserProfile(@RequestBody UserProfileDTO req) {
-        userService.updateUserProfile(req);
-        return ResponseEntity.ok(ApiPayload.success());
     }
 
     @PostMapping("/logout")
     @FwRequestMode(name = ServiceMethod.AUTH_LOGOUT, type = RequestType.PROTECTED)
-    public ResponseEntity<ApiPayload<?>> logout(@RequestBody ApiPayload<?> req, HttpServletResponse response) {
-        authService.logout(req.getHeader().getChannel(), response);
-        return ResponseEntity.ok(ApiPayload.success());
+    public ApiPayload<Void> logout(@RequestBody ApiPayload<Void> req, HttpServletResponse response) {
+        authService.logout(req, response);
+        return ApiPayload.success();
     }
 
     @PostMapping("/logout-all-devices")

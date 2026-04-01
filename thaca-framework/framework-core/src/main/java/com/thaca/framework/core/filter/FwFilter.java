@@ -1,10 +1,12 @@
 package com.thaca.framework.core.filter;
 
+import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.context.FwContext;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ChannelType;
+import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.JsonF;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -18,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +58,10 @@ public class FwFilter extends OncePerRequestFilter {
 
         byte[] requestBody = requestWrapper.getCachedBody();
         ApiPayload<?> envelope = JsonF.jsonToObject(requestBody, ApiPayload.class);
-        String transId = UUID.randomUUID().toString().replace("-", "");
+        String transId = UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
         String traceId = extractTraceId(requestBody);
         if (traceId == null) {
-            traceId = UUID.randomUUID() + "-" + System.currentTimeMillis();
+            traceId = UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
         }
         MDC.put("transId", transId);
         MDC.put("traceId", traceId);
@@ -163,19 +166,26 @@ public class FwFilter extends OncePerRequestFilter {
 
     private String extractUsername(HttpServletRequest request) {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = null;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            try {
-                Claims claims = Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
-                if (claims.getSubject() != null) return claims.getSubject();
-                else return "ANONYMOUS";
-            } catch (ExpiredJwtException e) {
-                if (e.getClaims() != null) {
-                    if (e.getClaims().getSubject() != null) return e.getClaims().getSubject();
-                } else return "ANONYMOUS";
-            } catch (Exception e) {
-                log.warn("[FwFilter] extractUsername failed: {}", e.getMessage());
+            token = authHeader.substring(7);
+        } else {
+            Optional<TokenPair> tokenPair = CommonUtils.tokenFromCookie(request.getHeader(HttpHeaders.COOKIE));
+            if (tokenPair.isPresent() && tokenPair.get().accessToken() != null) {
+                token = tokenPair.get().accessToken();
             }
+        }
+        try {
+            if (token == null) return "ANONYMOUS";
+            Claims claims = Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
+            if (claims.getSubject() != null) return claims.getSubject();
+            else return "ANONYMOUS";
+        } catch (ExpiredJwtException e) {
+            if (e.getClaims() != null) {
+                if (e.getClaims().getSubject() != null) return e.getClaims().getSubject();
+            } else return "ANONYMOUS";
+        } catch (Exception e) {
+            log.warn("[FwFilter] extractUsername failed: {}", e.getMessage());
         }
         return "ANONYMOUS";
     }

@@ -39,6 +39,7 @@ import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -140,17 +141,18 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.HANDLE)
-    public void resetPassword(ResetPasswordReq request) {
-        if (CommonUtils.isEmpty(request.getEmail(), request.getNewPassword(), request.getOTP())) {
+    @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.VALIDATE)
+    public void validateResetPassword(ResetPasswordReq request) {
+        if (StringUtils.isEmpty(request.getOTP())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
+        Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<>(), new PasswordRule<>()));
+        validator.validate(UserDTO.builder().email(request.getEmail()).password(request.getNewPassword()).build());
+    }
 
-        if (request.getEmail().contains("+")) {
-            throw new FwException(ErrorMessage.EMAIL_INVALID);
-        }
-
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.HANDLE)
+    public void handleResetPassword(ResetPasswordReq request) {
         User user = userRepository
             .findByEmail(request.getEmail())
             .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
@@ -170,16 +172,18 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.AUTH_VERIFY_FORGOT_PASSWORD_OTP, type = ModeType.VALIDATE)
-    public void verifyForgotPasswordOTP(VerifyOTPReq request) {
-        if (CommonUtils.isEmpty(request.getEmail(), request.getOTP())) {
+    @FwMode(name = ServiceMethod.AUTH_VERIFY_OTP_FORGOT_PASSWORD, type = ModeType.VALIDATE)
+    public void validateVerifyOTPForgotPassword(VerifyOTPReq request) {
+        if (StringUtils.isEmpty(request.getOTP())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
+        Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<>()));
+        validator.validate(UserDTO.builder().email(request.getEmail()).build());
+    }
 
-        if (request.getEmail().contains("+")) {
-            throw new FwException(ErrorMessage.EMAIL_INVALID);
-        }
-
+    @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.AUTH_VERIFY_OTP_FORGOT_PASSWORD, type = ModeType.HANDLE)
+    public void handleVerifyOTPForgotPassword(VerifyOTPReq request) {
         User user = userRepository
             .findByEmail(request.getEmail())
             .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
@@ -189,7 +193,6 @@ public class UserService {
         if (CommonUtils.isEmpty(otp)) {
             throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_NOT_SENT_OR_EXPIRED);
         }
-
         if (!otp.equals(request.getOTP())) {
             throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_INVALID);
         }
@@ -227,14 +230,13 @@ public class UserService {
 
     @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.VALIDATE)
     public void validateForgotPasswordRequest(ForgotPasswordReq request) {
-        if (request.getEmail().contains("+")) {
-            throw new FwException(ErrorMessage.EMAIL_INVALID);
-        }
+        Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<>()));
+        validator.validate(UserDTO.builder().email(request.getEmail()).build());
     }
 
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.HANDLE)
-    public void forgotPasswordRequest(ForgotPasswordReq request) {
+    public void handleForgotPasswordRequest(ForgotPasswordReq request) {
         User user = userRepository
             .findByEmail(request.getEmail())
             .orElseThrow(() -> new FwException(ErrorMessage.EMAIL_NOT_FOUND));
@@ -249,17 +251,11 @@ public class UserService {
         //            user.getUsername(),
         //            new ForgotPasswordEvent(request.getEmail(), user.getUsername())
         //        );
-    }
 
-    @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.AUTH_UPDATE_USER_PROFILE, type = ModeType.VALIDATE)
-    public void updateUserProfile(UserProfileDTO request) {
-        String userLogin = CommonService.getCurrentUserLogin();
-        Optional<User> optionalUser = userRepository.findByUsername(userLogin);
-        if (optionalUser.isEmpty()) {
-            throw new FwException(ErrorMessage.USER_NOT_FOUND);
-        }
-        userRepository.save(optionalUser.get());
+        // fake send otp
+        String keyForgotPassword = sessionStore.getKeyForgotPassword(user.getUsername());
+        String otp = "123456";
+        redisService.set(keyForgotPassword, otp, 5, TimeUnit.MINUTES);
     }
 
     @Transactional(readOnly = true)

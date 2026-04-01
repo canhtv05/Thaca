@@ -20,6 +20,7 @@ import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
@@ -128,10 +129,10 @@ public class AuthService {
             .build();
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_LOGOUT, type = ModeType.HANDLE)
-    public void logout(String channel, HttpServletResponse response) {
-        tokenProvider.revokeToken(ChannelType.valueOf(channel));
+    public void logout(ApiPayload<?> req, HttpServletResponse response) {
+        tokenProvider.revokeToken(ChannelType.valueOf(req.getHeader().getChannel()));
         cookieUtils.deleteCookie(response);
         SecurityUtils.clear();
     }

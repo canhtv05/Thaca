@@ -13,8 +13,7 @@ public class ServiceMethod {
     public static final String AUTH_CHANGE_PASSWORD = "auth.changePassword";
     public static final String AUTH_RESET_PASSWORD = "auth.resetPassword";
     public static final String AUTH_FORGOT_PASSWORD = "auth.forgotPassword";
-    public static final String AUTH_VERIFY_FORGOT_PASSWORD_OTP = "auth.verifyForgotPasswordOTP";
-    public static final String AUTH_UPDATE_USER_PROFILE = "auth.updateUserProfile";
+    public static final String AUTH_VERIFY_OTP_FORGOT_PASSWORD = "auth.verifyOTPForgotPassword";
     public static final String AUTH_LOGOUT = "auth.logout";
     public static final String AUTH_LOGOUT_ALL_DEVICES = "auth.logoutAllDevices";
 
