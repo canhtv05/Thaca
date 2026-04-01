@@ -15,6 +15,9 @@ import { GlobalService } from './core/global/global.service';
 import { I18nService } from './core/i18n/i18n.service';
 import { StoreEffectService } from './core/services/store-effect.service';
 import { firstValueFrom } from 'rxjs';
+import { provideIcons } from '@ng-icons/core';
+import { APP_CONFIG_ICONS } from './core/configs/app-config.icon';
+import { ThemeService } from './core/theme/theme.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -27,6 +30,7 @@ export const appConfig: ApplicationConfig = {
       },
     }),
     provideAppInitializer(async () => {
+      inject(ThemeService);
       const i18n = inject(I18nService);
       const appConfig = inject(AppConfigService);
       const globalService = inject(GlobalService);
@@ -36,5 +40,10 @@ export const appConfig: ApplicationConfig = {
       void globalService;
       void storeEffectService;
     }),
+    provideIcons(
+      Object.fromEntries(
+        Object.entries(APP_CONFIG_ICONS).map(([name, config]) => [name, config.icon]),
+      ),
+    ),
   ],
 };
