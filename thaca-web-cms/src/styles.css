@@ -217,15 +217,15 @@
 }
 
 @utility linear-1 {
-  @apply rounded-xl border border-white/20 bg-gradient-to-r from-purple-500 to-cyan-500 font-medium text-white shadow-lg hover:opacity-90 hover:shadow-lg;
+  @apply rounded-xl border border-white/20 bg-linear-to-r from-purple-500 to-cyan-500 font-medium text-white shadow-lg hover:opacity-90 hover:shadow-lg;
 }
 
 @utility linear-2 {
-  @apply bg-gradient-to-r from-purple-50 via-teal-50 to-cyan-50;
+  @apply bg-linear-to-r from-purple-50 via-teal-50 to-cyan-50;
 }
 
 @utility linear-3 {
-  @apply bg-gradient-to-br from-blue-50 via-teal-50 to-emerald-50;
+  @apply bg-linear-to-br from-blue-50 via-teal-50 to-emerald-50;
 }
 
 @utility gradient-bg {
