@@ -1,0 +1,9 @@
+{
+  "error": {
+    "forbiddenTitle": "Forbidden",
+    "forbiddenDescription": "You do not have permission to access this page.",
+    "notFoundTitle": "Page Not Found",
+    "notFoundDescription": "The page you are looking for does not exist.",
+    "backToLogin": "Back to login"
+  }
+}

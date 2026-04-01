@@ -1,0 +1,9 @@
+{
+  "error": {
+    "forbiddenTitle": "Không có quyền truy cập",
+    "forbiddenDescription": "Bạn không có quyền truy cập trang này.",
+    "notFoundTitle": "Không tìm thấy trang",
+    "notFoundDescription": "Trang bạn đang tìm không tồn tại.",
+    "backToLogin": "Quay lại đăng nhập"
+  }
+}
