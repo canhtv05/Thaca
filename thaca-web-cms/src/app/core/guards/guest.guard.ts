@@ -10,4 +10,4 @@ export const GuestGuard: CanActivateFn = () => {
   return true;
 };
 
-export const isAuthenticated = true;
+export const isAuthenticated = false;

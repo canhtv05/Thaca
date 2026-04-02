@@ -1,0 +1,7 @@
+:host ::ng-deep .p-inputtext {
+  --p-inputtext-background: transparent;
+  --p-inputtext-border-radius: var(--radius-xl);
+  --p-inputtext-border-color: var(--border);
+  box-shadow: none !important;
+  color: var(--foreground);
+}

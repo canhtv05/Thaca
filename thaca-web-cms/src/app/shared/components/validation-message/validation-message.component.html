@@ -1,0 +1,7 @@
+@if (shouldShowError()) {
+  <small class="text-red-500 text-sm mt-1" [ngClass]="class">
+    @if (getErrorMessage()) {
+      {{ getErrorMessage() | translate: getErrorParams() }}
+    }
+  </small>
+}

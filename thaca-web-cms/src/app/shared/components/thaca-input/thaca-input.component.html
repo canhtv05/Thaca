@@ -1,0 +1,39 @@
+@if (label) {
+  <label class="mb-1 text-sm font-medium text-foreground/60 flex gap-1" [for]="id">
+    {{ label }}
+    @if (required) {
+      <span class="text-[10px] text-red-500">(*)</span>
+    }
+  </label>
+}
+<p-iconfield class="relative">
+  @if (startIcon) {
+    <ng-icon [name]="startIcon.name" class="absolute left-3 top-1/2 -translate-y-1/2" />
+  }
+  <input
+    pInputText
+    [id]="id"
+    [type]="inputType()"
+    [placeholder]="placeholder"
+    [value]="value()"
+    [disabled]="disabled"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    class="w-full"
+    [class.border-red-500!]="hasError()"
+  />
+  @if (type === 'password') {
+    <ng-icon
+      [name]="
+        isPasswordVisible()
+          ? APP_CONFIG_ICONS['solarEyeClosed'].name
+          : APP_CONFIG_ICONS['solarEye'].name
+      "
+      class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+      (click)="onTogglePassword()"
+    />
+  }
+  @if (endIcon && type !== 'password') {
+    <ng-icon [name]="endIcon.name" class="absolute right-3 top-1/2 -translate-y-1/2" />
+  }
+</p-iconfield>

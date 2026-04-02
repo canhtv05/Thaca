@@ -1,0 +1,11 @@
+{
+  "validation": {
+    "required": "Trường thông tin bắt buộc nhập",
+    "minLength": "Trường thông tin phải có ít nhất {{min}} ký tự",
+    "maxLength": "Trường thông tin không được vượt quá {{max}} ký tự",
+    "emailInvalid": "Email không hợp lệ",
+    "pattern": "Định dạng không hợp lệ",
+    "min": "Giá trị tối thiểu là {{min}}",
+    "max": "Giá trị tối đa là {{max}}"
+  }
+}

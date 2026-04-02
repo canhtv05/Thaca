@@ -1,19 +1,27 @@
-import { Component, model } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { Component, inject } from '@angular/core';
 import { APP_CONFIG_ICONS } from '../../core/configs/app-config.icon';
+import { NgIcon } from '@ng-icons/core';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { ClickOutsideDirective } from '../../shared/directives/click-outside.directive';
+import { currentLang as currentLangSignal } from '../../core/stores/app.store';
 
 @Component({
   selector: 'app-auth-layout',
-  imports: [RouterOutlet, FormsModule],
+  imports: [NgIcon, ClickOutsideDirective],
   templateUrl: './auth-layout.component.html',
 })
 export class AuthLayoutComponent {
+  readonly i18nService = inject(I18nService);
   readonly APP_CONFIG_ICONS = APP_CONFIG_ICONS;
-  cities = [
-    { name: 'New York', code: 'NY' },
-    { name: 'Rome', code: 'RM' },
-  ];
-  /** Hai chiều với `[(ngModel)]` trên `app-thaca-select`. */
-  selectedCity = model<string>('NY');
+  showDropdown = false;
+  readonly currentLang = currentLangSignal;
+
+  onShowDropdown(): void {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  onChangeLang(lang: string): void {
+    this.i18nService.setLanguage(lang as 'vi' | 'en');
+    this.showDropdown = false;
+  }
 }
