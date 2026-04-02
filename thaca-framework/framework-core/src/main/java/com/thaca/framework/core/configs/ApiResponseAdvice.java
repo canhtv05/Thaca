@@ -1,6 +1,6 @@
 package com.thaca.framework.core.configs;
 
-import com.thaca.framework.core.dtos.ApiEnvelope;
+import com.thaca.framework.core.dtos.ApiPayload;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -34,8 +34,8 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
         ServerHttpResponse response
     ) {
         if (body != null) {
-            return ApiEnvelope.success(body);
+            return ApiPayload.success(body);
         }
-        return ApiEnvelope.success();
+        return ApiPayload.success();
     }
 }
