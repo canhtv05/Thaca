@@ -2,28 +2,23 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.User;
-import com.thaca.auth.domains.UserPermission;
 import com.thaca.auth.dtos.UserDTO;
-import com.thaca.auth.dtos.UserPermissionDTO;
-import com.thaca.auth.dtos.UserProfileDTO;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
 import com.thaca.auth.dtos.req.ResetPasswordReq;
 import com.thaca.auth.dtos.req.UserSearchReq;
 import com.thaca.auth.dtos.req.VerifyOTPReq;
 import com.thaca.auth.enums.ErrorMessage;
-import com.thaca.auth.enums.PermissionAction;
 import com.thaca.auth.repositories.RoleRepository;
-import com.thaca.auth.repositories.UserPermissionRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.EmailRule;
 import com.thaca.auth.validators.rules.FullnameRule;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
-import com.thaca.common.constants.EventConstants;
-import com.thaca.common.dtos.events.UserCreationEvent;
-import com.thaca.common.dtos.events.VerificationEmailEvent;
+// import com.thaca.common.constants.EventConstants;
+// import com.thaca.common.dtos.events.UserCreationEvent;
+// import com.thaca.common.dtos.events.VerificationEmailEvent;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -32,9 +27,9 @@ import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
-import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletResponse;
@@ -61,9 +56,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
-    private final UserPermissionRepository userPermissionRepository;
     private final AuthService authService;
-    private final KafkaProducerService kafkaProducerService;
+    // private final KafkaProducerService kafkaProducerService;
     private final RedisCacheService redisService;
     private final SessionStore sessionStore;
 
@@ -96,7 +90,6 @@ public class UserService {
         User user = User.builder()
             .username(request.getUsername())
             .isActivated(isAdmin && request.getIsActivated())
-            .isGlobal(isAdmin ? request.getIsGlobal() : false)
             .isLocked(false)
             .email(request.getEmail())
             .build();
@@ -106,11 +99,11 @@ public class UserService {
         if (ObjectUtils.isNotEmpty(request.getRoles()) && isAdmin) {
             user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
         } else {
-            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(List.of("ROLE_USER"))));
+            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(List.of(AuthoritiesConstants.USER))));
         }
 
         userRepository.save(user);
-        //        this.publishUserEvent(res, saved, isAdmin);
+        // this.publishUserEvent(res, saved, isAdmin);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -122,9 +115,6 @@ public class UserService {
         }
         User user = optionalUser.get();
         user.setIsActivated(request.getIsActivated());
-        if (SecurityUtils.isGlobalUser()) {
-            user.setIsGlobal(request.getIsGlobal());
-        }
         user.setRoles(new HashSet<>());
         if (ObjectUtils.isNotEmpty(request.getRoles())) {
             user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
@@ -246,11 +236,11 @@ public class UserService {
             throw new FwException(ErrorMessage.FORGET_PASSWORD_OTP_ALREADY_SENT);
         }
 
-        //        kafkaProducerService.sendAndWait(
-        //            EventConstants.FORGOT_PASSWORD_TOPIC,
-        //            user.getUsername(),
-        //            new ForgotPasswordEvent(request.getEmail(), user.getUsername())
-        //        );
+        // kafkaProducerService.sendAndWait(
+        // EventConstants.FORGOT_PASSWORD_TOPIC,
+        // user.getUsername(),
+        // new ForgotPasswordEvent(request.getEmail(), user.getUsername())
+        // );
 
         // fake send otp
         String keyForgotPassword = sessionStore.getKeyForgotPassword(user.getUsername());
@@ -272,25 +262,6 @@ public class UserService {
                 tenants.getNumberOfElements(),
                 (int) tenants.getTotalElements()
             )
-        );
-    }
-
-    @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.ADMIN_GET_USER_PERMISSION, type = ModeType.VALIDATE)
-    public Map<String, PermissionAction> getUserPermissions(Long userId) {
-        List<UserPermission> data = userPermissionRepository.findAllByUserId(userId);
-        return data.stream().collect(Collectors.toMap(UserPermission::getPermissionCode, UserPermission::getAction));
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.ADMIN_UPDATE_USER_PERMISSION, type = ModeType.VALIDATE)
-    public void updateUserPermission(Long userId, List<UserPermissionDTO> request) {
-        userPermissionRepository.deleteAllByUserId(userId);
-        userPermissionRepository.saveAll(
-            request
-                .stream()
-                .map(item -> item.fromEntity(userId))
-                .collect(Collectors.toSet())
         );
     }
 
@@ -320,16 +291,17 @@ public class UserService {
         };
     }
 
-    private void publishUserEvent(UserDTO request, User user, boolean isAdmin) {
-        String topic;
-        Object payload;
-        if (!isAdmin || !Boolean.TRUE.equals(request.getIsActivated())) {
-            topic = EventConstants.VERIFICATION_EMAIL_TOPIC;
-            payload = new VerificationEmailEvent(request.getEmail(), request.getUsername(), request.getFullname());
-        } else {
-            topic = EventConstants.USER_CREATED_TOPIC;
-            payload = new UserCreationEvent(user.getUsername(), request.getFullname());
-        }
-        kafkaProducerService.sendAndWait(topic, user.getUsername(), payload);
-    }
+    // private void publishUserEvent(UserDTO request, User user, boolean isAdmin) {
+    // String topic;
+    // Object payload;
+    // if (!isAdmin || !Boolean.TRUE.equals(request.getIsActivated())) {
+    // topic = EventConstants.VERIFICATION_EMAIL_TOPIC;
+    // payload = new VerificationEmailEvent(request.getEmail(),
+    // request.getUsername(), request.getFullname());
+    // } else {
+    // topic = EventConstants.USER_CREATED_TOPIC;
+    // payload = new UserCreationEvent(user.getUsername(), request.getFullname());
+    // }
+    // kafkaProducerService.sendAndWait(topic, user.getUsername(), payload);
+    // }
 }

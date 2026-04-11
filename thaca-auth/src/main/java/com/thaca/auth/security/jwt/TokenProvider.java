@@ -1,5 +1,8 @@
 package com.thaca.auth.security.jwt;
 
+import static com.thaca.framework.core.constants.AuthoritiesConstants.AUTHORITIES_KEY;
+import static com.thaca.framework.core.constants.AuthoritiesConstants.ROLE_KEY;
+
 import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
@@ -54,9 +57,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class TokenProvider {
 
-    private static final String AUTHORITIES_KEY = "auth";
-    private static final String ROLES_KEY = "role";
-    private static final String USER_GLOBAL_KEY = "isGlobal";
     private final SecretKey key;
     private final JwtParser jwtParser;
     private final UserRepository userRepository;
@@ -187,8 +187,7 @@ public class TokenProvider {
             .id(sessionId)
             .subject(authentication.getName())
             .claim(AUTHORITIES_KEY, authorities)
-            .claim(ROLES_KEY, String.join(",", userDetails.getRole()))
-            .claim(USER_GLOBAL_KEY, userDetails.isGlobal())
+            .claim(ROLE_KEY, String.join(",", userDetails.getRole()))
             .claim(CommonConstants.CHANNEL_KEY, channel)
             .issuedAt(new Date(now))
             .expiration(validity)
@@ -250,7 +249,6 @@ public class TokenProvider {
                 user.getPassword(),
                 authorities,
                 rolesStr,
-                user.getIsGlobal(),
                 channel.name()
             );
 

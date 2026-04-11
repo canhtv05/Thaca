@@ -33,22 +33,12 @@ public class SecurityUtils {
         return "ANONYMOUS";
     }
 
-    public static boolean isGlobalAdmin() {
+    public static boolean isSuperAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (
             authentication != null &&
             authentication.getPrincipal() instanceof UserPrincipal &&
-            ((UserPrincipal) authentication.getPrincipal()).isGlobal() &&
-            ((UserPrincipal) authentication.getPrincipal()).getRole().contains(AuthoritiesConstants.ADMIN)
-        );
-    }
-
-    public static boolean isGlobalUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (
-            authentication != null &&
-            authentication.getPrincipal() instanceof UserPrincipal &&
-            ((UserPrincipal) authentication.getPrincipal()).isGlobal()
+            ((UserPrincipal) authentication.getPrincipal()).getRole().contains(AuthoritiesConstants.SUPER_ADMIN)
         );
     }
 

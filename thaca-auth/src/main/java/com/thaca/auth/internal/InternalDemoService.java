@@ -22,6 +22,7 @@ public class InternalDemoService {
      * The RestTemplateInterceptor will automatically add the 'Authorization: Basic
      * <apiKey>' header.
      */
+    @SuppressWarnings("unchecked")
     public ApiPayload<Object> callOtherService() {
         String url = "http://internal-product-service/api/v1/internal/data";
 

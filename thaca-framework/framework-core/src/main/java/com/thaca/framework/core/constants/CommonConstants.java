@@ -44,4 +44,5 @@ public class CommonConstants {
 
     public static final String COOKIE_NAME = "THACA_COOKIE";
     public static final String CHANNEL_KEY = "channel";
+    public static final String REDIS_ROLE_PERM_PREFIX = "auth:role-permissions:";
 }

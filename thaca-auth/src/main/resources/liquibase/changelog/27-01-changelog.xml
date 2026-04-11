@@ -19,18 +19,7 @@
             <column name="created_at" type="TIMESTAMP" />
             <column name="updated_by" type="VARCHAR(255)" />
             <column name="updated_at" type="TIMESTAMP" />
-            <column name="type" type="VARCHAR(20)">
-                <constraints nullable="false" />
-            </column>
             <column name="description" type="VARCHAR(255)">
-                <constraints nullable="false" />
-            </column>
-            <column name="module" type="VARCHAR(255)">
-                <constraints nullable="false" />
-            </column>
-            <column name="method" type="VARCHAR(50)" />
-            <column name="path_pattern" type="VARCHAR(255)" />
-            <column name="is_global" type="BOOLEAN">
                 <constraints nullable="false" />
             </column>
         </createTable>
@@ -95,9 +84,6 @@
             <column name="is_locked" type="BOOLEAN">
                 <constraints nullable="false" />
             </column>
-            <column name="is_global" type="BOOLEAN">
-                <constraints nullable="false" />
-            </column>
             <column name="refresh_token" type="TEXT" />
         </createTable>
     </changeSet>
@@ -117,39 +103,9 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1761551503149-7" author="CanhPC">
-        <createTable tableName="user_permission">
-            <column name="id" type="VARCHAR(255)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user_permission" />
-            </column>
-            <column name="created_by" type="VARCHAR(255)">
-                <constraints nullable="false" />
-            </column>
-            <column name="created_at" type="TIMESTAMP" />
-            <column name="updated_by" type="VARCHAR(255)" />
-            <column name="updated_at" type="TIMESTAMP" />
-            <column name="user_id" type="BIGINT">
-                <constraints nullable="false" />
-            </column>
-            <column name="permission_code" type="VARCHAR(255)">
-                <constraints nullable="false" />
-            </column>
-            <column name="action" type="VARCHAR(255)">
-                <constraints nullable="false" />
-            </column>
-        </createTable>
-    </changeSet>
-
     <changeSet id="1761551503149-8" author="CanhPC">
         <addUniqueConstraint columnNames="username" constraintName="uc_users_username" tableName="users" />
         <addUniqueConstraint columnNames="email" constraintName="uc_users_email" tableName="users" />
-    </changeSet>
-
-    <changeSet id="1761551503149-9" author="CanhPC">
-        <addForeignKeyConstraint
-            baseColumnNames="permission_code" baseTableName="user_permission"
-            constraintName="fk_user_permission_on_permission_code"
-            referencedColumnNames="code" referencedTableName="permissions" />
     </changeSet>
 
     <changeSet id="1761551503149-10" author="CanhPC">
@@ -180,22 +136,10 @@
             referencedColumnNames="id" referencedTableName="users" />
     </changeSet>
 
-    <changeSet id="1761551503149-14" author="CanhPC">
-        <addForeignKeyConstraint
-            baseColumnNames="user_id" baseTableName="user_permission"
-            constraintName="fk_user_permission_on_user_id"
-            referencedColumnNames="id" referencedTableName="users" />
-    </changeSet>
-
     <changeSet id="load-data-permissions" author="CanhPC">
         <loadData file="liquibase/data/permission.csv" separator=";" tableName="permissions">
             <column name="code" type="string" />
-            <column name="type" type="string" />
             <column name="description" type="string" />
-            <column name="module" type="string" />
-            <column name="method" type="string" />
-            <column name="path_pattern" type="string" />
-            <column name="is_global" type="boolean" />
             <column name="created_by" type="string" />
             <column name="created_at" type="timestamp" />
             <column name="updated_by" type="string" />
@@ -222,7 +166,6 @@
             <column name="password" type="string" />
             <column name="is_activated" type="boolean" />
             <column name="is_locked" type="boolean" />
-            <column name="is_global" type="boolean" />
             <column name="email" type="string" />
             <column name="created_by" type="string" />
             <column name="created_at" type="timestamp" />

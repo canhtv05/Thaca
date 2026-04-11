@@ -3,6 +3,8 @@ package com.thaca.auth.security;
 import com.thaca.framework.core.security.UserPrincipal;
 import java.util.Collection;
 import lombok.Getter;
+import lombok.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
@@ -10,7 +12,6 @@ import org.springframework.security.core.userdetails.User;
 public class CustomUserDetails extends User implements UserPrincipal {
 
     private final String role;
-    private final boolean isAdmin;
     private final String channel;
 
     public CustomUserDetails(
@@ -18,23 +19,16 @@ public class CustomUserDetails extends User implements UserPrincipal {
         String password,
         Collection<? extends GrantedAuthority> authorities,
         String roles,
-        boolean isAdmin,
         String channel
     ) {
         super(username, password, authorities);
         this.role = roles;
-        this.isAdmin = isAdmin;
         this.channel = channel;
     }
 
     @Override
-    public String getUsername() {
+    public @NonNull String getUsername() {
         return super.getUsername();
-    }
-
-    @Override
-    public boolean isGlobal() {
-        return this.isAdmin;
     }
 
     @Override

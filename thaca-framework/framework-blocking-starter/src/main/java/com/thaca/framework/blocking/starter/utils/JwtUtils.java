@@ -1,6 +1,7 @@
 package com.thaca.framework.blocking.starter.utils;
 
 import com.thaca.common.enums.TokenStatus;
+import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.UserSessionService;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
@@ -13,11 +14,11 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class JwtUtils {
 
     private final FrameworkProperties frameworkProperties;
     private final UserSessionService userSessionService;
+    private final RedisCacheService redisService;
 
     public SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(frameworkProperties.getSecurity().getBase64Secret());
@@ -44,15 +46,38 @@ public class JwtUtils {
         return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
     }
 
+    @SuppressWarnings("unchecked")
     public Authentication getBasicAuthentication(String token) {
         Claims claims = this.parseToken(token);
-        Collection<? extends GrantedAuthority> authorities = Arrays.stream(
+
+        List<String> roleAuthorities = Arrays.stream(
             claims.get(AuthoritiesConstants.AUTHORITIES_KEY).toString().split(",")
         )
             .filter(auth -> !auth.trim().isEmpty())
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
-        return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, authorities);
+            .toList();
+
+        List<GrantedAuthority> allAuthorities = new ArrayList<>();
+
+        for (String auth : roleAuthorities) {
+            allAuthorities.add(new SimpleGrantedAuthority(auth));
+
+            if (auth.startsWith("ROLE_")) {
+                String roleCode = auth.substring(5);
+                try {
+                    List<String> permissions = redisService.get(
+                        CommonConstants.REDIS_ROLE_PERM_PREFIX + roleCode,
+                        List.class
+                    );
+                    if (permissions != null) {
+                        permissions.forEach(p -> allAuthorities.add(new SimpleGrantedAuthority(p)));
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to inflate permissions for role {} from Redis", roleCode, e);
+                }
+            }
+        }
+
+        return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, allAuthorities);
     }
 
     public TokenStatus validateToken(String authToken) {

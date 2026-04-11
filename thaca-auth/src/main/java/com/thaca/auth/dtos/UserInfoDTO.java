@@ -15,21 +15,16 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileDTO {
+public class UserInfoDTO {
 
     private String username;
     private String email;
-    private Boolean isGlobal;
     private List<String> roles;
     private List<String> roleLabels;
-    private List<String> permissions;
-    private String secretKey;
-    private String channel;
 
-    public static UserProfileDTO fromEntity(User user) {
-        return UserProfileDTO.builder()
+    public static UserInfoDTO fromEntity(User user) {
+        return UserInfoDTO.builder()
             .username(user.getUsername())
-            .isGlobal(user.getIsGlobal())
             .roles(user.getRoles().stream().map(Role::getCode).collect(Collectors.toList()))
             .roleLabels(user.getRoles().stream().map(Role::getDescription).collect(Collectors.toList()))
             .email(user.getEmail())

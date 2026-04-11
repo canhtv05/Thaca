@@ -1,11 +1,11 @@
 package com.thaca.auth.security;
 
 import com.thaca.auth.domains.User;
-import com.thaca.auth.dtos.UserProfileDTO;
+import com.thaca.auth.dtos.UserInfoDTO;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.services.AuthService;
-import com.thaca.auth.services.KafkaProducerService;
-import com.thaca.common.dtos.events.VerificationEmailEvent;
+// import com.thaca.auth.services.KafkaProducerService;
+// import com.thaca.common.dtos.events.VerificationEmailEvent;
 import com.thaca.framework.core.context.FwContext;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
@@ -27,7 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DomainUserDetailsService implements UserDetailsService {
 
     private final AuthService authService;
-    private final KafkaProducerService kafkaProducerService;
+
+    // private final KafkaProducerService kafkaProducerService;
 
     @Override
     @Transactional(readOnly = true)
@@ -45,24 +46,27 @@ public class DomainUserDetailsService implements UserDetailsService {
         }
 
         if (!user.getIsActivated()) {
-            VerificationEmailEvent event = new VerificationEmailEvent(user.getEmail(), lowercaseLogin, null);
-            //            kafkaProducerService.sendAndWait(EventConstants.VERIFICATION_EMAIL_TOPIC, event.username(), event);
+            // VerificationEmailEvent event = new VerificationEmailEvent(user.getEmail(),
+            // lowercaseLogin, null);
             throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
         }
 
-        UserProfileDTO userProfileDTO = UserProfileDTO.fromEntity(user);
-        authService.mappingUserPermissions(userProfileDTO, user);
-        List<GrantedAuthority> grantedAuthorities = userProfileDTO
-            .getPermissions()
-            .stream()
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
+        UserInfoDTO userInfoDTO = UserInfoDTO.fromEntity(user);
+
+        List<GrantedAuthority> grantedAuthorities =
+            userInfoDTO.getRoles() != null
+                ? userInfoDTO
+                      .getRoles()
+                      .stream()
+                      .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                      .collect(Collectors.toList())
+                : List.of();
+
         return new CustomUserDetails(
             user.getUsername(),
             user.getPassword(),
             grantedAuthorities,
-            String.join(",", userProfileDTO.getRoles()),
-            user.getIsGlobal(),
+            String.join(",", userInfoDTO.getRoles()),
             StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name())
         );
     }

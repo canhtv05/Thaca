@@ -37,7 +37,6 @@ public class UserDTO {
     private String email;
 
     private Boolean isActivated;
-    private Boolean isGlobal;
     private List<String> roles;
     private List<String> roleLabels;
 
@@ -54,7 +53,6 @@ public class UserDTO {
             .password(null)
             .email(user.getEmail())
             .isActivated(user.getIsActivated())
-            .isGlobal(user.getIsGlobal())
             .roles(user.getRoles().stream().map(Role::getCode).collect(Collectors.toList()))
             .roleLabels(user.getRoles().stream().map(Role::getDescription).collect(Collectors.toList()))
             .build();

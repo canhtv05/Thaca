@@ -1,12 +1,4 @@
 role_code;permission_code;created_by;created_at;updated_by;updated_at
-role_admin;role_update;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;permission_update;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;role_create;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;permission_create;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;user_read;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;permission_read;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;role_read;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;user_create;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;user_update;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;user_permission_read;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-role_admin;user_permission_update;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00 
+SUPER_ADMIN;USER_MAKER;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+ADMIN;USER_MAKER;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+MANAGER;USER_MAKER;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00

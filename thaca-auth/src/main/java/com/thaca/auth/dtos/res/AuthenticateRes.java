@@ -1,15 +1,15 @@
 package com.thaca.auth.dtos.res;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.thaca.auth.dtos.UserInfoDTO;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class AuthenticateRes {
 
     private boolean authenticate;
+    private UserInfoDTO info;
 }

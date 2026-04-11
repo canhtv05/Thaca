@@ -42,10 +42,6 @@ public class User extends BaseEntityAudit {
     @Builder.Default
     private boolean isLocked = false;
 
-    @Column(name = "is_global", nullable = false)
-    @Builder.Default
-    private Boolean isGlobal = false;
-
     @JsonIgnore
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     String refreshToken;
