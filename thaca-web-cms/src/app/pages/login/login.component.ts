@@ -12,6 +12,8 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { ValidationMessageComponent } from '../../shared/components/validation-message/validation-message.component';
+import { AuthService } from '../../core/services/auth.service';
+import { ILoginReq } from '../../core/models/auth.model';
 
 @Component({
   selector: 'app-login',
@@ -29,18 +31,21 @@ import { ValidationMessageComponent } from '../../shared/components/validation-m
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
   readonly APP_CONFIG_ICONS = APP_CONFIG_ICONS;
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    username: ['', [Validators.required]],
     password: ['', [Validators.required]],
   });
 
   onSubmit(): void {
-    console.log(this.form);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
+    this.authService.login(this.form.value as ILoginReq).then((res) => {
+      console.log(res);
+    });
   }
 }

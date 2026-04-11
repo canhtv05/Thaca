@@ -12,7 +12,6 @@ public class ApiHeader {
     private String username;
     private String location;
     private String channel;
-    private String traceId;
     private String language;
     private String apiKey;
 

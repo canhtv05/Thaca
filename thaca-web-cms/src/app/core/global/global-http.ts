@@ -3,7 +3,9 @@ import { firstValueFrom } from 'rxjs';
 import { signal } from '@angular/core';
 
 export class GlobalHttp {
+  private static activeRequests = 0;
   static readonly loading = signal<boolean>(false);
+
   private static get httpClient(): HttpClient | null {
     return (window as any).__appGlobal?.httpClient || null;
   }
@@ -30,7 +32,8 @@ export class GlobalHttp {
     body?: any,
     headers: Record<string, string> = {},
   ): Promise<T> {
-    this.loading.set(true);
+    this.startLoading();
+
     try {
       const client = this.httpClient;
       if (client) {
@@ -39,29 +42,51 @@ export class GlobalHttp {
           client.request<T>(method, url, {
             body,
             headers: httpHeaders,
+            withCredentials: true,
           }),
         );
       }
-      const fetchOptions: RequestInit = {
+      const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', ...headers },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers,
+        },
         body: body ? JSON.stringify(body) : undefined,
-      };
-
-      const response = await fetch(url, fetchOptions);
-      let result: any;
-      try {
-        result = await response.json();
-      } catch {
-        result = await response.text();
-      }
-
+      });
+      const data = await this.parseResponse(response);
       if (!response.ok) {
-        console.error('[GlobalHttp] Fetch error:', response.status, result);
+        throw {
+          status: response.status,
+          message: data?.message || 'Request failed',
+          data,
+        };
       }
-      return result as T;
+      return data as T;
     } finally {
+      this.stopLoading();
+    }
+  }
+
+  private static async parseResponse(response: Response) {
+    const contentType = response.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      return response.json();
+    }
+    return response.text();
+  }
+
+  private static startLoading() {
+    this.activeRequests++;
+    this.loading.set(true);
+  }
+
+  private static stopLoading() {
+    this.activeRequests--;
+    if (this.activeRequests <= 0) {
       this.loading.set(false);
+      this.activeRequests = 0;
     }
   }
 }

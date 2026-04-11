@@ -4,6 +4,7 @@ import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.Permission;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.domains.UserPermission;
+import com.thaca.auth.dtos.UserDTO;
 import com.thaca.auth.dtos.UserProfileDTO;
 import com.thaca.auth.dtos.req.LoginReq;
 import com.thaca.auth.dtos.res.AuthenticateRes;
@@ -14,6 +15,8 @@ import com.thaca.auth.enums.PermissionAction;
 import com.thaca.auth.repositories.UserPermissionRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.jwt.TokenProvider;
+import com.thaca.auth.validators.core.Validator;
+import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
@@ -59,9 +62,11 @@ public class AuthService {
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
     public void validateAuthenticate(LoginReq loginReq, HttpServletResponse httpServletResponse) {
-        if (StringUtils.isBlank(loginReq.getUsername()) || StringUtils.isBlank(loginReq.getPassword())) {
+        if (StringUtils.isEmpty(loginReq.getUsername())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
+        Validator<UserDTO> validator = new Validator<>(List.of(new PasswordRule<>()));
+        validator.validate(UserDTO.builder().password(loginReq.getPassword()).build());
     }
 
     @Transactional(rollbackFor = Exception.class)

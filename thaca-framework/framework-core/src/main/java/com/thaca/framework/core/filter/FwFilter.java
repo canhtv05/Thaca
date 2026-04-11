@@ -4,6 +4,7 @@ import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.utils.CommonUtils;
@@ -28,15 +29,18 @@ import org.jspecify.annotations.NullMarked;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import tools.jackson.databind.JsonNode;
 
 @Slf4j
 public class FwFilter extends OncePerRequestFilter {
 
     private final FrameworkProperties frameworkProperties;
     private static final int CACHE_LIMIT = 8192;
+    private static final String TRACE_ID_HEADER = "X-Trace-Id";
+    private static final String TRANS_ID_HEADER = "X-Trans-Id";
+    private static final String PARENT_TRANS_ID_HEADER = "X-Parent-Trans-Id";
 
     public FwFilter(FrameworkProperties frameworkProperties) {
         this.frameworkProperties = frameworkProperties;
@@ -59,19 +63,18 @@ public class FwFilter extends OncePerRequestFilter {
         byte[] requestBody = requestWrapper.getCachedBody();
         ApiPayload<?> envelope = JsonF.jsonToObject(requestBody, ApiPayload.class);
         String transId = UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
-        String traceId = extractTraceId(requestBody);
-        if (traceId == null) {
-            traceId = UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
-        }
+        String traceId = resolveTraceId(request);
+        String parentTransId = request.getHeader(PARENT_TRANS_ID_HEADER);
         MDC.put("transId", transId);
         MDC.put("traceId", traceId);
+        if (StringUtils.hasText(parentTransId)) {
+            MDC.put("parentTransId", parentTransId);
+        }
 
-        if (envelope != null && envelope.getHeader() != null) {
-            try {
-                FwContext.set(envelope.getHeader());
-            } catch (Exception e) {
-                log.warn("Cannot set FwContext: {}", e.getMessage());
-            }
+        try {
+            FwContext.set(buildContextHeader(envelope));
+        } catch (Exception e) {
+            log.warn("Cannot set FwContext: {}", e.getMessage());
         }
 
         String uri = request.getRequestURI();
@@ -82,6 +85,8 @@ public class FwFilter extends OncePerRequestFilter {
 
         log.info("IN - URI: '[{}] {}', User: [{}], IP: [{}], Payload: {}", method, uri, username, clientIp, payload);
         long startTime = System.currentTimeMillis();
+        response.setHeader(TRACE_ID_HEADER, traceId);
+        response.setHeader(TRANS_ID_HEADER, transId);
 
         if (
             envelope == null ||
@@ -138,6 +143,10 @@ public class FwFilter extends OncePerRequestFilter {
         }
     }
 
+    private ApiHeader buildContextHeader(ApiPayload<?> envelope) {
+        return envelope != null && envelope.getHeader() != null ? envelope.getHeader() : ApiHeader.builder().build();
+    }
+
     private void processLog(
         HttpServletResponse response,
         ApiPayload<?> channelError,
@@ -190,18 +199,11 @@ public class FwFilter extends OncePerRequestFilter {
         return "ANONYMOUS";
     }
 
-    private String extractTraceId(byte[] body) {
-        try {
-            if (body != null && body.length > 0) {
-                JsonNode root = JsonF.readTree(body);
-                JsonNode node = root.path("header").path("traceId");
-                if (!node.isMissingNode() && !node.isNull() && !node.asString().isBlank()) {
-                    return node.asString().trim();
-                }
-            }
-        } catch (Exception e) {
-            log.warn("[FwFilter] extractTraceId failed: {}", e.getMessage());
+    private String resolveTraceId(HttpServletRequest request) {
+        String traceId = request.getHeader(TRACE_ID_HEADER);
+        if (StringUtils.hasText(traceId)) {
+            return traceId.trim();
         }
-        return null;
+        return UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
     }
 }

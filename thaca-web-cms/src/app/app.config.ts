@@ -19,6 +19,7 @@ import { firstValueFrom } from 'rxjs';
 import { provideIcons } from '@ng-icons/core';
 import { APP_CONFIG_ICONS } from './core/configs/app-config.icon';
 import { ThemeService } from './core/theme/theme.service';
+import { AuthService } from './core/services/auth.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -34,12 +35,14 @@ export const appConfig: ApplicationConfig = {
       inject(ThemeService);
       const i18n = inject(I18nService);
       const appConfig = inject(AppConfigService);
+      const authService = inject(AuthService);
       const globalService = inject(GlobalService);
       const storeEffectService = inject(StoreEffectService);
       await firstValueFrom(i18n.bootstrapLanguage());
       await appConfig.loadConfig();
       void globalService;
       void storeEffectService;
+      void authService;
     }),
     provideIcons(
       Object.fromEntries(Object.entries(APP_CONFIG_ICONS).map(([name, icon]) => [name, icon.icon])),
