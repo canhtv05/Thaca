@@ -14,12 +14,13 @@ import { AppConfigService } from './core/configs/app-config.service';
 import { GlobalService } from './core/global/global.service';
 import { I18nService } from './core/i18n/i18n.service';
 import { StoreEffectService } from './core/services/store-effect.service';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { provideIcons } from '@ng-icons/core';
 import { APP_CONFIG_ICONS } from './core/configs/app-config.icon';
 import { ThemeService } from './core/theme/theme.service';
 import { AuthService } from './core/services/auth.service';
+import { authInterceptor } from './core/global/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -47,6 +48,6 @@ export const appConfig: ApplicationConfig = {
     provideIcons(
       Object.fromEntries(Object.entries(APP_CONFIG_ICONS).map(([name, icon]) => [name, icon.icon])),
     ),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
   ],
 };

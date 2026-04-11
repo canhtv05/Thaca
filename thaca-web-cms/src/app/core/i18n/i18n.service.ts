@@ -11,30 +11,34 @@ export class I18nService {
   private readonly translate = inject(TranslateService);
   private readonly baseFiles = ['validation'];
   private loaded = new Set<string>();
+  private activeRouteFiles: string[] = [];
 
   bootstrapLanguage(): Observable<any> {
-    const lang = currentLang();
+    const lang = localStorage.getItem('lang') || currentLang();
+    if (lang !== currentLang()) {
+      currentLang.set(lang);
+    }
     return this.loadFiles(lang, this.baseFiles);
   }
 
   loadRouteTranslations(route: ActivatedRouteSnapshot) {
     const files: string[] = route.data['i18n'] || [];
+    this.activeRouteFiles = files;
     const lang = currentLang();
 
-    if (!files.length) return of(null);
-
-    return this.loadFiles(lang, files);
+    return this.loadFiles(lang, [...this.baseFiles, ...files]);
   }
 
   setLanguage(lang: 'vi' | 'en') {
     currentLang.set(lang);
-    void this.loadFiles(lang, this.baseFiles);
+    localStorage.setItem('lang', lang);
+    this.loadFiles(lang, [...this.baseFiles, ...this.activeRouteFiles]).subscribe();
   }
 
   private loadFiles(lang: string, files: string[]) {
     const toLoad = files.filter((f) => !this.loaded.has(`${lang}-${f}`));
     if (!toLoad.length) {
-      return of(this.translate.use(lang));
+      return this.translate.use(lang);
     }
     const requests = toLoad.map((file) => this.http.get(`/assets/i18n/${lang}/${file}.json`));
     return forkJoin(requests).pipe(

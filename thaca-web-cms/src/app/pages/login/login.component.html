@@ -1,47 +1,51 @@
 <app-auth-layout>
-  <div class="flex items-center justify-center h-screen lg:min-w-md min-w-md">
-    <div id="sing-in-card" class="m-auto rounded-xl p-10 w-full">
-      <div id="logo-section" class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-foreground mb-2">Chào mừng trở lại</h1>
-        <p class="text-foreground text-sm">Đăng nhập để tiếp tục</p>
-      </div>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-1">
-        <div class="flex flex-col gap-4">
-          <div class="card flex flex-col justify-center w-full">
-            <thaca-input
-              placeholder="Email hoặc tên người dùng"
-              [startIcon]="APP_CONFIG_ICONS['solarUserBold']"
-              label="Email hoặc tên người dùng"
-              [required]="true"
-              formControlName="username"
-            />
-            <validation-message [control]="form.get('username')"></validation-message>
-          </div>
-          <div class="card flex flex-col justify-center w-full">
-            <thaca-input
-              placeholder="Mật khẩu"
-              [startIcon]="APP_CONFIG_ICONS['solarLockPasswordBold']"
-              label="Mật khẩu"
-              [required]="true"
-              type="password"
-              formControlName="password"
-            />
-            <validation-message [control]="form.get('password')"></validation-message>
-          </div>
-        </div>
-        <div id="options-section" class="flex items-center justify-end py-2">
-          <a class="text-cyan-300 text-sm hover:text-cyan-200" tabindex="-1" href="/forgot-password"
-            >Quên mật khẩu?</a
-          >
-        </div>
-        <button
-          class="inline-flex relative items-center justify-center gap-2 whitespace-nowrap text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden before:absolute before:inset-0 before:opacity-0 before:transition-opacity before:duration-300 before:pointer-events-none bg-primary shadow-none border-none text-white hover:opacity-90 h-10 px-6 has-[&gt;svg]:px-4 w-full rounded-full cursor-pointer"
-          type="submit"
-          tabindex="0"
-        >
-          Đăng nhập
-        </button>
-      </form>
+  <div
+    id="sing-in-card"
+    class="h-full rounded-xl p-10 w-full lg:min-w-md max-w-md flex flex-col justify-center"
+  >
+    <div id="logo-section" class="text-center mb-8">
+      <h1 class="text-2xl font-bold text-foreground mb-2">{{ 'greeting' | translate }}</h1>
+      <p class="text-foreground text-sm">{{ 'description' | translate }}</p>
     </div>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-1">
+      <div class="flex flex-col gap-4">
+        <div class="card flex flex-col justify-center w-full">
+          <thaca-input
+            placeholder="{{ 'usernamePlaceholder' | translate }}"
+            [startIcon]="APP_CONFIG_ICONS['solarUserBold']"
+            label="{{ 'usernameLabel' | translate }}"
+            [required]="true"
+            formControlName="username"
+          />
+          <validation-message [control]="form.get('username')"></validation-message>
+        </div>
+        <div class="card flex flex-col justify-center w-full">
+          <thaca-input
+            placeholder="{{ 'passwordPlaceholder' | translate }}"
+            [startIcon]="APP_CONFIG_ICONS['solarLockPasswordBold']"
+            label="{{ 'passwordLabel' | translate }}"
+            [required]="true"
+            type="password"
+            formControlName="password"
+          />
+          <validation-message [control]="form.get('password')"></validation-message>
+        </div>
+      </div>
+      <div id="options-section" class="flex items-center justify-end py-2">
+        <a
+          class="text-cyan-300 text-sm hover:text-cyan-200"
+          tabindex="-1"
+          href="/forgot-password"
+          >{{ 'forgotPassword' | translate }}</a
+        >
+      </div>
+      <button
+        class="inline-flex relative items-center justify-center gap-2 whitespace-nowrap text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden before:absolute before:inset-0 before:opacity-0 before:transition-opacity before:duration-300 before:pointer-events-none bg-primary shadow-none border-none text-white hover:opacity-90 h-10 px-6 has-[&gt;svg]:px-4 w-full rounded-full cursor-pointer"
+        type="submit"
+        tabindex="0"
+      >
+        {{ 'login' | translate }}
+      </button>
+    </form>
   </div>
 </app-auth-layout>

@@ -5,7 +5,7 @@ import { pageTitle } from './core/stores/app.store';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  template: `<router-outlet></router-outlet>`,
+  template: ` <router-outlet></router-outlet> `,
 })
 export class App {
   constructor() {

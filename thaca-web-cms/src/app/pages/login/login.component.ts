@@ -14,6 +14,7 @@ import {
 import { ValidationMessageComponent } from '../../shared/components/validation-message/validation-message.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ILoginReq } from '../../core/models/auth.model';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login',
@@ -26,6 +27,7 @@ import { ILoginReq } from '../../core/models/auth.model';
     ɵInternalFormsSharedModule,
     ReactiveFormsModule,
     ValidationMessageComponent,
+    TranslateModule,
   ],
   templateUrl: './login.component.html',
 })

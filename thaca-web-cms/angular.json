@@ -59,7 +59,8 @@
               "buildTarget": "thaca-web-cms:build:production"
             },
             "development": {
-              "buildTarget": "thaca-web-cms:build:development"
+              "buildTarget": "thaca-web-cms:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

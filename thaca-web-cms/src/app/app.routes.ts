@@ -20,7 +20,6 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    providers: [importProvidersFrom(TranslateModule)],
     resolve: { i18n: I18nResolver },
     data: { i18n: ['auth'] },
     canActivate: [GuestGuard],
@@ -28,14 +27,12 @@ export const routes: Routes = [
   },
   {
     path: '403',
-    providers: [importProvidersFrom(TranslateModule)],
     resolve: { i18n: I18nResolver },
     data: { i18n: ['error'] },
     component: ForbiddenComponent,
   },
   {
     path: '404',
-    providers: [importProvidersFrom(TranslateModule)],
     resolve: { i18n: I18nResolver },
     data: { i18n: ['error'] },
     component: NotFoundComponent,

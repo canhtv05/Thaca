@@ -46,6 +46,11 @@ public class FwFilter extends OncePerRequestFilter {
         this.frameworkProperties = frameworkProperties;
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return "OPTIONS".equalsIgnoreCase(request.getMethod());
+    }
+
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(frameworkProperties.getSecurity().getBase64Secret());
         return Keys.hmacShaKeyFor(keyBytes);

@@ -33,6 +33,10 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
         ServerHttpRequest request,
         ServerHttpResponse response
     ) {
+        if (body instanceof ApiPayload) {
+            return body;
+        }
+
         if (body != null) {
             return ApiPayload.success(body);
         }

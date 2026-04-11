@@ -125,7 +125,7 @@ services:
 volumes:
   postgres_ms:
   redis_ms:
-  mongo_ms:
+  # mongo_ms:
   neo4j_ms:
   zookeeper_ms:
   kafka_ms:
