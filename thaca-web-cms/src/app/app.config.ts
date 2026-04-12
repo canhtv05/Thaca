@@ -6,6 +6,7 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { routes } from './app.routes';
 import { providePrimeNG } from 'primeng/config';
@@ -21,9 +22,16 @@ import { APP_CONFIG_ICONS } from './core/configs/app-config.icon';
 import { ThemeService } from './core/theme/theme.service';
 import { AuthService } from './core/services/auth.service';
 import { authInterceptor } from './core/global/auth.interceptor';
+import { provideToastr } from 'ngx-toastr';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideAnimations(),
+    provideToastr({
+      timeOut: 5000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+    }),
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     importProvidersFrom(TranslateModule.forRoot()),

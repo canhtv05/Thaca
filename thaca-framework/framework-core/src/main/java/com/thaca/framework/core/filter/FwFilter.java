@@ -138,7 +138,7 @@ public class FwFilter extends OncePerRequestFilter {
                 uri,
                 username
             );
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 

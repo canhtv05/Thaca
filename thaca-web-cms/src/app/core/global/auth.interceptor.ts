@@ -10,6 +10,8 @@ import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { ToastrService } from 'ngx-toastr';
+import { currentLang } from '../stores/app.store';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<any>,
@@ -17,6 +19,7 @@ export const authInterceptor: HttpInterceptorFn = (
 ): Observable<HttpEvent<any>> => {
   const router = inject(Router);
   const authService = inject(AuthService);
+  const toastrService = inject(ToastrService);
 
   const authReq = req.clone({
     withCredentials: true,
@@ -24,21 +27,40 @@ export const authInterceptor: HttpInterceptorFn = (
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      const lang = currentLang() || 'vi';
+      let title = lang === 'vi' ? 'Lỗi hệ thống' : 'System error';
+      let message =
+        lang === 'vi' ? 'Đã xảy ra lỗi không xác định' : 'Unknown internal server error';
+      const backendError = error?.error?.body?.data;
+      if (backendError) {
+        if (lang === 'vi') {
+          title = backendError.titleVi || title;
+          message = backendError.messageVi || message;
+        } else {
+          title = backendError.titleEn || title;
+          message = backendError.messageEn || message;
+        }
+      }
       switch (error.status) {
-        case 400:
-          console.log(1);
-          break;
         case 401:
           authService.logout();
           router.navigate(['/login']);
-          break;
+          return throwError(() => error);
         case 403:
           router.navigate(['/forbidden']);
+          toastrService.warning(message, title);
           break;
         case 0:
-          console.error('Network error or CORS issue');
+          title = lang === 'vi' ? 'Lỗi mạng' : 'Network error';
+          message = lang === 'vi' ? 'Không thể kết nối đến máy chủ' : 'Cannot connect to server';
+          toastrService.error(message, title);
           break;
         default:
+          if (error.status >= 500) {
+            toastrService.error(message, title);
+          } else {
+            toastrService.warning(message, title);
+          }
           break;
       }
       return throwError(() => error);

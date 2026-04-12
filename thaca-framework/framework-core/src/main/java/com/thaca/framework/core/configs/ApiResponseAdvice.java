@@ -6,7 +6,6 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -35,12 +34,12 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
         ServerHttpResponse response
     ) {
         if (body instanceof ApiPayload) {
-            return ResponseEntity.ok(body);
+            return body;
         }
 
         if (body != null) {
-            return ResponseEntity.ok().body(ApiPayload.success(body));
+            return ApiPayload.success(body);
         }
-        return ResponseEntity.ok().body(ApiPayload.success());
+        return ApiPayload.success();
     }
 }

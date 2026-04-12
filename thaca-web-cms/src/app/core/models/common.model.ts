@@ -43,3 +43,11 @@ export interface ISearchResponse<T> {
   data: T[];
   pagination: IPaginationResponse;
 }
+
+export interface IErrorData {
+  code: string;
+  titleVi: string;
+  titleEn: string;
+  messageVi: string;
+  messageEn: string;
+}
