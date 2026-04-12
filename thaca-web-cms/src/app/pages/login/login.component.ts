@@ -15,6 +15,7 @@ import { ValidationMessageComponent } from '../../shared/components/validation-m
 import { AuthService } from '../../core/services/auth.service';
 import { ILoginReq } from '../../core/models/auth.model';
 import { TranslateModule } from '@ngx-translate/core';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
@@ -34,6 +35,7 @@ import { TranslateModule } from '@ngx-translate/core';
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly toastr = inject(ToastrService);
   readonly APP_CONFIG_ICONS = APP_CONFIG_ICONS;
 
   form = this.fb.group({
@@ -41,13 +43,12 @@ export class LoginComponent {
     password: ['', [Validators.required]],
   });
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    this.authService.login(this.form.value as ILoginReq).then((res) => {
-      console.log(res);
-    });
+    const res = await this.authService.login(this.form.value as ILoginReq);
+    this.toastr.success(JSON.stringify(res), 'Success');
   }
 }

@@ -1,0 +1,195 @@
+/* ================================
+   NGX TOASTR — Final Fix
+================================= */
+
+.ngx-toastr {
+  // Reset layout ngx-toastr mặc định
+  background-image: none !important;
+  padding: 13px 15px 13px 46px !important; // chừa chỗ cho icon giả ở trái
+  border-radius: 12px !important;
+  border: 0.5px solid transparent;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07) !important;
+  position: relative;
+  overflow: hidden;
+  // KHÔNG dùng animation ở đây — để ngx-toastr tự handle
+
+  // Accent bar trái
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 0;
+  }
+
+  // Icon circle dùng ::after
+  &::after {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-size: 12px 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .toast-title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 3px !important;
+    white-space: nowrap;
+  }
+
+  .toast-message {
+    font-size: 12.5px;
+    font-weight: 400;
+    opacity: 0.85;
+    line-height: 1.45;
+    margin: 0 !important;
+  }
+}
+
+/* ===== SUCCESS ===== */
+.ngx-toastr.toast-success {
+  background: #f0fdf8 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+
+  &::before {
+    background: #10b981;
+  }
+
+  &::after {
+    background-color: #10b981;
+    // checkmark SVG trắng
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='2,6 5,9 10,3'/%3E%3C/svg%3E");
+  }
+
+  .toast-title {
+    color: #065f46;
+  }
+  .toast-message {
+    color: #134e4a;
+  }
+}
+
+/* ===== ERROR ===== */
+.ngx-toastr.toast-error {
+  background: #fff5f5 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+
+  &::before {
+    background: #ef4444;
+  }
+
+  &::after {
+    background-color: #ef4444;
+    // X SVG trắng
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'%3E%3Cline x1='3' y1='3' x2='9' y2='9'/%3E%3Cline x1='9' y1='3' x2='3' y2='9'/%3E%3C/svg%3E");
+  }
+
+  .toast-title {
+    color: #7f1d1d;
+  }
+  .toast-message {
+    color: #450a0a;
+  }
+}
+
+/* ===== WARNING ===== */
+.ngx-toastr.toast-warning {
+  background: #fffcf0 !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+
+  &::before {
+    background: #f59e0b;
+  }
+
+  &::after {
+    background-color: #f59e0b;
+    // ! SVG trắng
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'%3E%3Cline x1='6' y1='2.5' x2='6' y2='7'/%3E%3Ccircle cx='6' cy='9.5' r='0.8' fill='white' stroke='none'/%3E%3C/svg%3E");
+  }
+
+  .toast-title {
+    color: #78350f;
+  }
+  .toast-message {
+    color: #451a03;
+  }
+}
+
+/* ===== INFO ===== */
+.ngx-toastr.toast-info {
+  background: #eff8ff !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+
+  &::before {
+    background: #3b82f6;
+  }
+
+  &::after {
+    background-color: #3b82f6;
+    // i SVG trắng
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'%3E%3Cline x1='6' y1='5.5' x2='6' y2='9.5'/%3E%3Ccircle cx='6' cy='2.8' r='0.8' fill='white' stroke='none'/%3E%3C/svg%3E");
+  }
+
+  .toast-title {
+    color: #1e3a8a;
+  }
+  .toast-message {
+    color: #0c2547;
+  }
+}
+
+/* ================================
+   DARK MODE
+================================= */
+body.dark {
+  .ngx-toastr.toast-success {
+    background: #052e20 !important;
+    border-color: rgba(16, 185, 129, 0.25) !important;
+    .toast-title {
+      color: #6ee7b7;
+    }
+    .toast-message {
+      color: #a7f3d0;
+    }
+  }
+  .ngx-toastr.toast-error {
+    background: #2d0808 !important;
+    border-color: rgba(239, 68, 68, 0.25) !important;
+    .toast-title {
+      color: #fca5a5;
+    }
+    .toast-message {
+      color: #fecaca;
+    }
+  }
+  .ngx-toastr.toast-warning {
+    background: #2d1a00 !important;
+    border-color: rgba(245, 158, 11, 0.25) !important;
+    .toast-title {
+      color: #fcd34d;
+    }
+    .toast-message {
+      color: #fde68a;
+    }
+  }
+  .ngx-toastr.toast-info {
+    background: #071830 !important;
+    border-color: rgba(59, 130, 246, 0.25) !important;
+    .toast-title {
+      color: #93c5fd;
+    }
+    .toast-message {
+      color: #bfdbfe;
+    }
+  }
+}
