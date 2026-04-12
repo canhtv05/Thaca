@@ -115,6 +115,15 @@ public enum CommonErrorMessage implements ErrorMessageRule {
         "Channel không hợp lệ",
         "Request invalid params",
         "Channel invalid params"
+    ),
+
+    DUPLICATE_TRANS_ID(
+        "DUPLICATE.TRANS.ID",
+        "Yêu cầu đã được gửi trước đó",
+        "Giao dịch này đã được xử lý hoặc đang được xử lý. Vui lòng không gửi lại yêu cầu.",
+        "Duplicate request",
+        "This transaction has already been processed or is currently being processed. Please do not resubmit the " +
+            "request."
     );
 
     private final String code;

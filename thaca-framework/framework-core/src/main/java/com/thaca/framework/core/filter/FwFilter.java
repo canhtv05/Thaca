@@ -20,9 +20,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
@@ -40,7 +43,8 @@ public class FwFilter extends OncePerRequestFilter {
     private static final int CACHE_LIMIT = 8192;
     private static final String TRACE_ID_HEADER = "X-Trace-Id";
     private static final String TRANS_ID_HEADER = "X-Trans-Id";
-    private static final String PARENT_TRANS_ID_HEADER = "X-Parent-Trans-Id";
+    private static final String SPAN_ID_HEADER = "X-Span-Id";
+    private static final Set<String> IN_FLIGHT_TRANS_IDS = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public FwFilter(FrameworkProperties frameworkProperties) {
         this.frameworkProperties = frameworkProperties;
@@ -67,14 +71,12 @@ public class FwFilter extends OncePerRequestFilter {
 
         byte[] requestBody = requestWrapper.getCachedBody();
         ApiPayload<?> envelope = JsonF.jsonToObject(requestBody, ApiPayload.class);
-        String transId = UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
+        String transId = resolveTransId(envelope);
         String traceId = resolveTraceId(request);
-        String parentTransId = request.getHeader(PARENT_TRANS_ID_HEADER);
+        String spanId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
         MDC.put("transId", transId);
         MDC.put("traceId", traceId);
-        if (StringUtils.hasText(parentTransId)) {
-            MDC.put("parentTransId", parentTransId);
-        }
+        MDC.put("spanId", spanId);
 
         try {
             FwContext.set(buildContextHeader(envelope));
@@ -92,6 +94,7 @@ public class FwFilter extends OncePerRequestFilter {
         long startTime = System.currentTimeMillis();
         response.setHeader(TRACE_ID_HEADER, traceId);
         response.setHeader(TRANS_ID_HEADER, transId);
+        response.setHeader(SPAN_ID_HEADER, spanId);
 
         if (
             envelope == null ||
@@ -127,9 +130,29 @@ public class FwFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (!IN_FLIGHT_TRANS_IDS.add(transId)) {
+            log.warn(
+                "[FwFilter] Duplicate transId detected: [{}], URI: '[{}] {}', User: [{}]",
+                transId,
+                method,
+                uri,
+                username
+            );
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+            ApiPayload<?> dupError = ApiPayload.error(CommonErrorMessage.DUPLICATE_TRANS_ID);
+            dupError.setHeader(envelope.getHeader());
+
+            this.processLog(response, dupError, startTime, method, uri, username);
+            return;
+        }
+
         try {
             filterChain.doFilter(requestWrapper, responseWrapper);
         } finally {
+            IN_FLIGHT_TRANS_IDS.remove(transId);
             long duration = System.currentTimeMillis() - startTime;
             byte[] responseArray = responseWrapper.getContentAsByteArray();
             String responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
@@ -208,6 +231,13 @@ public class FwFilter extends OncePerRequestFilter {
         String traceId = request.getHeader(TRACE_ID_HEADER);
         if (StringUtils.hasText(traceId)) {
             return traceId.trim();
+        }
+        return UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
+    }
+
+    private String resolveTransId(ApiPayload<?> envelope) {
+        if (envelope != null && envelope.getBody() != null && StringUtils.hasText(envelope.getBody().getTransId())) {
+            return envelope.getBody().getTransId().trim();
         }
         return UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
     }
