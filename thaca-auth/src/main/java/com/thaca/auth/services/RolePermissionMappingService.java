@@ -32,6 +32,6 @@ public class RolePermissionMappingService {
         List<String> permissions = role.getPermissions().stream().map(Permission::getCode).collect(Collectors.toList());
 
         String key = CommonConstants.REDIS_ROLE_PERM_PREFIX + role.getCode();
-        redisService.set(key, permissions);
+        redisService.put(key, permissions);
     }
 }

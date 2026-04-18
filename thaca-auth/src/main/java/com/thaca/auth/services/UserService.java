@@ -245,7 +245,7 @@ public class UserService {
         // fake send otp
         String keyForgotPassword = sessionStore.getKeyForgotPassword(user.getUsername());
         String otp = "123456";
-        redisService.set(keyForgotPassword, otp, 5, TimeUnit.MINUTES);
+        redisService.put(keyForgotPassword, otp, 5, TimeUnit.MINUTES);
     }
 
     @Transactional(readOnly = true)

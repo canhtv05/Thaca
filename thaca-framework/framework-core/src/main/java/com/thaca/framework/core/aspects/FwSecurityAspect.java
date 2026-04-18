@@ -1,7 +1,7 @@
 package com.thaca.framework.core.aspects;
 
 import com.thaca.common.enums.CommonErrorMessage;
-import com.thaca.framework.core.annotations.FwRequestMode;
+import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.exceptions.FwException;
 import java.lang.reflect.Method;
@@ -19,12 +19,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class FwSecurityAspect {
 
-    @Around("@annotation(com.thaca.framework.core.annotations.FwRequestMode)")
+    @Around("@annotation(com.thaca.framework.core.annotations.FwRequest)")
     public Object checkSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        FwRequestMode requestMode = method.getAnnotation(FwRequestMode.class);
+        FwRequest requestMode = method.getAnnotation(FwRequest.class);
         if (Objects.isNull(requestMode)) {
-            requestMode = joinPoint.getTarget().getClass().getAnnotation(FwRequestMode.class);
+            requestMode = joinPoint.getTarget().getClass().getAnnotation(FwRequest.class);
         }
 
         if (Objects.nonNull(requestMode) && RequestType.PUBLIC.equals(requestMode.type())) {

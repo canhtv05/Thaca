@@ -23,15 +23,12 @@ public class SecurityConfig {
     @Bean
     @ConditionalOnMissingBean(SecurityFilterChain.class)
     SecurityFilterChain frameworkSecurityFilterChain(HttpSecurity http) throws Exception {
-        for (SecurityCustomizer customizer : securityCustomizers) {
-            customizer.customize(http);
-        }
-        if (securityCustomizers.isEmpty()) {
-            http.authorizeHttpRequests(request -> request.anyRequest().authenticated());
-        }
         http
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        for (SecurityCustomizer customizer : securityCustomizers) {
+            customizer.customize(http);
+        }
         return http.build();
     }
 }

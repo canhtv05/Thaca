@@ -23,7 +23,7 @@ public class RedisCacheService {
         return redisson.getBucket(key, StringCodec.INSTANCE);
     }
 
-    public <K, V> void set(K key, V value, long ttl, TimeUnit timeUnit) {
+    public <K, V> void put(K key, V value, long ttl, TimeUnit timeUnit) {
         try {
             if (CommonUtils.isEmpty(key, value)) return;
 
@@ -35,7 +35,7 @@ public class RedisCacheService {
         }
     }
 
-    public <K, V> void set(K key, V value) {
+    public <K, V> void put(K key, V value) {
         try {
             if (CommonUtils.isEmpty(key, value)) return;
 

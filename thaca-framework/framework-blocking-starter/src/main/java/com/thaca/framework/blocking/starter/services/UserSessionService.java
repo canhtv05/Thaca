@@ -29,7 +29,7 @@ public class UserSessionService {
             String data = JsonF.toJson(userSession);
             long ttl = this.frameworkProperties.getSecurity().getValidDurationInSeconds() + 300L;
             var keyUser = sessionStore.getKeyUser(userSession.getUsername(), userSession.getChannel());
-            redisService.set(keyUser, data, ttl, TimeUnit.SECONDS);
+            redisService.put(keyUser, data, ttl, TimeUnit.SECONDS);
         } catch (Exception e) {
             log.error("[UserSessionService] cacheUserSession()]:: ", e);
         }
@@ -37,7 +37,7 @@ public class UserSessionService {
 
     public void cacheToken(String username, ChannelType channelType, String token) {
         try {
-            redisService.set(
+            redisService.put(
                 sessionStore.getKeyToken(username, channelType),
                 FwUtils.hexString(token),
                 this.frameworkProperties.getSecurity().getValidDurationInSeconds(),

@@ -3,7 +3,6 @@ package com.thaca.framework.core.filter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import java.io.*;
-import java.util.Arrays;
 import lombok.Getter;
 
 @Getter
@@ -11,10 +10,9 @@ public class CachedBodyRequestWrapper extends HttpServletRequestWrapper {
 
     private final byte[] cachedBody;
 
-    public CachedBodyRequestWrapper(HttpServletRequest request, int limit) throws IOException {
+    public CachedBodyRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
-        byte[] raw = request.getInputStream().readAllBytes();
-        this.cachedBody = raw.length <= limit ? raw : Arrays.copyOf(raw, limit);
+        this.cachedBody = request.getInputStream().readAllBytes();
     }
 
     @Override
