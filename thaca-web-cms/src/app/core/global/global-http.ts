@@ -1,11 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { signal } from '@angular/core';
 
 export class GlobalHttp {
-  private static activeRequests = 0;
-  static readonly loading = signal<boolean>(false);
-
   private static get httpClient(): HttpClient | null {
     return (window as any).__appGlobal?.httpClient || null;
   }
@@ -32,41 +28,35 @@ export class GlobalHttp {
     body?: any,
     headers: Record<string, string> = {},
   ): Promise<T> {
-    this.startLoading();
-
-    try {
-      const client = this.httpClient;
-      if (client) {
-        const httpHeaders = new HttpHeaders(headers);
-        return await firstValueFrom(
-          client.request<T>(method, url, {
-            body,
-            headers: httpHeaders,
-            withCredentials: true,
-          }),
-        );
-      }
-      const response = await fetch(url, {
-        method,
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers,
-        },
-        body: body ? JSON.stringify(body) : undefined,
-      });
-      const data = await this.parseResponse(response);
-      if (!response.ok) {
-        throw {
-          status: response.status,
-          message: data?.message || 'Request failed',
-          data,
-        };
-      }
-      return data as T;
-    } finally {
-      this.stopLoading();
+    const client = this.httpClient;
+    if (client) {
+      const httpHeaders = new HttpHeaders(headers);
+      return await firstValueFrom(
+        client.request<T>(method, url, {
+          body,
+          headers: httpHeaders,
+          withCredentials: true,
+        }),
+      );
     }
+    const response = await fetch(url, {
+      method,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await this.parseResponse(response);
+    if (!response.ok) {
+      throw {
+        status: response.status,
+        message: data?.message || 'Request failed',
+        data,
+      };
+    }
+    return data as T;
   }
 
   private static async parseResponse(response: Response) {
@@ -75,18 +65,5 @@ export class GlobalHttp {
       return response.json();
     }
     return response.text();
-  }
-
-  private static startLoading() {
-    this.activeRequests++;
-    this.loading.set(true);
-  }
-
-  private static stopLoading() {
-    this.activeRequests--;
-    if (this.activeRequests <= 0) {
-      this.loading.set(false);
-      this.activeRequests = 0;
-    }
   }
 }

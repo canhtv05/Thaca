@@ -3,6 +3,18 @@ export interface ILoginReq {
   password: string;
 }
 
+export interface IAuthUserDTO {
+  id: number;
+  username: string;
+  email: string;
+  fullname?: string;
+  isActivated?: boolean;
+  isLocked?: boolean;
+  isSuperAdmin?: boolean;
+  roles?: string[];
+}
+
 export interface IAuthenticateRes {
   authenticate: boolean;
+  info: IAuthUserDTO;
 }

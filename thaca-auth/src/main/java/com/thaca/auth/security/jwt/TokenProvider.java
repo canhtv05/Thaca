@@ -211,7 +211,7 @@ public class TokenProvider {
             .id(sessionId)
             .subject(authentication.getName())
             .claim(AUTHORITIES_KEY, authorities)
-            .claim(ROLE_KEY, String.join(",", userDetails.getRole()))
+            .claim(ROLE_KEY, userDetails.getRole())
             .claim(CommonConstants.CHANNEL_KEY, channel)
             .issuedAt(new Date(now))
             .expiration(validity)

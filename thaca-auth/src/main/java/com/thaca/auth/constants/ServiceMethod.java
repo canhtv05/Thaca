@@ -26,4 +26,5 @@ public class ServiceMethod {
     public static final String CMS_UNLOCK_USER = "cms.unlockUser";
     public static final String ADMIN_GET_USER_PERMISSION = "cms.getUserPermission";
     public static final String ADMIN_UPDATE_USER_PERMISSION = "cms.updateUserPermission";
+    public static final String CMS_GET_PROFILE = "cms.getProfile";
 }

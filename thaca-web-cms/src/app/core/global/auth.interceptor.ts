@@ -8,10 +8,10 @@ import {
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, finalize } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import { currentLang } from '../stores/app.store';
+import { currentLang, isLoading } from '../stores/app.store';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<any>,
@@ -25,12 +25,15 @@ export const authInterceptor: HttpInterceptorFn = (
     withCredentials: true,
   });
 
+  isLoading.set(true);
+
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       const lang = currentLang() || 'vi';
       let title = lang === 'vi' ? 'Lỗi hệ thống' : 'System error';
       let message =
         lang === 'vi' ? 'Đã xảy ra lỗi không xác định' : 'Unknown internal server error';
+
       const backendError = error?.error?.body?.data;
       if (backendError) {
         if (lang === 'vi') {
@@ -41,6 +44,7 @@ export const authInterceptor: HttpInterceptorFn = (
           message = backendError.messageEn || message;
         }
       }
+
       switch (error.status) {
         case 401:
           authService.logout();
@@ -64,6 +68,9 @@ export const authInterceptor: HttpInterceptorFn = (
           break;
       }
       return throwError(() => error);
+    }),
+    finalize(() => {
+      isLoading.set(false);
     }),
   );
 };

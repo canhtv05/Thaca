@@ -53,7 +53,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
     private final AuthService authService;
     // private final KafkaProducerService kafkaProducerService;
     private final RedisCacheService redisService;
@@ -94,11 +93,13 @@ public class UserService {
 
         String encryptedPassword = passwordEncoder.encode(request.getPassword());
         user.setPassword(encryptedPassword);
-        //        if (ObjectUtils.isNotEmpty(request.getRoles()) && isAdmin) {
-        //            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
-        //        } else {
-        //            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(List.of(AuthoritiesConstants.USER))));
-        //        }
+        // if (ObjectUtils.isNotEmpty(request.getRoles()) && isAdmin) {
+        // user.setRoles(new
+        // HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
+        // } else {
+        // user.setRoles(new
+        // HashSet<>(roleRepository.findAllByCodeIn(List.of(AuthoritiesConstants.USER))));
+        // }
 
         userRepository.save(user);
         // this.publishUserEvent(res, saved, isAdmin);
@@ -113,10 +114,11 @@ public class UserService {
         }
         User user = optionalUser.get();
         user.setIsActivated(request.getIsActivated());
-        //        user.setRoles(new HashSet<>());
-        //        if (ObjectUtils.isNotEmpty(request.getRoles())) {
-        //            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
-        //        }
+        // user.setRoles(new HashSet<>());
+        // if (ObjectUtils.isNotEmpty(request.getRoles())) {
+        // user.setRoles(new
+        // HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
+        // }
         userRepository.save(user);
         return UserDTO.fromEntity(user);
     }

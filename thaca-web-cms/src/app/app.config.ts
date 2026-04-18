@@ -15,7 +15,7 @@ import { AppConfigService } from './core/configs/app-config.service';
 import { GlobalService } from './core/global/global.service';
 import { I18nService } from './core/i18n/i18n.service';
 import { StoreEffectService } from './core/services/store-effect.service';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { provideIcons } from '@ng-icons/core';
 import { APP_CONFIG_ICONS } from './core/configs/app-config.icon';
@@ -23,6 +23,7 @@ import { ThemeService } from './core/theme/theme.service';
 import { AuthService } from './core/services/auth.service';
 import { authInterceptor } from './core/global/auth.interceptor';
 import { provideToastr } from 'ngx-toastr';
+import { logger } from './utils/logger';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -45,13 +46,13 @@ export const appConfig: ApplicationConfig = {
       const i18n = inject(I18nService);
       const appConfig = inject(AppConfigService);
       const authService = inject(AuthService);
-      const globalService = inject(GlobalService);
-      const storeEffectService = inject(StoreEffectService);
+      const http = inject(HttpClient);
+      (window as any).__appGlobal = { httpClient: http };
+
       await firstValueFrom(i18n.bootstrapLanguage());
       await appConfig.loadConfig();
-      void globalService;
-      void storeEffectService;
-      void authService;
+
+      authService.getUserProfile().catch(() => {});
     }),
     provideIcons(
       Object.fromEntries(Object.entries(APP_CONFIG_ICONS).map(([name, icon]) => [name, icon.icon])),

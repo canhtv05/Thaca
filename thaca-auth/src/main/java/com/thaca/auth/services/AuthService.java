@@ -263,13 +263,9 @@ public class AuthService {
     }
 
     public static String getRoleString(SystemCredential sc, List<GrantedAuthority> authorities) {
-        String rolesString;
-        rolesString = sc.getRoles().stream().map(Role::getCode).collect(Collectors.joining(","));
+        String rolesString = sc.getRoles().stream().map(Role::getCode).collect(Collectors.joining(","));
         for (Role role : sc.getRoles()) {
             authorities.add(new SimpleGrantedAuthority(role.getCode()));
-            for (Permission perm : role.getPermissions()) {
-                authorities.add(new SimpleGrantedAuthority(perm.getCode()));
-            }
         }
         return rolesString;
     }

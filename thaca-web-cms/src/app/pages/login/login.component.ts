@@ -16,6 +16,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ILoginReq } from '../../core/models/auth.model';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -35,7 +36,7 @@ import { ToastrService } from 'ngx-toastr';
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
-  private readonly toastr = inject(ToastrService);
+  private router = inject(Router);
   readonly APP_CONFIG_ICONS = APP_CONFIG_ICONS;
 
   form = this.fb.group({
@@ -49,6 +50,8 @@ export class LoginComponent {
       return;
     }
     const res = await this.authService.login(this.form.value as ILoginReq);
-    this.toastr.success(JSON.stringify(res), 'Success');
+    if (res.body.status === 'OK') {
+      this.router.navigate(['/home']);
+    }
   }
 }
