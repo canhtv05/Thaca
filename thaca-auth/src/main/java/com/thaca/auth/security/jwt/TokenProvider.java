@@ -1,6 +1,5 @@
 package com.thaca.auth.security.jwt;
 
-import static com.thaca.framework.core.constants.AuthoritiesConstants.AUTHORITIES_KEY;
 import static com.thaca.framework.core.constants.AuthoritiesConstants.ROLE_KEY;
 
 import com.thaca.auth.domains.SystemCredential;
@@ -41,7 +40,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -196,11 +194,6 @@ public class TokenProvider {
         ChannelType channel,
         String sessionId
     ) {
-        String authorities = authentication
-            .getAuthorities()
-            .stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(","));
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         long now = System.currentTimeMillis();
@@ -210,7 +203,6 @@ public class TokenProvider {
         return Jwts.builder()
             .id(sessionId)
             .subject(authentication.getName())
-            .claim(AUTHORITIES_KEY, authorities)
             .claim(ROLE_KEY, userDetails.getRole())
             .claim(CommonConstants.CHANNEL_KEY, channel)
             .issuedAt(new Date(now))

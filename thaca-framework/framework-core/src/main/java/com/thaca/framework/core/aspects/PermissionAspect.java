@@ -3,11 +3,15 @@ package com.thaca.framework.core.aspects;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.annotations.CheckPermission;
 import com.thaca.framework.core.exceptions.FwException;
+import com.thaca.framework.core.security.PermissionProvider;
+import com.thaca.framework.core.security.SecurityUtils;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,39 +23,47 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
+@RequiredArgsConstructor
 public class PermissionAspect {
+
+    private final PermissionProvider permissionProvider;
 
     @Around("@annotation(com.thaca.framework.core.annotations.CheckPermission)")
     public Object checkPermission(ProceedingJoinPoint joinPoint) throws Throwable {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         CheckPermission annotation = method.getAnnotation(CheckPermission.class);
-
         if (Objects.isNull(annotation)) {
             annotation = joinPoint.getTarget().getClass().getAnnotation(CheckPermission.class);
         }
-
         if (Objects.nonNull(annotation)) {
             String[] requiredPermissions = annotation.value();
             if (requiredPermissions.length > 0) {
+                if (SecurityUtils.isSuperAdmin()) {
+                    return joinPoint.proceed();
+                }
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
                 if (auth == null || !auth.isAuthenticated()) {
                     throw new FwException(CommonErrorMessage.UNAUTHORIZED);
                 }
-
-                Set<String> userAuthorities = auth
+                Set<String> userRoles = auth
                     .getAuthorities()
                     .stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toSet());
 
+                Set<String> userPermissions = new HashSet<>();
+                for (String role : userRoles) {
+                    userPermissions.addAll(permissionProvider.getPermissions(role));
+                    if (role.startsWith("ROLE_")) {
+                        userPermissions.addAll(permissionProvider.getPermissions(role.substring(5)));
+                    }
+                }
                 boolean isAllowed;
                 if (annotation.allMatched()) {
-                    isAllowed = Arrays.stream(requiredPermissions).allMatch(userAuthorities::contains);
+                    isAllowed = Arrays.stream(requiredPermissions).allMatch(userPermissions::contains);
                 } else {
-                    isAllowed = Arrays.stream(requiredPermissions).anyMatch(userAuthorities::contains);
+                    isAllowed = Arrays.stream(requiredPermissions).anyMatch(userPermissions::contains);
                 }
-
                 if (!isAllowed) {
                     throw new FwException(CommonErrorMessage.FORBIDDEN);
                 }
