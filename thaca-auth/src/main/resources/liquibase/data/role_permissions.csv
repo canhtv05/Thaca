@@ -1,4 +1,5 @@
 role_code;permission_code;created_by;created_at;updated_by;updated_at
-SUPER_ADMIN;USER_MAKER;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
 ADMIN;USER_MAKER;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-MANAGER;USER_MAKER;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+ADMIN;CMS_VIEW;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+ADMIN;CMS_EDIT;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+MANAGER;CMS_VIEW;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00

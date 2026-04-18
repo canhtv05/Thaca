@@ -4,7 +4,6 @@ import com.thaca.framework.core.security.UserPrincipal;
 import java.util.Collection;
 import lombok.Getter;
 import lombok.NonNull;
-import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
@@ -13,17 +12,20 @@ public class CustomUserDetails extends User implements UserPrincipal {
 
     private final String role;
     private final String channel;
+    private final boolean isSuperAdmin;
 
     public CustomUserDetails(
         String username,
         String password,
         Collection<? extends GrantedAuthority> authorities,
         String roles,
-        String channel
+        String channel,
+        boolean isSuperAdmin
     ) {
         super(username, password, authorities);
         this.role = roles;
         this.channel = channel;
+        this.isSuperAdmin = isSuperAdmin;
     }
 
     @Override
@@ -39,5 +41,10 @@ public class CustomUserDetails extends User implements UserPrincipal {
     @Override
     public String getChannel() {
         return this.channel;
+    }
+
+    @Override
+    public boolean isSuperAdmin() {
+        return this.isSuperAdmin;
     }
 }

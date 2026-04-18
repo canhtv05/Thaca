@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
+
+    <changeSet id="18042026-1" author="CanhPC">
+        <createTable tableName="system_users" remarks="auth">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_users" />
+            </column>
+            <column name="fullname" type="VARCHAR(255)" />
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="is_activated" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false" />
+            </column>
+            <column name="is_locked" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="is_super_admin" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_by" type="VARCHAR(255)" />
+            <column name="created_at" type="TIMESTAMP" />
+            <column name="updated_by" type="VARCHAR(255)" />
+            <column name="updated_at" type="TIMESTAMP" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="18042026-2" author="CanhPC">
+        <createTable tableName="system_credentials" remarks="auth">
+            <column name="username" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credentials" />
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="system_user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_syscred_on_sysuser" referencedTableName="system_users" referencedColumnNames="id" />
+            </column>
+            <column name="refresh_token" type="TEXT" />
+            <column name="created_by" type="VARCHAR(255)" />
+            <column name="created_at" type="TIMESTAMP" />
+            <column name="updated_by" type="VARCHAR(255)" />
+            <column name="updated_at" type="TIMESTAMP" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="18042026-3" author="CanhPC">
+        <createTable tableName="system_credential_roles" remarks="auth">
+            <column name="credential_id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="role_code" type="VARCHAR(50)">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_roles" constraintName="fk_syscredrol_on_syscred" referencedColumnNames="username" referencedTableName="system_credentials" />
+        <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="system_credential_roles" constraintName="fk_syscredrol_on_role" referencedColumnNames="code" referencedTableName="roles" />
+    </changeSet>
+    
+    <changeSet id="18042026-4" author="CanhPC">
+        <createSequence incrementBy="1" sequenceName="system_user_seq" startValue="10" />
+    </changeSet>
+
+    <changeSet id="load-data-system-users" author="CanhPC">
+        <loadData file="liquibase/data/system_user.csv" separator=";" tableName="system_users">
+            <column name="id" type="numeric" />
+            <column name="fullname" type="string" />
+            <column name="email" type="string" />
+            <column name="is_activated" type="boolean" />
+            <column name="is_locked" type="boolean" />
+            <column name="is_super_admin" type="boolean" />
+            <column name="created_by" type="string" />
+            <column name="created_at" type="timestamp" />
+            <column name="updated_by" type="string" />
+            <column name="updated_at" type="timestamp" />
+        </loadData>
+    </changeSet>
+
+    <changeSet id="load-data-system-credentials" author="CanhPC">
+        <loadData file="liquibase/data/system_credential.csv" separator=";" tableName="system_credentials">
+            <column name="username" type="string" />
+            <column name="password" type="string" />
+            <column name="system_user_id" type="numeric" />
+            <column name="created_by" type="string" />
+            <column name="created_at" type="timestamp" />
+            <column name="updated_by" type="string" />
+            <column name="updated_at" type="timestamp" />
+        </loadData>
+    </changeSet>
+
+    <changeSet id="load-data-system-credential-roles" author="CanhPC">
+        <loadData file="liquibase/data/system_credential_roles.csv" separator=";" tableName="system_credential_roles">
+            <column name="credential_id" type="string" />
+            <column name="role_code" type="string" />
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>

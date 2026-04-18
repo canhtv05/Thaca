@@ -2,6 +2,8 @@ package com.thaca.auth.security;
 
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.framework.core.exceptions.FwException;
+import java.util.Objects;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +23,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws FwException {
         String username = authentication.getName();
-        String password = authentication.getCredentials().toString();
+        String password = Objects.requireNonNull(authentication.getCredentials()).toString();
         UserDetails user = userDetailsService.loadUserByUsername(username);
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw FwException.error(ErrorMessage.PASSWORD_INVALID);
@@ -30,7 +32,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     }
 
     @Override
-    public boolean supports(Class<?> authentication) {
+    public boolean supports(@NonNull Class<?> authentication) {
         return UsernamePasswordAuthenticationToken.class.equals(authentication);
     }
 }

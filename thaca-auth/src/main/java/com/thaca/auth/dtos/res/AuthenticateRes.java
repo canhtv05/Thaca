@@ -1,6 +1,6 @@
 package com.thaca.auth.dtos.res;
 
-import com.thaca.auth.dtos.UserInfoDTO;
+import com.thaca.auth.dtos.AuthUserDTO;
 import lombok.*;
 
 @Getter
@@ -11,5 +11,5 @@ import lombok.*;
 public class AuthenticateRes {
 
     private boolean authenticate;
-    private UserInfoDTO info;
+    private AuthUserDTO info;
 }

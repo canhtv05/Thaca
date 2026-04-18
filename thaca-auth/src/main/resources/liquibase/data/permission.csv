@@ -1,2 +1,4 @@
 code;description;created_by;created_at;updated_by;updated_at
 USER_MAKER;Quyền quản trị người dùng;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+CMS_VIEW;Quyền xem CMS;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+CMS_EDIT;Quyền sửa CMS;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00

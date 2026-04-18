@@ -1,15 +1,17 @@
 package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
-import com.thaca.auth.domains.User;
+import com.thaca.auth.domains.*;
+import com.thaca.auth.dtos.AuthUserDTO;
 import com.thaca.auth.dtos.UserDTO;
-import com.thaca.auth.dtos.UserInfoDTO;
 import com.thaca.auth.dtos.req.LoginReq;
 import com.thaca.auth.dtos.res.AuthenticateRes;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.dtos.res.VerifyTokenRes;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.UserRepository;
+import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.PasswordRule;
@@ -19,6 +21,7 @@ import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.context.FwContext;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.enums.ModeType;
@@ -27,16 +30,20 @@ import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.CookieUtils;
 import com.thaca.framework.core.utils.JsonF;
-import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +55,9 @@ import org.springframework.util.CollectionUtils;
 public class AuthService {
 
     private final CookieUtils cookieUtils;
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final SystemCredentialRepository systemCredentialRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final JwtUtils jwtUtils;
@@ -71,14 +80,44 @@ public class AuthService {
         );
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = tokenProvider.createToken(authentication, httpServletResponse);
-        if (StringUtils.isBlank(token)) {
-            throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
-        }
+        return getAuthenticateRes(loginReq, httpServletResponse, authentication, false);
+    }
 
-        UserInfoDTO userInfoDTO = getProfile(loginReq.getUsername());
-        return new AuthenticateRes(true, userInfoDTO);
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.HANDLE)
+    public AuthenticateRes authenticateCms(LoginReq loginReq, HttpServletResponse httpServletResponse) {
+        SystemCredential sc = systemCredentialRepository
+            .findByUsername(loginReq.getUsername())
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        if (!passwordEncoder.matches(loginReq.getPassword(), sc.getPassword())) {
+            throw new FwException(ErrorMessage.PASSWORD_INVALID);
+        }
+        SystemUser su = sc.getSystemUser();
+        if (su.isLocked()) {
+            throw new FwException(ErrorMessage.USER_LOCKED);
+        }
+        if (!su.getIsActivated()) {
+            throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
+        }
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        String rolesString;
+        if (su.isSuperAdmin()) {
+            rolesString = AuthoritiesConstants.SUPER_ADMIN;
+            authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
+        } else {
+            rolesString = getRoleString(sc, authorities);
+        }
+        CustomUserDetails userDetails = new CustomUserDetails(
+            sc.getUsername(),
+            sc.getPassword(),
+            authorities,
+            rolesString,
+            StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name()),
+            su.isSuperAdmin()
+        );
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return getAuthenticateRes(loginReq, httpServletResponse, authentication, true);
     }
 
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.VALIDATE)
@@ -139,17 +178,40 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> findOneWithAuthoritiesByUsername(String username) {
-        return userRepository.findOneWithAuthoritiesByUsername(username);
+    public Object findOneByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            return user.get();
+        }
+        return systemCredentialRepository.findByUsername(username).orElse(null);
     }
 
     @Transactional(readOnly = true)
-    public UserInfoDTO getProfile(String username) {
-        Optional<User> user = userRepository.findOneWithAuthoritiesByUsername(username);
-        if (user.isEmpty()) {
-            throw new FwException(ErrorMessage.USER_NOT_FOUND);
-        }
-        return UserInfoDTO.fromEntity(user.get());
+    public AuthUserDTO getSystemProfile(String username) {
+        return systemCredentialRepository
+            .findByUsername(username)
+            .map(sc -> {
+                SystemUser su = sc.getSystemUser();
+                return AuthUserDTO.builder()
+                    .id(su.getId())
+                    .username(sc.getUsername())
+                    .email(su.getEmail())
+                    .fullname(su.getFullname())
+                    .isActivated(su.getIsActivated())
+                    .isLocked(su.isLocked())
+                    .isSuperAdmin(su.isSuperAdmin())
+                    .roles(sc.getRoles().stream().map(Role::getCode).collect(Collectors.toSet()))
+                    .build();
+            })
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public AuthUserDTO getUserProfile(String username) {
+        return userRepository
+            .findByUsername(username)
+            .map(u -> AuthUserDTO.builder().id(u.getId()).username(u.getUsername()).email(u.getEmail()).build())
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
     @SuppressWarnings("unchecked")
@@ -180,5 +242,35 @@ public class AuthService {
         tokenProvider.revokeAllTokens();
         cookieUtils.deleteCookie(response);
         SecurityUtils.clear();
+    }
+
+    private AuthenticateRes getAuthenticateRes(
+        LoginReq loginReq,
+        HttpServletResponse httpServletResponse,
+        Authentication authentication,
+        boolean isCms
+    ) {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = tokenProvider.createToken(authentication, httpServletResponse);
+        if (StringUtils.isBlank(token)) {
+            throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
+        }
+
+        AuthUserDTO userInfoDTO = isCms
+            ? getSystemProfile(loginReq.getUsername())
+            : getUserProfile(loginReq.getUsername());
+        return new AuthenticateRes(true, userInfoDTO);
+    }
+
+    public static String getRoleString(SystemCredential sc, List<GrantedAuthority> authorities) {
+        String rolesString;
+        rolesString = sc.getRoles().stream().map(Role::getCode).collect(Collectors.joining(","));
+        for (Role role : sc.getRoles()) {
+            authorities.add(new SimpleGrantedAuthority(role.getCode()));
+            for (Permission perm : role.getPermissions()) {
+                authorities.add(new SimpleGrantedAuthority(perm.getCode()));
+            }
+        }
+        return rolesString;
     }
 }

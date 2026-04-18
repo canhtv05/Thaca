@@ -27,7 +27,6 @@ import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
 import com.thaca.framework.core.annotations.FwMode;
-import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.CommonUtils;
@@ -38,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -62,7 +60,7 @@ public class UserService {
     private final SessionStore sessionStore;
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.ADMIN_GET_USER_BY_ID, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_GET_USER_BY_ID, type = ModeType.HANDLE)
     public UserDTO findById(Long id) {
         return userRepository
             .findById(id)
@@ -96,11 +94,11 @@ public class UserService {
 
         String encryptedPassword = passwordEncoder.encode(request.getPassword());
         user.setPassword(encryptedPassword);
-        if (ObjectUtils.isNotEmpty(request.getRoles()) && isAdmin) {
-            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
-        } else {
-            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(List.of(AuthoritiesConstants.USER))));
-        }
+        //        if (ObjectUtils.isNotEmpty(request.getRoles()) && isAdmin) {
+        //            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
+        //        } else {
+        //            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(List.of(AuthoritiesConstants.USER))));
+        //        }
 
         userRepository.save(user);
         // this.publishUserEvent(res, saved, isAdmin);
@@ -115,16 +113,16 @@ public class UserService {
         }
         User user = optionalUser.get();
         user.setIsActivated(request.getIsActivated());
-        user.setRoles(new HashSet<>());
-        if (ObjectUtils.isNotEmpty(request.getRoles())) {
-            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
-        }
+        //        user.setRoles(new HashSet<>());
+        //        if (ObjectUtils.isNotEmpty(request.getRoles())) {
+        //            user.setRoles(new HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
+        //        }
         userRepository.save(user);
         return UserDTO.fromEntity(user);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.ADMIN_LOCK_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_LOCK_USER, type = ModeType.HANDLE)
     public void changeLockUser(Long id, boolean isLocked) {
         User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
         user.setLocked(isLocked);
@@ -249,7 +247,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.ADMIN_SEARCH_USERS, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.VALIDATE)
     public SearchResponse<UserDTO> searchDatatable(SearchRequest<UserSearchReq> request) {
         Specification<User> spec = createSpecification(request);
         Page<User> tenants = userRepository.findAll(spec, request.page().toPageable());

@@ -6,4 +6,6 @@ public interface UserPrincipal {
     String getRole();
 
     String getChannel();
+
+    boolean isSuperAdmin();
 }

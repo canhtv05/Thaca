@@ -1,0 +1,268 @@
+{
+  "info": {
+    "_postman_id": "6d5a4789-0972-452e-ba43-22ceb73da5e0",
+    "name": "Thaca",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49398327"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "user",
+          "item": [
+            {
+              "name": "http://localhost:1001/api/auth/sign-in",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"transId\": \"1\",\r\n        \"data\": {\r\n            \"username\": \"admin\",\r\n            \"password\": \"Thaca@2026\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/sign-in",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "sign-in"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "http://localhost:1001/api/auth/sign-up",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"data\": {\r\n            \"fullname\": \"vancahnh\",\r\n            \"username\": \"2123245\",\r\n            \"password\": \"oki5455\",\r\n            \"email\": \"2@gmail.com\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/sign-up",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "sign-up"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "http://localhost:1001/api/auth/logout",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"data\": {\r\n            \"username\": \"2123245\",\r\n            \"password\": \"Mrcanh2639n@\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/logout",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "logout"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "http://localhost:1001/api/auth/logout-all-devices",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"data\": {\r\n           \r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/logout-all-devices",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "logout-all-devices"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "http://localhost:1001/api/auth/change-password",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"data\": {\r\n            \"currentPassword\":\"Mrcanh2639n@\",\r\n            \"newPassword\": \"Mrcanh2639n@\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/change-password",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "change-password"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "http://localhost:1001/api/auth/refresh-token",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"data\": {\r\n            \"username\": \"admin\",\r\n            \"password\": \"admin\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/refresh-token",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "refresh-token"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "http://localhost:1001/api/auth/forgot-password",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"data\": {\r\n            \"email\": \"2@gmail.com\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/forgot-password",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "forgot-password"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "http://localhost:1001/api/auth/verify-otp-forgot-password",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"data\": {\r\n            \"OTP\": \"OTP\",\r\n            \"email\": \"2@gmail.com\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/verify-otp-forgot-password",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "verify-otp-forgot-password"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "http://localhost:1001/api/auth/reset-password",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"data\": {\r\n            \"email\": \"2@gmail.com\",\r\n            \"OTP\":\"123456\",\r\n            \"newPassword\": \"Mrcanh2639n@\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/auth/reset-password",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "auth", "reset-password"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "admin",
+          "item": [
+            {
+              "name": "http://localhost:1001/api/cms/sign-in",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"header\": {\r\n        \"username\": \"canhcanh\",\r\n        \"location\": \"VN\",\r\n        \"channel\": \"WEB\",\r\n        \"apiKey\": \"VN\",\r\n        \"timestamp\": 1774766719985\r\n    },\r\n    \"body\": {\r\n        \"transId\": \"1\",\r\n        \"data\": {\r\n            \"username\": \"admin\",\r\n            \"password\": \"Thaca@2026\"\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:1001/api/cms/sign-in",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "1001",
+                  "path": ["api", "cms", "sign-in"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

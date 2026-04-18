@@ -29,8 +29,8 @@ public class Role extends BaseEntityAudit {
     @Column(name = "description")
     private String description;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users;
+    //    @ManyToMany(mappedBy = "roles")
+    //    private Set<SystemCredential> systemCredentials;
 
     @JsonIgnore
     @ManyToMany

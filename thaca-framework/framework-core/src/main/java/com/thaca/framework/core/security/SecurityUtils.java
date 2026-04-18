@@ -35,11 +35,16 @@ public class SecurityUtils {
 
     public static boolean isSuperAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (
-            authentication != null &&
-            authentication.getPrincipal() instanceof UserPrincipal &&
-            ((UserPrincipal) authentication.getPrincipal()).getRole().contains(AuthoritiesConstants.SUPER_ADMIN)
-        );
+        if (authentication == null) {
+            return false;
+        }
+        if (authentication.getPrincipal() instanceof UserPrincipal userPrincipal) {
+            return userPrincipal.isSuperAdmin();
+        }
+        return authentication
+            .getAuthorities()
+            .stream()
+            .anyMatch(a -> Objects.equals(a.getAuthority(), AuthoritiesConstants.SUPER_ADMIN));
     }
 
     public static void clear() {

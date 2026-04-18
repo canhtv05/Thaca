@@ -4,6 +4,7 @@ import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.exceptions.FwException;
+import com.thaca.framework.core.security.SecurityUtils;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -21,6 +22,10 @@ public class FwSecurityAspect {
 
     @Around("@annotation(com.thaca.framework.core.annotations.FwRequest)")
     public Object checkSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (SecurityUtils.isSuperAdmin()) {
+            return joinPoint.proceed();
+        }
+
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         FwRequest requestMode = method.getAnnotation(FwRequest.class);
         if (Objects.isNull(requestMode)) {

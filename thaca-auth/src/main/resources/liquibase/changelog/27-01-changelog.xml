@@ -88,20 +88,6 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1761551503149-6" author="CanhPC">
-        <createTable tableName="user_roles">
-            <column name="role_code" type="VARCHAR(50)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user_roles" />
-            </column>
-            <column name="user_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user_roles" />
-            </column>
-            <column name="created_by" type="VARCHAR(255)" />
-            <column name="created_at" type="TIMESTAMP" />
-            <column name="updated_by" type="VARCHAR(255)" />
-            <column name="updated_at" type="TIMESTAMP" />
-        </createTable>
-    </changeSet>
 
     <changeSet id="1761551503149-8" author="CanhPC">
         <addUniqueConstraint columnNames="username" constraintName="uc_users_username" tableName="users" />
@@ -120,20 +106,6 @@
             baseColumnNames="role_code" baseTableName="role_permissions"
             constraintName="fk_rolper_on_role"
             referencedColumnNames="code" referencedTableName="roles" />
-    </changeSet>
-
-    <changeSet id="1761551503149-12" author="CanhPC">
-        <addForeignKeyConstraint
-            baseColumnNames="role_code" baseTableName="user_roles"
-            constraintName="fk_userol_on_role"
-            referencedColumnNames="code" referencedTableName="roles" />
-    </changeSet>
-
-    <changeSet id="1761551503149-13" author="CanhPC">
-        <addForeignKeyConstraint
-            baseColumnNames="user_id" baseTableName="user_roles"
-            constraintName="fk_userol_on_user"
-            referencedColumnNames="id" referencedTableName="users" />
     </changeSet>
 
     <changeSet id="load-data-permissions" author="CanhPC">
@@ -174,16 +146,6 @@
         </loadData>
     </changeSet>
 
-    <changeSet id="load-data-user-roles" author="CanhPC">
-        <loadData file="liquibase/data/user_roles.csv" separator=";" tableName="user_roles">
-            <column name="user_id" type="numeric" />
-            <column name="role_code" type="string" />
-            <column name="created_by" type="string" />
-            <column name="created_at" type="timestamp" />
-            <column name="updated_by" type="string" />
-            <column name="updated_at" type="timestamp" />
-        </loadData>
-    </changeSet>
 
     <changeSet id="load-data-role-permissions" author="CanhPC">
         <loadData file="liquibase/data/role_permissions.csv" separator=";" tableName="role_permissions">

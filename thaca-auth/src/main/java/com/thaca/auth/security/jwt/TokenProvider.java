@@ -3,12 +3,14 @@ package com.thaca.auth.security.jwt;
 import static com.thaca.framework.core.constants.AuthoritiesConstants.AUTHORITIES_KEY;
 import static com.thaca.framework.core.constants.AuthoritiesConstants.ROLE_KEY;
 
-import com.thaca.auth.domains.Role;
+import com.thaca.auth.domains.SystemCredential;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
+import com.thaca.auth.services.AuthService;
 import com.thaca.common.dtos.UserSession;
 import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
@@ -18,6 +20,7 @@ import com.thaca.common.socket.WsSessionRevokedMessage;
 import com.thaca.framework.blocking.starter.services.RedisPubService;
 import com.thaca.framework.blocking.starter.services.UserSessionService;
 import com.thaca.framework.core.configs.FrameworkProperties;
+import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.constants.CommonConstants;
 import com.thaca.framework.core.context.FwContext;
 import com.thaca.framework.core.enums.ChannelType;
@@ -37,11 +40,7 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +59,7 @@ public class TokenProvider {
     private final SecretKey key;
     private final JwtParser jwtParser;
     private final UserRepository userRepository;
+    private final SystemCredentialRepository systemCredentialRepository;
     private final Long tokenValidityDuration;
     private final Long refreshTokenValidityDuration;
     private final RedisPubService redisPubService;
@@ -68,12 +68,14 @@ public class TokenProvider {
 
     public TokenProvider(
         UserRepository userRepository,
+        SystemCredentialRepository systemCredentialRepository,
         FrameworkProperties frameworkProperties,
         RedisPubService redisPubService,
         UserSessionService userSessionService,
         CookieUtils cookieUtils
     ) {
         this.userRepository = userRepository;
+        this.systemCredentialRepository = systemCredentialRepository;
         String secret = frameworkProperties.getSecurity().getBase64Secret();
         this.redisPubService = redisPubService;
         this.userSessionService = userSessionService;
@@ -109,9 +111,17 @@ public class TokenProvider {
         Cookie cookie = cookieUtils.setTokenCookie(token, refreshToken);
         response.addCookie(cookie);
 
-        User user = userRepository.findByUsername(name).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setRefreshToken(FwUtils.hexString(refreshToken));
-        userRepository.save(user);
+        Optional<User> user = userRepository.findByUsername(name);
+        if (user.isPresent()) {
+            user.get().setRefreshToken(FwUtils.hexString(refreshToken));
+            userRepository.save(user.get());
+        } else {
+            SystemCredential sc = systemCredentialRepository
+                .findByUsername(name)
+                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+            sc.setRefreshToken(FwUtils.hexString(refreshToken));
+            systemCredentialRepository.save(sc);
+        }
         return token;
     }
 
@@ -137,11 +147,18 @@ public class TokenProvider {
     public void revokeToken(ChannelType channel) {
         String username = SecurityUtils.getCurrentUsername();
         if (StringUtils.isNotBlank(username)) {
-            User user = userRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-            user.setRefreshToken(null);
-            userRepository.save(user);
+            Optional<User> user = userRepository.findByUsername(username);
+            if (user.isPresent()) {
+                user.get().setRefreshToken(null);
+                userRepository.save(user.get());
+            } else {
+                systemCredentialRepository
+                    .findByUsername(username)
+                    .ifPresent(sc -> {
+                        sc.setRefreshToken(null);
+                        systemCredentialRepository.save(sc);
+                    });
+            }
             Thread.startVirtualThread(() -> {
                 try {
                     userSessionService.removeOldSessionByChanelType(username, channel);
@@ -154,11 +171,18 @@ public class TokenProvider {
 
     public void revokeAllTokens() {
         String username = SecurityUtils.getCurrentUsername();
-        User user = userRepository
-            .findByUsername(username)
-            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setRefreshToken(null);
-        userRepository.save(user);
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            user.get().setRefreshToken(null);
+            userRepository.save(user.get());
+        } else {
+            systemCredentialRepository
+                .findByUsername(username)
+                .ifPresent(sc -> {
+                    sc.setRefreshToken(null);
+                    systemCredentialRepository.save(sc);
+                });
+        }
         // to sent notification to all devices
         Thread.startVirtualThread(() -> {
             userSessionService.removeOldSessionByChanelType(username, ChannelType.WEB);
@@ -225,41 +249,41 @@ public class TokenProvider {
             String username = claims.getSubject();
             String sessionId = isGenerateNewSession ? UUID.randomUUID().toString() : claims.getId();
 
-            User user = userRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+            String userRefreshToken;
+            Object userObj;
+
+            Optional<User> optionalUser = userRepository.findByUsername(username);
+            if (optionalUser.isPresent()) {
+                userObj = optionalUser.get();
+                userRefreshToken = optionalUser.get().getRefreshToken();
+            } else {
+                SystemCredential sc = systemCredentialRepository
+                    .findByUsername(username)
+                    .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+                userObj = sc;
+                userRefreshToken = sc.getRefreshToken();
+            }
 
             if (
-                StringUtils.isBlank(user.getRefreshToken()) ||
-                !Objects.equals(user.getRefreshToken(), FwUtils.hexString(refreshToken))
+                StringUtils.isBlank(userRefreshToken) ||
+                !Objects.equals(userRefreshToken, FwUtils.hexString(refreshToken))
             ) {
                 throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
             }
 
-            Collection<? extends GrantedAuthority> authorities = user
-                .getRoles()
-                .stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
-
-            String rolesStr = user.getRoles().stream().map(Role::getName).collect(Collectors.joining(","));
-
-            CustomUserDetails userDetails = new CustomUserDetails(
-                user.getUsername(),
-                user.getPassword(),
-                authorities,
-                rolesStr,
-                channel.name()
-            );
-
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-
+            Authentication authentication = getAuthentication(channel, userObj);
             String newAccessToken = generateToken(authentication, tokenValidityDuration, channel, sessionId);
-
             String newRefreshToken = generateToken(authentication, refreshTokenValidityDuration, channel, sessionId);
 
-            user.setRefreshToken(FwUtils.hexString(newRefreshToken));
-            userRepository.save(user);
+            if (userObj instanceof User u) {
+                u.setRefreshToken(FwUtils.hexString(newRefreshToken));
+                userRepository.save(u);
+            } else {
+                SystemCredential sc = (SystemCredential) userObj;
+                sc.setRefreshToken(FwUtils.hexString(newRefreshToken));
+                systemCredentialRepository.save(sc);
+            }
+
             cacheUserToken(username, channel, sessionId, newAccessToken);
             return RefreshTokenRes.builder().accessToken(newAccessToken).refreshToken(newRefreshToken).build();
         } catch (SignatureException e) {
@@ -267,6 +291,42 @@ public class TokenProvider {
         } catch (JwtException e) {
             throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
         }
+    }
+
+    private static Authentication getAuthentication(ChannelType channel, Object userObj) {
+        String username;
+        String password;
+        String rolesString = AuthoritiesConstants.USER;
+        boolean isSuperAdmin = false;
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        if (userObj instanceof User u) {
+            username = u.getUsername();
+            password = u.getPassword();
+            authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
+        } else if (userObj instanceof SystemCredential sc) {
+            username = sc.getUsername();
+            password = sc.getPassword();
+            isSuperAdmin = sc.getSystemUser().isSuperAdmin();
+            if (isSuperAdmin) {
+                rolesString = AuthoritiesConstants.SUPER_ADMIN;
+                authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
+            } else {
+                rolesString = AuthService.getRoleString(sc, authorities);
+            }
+        } else {
+            throw new FwException(ErrorMessage.USER_NOT_FOUND);
+        }
+
+        CustomUserDetails userDetails = new CustomUserDetails(
+            username,
+            password,
+            authorities,
+            rolesString,
+            channel.name(),
+            isSuperAdmin
+        );
+        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }
 
     private String extractRefreshToken(String cookieValue, HttpServletRequest request) {

@@ -1,16 +1,22 @@
 package com.thaca.auth.security;
 
+import com.thaca.auth.domains.Permission;
+import com.thaca.auth.domains.Role;
+import com.thaca.auth.domains.SystemCredential;
+import com.thaca.auth.domains.SystemUser;
 import com.thaca.auth.domains.User;
-import com.thaca.auth.dtos.UserInfoDTO;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.services.AuthService;
 // import com.thaca.auth.services.KafkaProducerService;
 // import com.thaca.common.dtos.events.VerificationEmailEvent;
+import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.context.FwContext;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,40 +40,68 @@ public class DomainUserDetailsService implements UserDetailsService {
     @Transactional(readOnly = true)
     public @NonNull UserDetails loadUserByUsername(final String login) {
         String lowercaseLogin = login.toLowerCase(Locale.ENGLISH);
-        return authService
-            .findOneWithAuthoritiesByUsername(lowercaseLogin)
-            .map(user -> createSpringSecurityUser(lowercaseLogin, user))
-            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        Object userObj = authService.findOneByUsername(lowercaseLogin);
+        if (userObj == null) {
+            throw new FwException(ErrorMessage.USER_NOT_FOUND);
+        }
+        return createSpringSecurityUser(userObj);
     }
 
-    private CustomUserDetails createSpringSecurityUser(String lowercaseLogin, User user) {
-        if (user.isLocked()) {
+    private CustomUserDetails createSpringSecurityUser(Object userObj) {
+        String username;
+        String password;
+        boolean isLocked;
+        boolean isActivated;
+        boolean isSuperadmin = false;
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        String rolesString = AuthoritiesConstants.USER;
+
+        if (userObj instanceof User user) {
+            username = user.getUsername();
+            password = user.getPassword();
+            isLocked = user.isLocked();
+            isActivated = user.getIsActivated();
+            grantedAuthorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
+        } else if (userObj instanceof SystemCredential sc) {
+            SystemUser su = sc.getSystemUser();
+            username = sc.getUsername();
+            password = sc.getPassword();
+            isLocked = su.isLocked();
+            isActivated = su.getIsActivated();
+            isSuperadmin = su.isSuperAdmin();
+
+            Set<Role> roles = sc.getRoles();
+            if (isSuperadmin) {
+                rolesString = AuthoritiesConstants.SUPER_ADMIN;
+                grantedAuthorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
+            } else {
+                rolesString = roles.stream().map(Role::getCode).collect(Collectors.joining(","));
+                for (Role role : roles) {
+                    grantedAuthorities.add(new SimpleGrantedAuthority(role.getCode()));
+                    for (Permission perm : role.getPermissions()) {
+                        grantedAuthorities.add(new SimpleGrantedAuthority(perm.getCode()));
+                    }
+                }
+            }
+        } else {
+            throw new FwException(ErrorMessage.USER_NOT_FOUND);
+        }
+
+        if (isLocked) {
             throw new FwException(ErrorMessage.USER_LOCKED);
         }
 
-        if (!user.getIsActivated()) {
-            // VerificationEmailEvent event = new VerificationEmailEvent(user.getEmail(),
-            // lowercaseLogin, null);
+        if (!isActivated) {
             throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
         }
 
-        UserInfoDTO userInfoDTO = UserInfoDTO.fromEntity(user);
-
-        List<GrantedAuthority> grantedAuthorities =
-            userInfoDTO.getRoles() != null
-                ? userInfoDTO
-                      .getRoles()
-                      .stream()
-                      .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                      .collect(Collectors.toList())
-                : List.of();
-
         return new CustomUserDetails(
-            user.getUsername(),
-            user.getPassword(),
+            username,
+            password,
             grantedAuthorities,
-            String.join(",", userInfoDTO.getRoles()),
-            StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name())
+            rolesString,
+            StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name()),
+            isSuperadmin
         );
     }
 }
