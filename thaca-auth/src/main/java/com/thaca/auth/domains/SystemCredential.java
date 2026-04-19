@@ -31,10 +31,6 @@ public class SystemCredential extends BaseEntityAudit {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @JsonIgnore
-    @Column(name = "refresh_token", columnDefinition = "TEXT")
-    private String refreshToken;
-
     @ManyToMany
     @JoinTable(
         name = "system_credential_roles",

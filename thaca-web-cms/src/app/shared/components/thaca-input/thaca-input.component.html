@@ -1,17 +1,27 @@
 @if (label) {
-  <label class="mb-1 text-sm font-medium text-foreground/60 flex gap-1" [for]="id">
+  <label class="thaca-label" [for]="id">
     {{ label }}
     @if (required) {
-      <span class="text-[10px] text-red-500">(*)</span>
+      <span class="thaca-required">(*)</span>
     }
   </label>
 }
-<p-iconfield class="relative">
+
+<div
+  class="thaca-input-wrap"
+  [class.has-icon-left]="startIcon"
+  [class.has-icon-right]="endIcon || type === 'password'"
+  [class.is-error]="hasError()"
+  [class.is-disabled]="disabled"
+>
   @if (startIcon) {
-    <ng-icon [name]="startIcon.name" class="absolute left-3 top-1/2 -translate-y-1/2" />
+    <span class="thaca-icon thaca-icon--left">
+      <ng-icon [name]="startIcon.name" />
+    </span>
   }
+
   <input
-    pInputText
+    class="thaca-input"
     [id]="id"
     [type]="inputType()"
     [placeholder]="placeholder"
@@ -19,21 +29,21 @@
     [disabled]="disabled"
     (input)="onInput($event)"
     (blur)="onBlur()"
-    class="w-full"
-    [class.border-red-500!]="hasError()"
   />
+
   @if (type === 'password') {
-    <ng-icon
-      [name]="
-        isPasswordVisible()
-          ? APP_CONFIG_ICONS['solarEyeClosed'].name
-          : APP_CONFIG_ICONS['solarEye'].name
-      "
-      class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-      (click)="onTogglePassword()"
-    />
+    <span class="thaca-icon thaca-icon--right thaca-icon--clickable" (click)="onTogglePassword()">
+      <ng-icon
+        [name]="
+          isPasswordVisible()
+            ? APP_CONFIG_ICONS['solarEyeClosed'].name
+            : APP_CONFIG_ICONS['solarEye'].name
+        "
+      />
+    </span>
+  } @else if (endIcon) {
+    <span class="thaca-icon thaca-icon--right">
+      <ng-icon [name]="endIcon.name" />
+    </span>
   }
-  @if (endIcon && type !== 'password') {
-    <ng-icon [name]="endIcon.name" class="absolute right-3 top-1/2 -translate-y-1/2" />
-  }
-</p-iconfield>
+</div>

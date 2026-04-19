@@ -8,4 +8,6 @@ public interface UserPrincipal {
     String getChannel();
 
     boolean isSuperAdmin();
+
+    boolean isCmsUser();
 }

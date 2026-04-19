@@ -1,0 +1,160 @@
+:host {
+  display: inline-flex;
+}
+
+.thaca-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  position: relative;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // ── Sizes ──────────────────────────────────
+  &--sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+  &--md {
+    height: 40px;
+    padding: 0 18px;
+    font-size: 14px;
+  }
+  &--lg {
+    height: 48px;
+    padding: 0 24px;
+    font-size: 15px;
+  }
+
+  &--icon-only {
+    padding: 0;
+    aspect-ratio: 1 / 1;
+    &.thaca-btn--sm {
+      width: 32px;
+    }
+    &.thaca-btn--md {
+      width: 40px;
+    }
+    &.thaca-btn--lg {
+      width: 48px;
+    }
+  }
+
+  // ── Variants ───────────────────────────────
+  &--primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+    &:hover:not(:disabled) {
+      filter: brightness(0.9);
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 35%, transparent);
+    }
+  }
+
+  &--secondary {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    border-color: var(--border);
+    &:hover:not(:disabled) {
+      filter: brightness(0.95);
+      border-color: color-mix(in oklch, var(--border) 80%, var(--foreground));
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--border) 60%, transparent);
+    }
+  }
+
+  &--outline {
+    background: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+    &:hover:not(:disabled) {
+      background: color-mix(in oklch, var(--primary) 8%, transparent);
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 20%, transparent);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--foreground);
+    border-color: transparent;
+    &:hover:not(:disabled) {
+      background: var(--muted);
+      border-color: var(--border);
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--foreground) 10%, transparent);
+    }
+  }
+
+  &--destructive {
+    background: var(--destructive);
+    color: #fff;
+    border-color: var(--destructive);
+    &:hover:not(:disabled) {
+      filter: brightness(0.88);
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 30%, transparent);
+    }
+  }
+
+  &--linear {
+    background: linear-gradient(to right, #818cf8, #38bdf8);
+    color: #fff;
+    border: none;
+    &:hover:not(:disabled) {
+      opacity: 0.88;
+    }
+  }
+
+  // ── Internals ──────────────────────────────
+  &__icon {
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: thaca-spin 0.6s linear infinite;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  &--loading {
+    pointer-events: none;
+  }
+}
+
+@keyframes thaca-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

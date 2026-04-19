@@ -15,8 +15,8 @@ import { ValidationMessageComponent } from '../../shared/components/validation-m
 import { AuthService } from '../../core/services/auth.service';
 import { ILoginReq } from '../../core/models/auth.model';
 import { TranslateModule } from '@ngx-translate/core';
-import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { ThacaButtonComponent } from '../../shared/components/thaca-button/thaca-button.component';
 
 @Component({
   selector: 'app-login',
@@ -30,6 +30,7 @@ import { Router } from '@angular/router';
     ReactiveFormsModule,
     ValidationMessageComponent,
     TranslateModule,
+    ThacaButtonComponent,
   ],
   templateUrl: './login.component.html',
 })

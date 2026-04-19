@@ -83,7 +83,7 @@ public class CommonUtils {
             String accessToken = data.get(AuthKey.ACCESS_TOKEN.getKey());
             String refreshToken = data.get(AuthKey.REFRESH_TOKEN.getKey());
 
-            if (isNotEmpty(accessToken, refreshToken)) {
+            if (isNotEmpty(accessToken)) {
                 return Optional.of(new TokenPair(accessToken, refreshToken));
             }
             return Optional.empty();

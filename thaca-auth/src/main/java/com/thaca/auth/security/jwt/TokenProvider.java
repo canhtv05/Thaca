@@ -6,7 +6,6 @@ import com.thaca.auth.domains.SystemCredential;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.enums.ErrorMessage;
-import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.services.AuthService;
@@ -42,6 +41,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -57,23 +57,23 @@ public class TokenProvider {
     private final SecretKey key;
     private final JwtParser jwtParser;
     private final UserRepository userRepository;
-    private final SystemCredentialRepository systemCredentialRepository;
     private final Long tokenValidityDuration;
+    private final Long cmsTokenValidityDuration;
     private final Long refreshTokenValidityDuration;
     private final RedisPubService redisPubService;
     private final UserSessionService userSessionService;
     private final CookieUtils cookieUtils;
+    private final AuthService authService;
 
     public TokenProvider(
         UserRepository userRepository,
-        SystemCredentialRepository systemCredentialRepository,
         FrameworkProperties frameworkProperties,
         RedisPubService redisPubService,
         UserSessionService userSessionService,
+        @Lazy AuthService authService,
         CookieUtils cookieUtils
     ) {
         this.userRepository = userRepository;
-        this.systemCredentialRepository = systemCredentialRepository;
         String secret = frameworkProperties.getSecurity().getBase64Secret();
         this.redisPubService = redisPubService;
         this.userSessionService = userSessionService;
@@ -81,7 +81,9 @@ public class TokenProvider {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         key = Keys.hmacShaKeyFor(keyBytes);
         jwtParser = Jwts.parser().verifyWith(key).build();
+        this.authService = authService;
         this.tokenValidityDuration = frameworkProperties.getSecurity().getValidDurationInSeconds();
+        this.cmsTokenValidityDuration = frameworkProperties.getSecurity().getCmsValidDurationInSeconds();
         this.refreshTokenValidityDuration = frameworkProperties.getSecurity().getRefreshDurationInSeconds();
     }
 
@@ -96,29 +98,40 @@ public class TokenProvider {
             throw new FwException(CommonErrorMessage.UNAUTHORIZED);
         }
         String name = userDetails.getUsername();
+
+        // c = 1 là CMS, c = 0 là User
+        int c = userDetails.isCmsUser() ? 1 : 0;
+
+        if (c == 1 && channel != ChannelType.WEB) {
+            throw new FwException(ErrorMessage.CHANNEL_INVALID);
+        }
+
         String oldToken = userSessionService.isUserOnline(name, channel);
         String sessionId = UUID.randomUUID().toString();
 
-        String token = this.generateToken(authentication, this.tokenValidityDuration, channel, sessionId);
+        long validity = (c == 1) ? this.cmsTokenValidityDuration : this.tokenValidityDuration;
+        String token = this.generateToken(authentication, validity, channel, sessionId);
+
         if (StringUtils.isNotBlank(oldToken)) {
             Thread.startVirtualThread(() -> this.handleKickOldSessionAsync(name, token, oldToken, channel));
         }
-        String refreshToken = this.generateToken(authentication, this.refreshTokenValidityDuration, channel, sessionId);
+
+        String refreshToken = null;
+        if (c == 0 && channel != ChannelType.WEB) {
+            refreshToken = this.generateToken(authentication, this.refreshTokenValidityDuration, channel, sessionId);
+        }
+
         this.cacheUserToken(name, channel, sessionId, token);
 
         Cookie cookie = cookieUtils.setTokenCookie(token, refreshToken);
         response.addCookie(cookie);
 
-        Optional<User> user = userRepository.findByUsername(name);
-        if (user.isPresent()) {
-            user.get().setRefreshToken(FwUtils.hexString(refreshToken));
-            userRepository.save(user.get());
-        } else {
-            SystemCredential sc = systemCredentialRepository
-                .findByUsername(name)
-                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-            sc.setRefreshToken(FwUtils.hexString(refreshToken));
-            systemCredentialRepository.save(sc);
+        if (refreshToken != null) {
+            Optional<User> user = userRepository.findByUsername(name);
+            if (user.isPresent()) {
+                user.get().setRefreshToken(FwUtils.hexString(refreshToken));
+                userRepository.save(user.get());
+            }
         }
         return token;
     }
@@ -149,13 +162,6 @@ public class TokenProvider {
             if (user.isPresent()) {
                 user.get().setRefreshToken(null);
                 userRepository.save(user.get());
-            } else {
-                systemCredentialRepository
-                    .findByUsername(username)
-                    .ifPresent(sc -> {
-                        sc.setRefreshToken(null);
-                        systemCredentialRepository.save(sc);
-                    });
             }
             Thread.startVirtualThread(() -> {
                 try {
@@ -173,13 +179,6 @@ public class TokenProvider {
         if (user.isPresent()) {
             user.get().setRefreshToken(null);
             userRepository.save(user.get());
-        } else {
-            systemCredentialRepository
-                .findByUsername(username)
-                .ifPresent(sc -> {
-                    sc.setRefreshToken(null);
-                    systemCredentialRepository.save(sc);
-                });
         }
         // to sent notification to all devices
         Thread.startVirtualThread(() -> {
@@ -199,12 +198,13 @@ public class TokenProvider {
         long now = System.currentTimeMillis();
         long validityMillis = validityTimeInSeconds * 1000L;
         Date validity = new Date(now + validityMillis);
-
+        if (userDetails == null) throw new FwException(CommonErrorMessage.UNAUTHORIZED);
         return Jwts.builder()
             .id(sessionId)
             .subject(authentication.getName())
             .claim(ROLE_KEY, userDetails.getRole())
             .claim(CommonConstants.CHANNEL_KEY, channel)
+            .claim("c", userDetails.isCmsUser() ? 1 : 0)
             .issuedAt(new Date(now))
             .expiration(validity)
             .signWith(key, Jwts.SIG.HS512)
@@ -241,19 +241,20 @@ public class TokenProvider {
             String username = claims.getSubject();
             String sessionId = isGenerateNewSession ? UUID.randomUUID().toString() : claims.getId();
 
-            String userRefreshToken;
-            Object userObj;
+            // Read claim c (1: CMS, 0: User)
+            Integer cClaim = claims.get("c", Integer.class);
+            if (cClaim != null && cClaim == 1) {
+                throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
+            }
 
-            Optional<User> optionalUser = userRepository.findByUsername(username);
-            if (optionalUser.isPresent()) {
-                userObj = optionalUser.get();
-                userRefreshToken = optionalUser.get().getRefreshToken();
-            } else {
-                SystemCredential sc = systemCredentialRepository
-                    .findByUsername(username)
-                    .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-                userObj = sc;
-                userRefreshToken = sc.getRefreshToken();
+            Object userObj = authService.findOneByUsername(username);
+            if (userObj == null) {
+                throw new FwException(ErrorMessage.USER_NOT_FOUND);
+            }
+
+            String userRefreshToken = null;
+            if (userObj instanceof User u) {
+                userRefreshToken = u.getRefreshToken();
             }
 
             if (
@@ -264,17 +265,15 @@ public class TokenProvider {
             }
 
             Authentication authentication = getAuthentication(channel, userObj);
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            if (userDetails == null) throw new FwException(CommonErrorMessage.UNAUTHORIZED);
+
             String newAccessToken = generateToken(authentication, tokenValidityDuration, channel, sessionId);
             String newRefreshToken = generateToken(authentication, refreshTokenValidityDuration, channel, sessionId);
 
-            if (userObj instanceof User u) {
-                u.setRefreshToken(FwUtils.hexString(newRefreshToken));
-                userRepository.save(u);
-            } else {
-                SystemCredential sc = (SystemCredential) userObj;
-                sc.setRefreshToken(FwUtils.hexString(newRefreshToken));
-                systemCredentialRepository.save(sc);
-            }
+            User u = (User) userObj;
+            u.setRefreshToken(FwUtils.hexString(newRefreshToken));
+            userRepository.save(u);
 
             cacheUserToken(username, channel, sessionId, newAccessToken);
             return RefreshTokenRes.builder().accessToken(newAccessToken).refreshToken(newRefreshToken).build();
@@ -310,13 +309,15 @@ public class TokenProvider {
             throw new FwException(ErrorMessage.USER_NOT_FOUND);
         }
 
+        boolean cmsUser = userObj instanceof SystemCredential;
         CustomUserDetails userDetails = new CustomUserDetails(
             username,
             password,
             authorities,
             rolesString,
             channel.name(),
-            isSuperAdmin
+            isSuperAdmin,
+            cmsUser
         );
         return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }

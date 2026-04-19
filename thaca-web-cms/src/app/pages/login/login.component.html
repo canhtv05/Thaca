@@ -39,13 +39,9 @@
           >{{ 'forgotPassword' | translate }}</a
         >
       </div>
-      <button
-        class="inline-flex relative items-center justify-center gap-2 whitespace-nowrap text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden before:absolute before:inset-0 before:opacity-0 before:transition-opacity before:duration-300 before:pointer-events-none bg-primary shadow-none border-none text-white hover:opacity-90 h-10 px-6 has-[&gt;svg]:px-4 w-full rounded-full cursor-pointer"
-        type="submit"
-        tabindex="0"
-      >
-        {{ 'login' | translate }}
-      </button>
+      <thaca-button class="w-full rounded-full!" type="submit" variant="primary" size="md">
+        <span class="text-white"> {{ 'login' | translate }}</span>
+      </thaca-button>
     </form>
   </div>
 </app-auth-layout>

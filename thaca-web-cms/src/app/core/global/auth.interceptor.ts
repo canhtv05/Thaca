@@ -49,7 +49,10 @@ export const authInterceptor: HttpInterceptorFn = (
         case 401:
           authService.logout();
           router.navigate(['/login']);
-          return throwError(() => error);
+          return throwError(() => {
+            authService.logout();
+            return error;
+          });
         case 403:
           router.navigate(['/forbidden']);
           toastrService.warning(message, title);

@@ -19,6 +19,7 @@ public class FrameworkProperties {
 
         private String base64Secret;
         private Long validDurationInSeconds;
+        private Long cmsValidDurationInSeconds;
         private Long refreshDurationInSeconds;
         private String cookieDomain;
     }

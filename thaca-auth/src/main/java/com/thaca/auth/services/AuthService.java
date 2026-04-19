@@ -113,7 +113,8 @@ public class AuthService {
             authorities,
             rolesString,
             StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name()),
-            su.isSuperAdmin()
+            su.isSuperAdmin(),
+            true
         );
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);

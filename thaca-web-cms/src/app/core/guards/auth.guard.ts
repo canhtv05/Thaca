@@ -1,21 +1,23 @@
 import { inject } from '@angular/core';
 import { CanActivateChildFn, Router } from '@angular/router';
 import { currentUser, isInitialAuthChecked } from '../stores/app.store';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, map, take } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 
-export const AuthGuard: CanActivateChildFn = (_, state) => {
+export const AuthGuard: CanActivateChildFn = async (_, state) => {
   const router = inject(Router);
+  const authService = inject(AuthService);
 
-  return toObservable(isInitialAuthChecked).pipe(
-    filter((checked) => checked),
-    take(1),
-    map(() => {
-      if (!currentUser()) {
-        void router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-        return false;
-      }
-      return true;
-    }),
-  );
+  if (!isInitialAuthChecked()) {
+    try {
+      await authService.getUserProfile();
+    } catch (e) {
+      isInitialAuthChecked.set(true);
+    }
+  }
+
+  if (!currentUser()) {
+    void router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    return false;
+  }
+  return true;
 };

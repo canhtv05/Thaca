@@ -52,7 +52,7 @@ public class DomainUserDetailsService implements UserDetailsService {
         String password;
         boolean isLocked;
         boolean isActivated;
-        boolean isSuperadmin = false;
+        boolean isSuperAdmin = false;
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         String rolesString = AuthoritiesConstants.USER;
 
@@ -68,10 +68,10 @@ public class DomainUserDetailsService implements UserDetailsService {
             password = sc.getPassword();
             isLocked = su.isLocked();
             isActivated = su.getIsActivated();
-            isSuperadmin = su.isSuperAdmin();
+            isSuperAdmin = su.isSuperAdmin();
 
             Set<Role> roles = sc.getRoles();
-            if (isSuperadmin) {
+            if (isSuperAdmin) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 grantedAuthorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
             } else {
@@ -95,13 +95,16 @@ public class DomainUserDetailsService implements UserDetailsService {
             throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
         }
 
+        boolean cmsUser = userObj instanceof SystemCredential;
+
         return new CustomUserDetails(
             username,
             password,
             grantedAuthorities,
             rolesString,
             StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name()),
-            isSuperadmin
+            isSuperAdmin,
+            cmsUser
         );
     }
 }

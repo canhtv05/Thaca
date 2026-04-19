@@ -1,0 +1,26 @@
+<button
+  class="thaca-btn"
+  [ngClass]="class"
+  [class]="'thaca-btn thaca-btn--' + variant + ' thaca-btn--' + size"
+  [class.thaca-btn--icon-only]="iconOnly"
+  [class.thaca-btn--loading]="loading"
+  [type]="type"
+  [disabled]="isDisabled"
+  (click)="onClick($event)"
+>
+  @if (loading) {
+    <span class="thaca-btn__spinner"></span>
+  } @else if (startIcon) {
+    <ng-icon [name]="startIcon.name" class="thaca-btn__icon" />
+  }
+
+  @if (!iconOnly) {
+    <span class="thaca-btn__label">
+      <ng-content />
+    </span>
+  }
+
+  @if (!loading && endIcon && !iconOnly) {
+    <ng-icon [name]="endIcon.name" class="thaca-btn__icon" />
+  }
+</button>
