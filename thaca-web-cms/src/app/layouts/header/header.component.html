@@ -6,15 +6,21 @@
       (click)="toggleSidebar()"
       aria-label="Toggle sidebar"
     >
-      <i class="pi" [class.pi-bars]="!layoutService.isMobileMenuActive()" [class.pi-times]="layoutService.isMobileMenuActive()"></i>
+      <i
+        class="pi"
+        [class.pi-bars]="!layoutService.isMobileMenuActive()"
+        [class.pi-times]="layoutService.isMobileMenuActive()"
+      ></i>
     </button>
   </div>
 
   <div class="header-center">
     <!-- Your content here -->
+    header center
   </div>
 
   <div class="header-end">
     <!-- Your content here (user avatar, notifications, etc.) -->
+    header end
   </div>
 </header>

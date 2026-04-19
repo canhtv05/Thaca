@@ -2,8 +2,8 @@ import { Component, inject, OnInit, OnDestroy, ElementRef, HostListener } from '
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
-import { AppMenuitem } from './app.menuitem';
-import { LayoutService } from './layout.service';
+import { AppMenuitem } from '../menu-item/menu-item.component';
+import { LayoutService } from './sidebar.service';
 import { filter, Subject, takeUntil } from 'rxjs';
 
 @Component({

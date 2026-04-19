@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LayoutService } from '../../shared/components/sidebar/layout.service';
+import { LayoutService } from '../../shared/components/sidebar/sidebar.service';
 
 @Component({
   selector: 'app-header',

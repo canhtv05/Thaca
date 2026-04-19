@@ -1,8 +1,8 @@
-<nav class="sidebar-nav">
+<nav class="sidebar-nav bg-accent">
   <div class="sidebar-brand">
-    @if (!layoutService.isSidebarCollapsed()) {
+    @if (!layoutService.isSidebarCollapsed() || !layoutService.isDesktop()) {
       <span class="brand-text">Thaca</span>
-      <span class="brand-badge">CMS</span>
+      <span class="brand-badge text-white!">CMS</span>
     } @else {
       <span class="brand-icon">T</span>
     }
