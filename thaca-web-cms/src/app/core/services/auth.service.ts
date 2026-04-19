@@ -17,17 +17,13 @@ export class AuthService {
   readonly user = computed(() => currentUser());
   readonly isAuthenticated = computed(() => !!currentUser());
 
-  private get baseUrl() {
-    return this.config.getApiUrl();
-  }
-
   async login(req: ILoginReq): Promise<IApiPayload<IAuthenticateRes>> {
     const payload: IApiPayload<ILoginReq> = {
       header: createHeader(),
       body: createBody(req),
     };
     const res = await GlobalHttp.post<IApiPayload<IAuthenticateRes>>(
-      `${this.baseUrl}/cms/sign-in`,
+      `${this.config.getApiUrl()}/cms/sign-in`,
       payload,
     );
     if (res.body.status === 'OK' && res.body.data.authenticate) {
@@ -44,7 +40,7 @@ export class AuthService {
       return this.profileRequest;
     }
     this.profileRequest = GlobalHttp.post<IApiPayload<IAuthUserDTO>>(
-      `${this.baseUrl}/cms/profile`,
+      `${this.config.getApiUrl()}/cms/profile`,
       {
         header: createHeader(),
         body: createBody({}),

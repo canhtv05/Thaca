@@ -12,6 +12,7 @@ import { catchError, finalize } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { currentLang, isLoading } from '../stores/app.store';
+import { SKIP_LOADING } from './http-context';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<any>,
@@ -21,11 +22,15 @@ export const authInterceptor: HttpInterceptorFn = (
   const authService = inject(AuthService);
   const toastrService = inject(ToastrService);
 
+  const skipLoading = req.context.get(SKIP_LOADING);
+
   const authReq = req.clone({
     withCredentials: true,
   });
 
-  isLoading.set(true);
+  if (!skipLoading) {
+    isLoading.set(true);
+  }
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -73,7 +78,9 @@ export const authInterceptor: HttpInterceptorFn = (
       return throwError(() => error);
     }),
     finalize(() => {
-      isLoading.set(false);
+      if (!skipLoading) {
+        isLoading.set(false);
+      }
     }),
   );
 };

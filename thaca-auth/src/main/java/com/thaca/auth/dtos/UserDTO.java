@@ -32,6 +32,7 @@ public class UserDTO {
     private String email;
 
     private Boolean isActivated;
+    private Boolean isLocked;
 
     public static UserDTO fromEntity(User user) {
         UserDTO userDTO = new UserDTO();

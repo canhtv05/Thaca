@@ -1,0 +1,26 @@
+:host {
+  width: 100%;
+}
+
+:host ::ng-deep .p-breadcrumb {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:host ::ng-deep .p-breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+
+:host ::ng-deep .p-breadcrumb.p-component {
+  background: transparent !important;
+  padding: 0px !important;
+  color: var(--foreground) !important;
+  font-size: var(--text-xs) !important;
+}
+
+:host ::ng-deep .p-icon {
+  width: 12px !important;
+  height: 12px !important;
+}

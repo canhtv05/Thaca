@@ -59,17 +59,17 @@ export class Sidebar implements OnInit, OnDestroy {
           {
             label: 'menu.user_list',
             icon: 'pi pi-users',
-            routerLink: ['/users/list'],
+            routerLink: ['/user-management/list'],
           },
           {
             label: 'menu.permissions',
             icon: 'pi pi-shield',
-            routerLink: ['/users/permissions'],
+            routerLink: ['/user-management/permissions'],
           },
           {
             label: 'menu.user_logs',
             icon: 'pi pi-history',
-            routerLink: ['/users/logs'],
+            routerLink: ['/user-management/logs'],
           },
         ],
       },

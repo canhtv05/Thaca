@@ -1,0 +1,112 @@
+.data-table-container {
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+  .table-header-box {
+    padding-bottom: 1rem;
+  }
+}
+
+/* ─── DataTable Internal Loading (Independent from global app-loading) ─── */
+.dt-loading-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.15); /* Subtler than global overlay */
+  backdrop-filter: blur(3px);
+  border-radius: 8px;
+  pointer-events: all;
+
+  .dt-loader-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    animation: dtFadeInUp 0.3s ease-out;
+
+    .dt-loader-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #10b981;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: dtSpin 0.8s linear infinite;
+    }
+
+    .dt-loader-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--foreground);
+      letter-spacing: 0.3px;
+      opacity: 0.9;
+    }
+  }
+}
+
+@keyframes dtSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes dtFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── PrimeNG Overrides ─── */
+::ng-deep {
+  .p-datatable {
+    background: transparent !important;
+    .header-cell {
+      background: var(--muted) !important;
+      color: var(--foreground) !important;
+      font-weight: 700 !important;
+      font-size: 0.7rem !important;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 14px 16px !important;
+      border-bottom: 2px solid var(--border) !important;
+    }
+    .p-datatable-tbody > tr {
+      background: transparent !important;
+      &:hover {
+        background: rgba(255, 255, 255, 0.03) !important;
+      }
+    }
+    .body-cell {
+      padding: 16px !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .action-col {
+      background: transparent !important;
+    }
+
+    .p-paginator {
+      background: transparent !important;
+      border: none !important;
+      .p-paginator-pages .p-paginator-page.p-highlight {
+        background: #10b981 !important;
+        color: white !important;
+      }
+    }
+  }
+}

@@ -13,6 +13,13 @@ export const mainLayoutRoute: Route[] = [
         path: 'home',
         component: HomeComponent,
       },
+      {
+        path: 'user-management',
+        loadChildren: () =>
+          import('../../pages/user-management/user-management.route').then(
+            (m) => m.userManagementRoute,
+          ),
+      },
     ],
   },
 ];

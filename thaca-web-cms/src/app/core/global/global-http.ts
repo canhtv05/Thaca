@@ -1,40 +1,49 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpContext } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { SKIP_LOADING } from '../global/http-context';
+
+export interface IRequestOptions {
+  headers?: Record<string, string>;
+  skipLoading?: boolean;
+}
 
 export class GlobalHttp {
   private static get httpClient(): HttpClient | null {
     return (window as any).__appGlobal?.httpClient || null;
   }
 
-  static get<T = any>(url: string, headers: Record<string, string> = {}): Promise<T> {
-    return this.request<T>('GET', url, undefined, headers);
+  static get<T = any>(url: string, options: IRequestOptions = {}): Promise<T> {
+    return this.request<T>('GET', url, undefined, options);
   }
 
-  static post<T = any>(url: string, body?: any, headers: Record<string, string> = {}): Promise<T> {
-    return this.request<T>('POST', url, body, headers);
+  static post<T = any>(url: string, body?: any, options: IRequestOptions = {}): Promise<T> {
+    return this.request<T>('POST', url, body, options);
   }
 
-  static put<T = any>(url: string, body?: any, headers: Record<string, string> = {}): Promise<T> {
-    return this.request<T>('PUT', url, body, headers);
+  static put<T = any>(url: string, body?: any, options: IRequestOptions = {}): Promise<T> {
+    return this.request<T>('PUT', url, body, options);
   }
 
-  static delete<T = any>(url: string, headers: Record<string, string> = {}): Promise<T> {
-    return this.request<T>('DELETE', url, undefined, headers);
+  static delete<T = any>(url: string, options: IRequestOptions = {}): Promise<T> {
+    return this.request<T>('DELETE', url, undefined, options);
   }
 
   static async request<T>(
     method: string,
     url: string,
     body?: any,
-    headers: Record<string, string> = {},
+    options: IRequestOptions = {},
   ): Promise<T> {
     const client = this.httpClient;
     if (client) {
-      const httpHeaders = new HttpHeaders(headers);
+      const httpHeaders = new HttpHeaders(options.headers || {});
+      const context = new HttpContext().set(SKIP_LOADING, !!options.skipLoading);
+
       return await firstValueFrom(
         client.request<T>(method, url, {
           body,
           headers: httpHeaders,
+          context,
           withCredentials: true,
         }),
       );
@@ -44,7 +53,7 @@ export class GlobalHttp {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        ...headers,
+        ...options.headers,
       },
       body: body ? JSON.stringify(body) : undefined,
     });

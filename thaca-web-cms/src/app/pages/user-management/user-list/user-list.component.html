@@ -1,0 +1,45 @@
+<div class="flex flex-col gap-4 w-full">
+  <app-breadcrumb title="User Management" />
+
+  <app-data-table
+    [config]="tableConfig"
+    [externalFilter]="filter()"
+    (onAction)="handleAction($event)"
+  >
+    <!-- Search Slot -->
+    <ng-template #searchTemplate>
+      <div class="flex items-center gap-3">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            pInputText
+            placeholder="Search by keywords..."
+            class="w-80 p-inputtext-sm"
+            [(ngModel)]="filter().username"
+            (keyup.enter)="onSearch()"
+          />
+        </span>
+        <p-button
+          icon="pi pi-filter"
+          [text]="true"
+          severity="secondary"
+          size="small"
+          label="Filters"
+        />
+      </div>
+    </ng-template>
+
+    <!-- Header Actions -->
+    <ng-template #headerActions>
+      <p-button
+        label="Export"
+        icon="pi pi-download"
+        [text]="true"
+        severity="secondary"
+        size="small"
+      />
+      <p-button label="Add User" icon="pi pi-plus" size="small" styleClass="p-button-primary" />
+    </ng-template>
+  </app-data-table>
+</div>

@@ -1,11 +1,25 @@
 package com.thaca.common.dtos.search;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 
-public record PaginationRequest(Integer page, Integer size, String sortField, String sortOrder) {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class PaginationRequest {
+
+    private Integer page;
+    private Integer size;
+    private String sortField;
+    private String sortOrder;
+
     private int safePage() {
         return (page == null || page < 1) ? 0 : page - 1;
     }

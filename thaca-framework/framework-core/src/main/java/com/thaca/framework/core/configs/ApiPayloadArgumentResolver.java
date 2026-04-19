@@ -45,7 +45,10 @@ public class ApiPayloadArgumentResolver implements HandlerMethodArgumentResolver
         String bodyString = new String(bodyBytes, StandardCharsets.UTF_8);
         JavaType targetType = objectMapper
             .getTypeFactory()
-            .constructParametricType(ApiPayload.class, parameter.getParameterType());
+            .constructParametricType(
+                ApiPayload.class,
+                objectMapper.getTypeFactory().constructType(parameter.getGenericParameterType())
+            );
         ApiPayload<?> payload = objectMapper.readValue(bodyString, targetType);
         if (payload == null) {
             return null;

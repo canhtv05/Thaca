@@ -1,0 +1,13 @@
+<div class="flex flex-col gap-1 card w-full rounded-md px-4">
+  <div class="flex justify-between items-center">
+    <h1 class="text-sm font-bold">{{ title }}</h1>
+  </div>
+  <p-breadcrumb [model]="items" [home]="home">
+    <ng-template #item let-item>
+      <a class="cursor-pointer" [routerLink]="item.url">
+        <i [class]="item.icon"></i>
+        {{ item.label }}
+      </a>
+    </ng-template>
+  </p-breadcrumb>
+</div>

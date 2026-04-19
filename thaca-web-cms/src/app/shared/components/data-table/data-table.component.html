@@ -1,0 +1,129 @@
+<div class="data-table-container card">
+  <!-- ─── Table Header / Search Slot ─── -->
+  <div class="table-header-box mb-4">
+    <div class="flex items-center justify-between gap-4">
+      <div class="header-left flex-1">
+        <ng-container *ngTemplateOutlet="searchTemplate"></ng-container>
+      </div>
+      <div class="header-right flex items-center gap-2">
+        <ng-container *ngTemplateOutlet="headerActions"></ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Main Table ─── -->
+  <div class="relative">
+    <!-- ─── Internal DataTable Loading (Independent) ─── -->
+    <div *ngIf="loading()" class="dt-loading-mask">
+      <div class="dt-loader-card">
+        <div class="dt-loader-spinner"></div>
+        <span class="dt-loader-text">Loading data...</span>
+      </div>
+    </div>
+
+    <p-table
+      [value]="data()"
+      [columns]="config.columns"
+      [lazy]="true"
+      (onLazyLoad)="onLazyLoad($event)"
+      [totalRecords]="totalRecords()"
+      [loading]="false"
+      [rows]="config.rows || 10"
+      [paginator]="true"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10, 20, 50, 100]"
+      [scrollable]="true"
+      scrollHeight="flex"
+      [dataKey]="config.dataKey || 'id'"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      class="p-datatable-sm"
+      [tableStyle]="{ 'min-width': '50rem' }"
+    >
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th *ngIf="config.showStt" style="width: 60px" class="header-cell stt-col">STT</th>
+          @for (col of config.columns; track col.field) {
+            <th
+              [pSortableColumn]="col.sortable ? col.field : ''"
+              [style.width]="col.width"
+              class="header-cell"
+            >
+              <div class="flex items-center gap-2">
+                {{ col.header }}
+                <p-sortIcon *ngIf="col.sortable" [field]="col.field" />
+              </div>
+            </th>
+          }
+          <th
+            *ngIf="config.actions?.length"
+            [class.fixed-right]="config.actionFixed"
+            class="action-col"
+            style="width: 120px"
+          >
+            Action
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+        <tr class="hover:bg-muted/50 transition-colors">
+          <td *ngIf="config.showStt" class="body-cell stt-col text-center">
+            <span class="text-xs opacity-60">{{ getIndex(rowIndex) }}</span>
+          </td>
+
+          @for (col of config.columns; track col.field) {
+            <td [style.width]="col.width" class="body-cell">
+              @if (!col.condition || col.condition(rowData)) {
+                @if (col.render) {
+                  <div [innerHTML]="col.render(rowData)"></div>
+                } @else {
+                  <span class="text-foreground/90">{{ rowData[col.field] }}</span>
+                }
+              }
+            </td>
+          }
+
+          <td
+            *ngIf="config.actions?.length"
+            [class.fixed-right]="config.actionFixed"
+            class="action-col"
+            style="width: 120px"
+          >
+            <div class="flex items-center gap-2">
+              @for (action of config.actions; track action.titleKey) {
+                @if (!action.condition || action.condition(rowData)) {
+                  <p-button
+                    [icon]="action.icon"
+                    [text]="true"
+                    [severity]="action.color || 'secondary'"
+                    rounded="true"
+                    size="small"
+                    (click)="handleAction(action.titleKey, rowData, $event)"
+                    [pTooltip]="action.titleKey"
+                    [tooltipPosition]="'top'"
+                  />
+                }
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td
+            [attr.colspan]="
+              config.columns.length + (config.actions?.length ? 1 : 0) + (config.showStt ? 1 : 0)
+            "
+            class="text-center py-8"
+          >
+            <div class="flex flex-col items-center gap-2 opacity-40">
+              <i class="pi pi-box text-4xl"></i>
+              <span>No data found</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

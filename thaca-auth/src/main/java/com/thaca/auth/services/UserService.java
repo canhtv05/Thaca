@@ -6,10 +6,8 @@ import com.thaca.auth.dtos.UserDTO;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
 import com.thaca.auth.dtos.req.ResetPasswordReq;
-import com.thaca.auth.dtos.req.UserSearchReq;
 import com.thaca.auth.dtos.req.VerifyOTPReq;
 import com.thaca.auth.enums.ErrorMessage;
-import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.EmailRule;
@@ -250,17 +248,22 @@ public class UserService {
 
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.VALIDATE)
-    public SearchResponse<UserDTO> searchDatatable(SearchRequest<UserSearchReq> request) {
+    public SearchResponse<UserDTO> search(SearchRequest<UserDTO> request) {
         Specification<User> spec = createSpecification(request);
-        Page<User> tenants = userRepository.findAll(spec, request.page().toPageable());
+        try {
+            Thread.sleep(10000);
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+        }
+        Page<User> users = userRepository.findAll(spec, request.getPage().toPageable());
         return new SearchResponse<>(
-            tenants.getContent().stream().map(UserDTO::fromEntity).collect(Collectors.toList()),
+            users.getContent().stream().map(UserDTO::fromEntity).collect(Collectors.toList()),
             PaginationResponse.of(
-                tenants.getNumber(),
-                tenants.getTotalPages(),
-                tenants.getSize(),
-                tenants.getNumberOfElements(),
-                (int) tenants.getTotalElements()
+                users.getNumber(),
+                users.getTotalPages(),
+                users.getSize(),
+                users.getNumberOfElements(),
+                (int) users.getTotalElements()
             )
         );
     }
@@ -270,22 +273,22 @@ public class UserService {
         return StringUtils.isNotEmpty(redisService.get(keyForgotPassword, String.class));
     }
 
-    private Specification<User> createSpecification(SearchRequest<UserSearchReq> criteria) {
+    private Specification<User> createSpecification(SearchRequest<UserDTO> req) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (StringUtils.isNotBlank(criteria.filter().getUsername())) {
-                predicates.add(
-                    cb.or(
-                        cb.like(
-                            cb.lower(root.get("username")),
-                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
-                        ),
-                        cb.like(
-                            cb.lower(root.get("username")),
-                            "%" + criteria.filter().getUsername().toLowerCase() + "%"
-                        )
-                    )
-                );
+            if (req.getFilter() != null) {
+                UserDTO filter = req.getFilter();
+                if (StringUtils.isNotBlank(filter.getUsername())) {
+                    predicates.add(
+                        cb.like(cb.lower(root.get("username")), "%" + filter.getUsername().toLowerCase() + "%")
+                    );
+                }
+                if (StringUtils.isNotBlank(filter.getEmail())) {
+                    predicates.add(cb.like(cb.lower(root.get("email")), "%" + filter.getEmail().toLowerCase() + "%"));
+                }
+                if (Objects.nonNull(filter.getIsActivated())) {
+                    predicates.add(cb.equal(root.get("isActivated"), filter.getIsActivated()));
+                }
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

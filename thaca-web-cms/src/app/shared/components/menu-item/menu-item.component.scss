@@ -59,6 +59,7 @@
   position: relative;
   white-space: nowrap;
   overflow: hidden;
+  transition: none !important;
 }
 
 :host(.root-menuitem) .menu-link {
@@ -88,10 +89,29 @@
 }
 
 .menu-link.active-route {
-  background: var(--color-primary);
-  color: var(--color-primary-foreground);
+  background: color-mix(in oklch, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
   opacity: 1;
   font-weight: 600;
+  transition: none !important;
+
+  .menu-icon,
+  .menu-text {
+    color: var(--color-primary) !important;
+    transition: none !important;
+  }
+
+  /* Soft indicator for root items */
+  &:not(.submenu-item)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 3px;
+    background: var(--color-primary);
+    border-radius: 0 4px 4px 0;
+  }
 }
 
 /* ─── Icon ─── */
@@ -161,20 +181,15 @@
 }
 
 .submenu .menu-link.active-route {
-  background: transparent;
+  background: color-mix(in oklch, var(--color-primary) 8%, transparent);
   color: var(--color-primary) !important;
   opacity: 1;
   font-weight: 700;
   box-shadow: none;
-}
+  transition: none !important;
 
-.menu-link {
-  &.active-route {
-    .menu-text {
-      color: var(--color-white) !important;
-    }
-    .menu-icon {
-      color: var(--color-white) !important;
-    }
+  .menu-text,
+  .menu-icon {
+    color: var(--color-primary) !important;
   }
 }
