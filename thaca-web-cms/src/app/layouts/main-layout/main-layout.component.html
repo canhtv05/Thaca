@@ -1,3 +1,23 @@
-<main class="flex min-h-screen flex-col bg-background text-foreground">
-  <router-outlet></router-outlet>
-</main>
+<div
+  class="layout-wrapper"
+  [class.sidebar-collapsed]="layoutService.isSidebarCollapsed()"
+  [class.mobile-menu-active]="layoutService.isMobileMenuActive()"
+>
+  <!-- Sidebar -->
+  <aside class="layout-sidebar">
+    <app-sidebar></app-sidebar>
+  </aside>
+
+  <!-- Mobile overlay -->
+  @if (layoutService.isMobileMenuActive()) {
+    <div class="mobile-overlay" (click)="layoutService.closeMobileMenu()"></div>
+  }
+
+  <!-- Main content area -->
+  <div class="layout-main">
+    <app-header></app-header>
+    <div class="layout-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

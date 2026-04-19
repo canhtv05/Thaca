@@ -1,9 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Sidebar } from '../../shared/components/sidebar/sidebar.component';
+import { HeaderComponent } from '../header/header.component';
+import { LayoutService } from '../../shared/components/sidebar/layout.service';
 
 @Component({
   selector: 'app-main-layout',
+  imports: [CommonModule, RouterOutlet, Sidebar, HeaderComponent],
   templateUrl: './main-layout.component.html',
-  imports: [RouterOutlet],
+  styleUrl: './main-layout.component.scss',
 })
-export class MainLayoutComponent {}
+export class MainLayoutComponent {
+  layoutService = inject(LayoutService);
+}

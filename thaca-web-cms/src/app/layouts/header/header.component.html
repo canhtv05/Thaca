@@ -1,0 +1,20 @@
+<header class="app-header">
+  <div class="header-start">
+    <button
+      class="toggle-btn"
+      data-sidebar-toggle
+      (click)="toggleSidebar()"
+      aria-label="Toggle sidebar"
+    >
+      <i class="pi" [class.pi-bars]="!layoutService.isMobileMenuActive()" [class.pi-times]="layoutService.isMobileMenuActive()"></i>
+    </button>
+  </div>
+
+  <div class="header-center">
+    <!-- Your content here -->
+  </div>
+
+  <div class="header-end">
+    <!-- Your content here (user avatar, notifications, etc.) -->
+  </div>
+</header>

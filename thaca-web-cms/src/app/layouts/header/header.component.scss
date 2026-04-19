@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  padding: 0 20px;
+  background: var(--color-background);
+  border-bottom: var(--border-b) solid var(--color-border);
+  backdrop-filter: blur(12px);
+  gap: 16px;
+}
+
+.header-start {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-foreground);
+  cursor: pointer;
+  opacity: 0.6;
+  font-size: 1.1rem;
+}
+
+.toggle-btn:hover {
+  background: var(--color-accent);
+  opacity: 1;
+}
