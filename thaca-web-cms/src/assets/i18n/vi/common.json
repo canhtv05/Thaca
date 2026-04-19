@@ -1,5 +1,27 @@
 {
   "common": {
-    "loading": "Đang xử lý..."
+    "loading": "Đang xử lý...",
+    "loading_data": "Đang tải dữ liệu...",
+    "no_data_found": "Không có dữ liệu",
+    "stt": "STT",
+    "select": "Chọn...",
+    "showing": "Hiển thị",
+    "records": "bản ghi",
+    "action": "Hành động",
+    "previous": "Trang trước",
+    "next": "Trang sau",
+    "first": "Trang đầu",
+    "last": "Trang cuối",
+    "page": "trang",
+    "try_changing_filters_or_search": "Thử thay đổi bộ lọc hoặc tìm kiếm khác",
+    "button": {
+      "create": "Tạo",
+      "update": "Cập nhật",
+      "delete": "Xóa",
+      "cancel": "Hủy",
+      "save": "Lưu",
+      "close": "Đóng",
+      "back": "Quay lại"
+    }
   }
 }

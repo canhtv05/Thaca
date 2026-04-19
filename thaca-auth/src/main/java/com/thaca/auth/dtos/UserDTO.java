@@ -1,5 +1,6 @@
 package com.thaca.auth.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thaca.auth.domains.User;
 import com.thaca.framework.core.utils.json.LowerCaseTrimDeserializer;
@@ -25,6 +26,7 @@ public class UserDTO {
     @JsonDeserialize(using = LowerCaseTrimDeserializer.class)
     private String username;
 
+    @JsonIgnore
     @JsonDeserialize(using = LowerCaseTrimDeserializer.class)
     private String password;
 

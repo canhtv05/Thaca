@@ -1,59 +1,99 @@
-.data-table-container {
-  padding: 1rem;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+// ═══════════════════════════════════════════════════════════════
+//  DataTable — Premium Redesign v2
+//  - Unified row color (no alternating dark/light)
+//  - Primary-led action buttons
+//  - Custom paginator (no p-paginator)
+//  - Full dark/light mode via CSS vars
+// ═══════════════════════════════════════════════════════════════
 
-  .table-header-box {
-    padding-bottom: 1rem;
-  }
+// ── Wrapper ──────────────────────────────────────────────────
+:host ::ng-deep .pi-inbox {
+  font-size: 48px !important;
+  font-weight: 300 !important;
 }
 
-/* ─── DataTable Internal Loading (Independent from global app-loading) ─── */
-.dt-loading-mask {
+:host ::ng-deep *:not(.tdd-trigger-icon):not(.dt-spinner):not(svg) {
+  transition: none !important;
+  animation-duration: 0s !important;
+  transform: none !important;
+}
+
+/* Correct Sort Icon styling (PrimeNG SVG) */
+:host ::ng-deep .p-datatable-sort-icon,
+:host ::ng-deep .p-icon {
+  color: var(--foreground) !important;
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.dt-wrapper {
+  display: grid;
+  grid-template-rows: auto 1fr auto; // Header, Body (flexible), Pager
+  background: var(--card);
+  border: var(--border-b) solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+// ── Header ───────────────────────────────────────────────────
+.dt-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: var(--border-b) solid var(--border);
+  background: color-mix(in oklch, var(--muted) 55%);
+}
+
+// ── Table Shell ──────────────────────────────────────────────
+.dt-body-shell {
+  position: relative;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Loading ──────────────────────────────────────────────────
+.dt-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 100;
+  inset: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.15); /* Subtler than global overlay */
+  background: color-mix(in oklch, var(--card) 60%, transparent);
   backdrop-filter: blur(3px);
-  border-radius: 8px;
-  pointer-events: all;
+}
 
-  .dt-loader-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 20px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 50px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-    animation: dtFadeInUp 0.3s ease-out;
+.dt-spinner-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  background: var(--card);
+  border-radius: var(--radius-lg);
 
-    .dt-loader-spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid #10b981;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: dtSpin 0.8s linear infinite;
-    }
+  box-shadow:
+    0 4px 6px -1px oklch(0 0 0 / 10%),
+    0 2px 4px -2px oklch(0 0 0 / 8%);
+}
 
-    .dt-loader-text {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--foreground);
-      letter-spacing: 0.3px;
-      opacity: 0.9;
-    }
-  }
+.dt-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid color-mix(in oklch, var(--primary) 25%, transparent);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: dtSpin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+.dt-spinner-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--foreground);
 }
 
 @keyframes dtSpin {
@@ -61,52 +101,359 @@
     transform: rotate(360deg);
   }
 }
-@keyframes dtFadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+// ── PrimeNG Table Overrides ───────────────────────────────────
+::ng-deep {
+  .dt-prime.p-datatable {
+    background: transparent !important;
+
+    .p-datatable-wrapper {
+      background: transparent;
+    }
+
+    // Header cells
+    .dt-th {
+      background: color-mix(in oklch, var(--muted) 65%, var(--card)) !important;
+      color: var(--muted-foreground) !important;
+      font-size: 0.68rem !important;
+      font-weight: 700 !important;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 10px 14px !important;
+      border-bottom: var(--border-b) solid var(--border) !important;
+      border-top: none !important;
+      border-right: none !important;
+      border-left: none !important;
+      white-space: nowrap;
+
+      &--stt {
+        width: 56px;
+        text-align: center;
+      }
+      &--action {
+        width: 120px;
+        text-align: center;
+      }
+
+      /* Fixed Column Support */
+      &.dt-fixed {
+        position: sticky;
+        left: 0;
+        z-index: 10;
+        background: color-mix(in oklch, var(--muted) 65%, var(--card)) !important;
+        box-shadow: 2px 0 8px oklch(0 0 0 / 6%);
+      }
+
+      &--fixed {
+        position: sticky;
+        right: 0;
+        z-index: 2;
+        background: color-mix(in oklch, var(--muted) 65%, var(--card)) !important;
+        box-shadow: -4px 0 10px oklch(0 0 0 / 8%);
+      }
+    }
+
+    .dt-th-inner {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    // ─ Body rows
+    .p-datatable-tbody > tr,
+    .p-datatable-tbody > tr.p-highlight,
+    .p-datatable-tbody > tr.p-datatable-row-odd {
+      background: var(--card) !important;
+    }
+
+    .dt-row {
+      cursor: pointer;
+
+      &:hover,
+      &:hover > td {
+        background: color-mix(in oklch, var(--primary) 6%, var(--card)) !important;
+      }
+
+      &:last-child .dt-td {
+        border-bottom: none !important;
+      }
+    }
+
+    // Body cells
+    .dt-td {
+      padding: 10px 14px !important;
+      font-size: 0.83rem;
+      color: var(--foreground);
+      border-bottom: var(--border-b) solid var(--border) !important;
+      border-right: none !important;
+      border-left: none !important;
+      background: var(--card) !important;
+      vertical-align: middle;
+
+      &--stt {
+        width: 56px;
+        text-align: center;
+      }
+      &--action {
+        width: 120px;
+        text-align: center;
+      }
+
+      &.dt-fixed {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background: var(--card) !important;
+        box-shadow: 2px 0 8px oklch(0 0 0 / 6%);
+      }
+
+      &--fixed {
+        position: sticky;
+        right: 0;
+        z-index: 1;
+        background: var(--card) !important;
+        box-shadow: -4px 0 10px oklch(0 0 0 / 8%);
+      }
+    }
+
+    // Hover must also propagate to td
+    .dt-row:hover .dt-td {
+      background: color-mix(in oklch, var(--primary) 6%, var(--card)) !important;
+    }
+
+    // STT badge
+    .dt-stt-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: color-mix(in oklch, var(--primary) 12%, var(--muted));
+      border: 1px solid color-mix(in oklch, var(--primary) 20%, transparent);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    // ─ Action Buttons ─────────────────────────────────────────
+    .dt-action-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .dt-act {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--muted-foreground);
+
+      &--default,
+      &--secondary {
+        &:hover {
+          color: var(--primary);
+          background: transparent !important;
+          border-color: transparent !important;
+        }
+      }
+
+      &--primary {
+        color: var(--primary);
+        &:hover {
+          background: transparent !important;
+          border-color: transparent !important;
+          filter: brightness(1.2);
+        }
+      }
+
+      &--success {
+        &:hover {
+          color: oklch(0.58 0.17 155);
+          background: transparent !important;
+          border-color: transparent !important;
+        }
+      }
+
+      &--danger {
+        &:hover {
+          color: var(--destructive);
+          background: transparent !important;
+          border-color: transparent !important;
+        }
+      }
+
+      &--warn {
+        &:hover {
+          color: oklch(0.72 0.17 70);
+          background: transparent !important;
+          border-color: transparent !important;
+        }
+      }
+
+      &--info {
+        &:hover {
+          color: oklch(0.6 0.18 245);
+          background: transparent !important;
+          border-color: transparent !important;
+        }
+      }
+
+      &--help {
+        &:hover {
+          color: oklch(0.65 0.2 290);
+          background: transparent !important;
+          border-color: transparent !important;
+        }
+      }
+    }
+
+    // Empty state
+    .dt-empty {
+      padding: 0 !important;
+      border: none !important;
+
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    .dt-empty-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 24px;
+    }
+
+    .dt-empty-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: color-mix(in oklch, var(--primary) 10%);
+      color: var(--primary);
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+
+    .dt-empty-title {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .dt-empty-sub {
+      margin: 0;
+      font-size: 0.77rem;
+      color: var(--muted-foreground);
+    }
+
+    // Sort icon
+    .p-sortable-column-icon {
+      color: var(--muted-foreground) !important;
+      font-size: 0.7rem !important;
+      margin-left: 2px;
+    }
+    .p-highlight .p-sortable-column-icon {
+      color: var(--primary) !important;
+    }
   }
 }
 
-/* ─── PrimeNG Overrides ─── */
-::ng-deep {
-  .p-datatable {
-    background: transparent !important;
-    .header-cell {
-      background: var(--muted) !important;
-      color: var(--foreground) !important;
-      font-weight: 700 !important;
-      font-size: 0.7rem !important;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 14px 16px !important;
-      border-bottom: 2px solid var(--border) !important;
-    }
-    .p-datatable-tbody > tr {
-      background: transparent !important;
-      &:hover {
-        background: rgba(255, 255, 255, 0.03) !important;
-      }
-    }
-    .body-cell {
-      padding: 16px !important;
-      border-bottom: 1px solid var(--border) !important;
-    }
-    .action-col {
-      background: transparent !important;
-    }
+// ── Custom Paginator ─────────────────────────────────────────
+.dt-pager {
+  height: 52px; // Fixed height to lock position
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  border-top: var(--border-b) solid var(--border);
+  background: color-mix(in oklch, var(--muted) 40%);
+  flex-shrink: 0;
+}
 
-    .p-paginator {
-      background: transparent !important;
-      border: none !important;
-      .p-paginator-pages .p-paginator-page.p-highlight {
-        background: #10b981 !important;
-        color: white !important;
-      }
-    }
+.dt-pager-info {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.dt-pager-center {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  justify-content: center;
+}
+
+.dt-pg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.73rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  line-height: 1;
+
+  &:hover:not(:disabled):not(.dt-pg-btn--active) {
+    background: color-mix(in oklch, var(--primary) 10%, transparent);
+    border-color: color-mix(in oklch, var(--primary) 22%, transparent);
+    color: var(--primary);
   }
+
+  &--active {
+    background: var(--primary) !important;
+    color: var(--color-white) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 2px 8px color-mix(in oklch, var(--primary) 40%, transparent);
+    cursor: default;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  &.dt-pg-nav {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+  }
+}
+
+.dt-pg-ellipsis {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  padding: 0 4px;
+  line-height: 28px;
+  user-select: none;
+}
+
+.dt-pager-size {
+  flex-shrink: 0;
 }

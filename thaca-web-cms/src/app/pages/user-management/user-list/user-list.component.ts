@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
 
 @Component({
   selector: 'app-user-list',
@@ -23,6 +24,7 @@ import { TagModule } from 'primeng/tag';
     InputTextModule,
     ButtonModule,
     TagModule,
+    ThacaInputComponent,
   ],
   templateUrl: './user-list.component.html',
 })

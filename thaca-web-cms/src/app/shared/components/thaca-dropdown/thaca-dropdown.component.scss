@@ -1,0 +1,193 @@
+.tdd-root {
+  position: relative;
+  display: inline-block;
+  font-family: inherit;
+
+  &.tdd--sm {
+    --tdd-h: 28px;
+    --tdd-fs: 0.72rem;
+    --tdd-px: 10px;
+  }
+  &.tdd--md {
+    --tdd-h: 34px;
+    --tdd-fs: 0.78rem;
+    --tdd-px: 12px;
+  }
+  &.tdd--lg {
+    --tdd-h: 40px;
+    --tdd-fs: 0.85rem;
+    --tdd-px: 14px;
+  }
+
+  &.tdd-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+.tdd-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--tdd-h, 34px);
+  padding: 0 var(--tdd-px, 12px);
+  background: color-mix(in oklch, var(--primary) 8%);
+  border: 1px solid color-mix(in oklch, var(--primary) 30%, transparent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--tdd-fs, 0.78rem);
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--foreground);
+  white-space: nowrap;
+  min-width: 80px;
+  outline: none;
+
+  &:hover {
+    background: color-mix(in oklch, var(--primary) 14%);
+    border-color: color-mix(in oklch, var(--primary) 55%, transparent);
+  }
+
+  .tdd-open & {
+    background: color-mix(in oklch, var(--primary) 15%);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 18%, transparent);
+  }
+}
+
+.tdd-trigger-label {
+  flex: 1;
+  text-align: left;
+
+  &.tdd-placeholder {
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+}
+
+.tdd-trigger-icon {
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+  flex-shrink: 0;
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .tdd-open & {
+    transform: rotate(180deg);
+  }
+}
+
+// ── Panel (shared inline + portal) ────────────────────────
+.tdd-panel {
+  // Inline mode (default)
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  min-width: 100%;
+  z-index: 1000;
+  background: var(--card);
+  border: 1px solid color-mix(in oklch, var(--primary) 35%);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 5%),
+    0 0 0 1px color-mix(in oklch, var(--primary) 6%, transparent);
+  overflow: hidden;
+  animation: tddSlideIn 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  // Portal mode — position comes from [ngStyle], override z-index only
+  &.tdd-portal-panel {
+    position: fixed !important; // [ngStyle] will set top/left/bottom
+    z-index: 9999;
+  }
+}
+
+@keyframes tddSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tdd-panel-inner {
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 240px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  // Thin scrollbar matching app theme
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--muted-foreground) 40%, transparent) transparent;
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--muted-foreground) 40%, transparent);
+    border-radius: 4px;
+  }
+}
+
+// ── Options ───────────────────────────────────────────────
+.tdd-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--tdd-fs, 0.78rem);
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--foreground);
+  text-align: left;
+  white-space: nowrap;
+
+  &:hover:not(.tdd-option--disabled):not(.tdd-option--active) {
+    background: color-mix(in oklch, var(--primary) 10%, transparent);
+  }
+
+  &--active {
+    background: color-mix(in oklch, var(--primary) 15%, transparent);
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.tdd-option-icon {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+
+  .tdd-option--active & {
+    color: var(--primary);
+  }
+}
+
+.tdd-check {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
+}

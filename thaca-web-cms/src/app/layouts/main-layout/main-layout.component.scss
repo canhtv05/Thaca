@@ -8,7 +8,6 @@
 /* ─── Sizes ─── */
 $sidebar-width: 256px;
 $sidebar-collapsed-width: 64px;
-$transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
 /* ─── Layout Grid ─── */
 .layout-wrapper {
@@ -16,7 +15,6 @@ $transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   grid-template-columns: $sidebar-width 1fr;
   height: 100vh;
   overflow: hidden;
-  transition: grid-template-columns $transition;
 }
 
 .layout-wrapper.sidebar-collapsed {
@@ -30,7 +28,6 @@ $transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: var(--color-sidebar);
   border-right: var(--border-b) solid var(--color-border);
   overflow: hidden;
-  transition: width $transition;
   z-index: 100;
 }
 
@@ -73,7 +70,6 @@ $transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     bottom: 0;
     width: $sidebar-width;
     transform: translateX(-100%);
-    transition: transform $transition;
     box-shadow: none;
     z-index: 1000;
   }

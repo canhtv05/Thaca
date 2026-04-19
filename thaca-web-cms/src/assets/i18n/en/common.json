@@ -1,5 +1,27 @@
 {
   "common": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "loading_data": "Loading data...",
+    "no_data_found": "No data found",
+    "stt": "No",
+    "select": "Select...",
+    "showing": "Showing",
+    "records": "records",
+    "action": "Action",
+    "previous": "Previous",
+    "next": "Next",
+    "first": "First",
+    "last": "Last",
+    "page": "page",
+    "try_changing_filters_or_search": "Try changing filters or search",
+    "button": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save",
+      "close": "Close",
+      "back": "Back"
+    }
   }
 }

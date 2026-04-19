@@ -1,25 +1,24 @@
-<div class="data-table-container card">
-  <!-- ─── Table Header / Search Slot ─── -->
-  <div class="table-header-box mb-4">
-    <div class="flex items-center justify-between gap-4">
-      <div class="header-left flex-1">
-        <ng-container *ngTemplateOutlet="searchTemplate"></ng-container>
-      </div>
-      <div class="header-right flex items-center gap-2">
-        <ng-container *ngTemplateOutlet="headerActions"></ng-container>
-      </div>
+<div class="dt-wrapper">
+  <!-- ── Header Bar ── -->
+  <div class="dt-header">
+    <div class="dt-header-search">
+      <ng-container *ngTemplateOutlet="searchTemplate"></ng-container>
+    </div>
+    <div class="dt-header-actions">
+      <ng-container *ngTemplateOutlet="headerActions"></ng-container>
     </div>
   </div>
 
-  <!-- ─── Main Table ─── -->
-  <div class="relative">
-    <!-- ─── Internal DataTable Loading (Independent) ─── -->
-    <div *ngIf="loading()" class="dt-loading-mask">
-      <div class="dt-loader-card">
-        <div class="dt-loader-spinner"></div>
-        <span class="dt-loader-text">Loading data...</span>
+  <!-- ── Table Shell ── -->
+  <div class="dt-body-shell">
+    @if (loading()) {
+      <div class="dt-overlay">
+        <div class="dt-spinner-wrap">
+          <div class="dt-spinner"></div>
+          <span class="dt-spinner-label">{{ 'common.loading_data' | translate }}</span>
+        </div>
       </div>
-    </div>
+    }
 
     <p-table
       [value]="data()"
@@ -28,102 +27,187 @@
       (onLazyLoad)="onLazyLoad($event)"
       [totalRecords]="totalRecords()"
       [loading]="false"
-      [rows]="config.rows || 10"
-      [paginator]="true"
-      [showCurrentPageReport]="true"
-      [rowsPerPageOptions]="[10, 20, 50, 100]"
+      [rows]="pagination().size"
+      [paginator]="false"
       [scrollable]="true"
       scrollHeight="flex"
       [dataKey]="config.dataKey || 'id'"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-      class="p-datatable-sm"
+      styleClass="dt-prime"
       [tableStyle]="{ 'min-width': '50rem' }"
     >
-      <ng-template pTemplate="header" let-columns>
+      <!-- HEAD -->
+      <ng-template pTemplate="header">
         <tr>
-          <th *ngIf="config.showStt" style="width: 60px" class="header-cell stt-col">STT</th>
+          @if (config.showStt) {
+            <th class="dt-th dt-th--stt">{{ 'common.stt' | translate }}</th>
+          }
           @for (col of config.columns; track col.field) {
             <th
-              [pSortableColumn]="col.sortable ? col.field : ''"
+              class="dt-th"
+              [class.dt-fixed]="col.fixed"
+              [pSortableColumn]="col.sortable ? col.field : undefined"
               [style.width]="col.width"
-              class="header-cell"
             >
-              <div class="flex items-center gap-2">
-                {{ col.header }}
-                <p-sortIcon *ngIf="col.sortable" [field]="col.field" />
+              <div class="dt-th-inner">
+                <span>{{ col.header }}</span>
+                @if (col.sortable) {
+                  <p-sortIcon [field]="col.field" />
+                }
               </div>
             </th>
           }
-          <th
-            *ngIf="config.actions?.length"
-            [class.fixed-right]="config.actionFixed"
-            class="action-col"
-            style="width: 120px"
-          >
-            Action
-          </th>
+          @if (config.actions?.length) {
+            <th class="dt-th dt-th--action" [class.dt-th--fixed]="config.actionFixed">
+              {{ 'common.action' | translate }}
+            </th>
+          }
         </tr>
       </ng-template>
 
-      <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
-        <tr class="hover:bg-muted/50 transition-colors">
-          <td *ngIf="config.showStt" class="body-cell stt-col text-center">
-            <span class="text-xs opacity-60">{{ getIndex(rowIndex) }}</span>
-          </td>
+      <!-- BODY -->
+      <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
+        <tr class="dt-row" (click)="onRowClick.emit(rowData)">
+          @if (config.showStt) {
+            <td class="dt-td dt-td--stt">
+              <span class="dt-stt-badge">{{ getIndex(rowIndex) }}</span>
+            </td>
+          }
 
           @for (col of config.columns; track col.field) {
-            <td [style.width]="col.width" class="body-cell">
+            <td class="dt-td" [class.dt-fixed]="col.fixed" [style.width]="col.width">
               @if (!col.condition || col.condition(rowData)) {
                 @if (col.render) {
                   <div [innerHTML]="col.render(rowData)"></div>
                 } @else {
-                  <span class="text-foreground/90">{{ rowData[col.field] }}</span>
+                  {{ rowData[col.field] }}
                 }
               }
             </td>
           }
 
-          <td
-            *ngIf="config.actions?.length"
-            [class.fixed-right]="config.actionFixed"
-            class="action-col"
-            style="width: 120px"
-          >
-            <div class="flex items-center gap-2">
-              @for (action of config.actions; track action.titleKey) {
-                @if (!action.condition || action.condition(rowData)) {
-                  <p-button
-                    [icon]="action.icon"
-                    [text]="true"
-                    [severity]="action.color || 'secondary'"
-                    rounded="true"
-                    size="small"
-                    (click)="handleAction(action.titleKey, rowData, $event)"
-                    [pTooltip]="action.titleKey"
-                    [tooltipPosition]="'top'"
-                  />
+          @if (config.actions?.length) {
+            <td class="dt-td dt-td--action" [class.dt-td--fixed]="config.actionFixed">
+              <div class="dt-action-group">
+                @for (action of config.actions; track action.titleKey) {
+                  @if (!action.condition || action.condition(rowData)) {
+                    <button
+                      type="button"
+                      class="dt-act dt-act--{{ action.color || 'default' }}"
+                      (click)="handleAction(action.titleKey, rowData, $event)"
+                      [pTooltip]="action.titleKey | translate"
+                      tooltipPosition="top"
+                    >
+                      <i [class]="action.icon"></i>
+                    </button>
+                  }
                 }
-              }
-            </div>
-          </td>
+              </div>
+            </td>
+          }
         </tr>
       </ng-template>
 
+      <!-- EMPTY -->
       <ng-template pTemplate="emptymessage">
         <tr>
           <td
             [attr.colspan]="
               config.columns.length + (config.actions?.length ? 1 : 0) + (config.showStt ? 1 : 0)
             "
-            class="text-center py-8"
+            class="dt-empty"
           >
-            <div class="flex flex-col items-center gap-2 opacity-40">
-              <i class="pi pi-box text-4xl"></i>
-              <span>No data found</span>
+            <div class="dt-empty-inner">
+              <div class="dt-empty-icon"><i class="pi pi-inbox text-lg"></i></div>
+              <p class="dt-empty-title">{{ 'common.no_data_found' | translate }}</p>
+              <p class="dt-empty-sub">{{ 'common.try_changing_filters_or_search' | translate }}</p>
             </div>
           </td>
         </tr>
       </ng-template>
     </p-table>
+  </div>
+
+  <!-- ── Custom Paginator ── -->
+  <div class="dt-pager">
+    <span class="dt-pager-info">
+      {{ 'common.showing' | translate }}
+      {{ pagination().page * pagination().size + 1 }}–{{
+        min(pagination().page * pagination().size + pagination().size, totalRecords())
+      }}
+      / {{ totalRecords() }} {{ 'common.records' | translate }}
+    </span>
+
+    <div class="dt-pager-center">
+      <!-- Prev controls -->
+      <button
+        type="button"
+        class="dt-pg-btn dt-pg-nav"
+        [disabled]="pagination().page === 0"
+        (click)="goToPage(0)"
+        [pTooltip]="'common.first' | translate"
+        [tooltipPosition]="'left'"
+      >
+        <i class="pi pi-angle-double-left"></i>
+      </button>
+      <button
+        type="button"
+        class="dt-pg-btn dt-pg-nav"
+        [disabled]="pagination().page === 0"
+        (click)="goToPage(pagination().page - 1)"
+        [pTooltip]="'common.previous' | translate"
+        [tooltipPosition]="'left'"
+      >
+        <i class="pi pi-angle-left"></i>
+      </button>
+
+      <!-- Page numbers -->
+      @for (p of visiblePages(); track p) {
+        @if (p === -1) {
+          <span class="dt-pg-ellipsis">…</span>
+        } @else {
+          <button
+            type="button"
+            class="dt-pg-btn"
+            [class.dt-pg-btn--active]="p === pagination().page"
+            (click)="p !== pagination().page && goToPage(p)"
+          >
+            {{ p + 1 }}
+          </button>
+        }
+      }
+
+      <!-- Next controls -->
+      <button
+        type="button"
+        class="dt-pg-btn dt-pg-nav"
+        [disabled]="pagination().page >= totalPages() - 1"
+        (click)="goToPage(pagination().page + 1)"
+        [pTooltip]="'common.next' | translate"
+        [tooltipPosition]="'right'"
+      >
+        <i class="pi pi-angle-right"></i>
+      </button>
+      <button
+        type="button"
+        class="dt-pg-btn dt-pg-nav"
+        [disabled]="pagination().page >= totalPages() - 1"
+        (click)="goToPage(totalPages() - 1)"
+        [pTooltip]="'common.last' | translate"
+        [tooltipPosition]="'right'"
+      >
+        <i class="pi pi-angle-double-right"></i>
+      </button>
+    </div>
+
+    <!-- Rows per page -->
+    <div class="dt-pager-size">
+      <app-thaca-dropdown
+        size="sm"
+        appendTo="body"
+        [options]="pageSizeOptions"
+        [ngModel]="pagination().size"
+        (onChange)="onPageSizeChange($event)"
+      />
+    </div>
   </div>
 </div>

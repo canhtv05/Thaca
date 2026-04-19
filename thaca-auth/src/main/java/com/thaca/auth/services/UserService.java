@@ -250,11 +250,6 @@ public class UserService {
     @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.VALIDATE)
     public SearchResponse<UserDTO> search(SearchRequest<UserDTO> request) {
         Specification<User> spec = createSpecification(request);
-        try {
-            Thread.sleep(10000);
-        } catch (Exception e) {
-            Thread.currentThread().interrupt();
-        }
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable());
         return new SearchResponse<>(
             users.getContent().stream().map(UserDTO::fromEntity).collect(Collectors.toList()),

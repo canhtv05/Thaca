@@ -5,32 +5,33 @@ import {
   EventEmitter,
   ContentChild,
   TemplateRef,
-  inject,
   signal,
+  computed,
   effect,
   untracked,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
-import { PaginatorModule } from 'primeng/paginator';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
-import { SkeletonModule } from 'primeng/skeleton';
-import {
-  IPaginationRequest,
-  IPaginationResponse,
-  ISearchRequest,
-  IApiPayload,
-} from '../../../core/models/common.model';
+import { IPaginationRequest, ISearchRequest, IApiPayload } from '../../../core/models/common.model';
 import { GlobalHttp } from '../../../core/global/global-http';
 import { createBody, createHeader } from '../../../utils/common.utils';
+import { TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import {
+  ThacaDropdownComponent,
+  IDropdownOption,
+} from '../thaca-dropdown/thaca-dropdown.component';
 
 export interface ITableColumn {
   field: string;
   header: string;
   sortable?: boolean;
   width?: string;
+  fixed?: boolean;
   condition?: (row: any) => boolean;
   render?: (row: any) => string;
 }
@@ -59,17 +60,20 @@ export interface ITableConfig<T = any> {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     TableModule,
-    PaginatorModule,
     InputTextModule,
     ButtonModule,
     TooltipModule,
-    SkeletonModule,
+    TranslateModule,
+    TranslatePipe,
+    ThacaDropdownComponent,
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })
 export class DataTableComponent {
+  private translate = inject(TranslateService);
   @Input({ required: true }) config!: ITableConfig;
   @Input() externalFilter: any = {};
 
@@ -89,6 +93,30 @@ export class DataTableComponent {
     size: 10,
     sortField: '',
     sortOrder: '',
+  });
+
+  pageSizeOptions: IDropdownOption[] = [
+    { label: '10 / ' + this.translate.instant('common.page'), value: 10 },
+    { label: '20 / ' + this.translate.instant('common.page'), value: 20 },
+    { label: '50 / ' + this.translate.instant('common.page'), value: 50 },
+    { label: '100 / ' + this.translate.instant('common.page'), value: 100 },
+  ];
+
+  totalPages = computed(() => Math.max(1, Math.ceil(this.totalRecords() / this.pagination().size)));
+
+  visiblePages = computed(() => {
+    const total = this.totalPages();
+    const cur = this.pagination().page;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+    const pages: number[] = [];
+    if (cur <= 3) {
+      pages.push(0, 1, 2, 3, 4, -1, total - 1);
+    } else if (cur >= total - 4) {
+      pages.push(0, -1, total - 5, total - 4, total - 3, total - 2, total - 1);
+    } else {
+      pages.push(0, -1, cur - 1, cur, cur + 1, -1, total - 1);
+    }
+    return pages;
   });
 
   constructor() {
@@ -131,14 +159,25 @@ export class DataTableComponent {
     this.load({ ...this.pagination(), page: 0 });
   }
 
+  goToPage(page: number) {
+    const cur = this.pagination();
+    if (page < 0 || page >= this.totalPages() || page === cur.page) return;
+    this.load({ ...cur, page });
+  }
+
+  onPageSizeChange(size: number) {
+    const cur = this.pagination();
+    if (size === cur.size) return;
+    this.load({ ...cur, page: 0, size });
+  }
+
   onLazyLoad(event: TableLazyLoadEvent) {
-    const page: IPaginationRequest = {
-      page: (event.first || 0) / (event.rows || this.config.rows || 10),
-      size: event.rows || this.config.rows || 10,
-      sortField: (event.sortField as string) || '',
-      sortOrder: event.sortOrder === 1 ? 'ASC' : event.sortOrder === -1 ? 'DESC' : '',
-    };
-    this.load(page);
+    const sortField = (event.sortField as string) || '';
+    const sortOrder = event.sortOrder === 1 ? 'ASC' : event.sortOrder === -1 ? 'DESC' : '';
+    const cur = this.pagination();
+    if (sortField !== cur.sortField || sortOrder !== cur.sortOrder) {
+      this.load({ ...cur, sortField, sortOrder, page: 0 });
+    }
   }
 
   handleAction(actionKey: string, row: any, event: Event) {
@@ -149,5 +188,9 @@ export class DataTableComponent {
   getIndex(rowIndex: number): number {
     const { page, size } = this.pagination();
     return page * size + rowIndex + 1;
+  }
+
+  min(a: number, b: number) {
+    return Math.min(a, b);
   }
 }
