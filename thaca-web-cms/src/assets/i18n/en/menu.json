@@ -1,0 +1,16 @@
+{
+  "menu": {
+    "overview": "Overview",
+    "dashboard": "Dashboard",
+    "user_management": "Users",
+    "user_list": "User List",
+    "permissions": "Permissions",
+    "user_logs": "User Logs",
+    "ui_components": "UI Components",
+    "pages": "Pages",
+    "auth": "Auth",
+    "login": "Login",
+    "error": "Error",
+    "crud": "Crud"
+  }
+}

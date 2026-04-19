@@ -9,7 +9,7 @@ import { currentLang } from '../stores/app.store';
 export class I18nService {
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
-  private readonly baseFiles = ['validation', 'common'];
+  private readonly baseFiles = ['validation', 'common', 'menu'];
   private loaded = new Set<string>();
   private activeRouteFiles: string[] = [];
 

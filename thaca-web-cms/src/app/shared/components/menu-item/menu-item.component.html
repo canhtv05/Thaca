@@ -3,7 +3,7 @@
   <!-- Section label -->
   @if (!layoutService.isSidebarCollapsed() || !layoutService.isDesktop()) {
     <div class="menu-section-label">
-      <span>{{ item().label }}</span>
+      <span>{{ item().label | translate }}</span>
     </div>
   } @else {
     <div class="menu-section-label collapsed">
@@ -27,13 +27,13 @@
     [attr.target]="item().target"
     class="menu-link"
     [class.active]="isActive()"
-    [pTooltip]="layoutService.isSidebarCollapsed() ? item().label : ''"
+    [pTooltip]="layoutService.isSidebarCollapsed() ? (item().label | translate) : ''"
     tooltipPosition="right"
     tabindex="0"
   >
     <i [ngClass]="item().icon" class="menu-icon"></i>
     @if (!layoutService.isSidebarCollapsed() || !layoutService.isDesktop()) {
-      <span class="menu-text">{{ item().label }}</span>
+      <span class="menu-text">{{ item().label | translate }}</span>
     }
     @if (hasChildren() && (!layoutService.isSidebarCollapsed() || !layoutService.isDesktop())) {
       <i class="pi pi-chevron-down menu-chevron" [class.rotated]="isActive()"></i>
@@ -65,13 +65,13 @@
     [attr.target]="item().target"
     class="menu-link"
     [class.active]="isActive()"
-    [pTooltip]="layoutService.isSidebarCollapsed() ? item().label : ''"
+    [pTooltip]="layoutService.isSidebarCollapsed() ? (item().label | translate) : ''"
     tooltipPosition="right"
     tabindex="0"
   >
     <i [ngClass]="item().icon" class="menu-icon"></i>
     @if (!layoutService.isSidebarCollapsed() || !layoutService.isDesktop()) {
-      <span class="menu-text">{{ item().label }}</span>
+      <span class="menu-text">{{ item().label | translate }}</span>
     }
   </a>
 }

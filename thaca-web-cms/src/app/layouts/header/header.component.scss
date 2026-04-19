@@ -3,6 +3,7 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
   --color-accent: var(--accent);
 }
 
@@ -53,6 +54,6 @@
 }
 
 .toggle-btn:hover {
-  background: var(--color-accent);
+  background: var(--color-muted);
   opacity: 1;
 }

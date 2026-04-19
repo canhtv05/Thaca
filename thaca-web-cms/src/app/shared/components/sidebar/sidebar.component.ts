@@ -50,14 +50,34 @@ export class Sidebar implements OnInit, OnDestroy {
 
     this.model = [
       {
-        label: 'Tổng quan',
-        items: [{ label: 'Dashboard', icon: 'pi pi-home', routerLink: ['/home'] }],
+        label: 'menu.overview',
+        items: [{ label: 'menu.dashboard', icon: 'pi pi-home', routerLink: ['/home'] }],
       },
       {
-        label: 'Quản lý',
+        label: 'menu.user_management',
         items: [
           {
-            label: 'UI Components',
+            label: 'menu.user_list',
+            icon: 'pi pi-users',
+            routerLink: ['/users/list'],
+          },
+          {
+            label: 'menu.permissions',
+            icon: 'pi pi-shield',
+            routerLink: ['/users/permissions'],
+          },
+          {
+            label: 'menu.user_logs',
+            icon: 'pi pi-history',
+            routerLink: ['/users/logs'],
+          },
+        ],
+      },
+      {
+        label: 'menu.ui_components',
+        items: [
+          {
+            label: 'menu.ui_components',
             icon: 'pi pi-th-large',
             path: '/uikit',
             items: [
@@ -70,23 +90,21 @@ export class Sidebar implements OnInit, OnDestroy {
               { label: 'Chart', icon: 'pi pi-chart-bar', routerLink: ['/uikit/charts'] },
             ],
           },
+        ],
+      },
+      {
+        label: 'menu.pages',
+        items: [
           {
-            label: 'Pages',
-            icon: 'pi pi-briefcase',
-            path: '/pages',
+            label: 'menu.auth',
+            icon: 'pi pi-lock',
+            path: '/auth',
             items: [
-              {
-                label: 'Auth',
-                icon: 'pi pi-user',
-                path: '/auth',
-                items: [
-                  { label: 'Login', icon: 'pi pi-sign-in', routerLink: ['/auth/login'] },
-                  { label: 'Error', icon: 'pi pi-times-circle', routerLink: ['/auth/error'] },
-                ],
-              },
-              { label: 'Crud', icon: 'pi pi-pencil', routerLink: ['/pages/crud'] },
+              { label: 'menu.login', icon: 'pi pi-sign-in', routerLink: ['/auth/login'] },
+              { label: 'menu.error', icon: 'pi pi-times-circle', routerLink: ['/auth/error'] },
             ],
           },
+          { label: 'menu.crud', icon: 'pi pi-pencil', routerLink: ['/pages/crud'] },
         ],
       },
     ];

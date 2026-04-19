@@ -4,10 +4,11 @@ import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { LayoutService } from '../sidebar/sidebar.service';
 import { TooltipModule } from 'primeng/tooltip';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: '[app-menuitem]',
-  imports: [CommonModule, RouterModule, TooltipModule],
+  imports: [CommonModule, RouterModule, TooltipModule, TranslateModule],
   templateUrl: './menu-item.component.html',
   styleUrl: './menu-item.component.scss',
   host: {

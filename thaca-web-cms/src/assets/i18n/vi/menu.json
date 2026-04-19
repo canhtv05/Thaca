@@ -1,0 +1,16 @@
+{
+  "menu": {
+    "overview": "Tổng quan",
+    "dashboard": "Bảng điều khiển",
+    "user_management": "Người dùng",
+    "user_list": "Danh sách người dùng",
+    "permissions": "Phân quyền",
+    "user_logs": "Nhật ký hoạt động",
+    "ui_components": "Thành phần UI",
+    "pages": "Trang",
+    "auth": "Xác thực",
+    "login": "Đăng nhập",
+    "error": "Lỗi",
+    "crud": "Thao tác dữ liệu"
+  }
+}
