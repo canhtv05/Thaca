@@ -2,13 +2,27 @@
   class="tdd-root"
   [class.tdd-open]="open()"
   [class.tdd-disabled]="disabled"
+  [class.tdd-readonly]="readonly"
   [class.tdd--sm]="size === 'sm'"
   [class.tdd--md]="size === 'md'"
   [class.tdd--lg]="size === 'lg'"
 >
-  <button type="button" class="tdd-trigger" (click)="toggle()" [disabled]="disabled">
+  @if (label) {
+    <label class="thaca-label" [for]="id">{{ label | translate }}</label>
+  }
+  <button type="button" class="tdd-trigger" (click)="toggle()" [disabled]="disabled" [id]="id">
     <span class="tdd-trigger-label" [class.tdd-placeholder]="!selectedLabel()">
-      {{ selectedLabel() ?? placeholder }}
+      {{ selectedLabel() ?? placeholder | translate }}
+    </span>
+    <span
+      class="tdd-clear-btn"
+      [class.is-visible]="showClearButton()"
+      (click)="clear($event)"
+      aria-label="Clear select"
+      role="button"
+      tabindex="-1"
+    >
+      &times;
     </span>
     <span class="tdd-trigger-icon">
       <svg
@@ -49,7 +63,7 @@
         @if (opt.icon) {
           <i [class]="opt.icon" class="tdd-option-icon"></i>
         }
-        <span>{{ opt.label }}</span>
+        <span>{{ opt.label | translate }}</span>
         @if (opt.value === value()) {
           <span class="tdd-check">
             <svg

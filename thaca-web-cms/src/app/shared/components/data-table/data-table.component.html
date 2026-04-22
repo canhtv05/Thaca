@@ -1,11 +1,8 @@
 <div class="dt-wrapper">
   <!-- ── Header Bar ── -->
   <div class="dt-header">
-    <div class="dt-header-search">
+    <div class="dt-header-search flex-1">
       <ng-container *ngTemplateOutlet="searchTemplate"></ng-container>
-    </div>
-    <div class="dt-header-actions">
-      <ng-container *ngTemplateOutlet="headerActions"></ng-container>
     </div>
   </div>
 
@@ -49,7 +46,7 @@
               [style.width]="col.width"
             >
               <div class="dt-th-inner">
-                <span>{{ col.header }}</span>
+                <span>{{ col.header | translate }}</span>
                 @if (col.sortable) {
                   <p-sortIcon [field]="col.field" />
                 }
@@ -117,7 +114,9 @@
             class="dt-empty"
           >
             <div class="dt-empty-inner">
-              <div class="dt-empty-icon"><i class="pi pi-inbox text-lg"></i></div>
+              <div class="dt-empty-icon">
+                <i class="pi pi-inbox text-muted-foreground opacity-50 text-md"></i>
+              </div>
               <p class="dt-empty-title">{{ 'common.no_data_found' | translate }}</p>
               <p class="dt-empty-sub">{{ 'common.try_changing_filters_or_search' | translate }}</p>
             </div>
@@ -201,8 +200,9 @@
 
     <!-- Rows per page -->
     <div class="dt-pager-size">
-      <app-thaca-dropdown
+      <thaca-dropdown
         size="sm"
+        [clearable]="false"
         appendTo="body"
         [options]="pageSizeOptions"
         [ngModel]="pagination().size"

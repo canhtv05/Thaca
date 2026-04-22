@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-4 w-full">
-  <app-breadcrumb title="User Management" />
+  <app-breadcrumb [title]="'menu.user_management' | translate" />
 
   <app-data-table
     [config]="tableConfig"
@@ -7,32 +7,34 @@
     (onAction)="handleAction($event)"
   >
     <ng-template #searchTemplate>
-      <div class="flex items-center gap-3">
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 place-content-end place-items-end"
+      >
         <thaca-input
           [(ngModel)]="filter().username"
-          placeholder="Search by keywords..."
-          class="w-80 p-inputtext-sm"
+          [placeholder]="'user.search_by_username' | translate"
           (keyup.enter)="onSearch()"
+          [label]="'user.username' | translate"
         />
-        <p-button
-          icon="pi pi-filter"
-          [text]="true"
-          severity="secondary"
-          size="small"
-          label="Filters"
+        <thaca-input
+          [(ngModel)]="filter().email"
+          [placeholder]="'user.search_by_email' | translate"
+          (keyup.enter)="onSearch()"
+          [label]="'user.email' | translate"
+          type="email"
         />
+        <thaca-dropdown
+          class="w-full"
+          [(ngModel)]="filter().isActivated"
+          [placeholder]="'user.search_by_status' | translate"
+          (keyup.enter)="onSearch()"
+          [label]="'user.status' | translate"
+          [options]="statusOptions"
+        />
+        <thaca-button size="md" class="w-full" variant="primary" (click)="onSearch()">
+          <span class="text-white leading-0"> {{ 'common.button.search' | translate }} </span>
+        </thaca-button>
       </div>
-    </ng-template>
-
-    <ng-template #headerActions>
-      <p-button
-        label="Export"
-        icon="pi pi-download"
-        [text]="true"
-        severity="secondary"
-        size="small"
-      />
-      <p-button label="Add User" icon="pi pi-plus" size="small" styleClass="p-button-primary" />
     </ng-template>
   </app-data-table>
 </div>

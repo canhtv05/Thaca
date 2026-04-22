@@ -3,19 +3,32 @@
 }
 
 .thaca-btn {
+  --tb-h: var(--thaca-control-md-h, 34px);
+  --tb-fs: var(--thaca-control-md-fs, 0.78rem);
+  --tb-px: calc(var(--thaca-control-md-px, 12px) + 4px);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  height: var(--tb-h);
+  padding: 0 var(--tb-px);
+  font-family: inherit;
+  font-size: var(--tb-fs);
   font-weight: 600;
   line-height: 1;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
   outline: none;
   white-space: nowrap;
   position: relative;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
 
   &:disabled {
     opacity: 0.45;
@@ -25,32 +38,32 @@
 
   // ── Sizes ──────────────────────────────────
   &--sm {
-    height: 32px;
-    padding: 0 12px;
-    font-size: 13px;
+    --tb-h: var(--thaca-control-sm-h, 28px);
+    --tb-fs: var(--thaca-control-sm-fs, 0.72rem);
+    --tb-px: calc(var(--thaca-control-sm-px, 10px) + 2px);
   }
   &--md {
-    height: 40px;
-    padding: 0 18px;
-    font-size: 14px;
+    --tb-h: var(--thaca-control-md-h, 34px);
+    --tb-fs: var(--thaca-control-md-fs, 0.78rem);
+    --tb-px: calc(var(--thaca-control-md-px, 12px) + 4px);
   }
   &--lg {
-    height: 48px;
-    padding: 0 24px;
-    font-size: 15px;
+    --tb-h: var(--thaca-control-lg-h, 40px);
+    --tb-fs: var(--thaca-control-lg-fs, 0.85rem);
+    --tb-px: calc(var(--thaca-control-lg-px, 14px) + 6px);
   }
 
   &--icon-only {
     padding: 0;
     aspect-ratio: 1 / 1;
     &.thaca-btn--sm {
-      width: 32px;
+      width: var(--thaca-control-sm-h, 28px);
     }
     &.thaca-btn--md {
-      width: 40px;
+      width: var(--thaca-control-md-h, 34px);
     }
     &.thaca-btn--lg {
-      width: 48px;
+      width: var(--thaca-control-lg-h, 40px);
     }
   }
 
@@ -60,23 +73,24 @@
     color: var(--primary-foreground);
     border-color: var(--primary);
     &:hover:not(:disabled) {
-      filter: brightness(0.9);
+      background: color-mix(in oklch, var(--primary) 88%, black);
+      border-color: color-mix(in oklch, var(--primary) 88%, black);
     }
     &:focus-visible {
-      box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 35%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 22%, transparent);
     }
   }
 
   &--secondary {
-    background: var(--secondary);
+    background: color-mix(in oklch, var(--secondary) 82%, var(--card));
     color: var(--secondary-foreground);
     border-color: var(--border);
     &:hover:not(:disabled) {
-      filter: brightness(0.95);
+      background: color-mix(in oklch, var(--secondary) 92%, var(--card));
       border-color: color-mix(in oklch, var(--border) 80%, var(--foreground));
     }
     &:focus-visible {
-      box-shadow: 0 0 0 3px color-mix(in oklch, var(--border) 60%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--border) 45%, transparent);
     }
   }
 
@@ -97,7 +111,7 @@
     color: var(--foreground);
     border-color: transparent;
     &:hover:not(:disabled) {
-      background: var(--muted);
+      background: color-mix(in oklch, var(--foreground) 8%, transparent);
       border-color: var(--border);
     }
     &:focus-visible {
@@ -110,7 +124,8 @@
     color: #fff;
     border-color: var(--destructive);
     &:hover:not(:disabled) {
-      filter: brightness(0.88);
+      background: color-mix(in oklch, var(--destructive) 88%, black);
+      border-color: color-mix(in oklch, var(--destructive) 88%, black);
     }
     &:focus-visible {
       box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 30%, transparent);
@@ -128,7 +143,7 @@
 
   // ── Internals ──────────────────────────────
   &__icon {
-    font-size: 15px;
+    font-size: clamp(13px, calc(var(--tb-fs) * 1.1), 16px);
     flex-shrink: 0;
   }
 

@@ -2,21 +2,24 @@
   position: relative;
   display: inline-block;
   font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 
   &.tdd--sm {
-    --tdd-h: 28px;
-    --tdd-fs: 0.72rem;
-    --tdd-px: 10px;
+    --tdd-h: var(--thaca-control-sm-h);
+    --tdd-fs: var(--thaca-control-sm-fs);
+    --tdd-px: var(--thaca-control-sm-px);
   }
   &.tdd--md {
-    --tdd-h: 34px;
-    --tdd-fs: 0.78rem;
-    --tdd-px: 12px;
+    --tdd-h: var(--thaca-control-md-h);
+    --tdd-fs: var(--thaca-control-md-fs);
+    --tdd-px: var(--thaca-control-md-px);
   }
   &.tdd--lg {
-    --tdd-h: 40px;
-    --tdd-fs: 0.85rem;
-    --tdd-px: 14px;
+    --tdd-h: var(--thaca-control-lg-h);
+    --tdd-fs: var(--thaca-control-lg-fs);
+    --tdd-px: var(--thaca-control-lg-px);
   }
 
   &.tdd-disabled {
@@ -78,6 +81,39 @@
 
   .tdd-open & {
     transform: rotate(180deg);
+  }
+}
+
+.tdd-clear-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted-foreground);
+  background: color-mix(in oklch, var(--border) 35%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease,
+    visibility 0.15s ease;
+
+  &.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  &:hover {
+    color: var(--foreground);
+    background: color-mix(in oklch, var(--border) 60%, transparent);
   }
 }
 

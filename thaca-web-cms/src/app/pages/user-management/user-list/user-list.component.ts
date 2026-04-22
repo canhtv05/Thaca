@@ -8,10 +8,13 @@ import { AppConfigService } from '../../../core/configs/app-config.service';
 import { IUserDTO } from '../../../core/models/user.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
+import {
+  IDropdownOption,
+  ThacaDropdownComponent,
+} from '../../../shared/components/thaca-dropdown/thaca-dropdown.component';
+import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-user-list',
@@ -21,22 +24,29 @@ import { ThacaInputComponent } from '../../../shared/components/thaca-input/thac
     FormsModule,
     BreadcrumbComponent,
     DataTableComponent,
-    InputTextModule,
-    ButtonModule,
-    TagModule,
     ThacaInputComponent,
+    ThacaDropdownComponent,
+    ThacaButtonComponent,
+    TranslateModule,
   ],
   templateUrl: './user-list.component.html',
 })
 export class UserListComponent {
   private configService = inject(AppConfigService);
+  private translate = inject(TranslateService);
+
   @ViewChild(DataTableComponent) table!: DataTableComponent;
 
   filter = signal({
     username: '',
     email: '',
-    fullname: '',
+    isActivated: true,
   });
+
+  statusOptions: IDropdownOption[] = [
+    { label: 'user.active', value: true },
+    { label: 'user.inactive', value: false },
+  ];
 
   tableConfig: ITableConfig = {
     url: `${this.configService.getApiUrl()}/admin/users/search`,
@@ -44,32 +54,34 @@ export class UserListComponent {
     actionFixed: true,
     showStt: true,
     columns: [
-      { field: 'username', header: 'Username', sortable: true, width: '150px' },
-      { field: 'email', header: 'Email', sortable: true },
+      { field: 'username', header: 'user.username', sortable: true, width: '150px' },
+      { field: 'email', header: 'user.email', sortable: true },
       {
         field: 'isActivated',
-        header: 'Status',
+        header: 'user.status',
         render: (row: IUserDTO) => {
-          const severity = row.isActivated ? 'success' : 'warn';
-          const label = row.isActivated ? 'Active' : 'Inactive';
-          return `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-${severity}-100 text-${severity}-700">${label}</span>`;
+          const label = this.translate.instant(row.isActivated ? 'user.active' : 'user.inactive');
+          const variant = row.isActivated ? 'success' : 'warning';
+          return `<span class="thaca-badge thaca-badge-${variant}">
+                    <span class="thb-dot"></span>${label}
+                  </span>`;
         },
       },
       {
         field: 'isLocked',
-        header: 'Security',
+        header: 'user.isActivated',
         render: (row: IUserDTO) => {
-          const icon = row.isLocked ? 'pi-lock text-red-500' : 'pi-lock-open text-green-500';
-          const label = row.isLocked ? 'Locked' : 'Safe';
-          return `<div class="flex items-center gap-1"><i class="pi ${icon}"></i><span class="text-xs opacity-60">${label}</span></div>`;
+          const label = this.translate.instant(row.isLocked ? 'user.locked' : 'user.safe');
+          const variant = row.isLocked ? 'danger' : 'info';
+          return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
         },
       },
     ],
     actions: [
-      { icon: 'pi pi-pencil', titleKey: 'Edit', color: 'secondary' },
+      { icon: 'pi pi-pencil', titleKey: 'common.button.update', color: 'secondary' },
       {
         icon: 'pi pi-trash',
-        titleKey: 'Delete',
+        titleKey: 'common.button.delete',
         color: 'danger',
         condition: (row) => !row.isActivated,
       },

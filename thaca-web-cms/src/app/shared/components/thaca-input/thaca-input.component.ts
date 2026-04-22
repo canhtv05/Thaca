@@ -34,7 +34,13 @@ import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
   ],
 })
 export class ThacaInputComponent implements ControlValueAccessor {
-  @HostBinding('class') class = 'w-full';
+  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() readonly = false;
+
+  @HostBinding('class')
+  get hostClass(): string {
+    return `w-full thi--${this.size}`;
+  }
 
   @Input() placeholder = '';
   @Input() startIcon?: (typeof APP_CONFIG_ICONS)[keyof typeof APP_CONFIG_ICONS];
@@ -95,6 +101,31 @@ export class ThacaInputComponent implements ControlValueAccessor {
 
   onTogglePassword() {
     this.isPasswordVisible.update((v) => !v);
+  }
+
+  clearValue(event?: MouseEvent) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (this.disabled || this.readonly) return;
+    this.value.set('');
+    this.onChange('');
+    this.onTouched();
+  }
+
+  showClearButton() {
+    return (
+      !this.disabled &&
+      !this.readonly &&
+      this.type !== 'password' &&
+      !this.endIcon &&
+      this.value().length > 0
+    );
+  }
+
+  hasRightSlot() {
+    return (
+      !!this.endIcon || this.type === 'password' || (this.type !== 'password' && !this.endIcon)
+    );
   }
 
   hasError() {

@@ -37,12 +37,12 @@
 
 // ── Header ───────────────────────────────────────────────────
 .dt-header {
-  height: 56px;
+  padding: 10px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 16px;
   border-bottom: var(--border-b) solid var(--border);
   background: color-mix(in oklch, var(--muted) 55%);
 }

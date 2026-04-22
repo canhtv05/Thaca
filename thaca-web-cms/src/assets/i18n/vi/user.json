@@ -1,0 +1,16 @@
+{
+  "user": {
+    "username": "Tên người dùng",
+    "email": "Email",
+    "status": "Trạng thái",
+    "isActivated": "Kích hoạt",
+    "action": "Hành động",
+    "search_by_username": "Tìm kiếm theo tên người dùng",
+    "search_by_email": "Tìm kiếm theo email",
+    "search_by_status": "Tìm kiếm theo trạng thái",
+    "active": "Hoạt động",
+    "inactive": "Không hoạt động",
+    "locked": "Đã khóa",
+    "safe": "An toàn"
+  }
+}

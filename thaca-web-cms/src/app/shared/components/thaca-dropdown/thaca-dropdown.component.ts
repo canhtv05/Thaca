@@ -25,7 +25,7 @@ export interface IDropdownOption {
 }
 
 @Component({
-  selector: 'app-thaca-dropdown',
+  selector: 'thaca-dropdown',
   standalone: true,
   imports: [CommonModule, TranslateModule],
   providers: [
@@ -42,7 +42,11 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
   @Input() options: IDropdownOption[] = [];
   @Input() placeholder = 'Chọn...';
   @Input() disabled = false;
+  @Input() readonly = false;
+  @Input() clearable = true;
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() label?: string;
+  @Input() id: string = `thaca-dropdown-${Math.random().toString(36).substring(2, 15)}`;
   /**
    * 'body' → panel renders via fixed positioning, escapes overflow/z-index traps.
    * null (default) → panel renders inline inside the component (absolute).
@@ -101,7 +105,7 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
   }
 
   toggle() {
-    if (this.disabled) return;
+    if (this.disabled || this.readonly) return;
     const next = !this.open();
     this.open.set(next);
     this._onTouched();
@@ -116,7 +120,7 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
   }
 
   select(opt: IDropdownOption) {
-    if (opt.disabled) return;
+    if (opt.disabled || this.disabled || this.readonly) return;
     this.value.set(opt.value);
     this.open.set(false);
     this.removeGlobalListeners();
@@ -127,6 +131,28 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
   close() {
     this.open.set(false);
     this.removeGlobalListeners();
+  }
+
+  clear(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this.clearable) return;
+    this.value.set(null);
+    this._onChange(null);
+    this.onChange.emit(null);
+    this._onTouched();
+    this.close();
+  }
+
+  showClearButton() {
+    return (
+      this.clearable &&
+      !this.disabled &&
+      !this.readonly &&
+      this.value() !== null &&
+      this.value() !== undefined &&
+      this.value() !== ''
+    );
   }
 
   private removeGlobalListeners() {

@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './styles/tooltip.scss';
+@import './styles/thaca.scss';
+@import './styles/badge.scss';
 
 @custom-variant dark (&:is(.dark *));
 

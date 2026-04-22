@@ -10,7 +10,7 @@
 <div
   class="thaca-input-wrap"
   [class.has-icon-left]="startIcon"
-  [class.has-icon-right]="endIcon || type === 'password'"
+  [class.has-icon-right]="hasRightSlot()"
   [class.is-error]="hasError()"
   [class.is-disabled]="disabled"
 >
@@ -27,6 +27,7 @@
     [placeholder]="placeholder"
     [value]="value()"
     [disabled]="disabled"
+    [readonly]="readonly"
     (input)="onInput($event)"
     (blur)="onBlur()"
   />
@@ -45,5 +46,18 @@
     <span class="thaca-icon thaca-icon--right">
       <ng-icon [name]="endIcon.name" />
     </span>
+  }
+
+  @if (type !== 'password' && !endIcon) {
+    <button
+      tabindex="-1"
+      type="button"
+      class="thaca-clear-btn"
+      [class.is-visible]="showClearButton()"
+      (click)="clearValue($event)"
+      [attr.aria-label]="'Clear input'"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
   }
 </div>

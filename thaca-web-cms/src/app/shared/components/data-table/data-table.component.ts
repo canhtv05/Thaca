@@ -82,7 +82,6 @@ export class DataTableComponent {
   @Output() onAction = new EventEmitter<{ actionKey: string; row: any }>();
 
   @ContentChild('searchTemplate') searchTemplate?: TemplateRef<any>;
-  @ContentChild('headerActions') headerActions?: TemplateRef<any>;
 
   data = signal<any[]>([]);
   totalRecords = signal(0);

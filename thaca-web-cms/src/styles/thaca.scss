@@ -1,0 +1,77 @@
+:root {
+  --thaca-control-sm-h: 28px;
+  --thaca-control-sm-fs: 0.72rem;
+  --thaca-control-sm-px: 10px;
+
+  --thaca-control-md-h: 34px;
+  --thaca-control-md-fs: 0.78rem;
+  --thaca-control-md-px: 12px;
+
+  --thaca-control-lg-h: 40px;
+  --thaca-control-lg-fs: 0.85rem;
+  --thaca-control-lg-px: 14px;
+
+  --thaca-min-height: var(--thaca-control-md-h);
+}
+
+thaca-input {
+  --thaca-control-h: var(--thaca-control-md-h);
+  --thaca-control-fs: var(--thaca-control-md-fs);
+  --thaca-control-px: var(--thaca-control-md-px);
+
+  &.thi--sm {
+    --thaca-control-h: var(--thaca-control-sm-h);
+    --thaca-control-fs: var(--thaca-control-sm-fs);
+    --thaca-control-px: var(--thaca-control-sm-px);
+  }
+
+  &.thi--md {
+    --thaca-control-h: var(--thaca-control-md-h);
+    --thaca-control-fs: var(--thaca-control-md-fs);
+    --thaca-control-px: var(--thaca-control-md-px);
+  }
+
+  &.thi--lg {
+    --thaca-control-h: var(--thaca-control-lg-h);
+    --thaca-control-fs: var(--thaca-control-lg-fs);
+    --thaca-control-px: var(--thaca-control-lg-px);
+  }
+}
+
+thaca-input.thi--sm .thaca-input {
+  height: var(--thaca-control-sm-h);
+  font-size: var(--thaca-control-sm-fs);
+  padding-left: var(--thaca-control-sm-px);
+  padding-right: var(--thaca-control-sm-px);
+}
+
+thaca-input.thi--md .thaca-input {
+  height: var(--thaca-control-md-h);
+  font-size: var(--thaca-control-md-fs);
+  padding-left: var(--thaca-control-md-px);
+  padding-right: var(--thaca-control-md-px);
+}
+
+thaca-input.thi--lg .thaca-input {
+  height: var(--thaca-control-lg-h);
+  font-size: var(--thaca-control-lg-fs);
+  padding-left: var(--thaca-control-lg-px);
+  padding-right: var(--thaca-control-lg-px);
+}
+
+.thaca-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--foreground);
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1;
+}
+
+.thaca-required {
+  font-size: 10px;
+  color: #e24b4a;
+  font-weight: 400;
+}

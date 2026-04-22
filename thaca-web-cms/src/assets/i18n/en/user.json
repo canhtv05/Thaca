@@ -1,0 +1,16 @@
+{
+  "user": {
+    "username": "Username",
+    "email": "Email",
+    "status": "Status",
+    "isActivated": "Activated",
+    "action": "Action",
+    "search_by_username": "Search by username",
+    "search_by_email": "Search by email",
+    "search_by_status": "Search by status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "locked": "Locked",
+    "safe": "Safe"
+  }
+}
