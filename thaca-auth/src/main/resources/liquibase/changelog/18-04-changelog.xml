@@ -5,6 +5,9 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
 
     <changeSet id="18042026-1" author="CanhPC">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="system_users" schemaName="auth"/></not>
+        </preConditions>
         <createTable tableName="system_users" remarks="auth">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_users" />
@@ -30,6 +33,9 @@
     </changeSet>
 
     <changeSet id="18042026-2" author="CanhPC">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="system_credentials" schemaName="auth"/></not>
+        </preConditions>
         <createTable tableName="system_credentials" remarks="auth">
             <column name="username" type="VARCHAR(255)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credentials" />
@@ -49,6 +55,9 @@
     </changeSet>
 
     <changeSet id="18042026-3" author="CanhPC">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="system_credential_roles" schemaName="auth"/></not>
+        </preConditions>
         <createTable tableName="system_credential_roles" remarks="auth">
             <column name="credential_id" type="VARCHAR(255)">
                 <constraints nullable="false" primaryKey="true" />
@@ -60,12 +69,18 @@
         <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_roles" constraintName="fk_syscredrol_on_syscred" referencedColumnNames="username" referencedTableName="system_credentials" />
         <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="system_credential_roles" constraintName="fk_syscredrol_on_role" referencedColumnNames="code" referencedTableName="roles" />
     </changeSet>
-    
+
     <changeSet id="18042026-4" author="CanhPC">
+        <preConditions onFail="MARK_RAN">
+            <not><sequenceExists sequenceName="system_user_seq" schemaName="auth"/></not>
+        </preConditions>
         <createSequence incrementBy="1" sequenceName="system_user_seq" startValue="10" />
     </changeSet>
 
     <changeSet id="load-data-system-users" author="CanhPC">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_users</sqlCheck>
+        </preConditions>
         <loadData file="liquibase/data/system_user.csv" separator=";" tableName="system_users">
             <column name="id" type="numeric" />
             <column name="fullname" type="string" />
@@ -81,6 +96,9 @@
     </changeSet>
 
     <changeSet id="load-data-system-credentials" author="CanhPC">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_credentials</sqlCheck>
+        </preConditions>
         <loadData file="liquibase/data/system_credential.csv" separator=";" tableName="system_credentials">
             <column name="username" type="string" />
             <column name="password" type="string" />
@@ -93,6 +111,9 @@
     </changeSet>
 
     <changeSet id="load-data-system-credential-roles" author="CanhPC">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_credential_roles</sqlCheck>
+        </preConditions>
         <loadData file="liquibase/data/system_credential_roles.csv" separator=";" tableName="system_credential_roles">
             <column name="credential_id" type="string" />
             <column name="role_code" type="string" />

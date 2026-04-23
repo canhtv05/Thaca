@@ -11,6 +11,7 @@ public class ApiHeader {
 
     private String username;
     private String location;
+    private String language;
     private String channel;
     private String apiKey;
 

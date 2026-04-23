@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-5.0.xsd"
+  objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+  <!-- Create login_history table -->
+  <changeSet id="1776911488544-7" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><tableExists tableName="login_history" schemaName="auth"/></not>
+    </preConditions>
+    <createTable schemaName="auth" tableName="login_history">
+      <column name="id" type="VARCHAR(50)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_login_history"/>
+      </column>
+      <column name="created_at" type="DATETIME"/>
+      <column name="updated_at" type="DATETIME"/>
+      <column name="created_by" type="VARCHAR(255)"/>
+      <column name="updated_by" type="VARCHAR(255)"/>
+      <column name="user_id" type="VARCHAR(50)"/>
+      <column name="ip_address" type="VARCHAR(45)"/>
+      <column name="country" type="VARCHAR(100)"/>
+      <column name="city" type="VARCHAR(100)"/>
+      <column name="latitude" type="DOUBLE"/>
+      <column name="longitude" type="DOUBLE"/>
+      <column name="approx_location" type="VARCHAR(255)"/>
+      <column name="device" type="VARCHAR(100)"/>
+      <column name="device_type" type="VARCHAR(20)"/>
+      <column name="os" type="VARCHAR(100)"/>
+      <column name="browser" type="VARCHAR(100)"/>
+      <column name="user_agent" type="VARCHAR(500)"/>
+      <column name="channel" type="VARCHAR(20)"/>
+      <column name="login_method" type="VARCHAR(20)"/>
+      <column name="login_time" type="DATETIME">
+        <constraints nullable="false"/>
+      </column>
+      <column name="timezone" type="VARCHAR(50)"/>
+      <column name="session_id" type="VARCHAR(100)"/>
+      <column name="request_id" type="VARCHAR(100)"/>
+      <column name="is_trusted_device" type="BOOLEAN"/>
+      <column name="is_new_device" type="BOOLEAN"/>
+      <column name="is_vpn" type="BOOLEAN"/>
+      <column name="risk_score" type="INT"/>
+      <column name="status" type="VARCHAR(20)"/>
+      <column name="failure_reason" type="VARCHAR(255)"/>
+    </createTable>
+  </changeSet>
+
+  <!-- Add unique constraint on system_credentials.system_user_id -->
+  <changeSet id="1776911488544-8" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><uniqueConstraintExists tableName="system_credentials" constraintName="uc_system_credentials_system_user" schemaName="auth"/></not>
+    </preConditions>
+    <addUniqueConstraint columnNames="system_user_id" constraintName="uc_system_credentials_system_user"
+                         schemaName="auth" tableName="system_credentials"/>
+  </changeSet>
+
+  <!-- Drop audit columns from role_permissions (already done) -->
+  <changeSet id="1776911488544-11" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="role_permissions" columnName="created_at" schemaName="auth"/>
+    </preConditions>
+    <dropColumn columnName="created_at" schemaName="auth" tableName="role_permissions"/>
+    <dropColumn columnName="created_by" schemaName="auth" tableName="role_permissions"/>
+    <dropColumn columnName="updated_at" schemaName="auth" tableName="role_permissions"/>
+    <dropColumn columnName="updated_by" schemaName="auth" tableName="role_permissions"/>
+  </changeSet>
+
+  <!-- Drop NOT NULL on permissions.created_by -->
+  <changeSet id="1776911488544-4" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM information_schema.columns
+        WHERE table_schema = 'auth'
+          AND table_name = 'permissions'
+          AND column_name = 'created_by'
+          AND is_nullable = 'NO'
+      </sqlCheck>
+    </preConditions>
+    <dropNotNullConstraint columnDataType="varchar(255)" columnName="created_by" schemaName="auth"
+                           tableName="permissions"/>
+  </changeSet>
+
+  <!-- Drop NOT NULL on roles.created_by -->
+  <changeSet id="1776911488544-5" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM information_schema.columns
+        WHERE table_schema = 'auth'
+          AND table_name = 'roles'
+          AND column_name = 'created_by'
+          AND is_nullable = 'NO'
+      </sqlCheck>
+    </preConditions>
+    <dropNotNullConstraint columnDataType="varchar(255)" columnName="created_by" schemaName="auth"
+                           tableName="roles"/>
+  </changeSet>
+
+  <!-- Drop NOT NULL on users.created_by -->
+  <changeSet id="1776911488544-6" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM information_schema.columns
+        WHERE table_schema = 'auth'
+          AND table_name = 'users'
+          AND column_name = 'created_by'
+          AND is_nullable = 'NO'
+      </sqlCheck>
+    </preConditions>
+    <dropNotNullConstraint columnDataType="varchar(255)" columnName="created_by" schemaName="auth"
+                           tableName="users"/>
+  </changeSet>
+
+</databaseChangeLog>

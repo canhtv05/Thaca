@@ -6,6 +6,9 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="20260419-1" author="CanhPC">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="system_credentials" columnName="refresh_token" schemaName="auth"/>
+        </preConditions>
         <dropColumn tableName="system_credentials" schemaName="auth" columnName="refresh_token"/>
     </changeSet>
 
