@@ -12,9 +12,5 @@
   <property name="uuidType" value="uuid" dbms="postgresql"/>
   <property name="datetimeType" value="datetime" dbms="postgresql"/>
 
-  <include file="liquibase/changelog/27-01-changelog.xml"/>
-  <include file="liquibase/changelog/18-04-changelog.xml"/>
-  <include file="liquibase/changelog/19-04-changelog.xml"/>
-  <include file="liquibase/changelog/23-04-changelog.xml"/>
-  <include file="liquibase/changelog/23-01-changelog.xml"/>
+  <include file="/liquibase/changelog/23-01-changelog.xml"/>
 </databaseChangeLog>

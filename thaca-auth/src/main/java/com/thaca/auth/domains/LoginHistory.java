@@ -27,8 +27,9 @@ public class LoginHistory extends BaseEntityAudit {
     @Column(name = "id", length = 50, nullable = false, unique = true)
     private String id;
 
-    @Column(name = "user_id", length = 50)
-    private String userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
 
     @Column(name = "ip_address", length = 45)
     private String ipAddress;

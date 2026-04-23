@@ -6,8 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-5.0.xsd"
   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
-  <!-- Create login_history table -->
-  <changeSet id="1776911488544-7" author="CanhPC">
+  <changeSet id="1776913763345-1" author="CanhPC">
     <preConditions onFail="MARK_RAN">
       <not><tableExists tableName="login_history" schemaName="auth"/></not>
     </preConditions>
@@ -19,7 +18,9 @@
       <column name="updated_at" type="DATETIME"/>
       <column name="created_by" type="VARCHAR(255)"/>
       <column name="updated_by" type="VARCHAR(255)"/>
-      <column name="user_id" type="VARCHAR(50)"/>
+      <column name="user_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
       <column name="ip_address" type="VARCHAR(45)"/>
       <column name="country" type="VARCHAR(100)"/>
       <column name="city" type="VARCHAR(100)"/>
@@ -48,8 +49,152 @@
     </createTable>
   </changeSet>
 
-  <!-- Add unique constraint on system_credentials.system_user_id -->
-  <changeSet id="1776911488544-8" author="CanhPC">
+  <changeSet id="1776913763345-2" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><tableExists tableName="permissions" schemaName="auth"/></not>
+    </preConditions>
+    <createTable schemaName="auth" tableName="permissions">
+      <column name="code" type="VARCHAR(50)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_permissions"/>
+      </column>
+      <column name="created_at" type="DATETIME"/>
+      <column name="updated_at" type="DATETIME"/>
+      <column name="created_by" type="VARCHAR(255)"/>
+      <column name="updated_by" type="VARCHAR(255)"/>
+      <column name="description" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="1776913763345-3" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><tableExists tableName="role_permissions" schemaName="auth"/></not>
+    </preConditions>
+    <createTable schemaName="auth" tableName="role_permissions">
+      <column name="permission_code" type="VARCHAR(50)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_role_permissions"/>
+      </column>
+      <column name="role_code" type="VARCHAR(50)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_role_permissions"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="1776913763345-4" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><tableExists tableName="roles" schemaName="auth"/></not>
+    </preConditions>
+    <createTable schemaName="auth" tableName="roles">
+      <column name="code" type="VARCHAR(50)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_roles"/>
+      </column>
+      <column name="created_at" type="DATETIME"/>
+      <column name="updated_at" type="DATETIME"/>
+      <column name="created_by" type="VARCHAR(255)"/>
+      <column name="updated_by" type="VARCHAR(255)"/>
+      <column name="name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="VARCHAR(255)"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="1776913763345-5" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><tableExists tableName="system_credential_roles" schemaName="auth"/></not>
+    </preConditions>
+    <createTable schemaName="auth" tableName="system_credential_roles">
+      <column name="credential_id" type="VARCHAR(255)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credential_roles"/>
+      </column>
+      <column name="role_code" type="VARCHAR(50)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credential_roles"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="1776913763345-6" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><tableExists tableName="system_credentials" schemaName="auth"/></not>
+    </preConditions>
+    <createTable schemaName="auth" tableName="system_credentials">
+      <column name="username" type="VARCHAR(255)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credentials"/>
+      </column>
+      <column name="created_at" type="DATETIME"/>
+      <column name="updated_at" type="DATETIME"/>
+      <column name="created_by" type="VARCHAR(255)"/>
+      <column name="updated_by" type="VARCHAR(255)"/>
+      <column name="system_user_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="password" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="1776913763345-7" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><tableExists tableName="system_users" schemaName="auth"/></not>
+    </preConditions>
+    <createTable schemaName="auth" tableName="system_users">
+      <column name="id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_users"/>
+      </column>
+      <column name="created_at" type="DATETIME"/>
+      <column name="updated_at" type="DATETIME"/>
+      <column name="created_by" type="VARCHAR(255)"/>
+      <column name="updated_by" type="VARCHAR(255)"/>
+      <column name="fullname" type="VARCHAR(255)"/>
+      <column name="email" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_activated" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_locked" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_super_admin" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="1776913763345-8" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><tableExists tableName="users" schemaName="auth"/></not>
+    </preConditions>
+    <createTable schemaName="auth" tableName="users">
+      <column name="id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_users"/>
+      </column>
+      <column name="created_at" type="DATETIME"/>
+      <column name="updated_at" type="DATETIME"/>
+      <column name="created_by" type="VARCHAR(255)"/>
+      <column name="updated_by" type="VARCHAR(255)"/>
+      <column name="username" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="email" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="password" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_activated" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_locked" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column name="refresh_token" type="TEXT"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="1776913763345-9" author="CanhPC">
     <preConditions onFail="MARK_RAN">
       <not><uniqueConstraintExists tableName="system_credentials" constraintName="uc_system_credentials_system_user" schemaName="auth"/></not>
     </preConditions>
@@ -57,60 +202,193 @@
                          schemaName="auth" tableName="system_credentials"/>
   </changeSet>
 
-  <!-- Drop audit columns from role_permissions (already done) -->
-  <changeSet id="1776911488544-11" author="CanhPC">
+  <changeSet id="1776913763345-10" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <columnExists tableName="role_permissions" columnName="created_at" schemaName="auth"/>
+      <not><uniqueConstraintExists tableName="system_users" constraintName="uc_system_users_email" schemaName="auth"/></not>
     </preConditions>
-    <dropColumn columnName="created_at" schemaName="auth" tableName="role_permissions"/>
-    <dropColumn columnName="created_by" schemaName="auth" tableName="role_permissions"/>
-    <dropColumn columnName="updated_at" schemaName="auth" tableName="role_permissions"/>
-    <dropColumn columnName="updated_by" schemaName="auth" tableName="role_permissions"/>
+    <addUniqueConstraint columnNames="email" constraintName="uc_system_users_email" schemaName="auth"
+                         tableName="system_users"/>
   </changeSet>
 
-  <!-- Drop NOT NULL on permissions.created_by -->
-  <changeSet id="1776911488544-4" author="CanhPC">
+  <changeSet id="1776913763345-11" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="1">
-        SELECT COUNT(*) FROM information_schema.columns
-        WHERE table_schema = 'auth'
-          AND table_name = 'permissions'
-          AND column_name = 'created_by'
-          AND is_nullable = 'NO'
-      </sqlCheck>
+      <not><uniqueConstraintExists tableName="users" constraintName="uc_users_email" schemaName="auth"/></not>
     </preConditions>
-    <dropNotNullConstraint columnDataType="varchar(255)" columnName="created_by" schemaName="auth"
-                           tableName="permissions"/>
+    <addUniqueConstraint columnNames="email" constraintName="uc_users_email" schemaName="auth" tableName="users"/>
   </changeSet>
 
-  <!-- Drop NOT NULL on roles.created_by -->
-  <changeSet id="1776911488544-5" author="CanhPC">
+  <changeSet id="1776913763345-12" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="1">
-        SELECT COUNT(*) FROM information_schema.columns
-        WHERE table_schema = 'auth'
-          AND table_name = 'roles'
-          AND column_name = 'created_by'
-          AND is_nullable = 'NO'
-      </sqlCheck>
+      <not><uniqueConstraintExists tableName="users" constraintName="uc_users_username" schemaName="auth"/></not>
     </preConditions>
-    <dropNotNullConstraint columnDataType="varchar(255)" columnName="created_by" schemaName="auth"
-                           tableName="roles"/>
+    <addUniqueConstraint columnNames="username" constraintName="uc_users_username" schemaName="auth" tableName="users"/>
   </changeSet>
 
-  <!-- Drop NOT NULL on users.created_by -->
-  <changeSet id="1776911488544-6" author="CanhPC">
+  <changeSet id="1776913763345-13" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="1">
-        SELECT COUNT(*) FROM information_schema.columns
-        WHERE table_schema = 'auth'
-          AND table_name = 'users'
-          AND column_name = 'created_by'
-          AND is_nullable = 'NO'
-      </sqlCheck>
+      <not><foreignKeyConstraintExists foreignKeyName="FK_LOGIN_HISTORY_ON_USER" schemaName="auth"/></not>
     </preConditions>
-    <dropNotNullConstraint columnDataType="varchar(255)" columnName="created_by" schemaName="auth"
-                           tableName="users"/>
+    <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="login_history" baseTableSchemaName="auth"
+                             constraintName="FK_LOGIN_HISTORY_ON_USER" referencedColumnNames="id"
+                             referencedTableName="users" referencedTableSchemaName="auth"/>
+  </changeSet>
+
+  <changeSet id="1776913763345-14" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><foreignKeyConstraintExists foreignKeyName="FK_SYSTEM_CREDENTIALS_ON_SYSTEM_USER" schemaName="auth"/></not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="system_user_id" baseTableName="system_credentials"
+                             baseTableSchemaName="auth" constraintName="FK_SYSTEM_CREDENTIALS_ON_SYSTEM_USER"
+                             referencedColumnNames="id" referencedTableName="system_users"
+                             referencedTableSchemaName="auth"/>
+  </changeSet>
+
+  <changeSet id="1776913763345-15" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><foreignKeyConstraintExists foreignKeyName="fk_rolper_on_permission" schemaName="auth"/></not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="permission_code" baseTableName="role_permissions"
+                             baseTableSchemaName="auth" constraintName="fk_rolper_on_permission"
+                             referencedColumnNames="code" referencedTableName="permissions"
+                             referencedTableSchemaName="auth"/>
+  </changeSet>
+
+  <changeSet id="1776913763345-16" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><foreignKeyConstraintExists foreignKeyName="fk_rolper_on_role" schemaName="auth"/></not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="role_permissions" baseTableSchemaName="auth"
+                             constraintName="fk_rolper_on_role" referencedColumnNames="code" referencedTableName="roles"
+                             referencedTableSchemaName="auth"/>
+  </changeSet>
+
+  <changeSet id="1776913763345-17" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><foreignKeyConstraintExists foreignKeyName="fk_syscrerol_on_role" schemaName="auth"/></not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="system_credential_roles"
+                             baseTableSchemaName="auth" constraintName="fk_syscrerol_on_role"
+                             referencedColumnNames="code" referencedTableName="roles" referencedTableSchemaName="auth"/>
+  </changeSet>
+
+  <changeSet id="1776913763345-18" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><foreignKeyConstraintExists foreignKeyName="fk_syscrerol_on_system_credential" schemaName="auth"/></not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_roles"
+                             baseTableSchemaName="auth" constraintName="fk_syscrerol_on_system_credential"
+                             referencedColumnNames="username" referencedTableName="system_credentials"
+                             referencedTableSchemaName="auth"/>
+  </changeSet>
+
+  <changeSet id="1776913763345-19" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sequenceExists sequenceName="thaca_seq" schemaName="auth"/>
+    </preConditions>
+    <dropSequence schemaName="auth" sequenceName="thaca_seq"/>
+  </changeSet>
+
+  <!-- ═══ Seed Data ═══════════════════════════════════════════════════════ -->
+
+  <changeSet id="load-data-permissions" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.permissions</sqlCheck>
+    </preConditions>
+    <loadData file="liquibase/data/permission.csv" separator=";" tableName="permissions" schemaName="auth">
+      <column name="code" type="string"/>
+      <column name="description" type="string"/>
+      <column name="created_by" type="string"/>
+      <column name="created_at" type="timestamp"/>
+      <column name="updated_by" type="string"/>
+      <column name="updated_at" type="timestamp"/>
+    </loadData>
+  </changeSet>
+
+  <changeSet id="load-data-roles" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.roles</sqlCheck>
+    </preConditions>
+    <loadData file="liquibase/data/role.csv" separator=";" tableName="roles" schemaName="auth">
+      <column name="code" type="string"/>
+      <column name="name" type="string"/>
+      <column name="description" type="string"/>
+      <column name="created_by" type="string"/>
+      <column name="created_at" type="timestamp"/>
+      <column name="updated_by" type="string"/>
+      <column name="updated_at" type="timestamp"/>
+    </loadData>
+  </changeSet>
+
+  <changeSet id="load-data-users" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.users</sqlCheck>
+    </preConditions>
+    <loadData file="liquibase/data/user.csv" separator=";" tableName="users" schemaName="auth">
+      <column name="id" type="numeric"/>
+      <column name="username" type="string"/>
+      <column name="password" type="string"/>
+      <column name="is_activated" type="boolean"/>
+      <column name="is_locked" type="boolean"/>
+      <column name="email" type="string"/>
+      <column name="created_by" type="string"/>
+      <column name="created_at" type="timestamp"/>
+      <column name="updated_by" type="string"/>
+      <column name="updated_at" type="timestamp"/>
+    </loadData>
+  </changeSet>
+
+  <!-- role_permissions chỉ có 2 cột: role_code, permission_code (không có audit columns) -->
+  <changeSet id="load-data-role-permissions" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.role_permissions</sqlCheck>
+    </preConditions>
+    <loadData file="liquibase/data/role_permissions.csv" separator=";" tableName="role_permissions" schemaName="auth">
+      <column name="role_code" type="string"/>
+      <column name="permission_code" type="string"/>
+    </loadData>
+  </changeSet>
+
+  <changeSet id="load-data-system-users" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_users</sqlCheck>
+    </preConditions>
+    <loadData file="liquibase/data/system_user.csv" separator=";" tableName="system_users" schemaName="auth">
+      <column name="id" type="numeric"/>
+      <column name="fullname" type="string"/>
+      <column name="email" type="string"/>
+      <column name="is_activated" type="boolean"/>
+      <column name="is_locked" type="boolean"/>
+      <column name="is_super_admin" type="boolean"/>
+      <column name="created_by" type="string"/>
+      <column name="created_at" type="timestamp"/>
+      <column name="updated_by" type="string"/>
+      <column name="updated_at" type="timestamp"/>
+    </loadData>
+  </changeSet>
+
+  <changeSet id="load-data-system-credentials" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_credentials</sqlCheck>
+    </preConditions>
+    <loadData file="liquibase/data/system_credential.csv" separator=";" tableName="system_credentials" schemaName="auth">
+      <column name="username" type="string"/>
+      <column name="password" type="string"/>
+      <column name="system_user_id" type="numeric"/>
+      <column name="created_by" type="string"/>
+      <column name="created_at" type="timestamp"/>
+      <column name="updated_by" type="string"/>
+      <column name="updated_at" type="timestamp"/>
+    </loadData>
+  </changeSet>
+
+  <changeSet id="load-data-system-credential-roles" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_credential_roles</sqlCheck>
+    </preConditions>
+    <loadData file="liquibase/data/system_credential_roles.csv" separator=";" tableName="system_credential_roles" schemaName="auth">
+      <column name="credential_id" type="string"/>
+      <column name="role_code" type="string"/>
+    </loadData>
   </changeSet>
 
 </databaseChangeLog>
