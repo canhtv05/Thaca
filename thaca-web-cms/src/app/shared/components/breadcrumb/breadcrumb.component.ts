@@ -1,28 +1,32 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
+import { Component, Input, inject } from '@angular/core';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuItem } from 'primeng/api';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-breadcrumb',
   templateUrl: './breadcrumb.component.html',
   styleUrl: './breadcrumb.component.scss',
   standalone: true,
-  imports: [BreadcrumbModule, RouterLink],
+  imports: [BreadcrumbModule, RouterLink, TranslateModule],
 })
-export class BreadcrumbComponent implements OnInit {
-  @Input() items: MenuItem[] | undefined;
-  @Input() home: MenuItem | undefined;
-  @Input() title: string | undefined;
+export class BreadcrumbComponent {
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
 
-  ngOnInit() {
-    this.items = [
-      { label: 'Electronics' },
-      { label: 'Computer' },
-      { label: 'Accessories' },
-      { label: 'Keyboard' },
-      { label: 'Wireless' },
-    ];
-    this.home = { icon: 'pi pi-home' };
+  @Input() items: MenuItem[] = [];
+  @Input() home: MenuItem = { icon: 'pi pi-home', routerLink: '/home' };
+  @Input() title: string | undefined;
+  @Input() showBack = false;
+  @Input() backUrl?: string;
+
+  goBack() {
+    if (this.backUrl) {
+      this.router.navigateByUrl(this.backUrl);
+      return;
+    }
+    this.location.back();
   }
 }

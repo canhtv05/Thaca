@@ -17,6 +17,7 @@ import {
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
 import { ILoginHistoryDTO } from '../../../core/models/login-history.model';
 import { ThacaDatepickerComponent } from '../../../shared/components/thaca-datepicker/thaca-datepicker.component';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-login-history',
@@ -40,6 +41,8 @@ export class LoginHistoryComponent {
   private translate = inject(TranslateService);
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
+
+  breadcrumbItems: MenuItem[] = [{ label: 'menu.login_history' }];
 
   rangeDates: Date[] | undefined;
 

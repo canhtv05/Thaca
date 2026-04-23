@@ -51,7 +51,14 @@ export class Sidebar implements OnInit, OnDestroy {
     this.model = [
       {
         label: 'menu.overview',
-        items: [{ label: 'menu.dashboard', icon: 'pi pi-home', routerLink: ['/home'] }],
+        items: [
+          { label: 'menu.dashboard', icon: 'pi pi-home', routerLink: ['/home'] },
+          {
+            label: 'menu.login_history',
+            icon: 'pi pi-history',
+            routerLink: ['/login-history'],
+          },
+        ],
       },
       {
         label: 'menu.user_management',
@@ -65,11 +72,6 @@ export class Sidebar implements OnInit, OnDestroy {
             label: 'menu.permissions',
             icon: 'pi pi-shield',
             routerLink: ['/user-management/permissions'],
-          },
-          {
-            label: 'menu.login_history',
-            icon: 'pi pi-history',
-            routerLink: ['/user-management/login-history'],
           },
         ],
       },

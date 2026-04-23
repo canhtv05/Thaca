@@ -16,6 +16,7 @@ import {
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thaca-modal.component';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-user-list',
@@ -39,6 +40,11 @@ export class UserListComponent {
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
   @ViewChild('createModal') createModal!: ThacaModalComponent;
+
+  breadcrumbItems: MenuItem[] = [
+    { label: 'menu.user_management', routerLink: '/user-management/list' },
+    { label: 'menu.user_list' },
+  ];
 
   filter = signal({
     username: '',

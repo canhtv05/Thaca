@@ -14,6 +14,11 @@ export const mainLayoutRoute: Route[] = [
         component: HomeComponent,
       },
       {
+        path: '',
+        loadChildren: () =>
+          import('../../pages/overview/overview.route').then((m) => m.overviewRoute),
+      },
+      {
         path: 'user-management',
         loadChildren: () =>
           import('../../pages/user-management/user-management.route').then(
