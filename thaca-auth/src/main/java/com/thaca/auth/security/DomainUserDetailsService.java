@@ -10,7 +10,7 @@ import com.thaca.auth.services.AuthService;
 // import com.thaca.auth.services.KafkaProducerService;
 // import com.thaca.common.dtos.events.VerificationEmailEvent;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
-import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             password,
             grantedAuthorities,
             rolesString,
-            StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name()),
+            StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
             isSuperAdmin,
             cmsUser
         );

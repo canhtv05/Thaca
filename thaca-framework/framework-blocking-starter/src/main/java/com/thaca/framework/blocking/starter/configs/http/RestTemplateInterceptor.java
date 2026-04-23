@@ -1,7 +1,7 @@
 package com.thaca.framework.blocking.starter.configs.http;
 
 import com.thaca.framework.core.configs.FrameworkProperties;
-import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.dtos.ApiHeader;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
     ) throws IOException {
         FrameworkProperties.HttpClientConfig config = frameworkProperties.getHttpClient();
 
-        ApiHeader contextHeader = FwContext.get();
+        ApiHeader contextHeader = FwContextHeader.get();
         if (contextHeader != null) {
             if (StringUtils.hasText(contextHeader.getApiKey())) {
                 request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Basic " + contextHeader.getApiKey());

@@ -24,7 +24,7 @@
 
     <p-table
       [value]="data()"
-      [columns]="config.columns"
+      [columns]="displayColumns()"
       [lazy]="true"
       (onLazyLoad)="onLazyLoad($event)"
       [totalRecords]="totalRecords()"
@@ -43,7 +43,7 @@
           @if (config.showStt) {
             <th class="dt-th dt-th--stt">{{ 'common.stt' | translate }}</th>
           }
-          @for (col of config.columns; track col.field) {
+          @for (col of displayColumns(); track col.field) {
             <th
               class="dt-th"
               [class.dt-fixed]="col.fixed"
@@ -75,7 +75,7 @@
             </td>
           }
 
-          @for (col of config.columns; track col.field) {
+          @for (col of displayColumns(); track col.field) {
             <td class="dt-td" [class.dt-fixed]="col.fixed" [style.width]="col.width">
               @if (!col.condition || col.condition(rowData)) {
                 @if (col.render) {
@@ -114,7 +114,7 @@
         <tr>
           <td
             [attr.colspan]="
-              config.columns.length + (config.actions?.length ? 1 : 0) + (config.showStt ? 1 : 0)
+              displayColumns().length + (config.actions?.length ? 1 : 0) + (config.showStt ? 1 : 0)
             "
             class="dt-empty"
           >

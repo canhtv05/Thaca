@@ -1,6 +1,7 @@
 package com.thaca.auth.controller;
 
 import com.thaca.auth.constants.ServiceMethod;
+import com.thaca.auth.dtos.LoginHistoryDTO;
 import com.thaca.auth.dtos.UserDTO;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
@@ -11,9 +12,11 @@ import com.thaca.auth.dtos.res.AuthenticateRes;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.services.AuthService;
 import com.thaca.auth.services.UserService;
+import com.thaca.common.dtos.search.SearchRequest;
+import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.constants.CommonConstants;
-import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.RequestType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,8 +34,12 @@ public class UserAuthController {
 
     @PostMapping("/sign-in")
     @FwRequest(name = ServiceMethod.AUTH_AUTHENTICATE, type = RequestType.PUBLIC)
-    public ResponseEntity<AuthenticateRes> authenticate(LoginReq loginReq, HttpServletResponse httpServletResponse) {
-        return ResponseEntity.ok(authService.authenticate(loginReq, httpServletResponse));
+    public ResponseEntity<AuthenticateRes> authenticate(
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
+        return ResponseEntity.ok(authService.authenticate(loginReq, httpServletRequest, httpServletResponse));
     }
 
     @PostMapping("/sign-up")
@@ -49,7 +56,7 @@ public class UserAuthController {
         HttpServletRequest httpServletRequest,
         HttpServletResponse response
     ) {
-        String channel = FwContext.get() != null ? FwContext.get().getChannel() : null;
+        String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : null;
         return ResponseEntity.ok(authService.refreshToken(cookieValue, channel, httpServletRequest, response));
     }
 
@@ -93,5 +100,11 @@ public class UserAuthController {
     public ResponseEntity<Void> logoutAllDevices(HttpServletResponse response) {
         authService.logoutAllDevices(response);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/search-login-history")
+    @FwRequest(name = ServiceMethod.AUTH_SEARCH_LOGIN_HISTORY, type = RequestType.PROTECTED)
+    public ResponseEntity<SearchResponse<LoginHistoryDTO>> searchLoginHistory(SearchRequest<LoginHistoryDTO> criteria) {
+        return ResponseEntity.ok(authService.searchLoginHistory(criteria));
     }
 }

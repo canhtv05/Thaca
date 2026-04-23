@@ -1,5 +1,6 @@
 package com.thaca.auth.configs;
 
+import com.maxmind.geoip2.DatabaseReader;
 import com.thaca.auth.security.CustomAuthenticationProvider;
 import com.thaca.auth.security.jwt.JWTConfigurer;
 import com.thaca.common.enums.CommonErrorMessage;
@@ -7,6 +8,8 @@ import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.utils.JsonF;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -69,6 +72,26 @@ public class AuthSecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(HttpSecurity http, CustomAuthenticationProvider customProvider) {
         return http.getSharedObject(AuthenticationManagerBuilder.class).authenticationProvider(customProvider).build();
+    }
+
+    @Bean
+    DatabaseReader cityDatabaseReader() {
+        try (InputStream is = getClass().getResourceAsStream("/geoip/GeoLite2-City.mmdb")) {
+            if (is == null) return null;
+            return new DatabaseReader.Builder(is).build();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Bean
+    DatabaseReader anonymousIpDatabaseReader() {
+        try (InputStream is = getClass().getResourceAsStream("/geoip/GeoIP2-Anonymous-IP.mmdb")) {
+            if (is == null) return null;
+            return new DatabaseReader.Builder(is).build();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Bean

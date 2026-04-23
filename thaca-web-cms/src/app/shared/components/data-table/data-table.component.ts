@@ -53,6 +53,7 @@ export interface ITableConfig<T = any> {
   dataKey?: string;
   actionFixed?: boolean;
   showStt?: boolean;
+  withAudit?: boolean;
 }
 
 @Component({
@@ -80,6 +81,21 @@ export class DataTableComponent {
   @Output() onRowClick = new EventEmitter<any>();
   @Output() onDataLoaded = new EventEmitter<any[]>();
   @Output() onAction = new EventEmitter<{ actionKey: string; row: any }>();
+
+  private auditColumns: ITableColumn[] = [
+    { field: 'createdAt', header: 'common.createdAt', width: '180px', sortable: true },
+    { field: 'createdBy', header: 'common.createdBy', width: '150px', sortable: true },
+    { field: 'updatedAt', header: 'common.updatedAt', width: '180px', sortable: true },
+    { field: 'updatedBy', header: 'common.updatedBy', width: '150px', sortable: true },
+  ];
+
+  displayColumns = computed(() => {
+    let cols = [...this.config.columns];
+    if (this.config.withAudit) {
+      cols = [...cols, ...this.auditColumns];
+    }
+    return cols;
+  });
 
   @ContentChild('searchTemplate') searchTemplate?: TemplateRef<any>;
   @ContentChild('headerActions') headerActions?: TemplateRef<any>;

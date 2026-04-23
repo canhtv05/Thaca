@@ -8,6 +8,7 @@ import com.thaca.auth.services.AuthService;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.security.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,12 @@ public class CmsAuthController {
 
     @PostMapping("/sign-in")
     @FwRequest(name = ServiceMethod.CMS_AUTHENTICATE, type = RequestType.PUBLIC)
-    public ResponseEntity<AuthenticateRes> signIn(LoginReq loginReq, HttpServletResponse httpServletResponse) {
-        return ResponseEntity.ok(authService.authenticateCms(loginReq, httpServletResponse));
+    public ResponseEntity<AuthenticateRes> signIn(
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
+        return ResponseEntity.ok(authService.authenticateCms(loginReq, httpServletRequest, httpServletResponse));
     }
 
     @PostMapping("/profile")

@@ -1,0 +1,504 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// thaca-datepicker
+// ─────────────────────────────────────────────────────────────────────────────
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  transition: none !important;
+}
+
+// ── Wrapper ───────────────────────────────────────────────────────────────────
+.thaca-dp-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--thaca-control-h, var(--thaca-min-height));
+
+  &.is-inline {
+    height: auto;
+  }
+}
+
+// ── p-datePicker full width ───────────────────────────────────────────────────
+.thaca-dp {
+  width: 100%;
+  display: block;
+
+  ::ng-deep .p-datepicker-input {
+    width: 100%;
+    height: var(--thaca-control-h, var(--thaca-min-height));
+    // right padding: 8px(gap) + 14px(icon) + 6px = 28px
+    // khi có clear button hiện thêm: 8+14+4+16+4 = 46px — handle bằng class
+    padding: 0 30px 0 var(--thaca-control-px, 12px);
+    font-size: var(--thaca-control-fs, 0.78rem);
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--foreground);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: var(--muted-foreground);
+      opacity: 0.9;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: var(--primary);
+    }
+
+    &:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
+      &::placeholder {
+        opacity: 0.6;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: color-mix(in srgb, var(--border) 30%, transparent);
+    }
+
+    .has-icon-left & {
+      padding-left: calc(var(--thaca-control-px, 12px) + 22px);
+    }
+
+    .is-error & {
+      border-color: #e24b4a;
+      box-shadow: 0 0 0 3px rgba(226, 75, 74, 0.1);
+    }
+  }
+
+  // Ẩn icon PrimeNG tự inject
+  ::ng-deep .p-datepicker-input-icon-container {
+    display: none;
+  }
+}
+
+// ── Shared icon base ──────────────────────────────────────────────────────────
+.thaca-icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  opacity: 0.38;
+  pointer-events: none;
+  z-index: 1;
+  line-height: 1;
+  line-height: 1;
+
+  &--left {
+    left: var(--thaca-control-px, 12px);
+    font-size: 14px;
+  }
+
+  // Calendar icon: luôn dính vào lề phải bên trong border input
+  &--calendar {
+    right: 12px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+
+    .thaca-dp-wrap:focus-within & {
+      opacity: 0.65;
+    }
+    .is-error & {
+      opacity: 0.7;
+      color: #e24b4a;
+    }
+    .is-disabled & {
+      opacity: 0.18;
+    }
+  }
+}
+
+// ── Clear button ──────────────────────────────────────────────────────────────
+// Nằm ngay trước .thaca-icon--calendar trong DOM
+// → dùng CSS ~ để đẩy calendar icon khi clear hiện
+.thaca-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 2;
+
+  &.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    // Đẩy calendar icon sang trái khi clear visible
+    & ~ .thaca-icon--calendar {
+      right: 31px;
+    }
+  }
+
+  &:hover {
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--border) 65%, transparent);
+  }
+
+  .is-error & {
+    color: #e24b4a;
+  }
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+.thaca-label {
+  font-size: var(--thaca-control-fs, 0.78rem);
+  font-weight: 600;
+  color: var(--foreground);
+  opacity: 0.85;
+}
+
+.thaca-required {
+  color: #e24b4a;
+  margin-left: 2px;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Panel popup
+// Vì appendTo="body", style này cần đặt trong styles.scss (global)
+// hoặc giữ ::ng-deep trong component SCSS
+// ─────────────────────────────────────────────────────────────────────────────
+::ng-deep .thaca-dp-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  overflow: hidden;
+
+  // ── Header ──────────────────────────────────────────────────────
+  .p-datepicker-header {
+    padding: 0 10px;
+    height: 48px; // Cố định chiều cao để không bị giật
+    border-bottom: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  // Prev / Next — styled giống thaca-button secondary
+  .p-datepicker-prev-button,
+  .p-datepicker-next-button {
+    width: 32px;
+    height: 32px;
+    background: color-mix(in srgb, var(--background), var(--foreground) 3%);
+    color: var(--foreground);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 1;
+
+    // Ẩn icon PrimeNG mặc định, dùng CSS arrow thay thế
+    svg,
+    span {
+      display: none !important;
+    }
+
+    &::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-left: 1.5px solid var(--foreground);
+      border-bottom: 1.5px solid var(--foreground);
+      opacity: 0.7;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--border) 50%, transparent);
+      border-color: var(--primary);
+      &::before {
+        opacity: 1;
+      }
+    }
+  }
+
+  .p-datepicker-prev-button::before {
+    transform: rotate(45deg) translate(1px, -1px);
+  }
+
+  .p-datepicker-next-button::before {
+    transform: rotate(-135deg) translate(1px, -1px);
+  }
+
+  .p-datepicker-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex: 1;
+    min-width: 140px; // Đảm bảo title có không gian đủ để không bị co giãn
+    height: 100%;
+  }
+
+  // Month / Year select
+  .p-datepicker-select-month,
+  .p-datepicker-select-year {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--foreground);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: var(--radius-sm);
+    pointer-events: auto !important;
+    z-index: 10;
+    position: relative;
+
+    &:hover {
+      background: var(--muted);
+      color: var(--primary);
+    }
+  }
+
+  // ── Calendar grid ────────────────────────────────────────────────
+  .p-datepicker-calendar-container {
+    padding: 6px 10px 10px;
+  }
+
+  .p-datepicker-day-view {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .p-datepicker-weekday-cell {
+    text-align: center;
+    padding: 4px 0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--muted-foreground);
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .p-datepicker-day-cell {
+    padding: 1px;
+    text-align: center;
+  }
+
+  .p-datepicker-today > .p-datepicker-day {
+    border: 1.5px solid var(--primary) !important;
+    background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+    color: var(--primary) !important;
+  }
+
+  .p-datepicker-day {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.76rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--foreground);
+
+    &:hover:not(.p-disabled) {
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      color: var(--primary);
+    }
+
+    &.p-datepicker-today {
+      font-weight: 700;
+      color: var(--primary);
+      border: 1.5px solid var(--primary) !important;
+      background: color-mix(in srgb, var(--primary) 8%, transparent) !important;
+    }
+
+    &.p-datepicker-day-selected,
+    &[aria-selected='true'] {
+      background: var(--primary) !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 30%, transparent);
+    }
+
+    &.p-disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    // Range: start / end
+    &.p-datepicker-day-selected-range-start,
+    &.p-datepicker-day-selected-range-end {
+      background: var(--primary) !important;
+      color: #fff !important;
+      border-radius: var(--radius-sm);
+    }
+
+    // Range: in-between
+    &.p-datepicker-day-selected-range {
+      background: color-mix(in srgb, var(--primary) 14%, transparent);
+      color: var(--primary);
+      border-radius: 0;
+    }
+  }
+
+  // ── Month / Year view ─────────────────────────────────────────────
+  .p-datepicker-month-view,
+  .p-datepicker-year-view {
+    padding: 8px 10px 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .p-datepicker-month,
+  .p-datepicker-year {
+    padding: 7px 4px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--foreground);
+    pointer-events: auto !important;
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      color: var(--primary);
+    }
+
+    &.p-datepicker-month-selected,
+    &.p-datepicker-year-selected {
+      background: var(--primary);
+      color: #fff; // luôn white
+      font-weight: 700;
+    }
+  }
+
+  // ── Time picker ──────────────────────────────────────────────────
+  .p-timepicker {
+    border-top: 1px solid var(--border);
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--foreground);
+
+    button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--foreground);
+      opacity: 0.45;
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    input {
+      width: 32px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--foreground);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 2px 3px;
+      outline: none;
+      &:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 15%, transparent);
+      }
+    }
+  }
+
+  // ── Button bar (Today / Clear) — styled giống thaca-button ────────
+  .p-datepicker-buttonbar {
+    border-top: none;
+    padding: 7px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+
+    .p-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.73rem;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 4px 12px;
+      height: 26px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      line-height: 1;
+      &:hover {
+        background: color-mix(in srgb, var(--primary) 12%, transparent);
+        color: var(--primary);
+      }
+    }
+  }
+
+  // ── Multiple months layout ────────────────────────────────────────
+  &.p-datepicker-multiple-month {
+    .p-datepicker-group-container {
+      display: flex;
+      gap: 0;
+    }
+
+    .p-datepicker-group + .p-datepicker-group {
+      border-left: 1px solid var(--border);
+    }
+  }
+
+  // ── Week numbers ─────────────────────────────────────────────────
+  .p-datepicker-weeknumber {
+    font-size: 0.65rem;
+    color: var(--muted-foreground);
+    opacity: 0.4;
+    padding: 1px 3px;
+  }
+}

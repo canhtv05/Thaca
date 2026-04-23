@@ -2,6 +2,7 @@ import { IconName, IconType } from '@ng-icons/core';
 import { solarGlobalBoldDuotone } from '@ng-icons/solar-icons/bold-duotone';
 import { solarUserBold, solarLockPasswordBold } from '@ng-icons/solar-icons/bold';
 import { solarEye, solarEyeClosed } from '@ng-icons/solar-icons/outline';
+import { solarCalendarBold } from '@ng-icons/solar-icons/bold';
 
 export const APP_CONFIG_ICONS: Record<string, { name: IconName; icon: IconType }> = {
   solarGlobalBoldDuotone: {
@@ -23,5 +24,9 @@ export const APP_CONFIG_ICONS: Record<string, { name: IconName; icon: IconType }
   solarEyeClosed: {
     name: 'solarEyeClosed',
     icon: solarEyeClosed,
+  },
+  solarCalendar: {
+    name: 'solarCalendar',
+    icon: solarCalendarBold,
   },
 };

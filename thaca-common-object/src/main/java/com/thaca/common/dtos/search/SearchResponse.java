@@ -2,8 +2,8 @@ package com.thaca.common.dtos.search;
 
 import java.util.List;
 
-public record SearchResponse<T>(List<T> data, PaginationResponse pagination) {
-    public static <T> SearchResponse<T> of(List<T> data, PaginationResponse pagination) {
+public record SearchResponse<T>(List<T> data, PaginationResponse<?> pagination) {
+    public static <T> SearchResponse<T> of(List<T> data, PaginationResponse<?> pagination) {
         return new SearchResponse<>(data, pagination);
     }
 

@@ -1,6 +1,7 @@
 package com.thaca.framework.core.configs;
 
-import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.context.FwContextBody;
+import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.dtos.ApiPayload;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
@@ -54,7 +55,10 @@ public class ApiPayloadArgumentResolver implements HandlerMethodArgumentResolver
             return null;
         }
         if (payload.getHeader() != null) {
-            FwContext.set(payload.getHeader());
+            FwContextHeader.set(payload.getHeader());
+        }
+        if (payload.getBody() != null) {
+            FwContextBody.set(payload.getBody());
         }
         if (payload.getBody() != null) {
             return payload.getBody().getData();

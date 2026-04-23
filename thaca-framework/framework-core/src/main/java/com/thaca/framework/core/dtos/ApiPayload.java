@@ -2,7 +2,7 @@ package com.thaca.framework.core.dtos;
 
 import com.thaca.common.dtos.ErrorData;
 import com.thaca.common.validations.ErrorMessageRule;
-import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.context.FwContextHeader;
 import lombok.*;
 import org.slf4j.MDC;
 
@@ -32,9 +32,9 @@ public class ApiPayload<T> {
     }
 
     public static ApiHeader fallbackHeader() {
-        if (FwContext.get() == null) {
+        if (FwContextHeader.get() == null) {
             return ApiHeader.builder().build();
         }
-        return FwContext.get();
+        return FwContextHeader.get();
     }
 }

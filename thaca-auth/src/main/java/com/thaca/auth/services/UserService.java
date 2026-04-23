@@ -252,14 +252,12 @@ public class UserService {
         Specification<User> spec = createSpecification(request);
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable());
         return new SearchResponse<>(
-            users.getContent().stream().map(UserDTO::fromEntity).collect(Collectors.toList()),
-            PaginationResponse.of(
-                users.getNumber(),
-                users.getTotalPages(),
-                users.getSize(),
-                users.getNumberOfElements(),
-                (int) users.getTotalElements()
-            )
+            users
+                .getContent()
+                .stream()
+                .map(u -> UserDTO.fromEntity(u, true))
+                .collect(Collectors.toList()),
+            PaginationResponse.of(users)
         );
     }
 

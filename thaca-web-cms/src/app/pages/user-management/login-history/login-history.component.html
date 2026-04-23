@@ -1,0 +1,67 @@
+<div class="flex flex-col gap-4 w-full">
+  <app-breadcrumb [title]="'menu.user_management' | translate" />
+
+  <app-data-table [config]="tableConfig" [externalFilter]="filter()">
+    <ng-template #headerActions>
+      <div class="flex justify-end items-center gap-4">
+        <thaca-button size="md" variant="secondary">
+          <span class="text-foreground"> {{ 'common.button.export' | translate }} </span>
+        </thaca-button>
+      </div>
+    </ng-template>
+
+    <ng-template #searchTemplate>
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 place-content-end place-items-end"
+      >
+        <thaca-dropdown
+          class="w-full"
+          [(ngModel)]="filter().status"
+          [placeholder]="'auth.search_by_status' | translate"
+          (change)="onSearch()"
+          [label]="'user.status' | translate"
+          [options]="statusOptions"
+        />
+
+        <thaca-dropdown
+          class="w-full"
+          [(ngModel)]="filter().channel"
+          [placeholder]="'auth.search_by_channel' | translate"
+          (change)="onSearch()"
+          [label]="'auth.channel' | translate"
+          [options]="channelOptions"
+        />
+
+        <thaca-dropdown
+          [(ngModel)]="filter().deviceType"
+          [placeholder]="'auth.search_by_device' | translate"
+          (keyup.enter)="onSearch()"
+          [label]="'auth.device' | translate"
+          [options]="deviceTypeOptions"
+          class="w-full"
+        />
+
+        <thaca-input
+          [(ngModel)]="filter().browser"
+          [placeholder]="'auth.search_by_browser' | translate"
+          (keyup.enter)="onSearch()"
+          [label]="'auth.browser' | translate"
+        />
+
+        <thaca-datepicker
+          class="w-full"
+          [(ngModel)]="rangeDates"
+          mode="range"
+          [label]="'common.dateRange' | translate"
+          [placeholder]="'common.select_date_range' | translate"
+          [showButtonBar]="true"
+          [readonly]="true"
+        />
+
+        <thaca-button size="md" class="w-full" variant="primary" (clicked)="onSearch()">
+          <span class="text-white"> {{ 'common.button.search' | translate }} </span>
+        </thaca-button>
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>

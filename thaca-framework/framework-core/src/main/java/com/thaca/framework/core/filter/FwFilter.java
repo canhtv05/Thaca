@@ -1,7 +1,9 @@
 package com.thaca.framework.core.filter;
 
 import com.thaca.common.enums.CommonErrorMessage;
-import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.context.FwContextBody;
+import com.thaca.framework.core.context.FwContextHeader;
+import com.thaca.framework.core.dtos.ApiBody;
 import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ChannelType;
@@ -63,7 +65,8 @@ public class FwFilter extends OncePerRequestFilter {
         MDC.put("spanId", spanId);
 
         try {
-            FwContext.set(buildContextHeader(envelope));
+            FwContextHeader.set(buildContextHeader(envelope));
+            FwContextBody.set(buildContextBody(envelope));
         } catch (Exception e) {
             log.warn("Cannot set FwContext: {}", e.getMessage());
         }
@@ -153,12 +156,16 @@ public class FwFilter extends OncePerRequestFilter {
 
             responseWrapper.copyBodyToResponse();
             MDC.clear();
-            FwContext.clear();
+            FwContextHeader.clear();
         }
     }
 
     private ApiHeader buildContextHeader(ApiPayload<?> envelope) {
         return envelope != null && envelope.getHeader() != null ? envelope.getHeader() : ApiHeader.builder().build();
+    }
+
+    private ApiBody<?> buildContextBody(ApiPayload<?> envelope) {
+        return envelope != null && envelope.getBody() != null ? envelope.getBody() : ApiBody.builder().build();
     }
 
     private void processLog(
@@ -184,7 +191,7 @@ public class FwFilter extends OncePerRequestFilter {
         );
 
         MDC.clear();
-        FwContext.clear();
+        FwContextHeader.clear();
     }
 
     private String extractUsername() {

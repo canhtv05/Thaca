@@ -13,6 +13,13 @@ export interface IPaginationResponse {
   total: number;
 }
 
+export interface IBaseAuditResponse {
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+}
+
 export interface IApiBody<T> {
   data: T;
   transId: string;
@@ -25,6 +32,7 @@ export interface IApiHeader {
   location: string;
   channel: string;
   language: string;
+  deviceId: string;
   apiKey: string;
   timestamp: number;
 }

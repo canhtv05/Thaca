@@ -1,35 +1,40 @@
 package com.thaca.auth.domains;
 
 import com.thaca.auth.enums.DeviceType;
-import com.thaca.auth.enums.LoginMethod;
 import com.thaca.auth.enums.LoginStatus;
-import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import com.thaca.framework.core.enums.ChannelType;
 import jakarta.persistence.*;
 import java.time.Instant;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Setter
 @Getter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "login_history", schema = "auth")
-public class LoginHistory extends BaseEntityAudit {
+public class LoginHistory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "thaca_seq_gen")
-    @SequenceGenerator(name = "thaca_seq_gen", sequenceName = "thaca_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", length = 50, nullable = false, unique = true)
     private String id;
 
+    @Column(name = "username", length = 50)
+    private String username;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "system_user_id", referencedColumnName = "id")
+    private SystemUser systemUser;
 
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
@@ -49,9 +54,6 @@ public class LoginHistory extends BaseEntityAudit {
     @Column(name = "approx_location", length = 255)
     private String approxLocation;
 
-    @Column(name = "device", length = 100)
-    private String device;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "device_type", length = 20)
     private DeviceType deviceType;
@@ -69,22 +71,15 @@ public class LoginHistory extends BaseEntityAudit {
     @Column(name = "channel", length = 20)
     private ChannelType channel;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "login_method", length = 20)
-    private LoginMethod loginMethod;
-
     @Builder.Default
     @Column(name = "login_time", nullable = false)
     private Instant loginTime = Instant.now();
 
-    @Column(name = "timezone", length = 50)
-    private String timezone;
-
-    @Column(name = "session_id", length = 100)
-    private String sessionId;
-
     @Column(name = "request_id", length = 100)
     private String requestId;
+
+    @Column(name = "device_id", length = 255)
+    private String deviceId;
 
     @Builder.Default
     @Column(name = "is_trusted_device")
@@ -100,6 +95,9 @@ public class LoginHistory extends BaseEntityAudit {
 
     @Column(name = "risk_score")
     private Integer riskScore;
+
+    @Column(name = "country_iso_code", length = 20)
+    private String countryIsoCode;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)

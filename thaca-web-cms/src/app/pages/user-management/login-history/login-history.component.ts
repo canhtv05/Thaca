@@ -1,0 +1,164 @@
+import { Component, inject, signal, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { DatePickerModule } from 'primeng/datepicker';
+import { BreadcrumbComponent } from '../../../shared/components/breadcrumb/breadcrumb.component';
+import {
+  DataTableComponent,
+  ITableConfig,
+} from '../../../shared/components/data-table/data-table.component';
+import { AppConfigService } from '../../../core/configs/app-config.service';
+import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
+import {
+  IDropdownOption,
+  ThacaDropdownComponent,
+} from '../../../shared/components/thaca-dropdown/thaca-dropdown.component';
+import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
+import { ILoginHistoryDTO } from '../../../core/models/login-history.model';
+import { ThacaDatepickerComponent } from '../../../shared/components/thaca-datepicker/thaca-datepicker.component';
+
+@Component({
+  selector: 'app-login-history',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslateModule,
+    DatePickerModule,
+    BreadcrumbComponent,
+    DataTableComponent,
+    ThacaInputComponent,
+    ThacaDropdownComponent,
+    ThacaButtonComponent,
+    ThacaDatepickerComponent,
+  ],
+  templateUrl: './login-history.component.html',
+})
+export class LoginHistoryComponent {
+  private configService = inject(AppConfigService);
+  private translate = inject(TranslateService);
+
+  @ViewChild(DataTableComponent) table!: DataTableComponent;
+
+  rangeDates: Date[] | undefined;
+
+  filter = signal({
+    status: null,
+    channel: null,
+    deviceType: null,
+    browser: '',
+    fromDate: null as string | null,
+    toDate: null as string | null,
+  });
+
+  statusOptions: IDropdownOption[] = [
+    { label: 'common.all', value: null },
+    { label: 'auth.success', value: 'SUCCESS' },
+    { label: 'auth.failed', value: 'FAILED' },
+  ];
+
+  channelOptions: IDropdownOption[] = [
+    { label: 'common.all', value: null },
+    { label: 'auth.web', value: 'WEB' },
+    { label: 'auth.mobile', value: 'MOBILE' },
+  ];
+
+  deviceTypeOptions: IDropdownOption[] = [
+    { label: 'common.all', value: null },
+    { label: 'auth.desktop', value: 'DESKTOP' },
+    { label: 'auth.mobile', value: 'MOBILE' },
+    { label: 'auth.tablet', value: 'TABLET' },
+    { label: 'auth.unknown', value: 'UNKNOWN' },
+  ];
+
+  tableConfig: ITableConfig = {
+    url: `${this.configService.getApiUrl()}/auth/search-login-history`,
+    rows: 10,
+    showStt: true,
+    columns: [
+      { field: 'loginTime', header: 'auth.loginTime', sortable: true, width: '180px' },
+      { field: 'ipAddress', header: 'auth.ipAddress', width: '130px' },
+      {
+        field: 'location',
+        header: 'auth.location',
+        render: (row: ILoginHistoryDTO) =>
+          `${row.city || ''}${row.city && row.country ? ', ' : ''}${row.country || ''}`,
+      },
+      {
+        field: 'device',
+        header: 'auth.device',
+        render: (row: ILoginHistoryDTO) => `
+          <div class="flex flex-col gap-0.5">
+            <span class="text-xs opacity-70">${row.deviceType || 'UNKNOWN'}</span>
+            <span>${row.os || ''} / ${row.browser || ''}</span>
+          </div>
+        `,
+      },
+      {
+        field: 'isNewDevice',
+        header: 'auth.isNewDevice',
+        render: (row: ILoginHistoryDTO) =>
+          row.isNewDevice
+            ? `<span class="text-success font-bold">YES</span>`
+            : `<span class="opacity-50">NO</span>`,
+      },
+      { field: 'deviceId', header: 'auth.deviceId', width: '150px' },
+      { field: 'channel', header: 'auth.channel', width: '100px' },
+      {
+        field: 'status',
+        header: 'user.status',
+        width: '120px',
+        render: (row: ILoginHistoryDTO) => {
+          const isSuccess = row.status === 'SUCCESS';
+          const label = this.translate.instant(isSuccess ? 'auth.success' : 'auth.failed');
+          const variant = isSuccess ? 'success' : 'danger';
+          return `<span class="thaca-badge thaca-badge-${variant}">
+                    <span class="thb-dot"></span>${label}
+                  </span>`;
+        },
+      },
+      {
+        field: 'riskScore',
+        header: 'auth.riskScore',
+        width: '100px',
+        render: (row: ILoginHistoryDTO) => {
+          const score = row.riskScore || 0;
+          let variant = 'success';
+          if (score > 50) variant = 'danger';
+          else if (score > 20) variant = 'warning';
+          return `<span class="thaca-badge thaca-badge-${variant}">${score}</span>`;
+        },
+      },
+      {
+        field: 'isVpn',
+        header: 'auth.vpn',
+        width: '80px',
+        render: (row: ILoginHistoryDTO) =>
+          row.isVpn
+            ? `<span class="text-danger font-bold">YES</span>`
+            : `<span class="opacity-50">NO</span>`,
+      },
+      { field: 'requestId', header: 'auth.requestId', width: '150px' },
+      { field: 'failureReason', header: 'auth.failureReason' },
+    ],
+  };
+
+  onSearch() {
+    if (
+      this.rangeDates &&
+      this.rangeDates.length === 2 &&
+      this.rangeDates[0] &&
+      this.rangeDates[1]
+    ) {
+      this.filter.update((f) => ({
+        ...f,
+        fromDate: this.rangeDates![0].toISOString(),
+        toDate: this.rangeDates![1].toISOString(),
+      }));
+    } else {
+      this.filter.update((f) => ({ ...f, fromDate: null, toDate: null }));
+    }
+    this.table.refresh();
+  }
+}

@@ -25,6 +25,14 @@
       "back": "Quay lại",
       "search": "Tìm kiếm",
       "export": "Xuất bảng"
-    }
+    },
+    "createdAt": "Ngày tạo",
+    "createdBy": "Người tạo",
+    "updatedAt": "Ngày cập nhật",
+    "updatedBy": "Người cập nhật",
+    "dateRange": "Khoảng thời gian",
+    "fromDate": "Từ ngày",
+    "toDate": "Đến ngày",
+    "select_date_range": "Chọn từ ngày - đến ngày"
   }
 }

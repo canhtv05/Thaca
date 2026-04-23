@@ -13,6 +13,7 @@ public class ApiHeader {
     private String location;
     private String language;
     private String channel;
+    private String deviceId;
     private String apiKey;
 
     @Builder.Default

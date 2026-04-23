@@ -3,26 +3,36 @@ package com.thaca.auth.services;
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
 import com.thaca.auth.dtos.AuthUserDTO;
+import com.thaca.auth.dtos.DeviceInfo;
+import com.thaca.auth.dtos.GeoInfo;
+import com.thaca.auth.dtos.LoginHistoryDTO;
 import com.thaca.auth.dtos.UserDTO;
 import com.thaca.auth.dtos.req.LoginReq;
 import com.thaca.auth.dtos.res.AuthenticateRes;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.dtos.res.VerifyTokenRes;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.enums.LoginStatus;
+import com.thaca.auth.repositories.LoginHistoryRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
+import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.common.dtos.TokenPair;
+import com.thaca.common.dtos.search.PaginationResponse;
+import com.thaca.common.dtos.search.SearchRequest;
+import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
-import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.context.FwContextBody;
+import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
@@ -30,13 +40,17 @@ import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.CookieUtils;
 import com.thaca.framework.core.utils.JsonF;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.json.JsonParseException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -57,13 +71,20 @@ public class AuthService {
     private final CookieUtils cookieUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final SystemUserRepository systemUserRepository;
     private final SystemCredentialRepository systemCredentialRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final JwtUtils jwtUtils;
+    private final CommonService commonService;
+    private final LoginHistoryRepository loginHistoryRepository;
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
-    public void validateAuthenticate(LoginReq loginReq, HttpServletResponse httpServletResponse) {
+    public void validateAuthenticate(
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
         if (StringUtils.isEmpty(loginReq.getUsername())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
@@ -73,52 +94,99 @@ public class AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.HANDLE)
-    public AuthenticateRes authenticate(LoginReq loginReq, HttpServletResponse httpServletResponse) {
+    public AuthenticateRes authenticate(
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             loginReq.getUsername(),
             loginReq.getPassword()
         );
 
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        return getAuthenticateRes(loginReq, httpServletResponse, authentication, false);
+        try {
+            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+            return getAuthenticateRes(loginReq, httpServletRequest, httpServletResponse, authentication, false);
+        } catch (Exception e) {
+            userRepository
+                .findByUsername(loginReq.getUsername())
+                .ifPresent(user ->
+                    saveLoginHistory(
+                        AuthUserDTO.builder().id(user.getId()).build(),
+                        httpServletRequest,
+                        LoginStatus.FAILED,
+                        e.getMessage(),
+                        false
+                    )
+                );
+            throw e;
+        }
+    }
+
+    @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.VALIDATE)
+    public void validateAuthenticateCms(
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
+        validateAuthenticate(loginReq, httpServletRequest, httpServletResponse);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.HANDLE)
-    public AuthenticateRes authenticateCms(LoginReq loginReq, HttpServletResponse httpServletResponse) {
-        SystemCredential sc = systemCredentialRepository
-            .findByUsername(loginReq.getUsername())
-            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        if (!passwordEncoder.matches(loginReq.getPassword(), sc.getPassword())) {
-            throw new FwException(ErrorMessage.PASSWORD_INVALID);
+    public AuthenticateRes authenticateCms(
+        LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
+    ) {
+        try {
+            SystemCredential sc = systemCredentialRepository
+                .findByUsername(loginReq.getUsername())
+                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+            if (!passwordEncoder.matches(loginReq.getPassword(), sc.getPassword())) {
+                throw new FwException(ErrorMessage.PASSWORD_INVALID);
+            }
+            SystemUser su = sc.getSystemUser();
+            if (su.isLocked()) {
+                throw new FwException(ErrorMessage.USER_LOCKED);
+            }
+            if (!su.getIsActivated()) {
+                throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
+            }
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            String rolesString;
+            if (su.isSuperAdmin()) {
+                rolesString = AuthoritiesConstants.SUPER_ADMIN;
+                authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
+            } else {
+                rolesString = getRoleString(sc, authorities);
+            }
+            CustomUserDetails userDetails = new CustomUserDetails(
+                sc.getUsername(),
+                sc.getPassword(),
+                authorities,
+                rolesString,
+                StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
+                su.isSuperAdmin(),
+                true
+            );
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            return getAuthenticateRes(loginReq, httpServletRequest, httpServletResponse, authentication, true);
+        } catch (Exception e) {
+            systemCredentialRepository
+                .findByUsername(loginReq.getUsername())
+                .ifPresent(sc ->
+                    saveLoginHistory(
+                        AuthUserDTO.builder().id(sc.getSystemUser().getId()).build(),
+                        httpServletRequest,
+                        LoginStatus.FAILED,
+                        e.getMessage(),
+                        true
+                    )
+                );
+            throw e;
         }
-        SystemUser su = sc.getSystemUser();
-        if (su.isLocked()) {
-            throw new FwException(ErrorMessage.USER_LOCKED);
-        }
-        if (!su.getIsActivated()) {
-            throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
-        }
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        String rolesString;
-        if (su.isSuperAdmin()) {
-            rolesString = AuthoritiesConstants.SUPER_ADMIN;
-            authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
-        } else {
-            rolesString = getRoleString(sc, authorities);
-        }
-        CustomUserDetails userDetails = new CustomUserDetails(
-            sc.getUsername(),
-            sc.getPassword(),
-            authorities,
-            rolesString,
-            StringUtils.defaultIfBlank(FwContext.get().getChannel(), ChannelType.WEB.name()),
-            su.isSuperAdmin(),
-            true
-        );
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return getAuthenticateRes(loginReq, httpServletResponse, authentication, true);
     }
 
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.VALIDATE)
@@ -172,7 +240,7 @@ public class AuthService {
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_LOGOUT, type = ModeType.HANDLE)
     public void logout(HttpServletResponse response) {
-        String channel = FwContext.get() != null ? FwContext.get().getChannel() : ChannelType.WEB.name();
+        String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : ChannelType.WEB.name();
         tokenProvider.revokeToken(ChannelType.valueOf(channel));
         cookieUtils.deleteCookie(response);
         SecurityUtils.clear();
@@ -245,8 +313,20 @@ public class AuthService {
         SecurityUtils.clear();
     }
 
+    @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.AUTH_SEARCH_LOGIN_HISTORY, type = ModeType.HANDLE)
+    public SearchResponse<LoginHistoryDTO> searchLoginHistory(SearchRequest<LoginHistoryDTO> request) {
+        Specification<LoginHistory> spec = createLoginHistorySpecification(request);
+        Page<LoginHistory> page = loginHistoryRepository.findAll(spec, request.getPage().toPageable());
+        return new SearchResponse<>(
+            page.getContent().stream().map(LoginHistoryDTO::fromEntity).collect(Collectors.toList()),
+            PaginationResponse.of(page)
+        );
+    }
+
     private AuthenticateRes getAuthenticateRes(
         LoginReq loginReq,
+        HttpServletRequest httpServletRequest,
         HttpServletResponse httpServletResponse,
         Authentication authentication,
         boolean isCms
@@ -260,7 +340,76 @@ public class AuthService {
         AuthUserDTO userInfoDTO = isCms
             ? getSystemProfile(loginReq.getUsername())
             : getUserProfile(loginReq.getUsername());
+
+        saveLoginHistory(userInfoDTO, httpServletRequest, LoginStatus.SUCCESS, null, isCms);
+
         return new AuthenticateRes(true, userInfoDTO);
+    }
+
+    private void saveLoginHistory(
+        AuthUserDTO userDTO,
+        HttpServletRequest request,
+        LoginStatus status,
+        String failureReason,
+        boolean isCms
+    ) {
+        try {
+            String ip = commonService.extractIpAddress(request);
+            String ua = request.getHeader("User-Agent");
+            String deviceId = Optional.ofNullable(FwContextHeader.get())
+                .map(h -> StringUtils.trimToNull(h.getDeviceId()))
+                .orElse(null);
+
+            GeoInfo geo = commonService.lookup(ip);
+            DeviceInfo device = commonService.parse(ua);
+            boolean isNewDevice = isNewDevice(userDTO.getId(), isCms, deviceId, status);
+
+            LoginHistory history = LoginHistory.builder()
+                .username(userDTO.getUsername())
+                .user(isCms ? null : userRepository.getReferenceById(userDTO.getId()))
+                .systemUser(isCms ? systemUserRepository.getReferenceById(userDTO.getId()) : null)
+                .ipAddress(ip)
+                .userAgent(ua)
+                .browser(device.getBrowser())
+                .os(device.getOs())
+                .deviceType(device.getDeviceType())
+                .country(geo.getCountry())
+                .countryIsoCode(geo.getCountryIsoCode())
+                .city(geo.getCity())
+                .latitude(geo.getLatitude())
+                .longitude(geo.getLongitude())
+                .approxLocation(geo.getApproxLocation())
+                .isVpn(geo.getIsVpn())
+                .riskScore(geo.getRiskScore())
+                .channel(
+                    ChannelType.valueOf(
+                        StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name())
+                    )
+                )
+                .status(status)
+                .failureReason(failureReason)
+                .loginTime(Instant.now())
+                .requestId(FwContextBody.get().getTransId())
+                .deviceId(deviceId)
+                .isNewDevice(isNewDevice)
+                .build();
+
+            loginHistoryRepository.save(history);
+        } catch (Exception ignored) {}
+    }
+
+    private boolean isNewDevice(Long userId, boolean isCms, String deviceId, LoginStatus status) {
+        if (userId == null || StringUtils.isBlank(deviceId) || !LoginStatus.SUCCESS.equals(status)) {
+            return false;
+        }
+        if (isCms) {
+            return !loginHistoryRepository.existsBySystemUser_IdAndDeviceIdAndStatus(
+                userId,
+                deviceId,
+                LoginStatus.SUCCESS
+            );
+        }
+        return !loginHistoryRepository.existsByUser_IdAndDeviceIdAndStatus(userId, deviceId, LoginStatus.SUCCESS);
     }
 
     public static String getRoleString(SystemCredential sc, List<GrantedAuthority> authorities) {
@@ -269,5 +418,50 @@ public class AuthService {
             authorities.add(new SimpleGrantedAuthority(role.getCode()));
         }
         return rolesString;
+    }
+
+    private Specification<LoginHistory> createLoginHistorySpecification(SearchRequest<LoginHistoryDTO> req) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (req.getFilter() != null) {
+                LoginHistoryDTO filter = req.getFilter();
+                if (StringUtils.isNotBlank(filter.getUsername())) {
+                    predicates.add(
+                        cb.like(cb.lower(root.get("username")), "%" + filter.getUsername().toLowerCase() + "%")
+                    );
+                }
+                if (filter.getIsCms() != null) {
+                    if (filter.getIsCms()) {
+                        predicates.add(cb.isNotNull(root.get("systemUser")));
+                    } else {
+                        predicates.add(cb.isNotNull(root.get("user")));
+                    }
+                }
+                if (StringUtils.isNotBlank(filter.getIpAddress())) {
+                    predicates.add(cb.like(root.get("ipAddress"), "%" + filter.getIpAddress() + "%"));
+                }
+                if (filter.getStatus() != null) {
+                    predicates.add(cb.equal(root.get("status"), filter.getStatus()));
+                }
+                if (filter.getDeviceType() != null) {
+                    predicates.add(cb.equal(root.get("deviceType"), filter.getDeviceType().name()));
+                }
+                if (filter.getChannel() != null) {
+                    predicates.add(cb.equal(root.get("channel"), filter.getChannel()));
+                }
+                if (StringUtils.isNotBlank(filter.getBrowser())) {
+                    predicates.add(
+                        cb.like(cb.lower(root.get("browser")), "%" + filter.getBrowser().toLowerCase() + "%")
+                    );
+                }
+                if (filter.getFromDate() != null) {
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("loginTime"), filter.getFromDate()));
+                }
+                if (filter.getToDate() != null) {
+                    predicates.add(cb.lessThanOrEqualTo(root.get("loginTime"), filter.getToDate()));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 }

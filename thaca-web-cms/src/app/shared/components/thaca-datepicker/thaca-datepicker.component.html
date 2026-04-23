@@ -1,0 +1,70 @@
+@if (label) {
+  <label class="thaca-label" [for]="id">
+    {{ label }}
+    @if (required) {
+      <span class="thaca-required">(*)</span>
+    }
+  </label>
+}
+
+<div
+  class="thaca-dp-wrap"
+  [class.has-icon-left]="startIcon"
+  [class.is-error]="hasError()"
+  [class.is-disabled]="disabled"
+  [class.is-range]="isRange()"
+  [class.is-inline]="inline"
+>
+  @if (startIcon) {
+    <span class="thaca-icon thaca-icon--left">
+      <ng-icon [name]="startIcon.name" />
+    </span>
+  }
+
+  <p-datePicker
+    [inputId]="id"
+    class="thaca-dp"
+    [selectionMode]="mode"
+    [view]="view"
+    [dateFormat]="dateFormat"
+    [showTime]="showTime"
+    [hourFormat]="hourFormat"
+    [showButtonBar]="showButtonBar"
+    [inline]="inline"
+    [minDate]="minDate!"
+    [maxDate]="maxDate!"
+    [disabledDates]="disabledDates!"
+    [disabledDays]="disabledDays!"
+    [firstDayOfWeek]="firstDayOfWeek"
+    [showWeek]="showWeek"
+    [numberOfMonths]="numberOfMonths"
+    [readonlyInput]="readonly"
+    [disabled]="disabled"
+    [placeholder]="rangePlaceholder()"
+    [ngModel]="value()"
+    (ngModelChange)="onDateSelect($event)"
+    (onBlur)="onBlur()"
+    appendTo="body"
+    styleClass="thaca-dp-inner"
+    panelStyleClass="thaca-dp-panel"
+  />
+
+  <!-- Clear button — trước icon để CSS ~ hoạt động -->
+  @if (!disabled && !readonly) {
+    <button
+      tabindex="-1"
+      type="button"
+      class="thaca-clear-btn"
+      [class.is-visible]="hasValue()"
+      (click)="clearValue($event)"
+      aria-label="Clear date"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  }
+
+  <!-- Calendar icon: inline SVG, nằm trong border -->
+  <span class="thaca-icon thaca-icon--right thaca-icon--calendar">
+    <ng-icon [name]="APP_CONFIG_ICONS['solarCalendar'].name" />
+  </span>
+</div>

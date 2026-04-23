@@ -20,7 +20,7 @@ import com.thaca.framework.blocking.starter.services.UserSessionService;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.constants.CommonConstants;
-import com.thaca.framework.core.context.FwContext;
+import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
@@ -88,7 +88,8 @@ public class TokenProvider {
     }
 
     public String createToken(Authentication authentication, HttpServletResponse response) {
-        ChannelType channel = FwContext.get() != null ? ChannelType.valueOf(FwContext.get().getChannel()) : null;
+        ChannelType channel =
+            FwContextHeader.get() != null ? ChannelType.valueOf(FwContextHeader.get().getChannel()) : null;
         if (channel == null) {
             throw new FwException(CommonErrorMessage.CHANNEL_INVALID);
         }

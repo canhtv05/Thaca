@@ -2,7 +2,7 @@ package com.thaca.framework.core.context;
 
 import com.thaca.framework.core.dtos.ApiHeader;
 
-public class FwContext {
+public class FwContextHeader {
 
     private static final ThreadLocal<ApiHeader> CONTEXT = new ThreadLocal<>();
 

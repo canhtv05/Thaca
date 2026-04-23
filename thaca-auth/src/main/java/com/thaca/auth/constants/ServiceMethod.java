@@ -16,6 +16,7 @@ public class ServiceMethod {
     public static final String AUTH_VERIFY_OTP_FORGOT_PASSWORD = "auth.verifyOTPForgotPassword";
     public static final String AUTH_LOGOUT = "auth.logout";
     public static final String AUTH_LOGOUT_ALL_DEVICES = "auth.logoutAllDevices";
+    public static final String AUTH_SEARCH_LOGIN_HISTORY = "auth.searchLoginHistory";
 
     public static final String CMS_AUTHENTICATE = "cms.authenticate";
     public static final String CMS_SEARCH_USERS = "cms.searchUsers";

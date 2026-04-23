@@ -4,16 +4,16 @@
     class="h-full rounded-xl p-10 w-full lg:min-w-md max-w-md flex flex-col justify-center"
   >
     <div id="logo-section" class="text-center mb-8">
-      <h1 class="text-2xl font-bold text-foreground mb-2">{{ 'greeting' | translate }}</h1>
-      <p class="text-foreground text-sm">{{ 'description' | translate }}</p>
+      <h1 class="text-2xl font-bold text-foreground mb-2">{{ 'auth.greeting' | translate }}</h1>
+      <p class="text-foreground text-sm">{{ 'auth.description' | translate }}</p>
     </div>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-1">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col justify-center w-full">
           <thaca-input
-            placeholder="{{ 'usernamePlaceholder' | translate }}"
+            placeholder="{{ 'auth.usernamePlaceholder' | translate }}"
             [startIcon]="APP_CONFIG_ICONS['solarUserBold']"
-            label="{{ 'usernameLabel' | translate }}"
+            label="{{ 'auth.usernameLabel' | translate }}"
             [required]="true"
             formControlName="username"
           />
@@ -21,9 +21,9 @@
         </div>
         <div class="flex flex-col justify-center w-full">
           <thaca-input
-            placeholder="{{ 'passwordPlaceholder' | translate }}"
+            placeholder="{{ 'auth.passwordPlaceholder' | translate }}"
             [startIcon]="APP_CONFIG_ICONS['solarLockPasswordBold']"
-            label="{{ 'passwordLabel' | translate }}"
+            label="{{ 'auth.passwordLabel' | translate }}"
             [required]="true"
             type="password"
             formControlName="password"
@@ -36,11 +36,11 @@
           class="text-cyan-300 text-xs hover:text-cyan-200"
           tabindex="-1"
           href="/forgot-password"
-          >{{ 'forgotPassword' | translate }}</a
+          >{{ 'auth.forgotPassword' | translate }}</a
         >
       </div>
       <thaca-button class="w-full rounded-full!" type="submit" variant="primary" size="md">
-        <span class="text-white"> {{ 'login' | translate }}</span>
+        <span class="text-white"> {{ 'auth.login' | translate }}</span>
       </thaca-button>
     </form>
   </div>

@@ -25,6 +25,14 @@
       "back": "Back",
       "search": "Search",
       "export": "Export"
-    }
+    },
+    "createdAt": "Created At",
+    "createdBy": "Created By",
+    "updatedAt": "Updated At",
+    "updatedBy": "Updated By",
+    "dateRange": "Date Range",
+    "fromDate": "From Date",
+    "toDate": "To Date",
+    "select_date_range": "Select date range"
   }
 }
