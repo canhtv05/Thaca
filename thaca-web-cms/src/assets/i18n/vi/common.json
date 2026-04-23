@@ -33,6 +33,8 @@
     "dateRange": "Khoảng thời gian",
     "fromDate": "Từ ngày",
     "toDate": "Đến ngày",
-    "select_date_range": "Chọn từ ngày - đến ngày"
+    "select_date_range": "Chọn từ ngày - đến ngày",
+    "yes": "Có",
+    "no": "Không"
   }
 }

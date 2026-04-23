@@ -33,6 +33,8 @@
     "dateRange": "Date Range",
     "fromDate": "From Date",
     "toDate": "To Date",
-    "select_date_range": "Select date range"
+    "select_date_range": "Select date range",
+    "yes": "Yes",
+    "no": "No"
   }
 }

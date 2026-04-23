@@ -100,8 +100,8 @@ export class LoginHistoryComponent {
         header: 'auth.isNewDevice',
         render: (row: ILoginHistoryDTO) =>
           row.isNewDevice
-            ? `<span class="text-success font-bold">YES</span>`
-            : `<span class="opacity-50">NO</span>`,
+            ? `<span class="text-success thaca-badge thaca-badge-success font-bold">${this.translate.instant('common.yes')}</span>`
+            : `<span class="opacity-50 thaca-badge thaca-badge-danger font-bold">${this.translate.instant('common.no')}</span>`,
       },
       { field: 'deviceId', header: 'auth.deviceId', width: '150px' },
       { field: 'channel', header: 'auth.channel', width: '100px' },
