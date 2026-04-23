@@ -1,0 +1,71 @@
+<p-dialog
+  [visible]="_visible"
+  [header]="title | translate"
+  [modal]="modal"
+  [draggable]="draggable"
+  [resizable]="resizable"
+  [closable]="closable"
+  [dismissableMask]="dismissableMask"
+  [maximizable]="maximizable"
+  [blockScroll]="blockScroll"
+  [transitionOptions]="transitionOptions"
+  [appendTo]="appendTo"
+  [styleClass]="'thaca-modal-container thaca-modal--' + size + ' ' + styleClass"
+  maskStyleClass="thaca-modal-mask"
+  (onShow)="pDialogOnShow()"
+  (onHide)="handleHide()"
+>
+  <!-- Custom header: chỉ dùng khi có headerIcon hoặc description -->
+  @if (headerIcon || description) {
+    <ng-template pTemplate="header">
+      <div class="thaca-modal__header">
+        <div class="thaca-modal__header-main">
+          @if (headerIcon) {
+            <div class="thaca-modal__icon-wrapper">
+              <i [class]="headerIcon"></i>
+            </div>
+          }
+          <div class="thaca-modal__title-wrapper">
+            <span class="thaca-modal__title">{{ title | translate }}</span>
+            @if (description) {
+              <span class="thaca-modal__description">{{ description | translate }}</span>
+            }
+          </div>
+        </div>
+        @if (closable) {
+          <button type="button" class="thaca-modal__close-btn" (click)="hide()" aria-label="Close">
+            <i class="pi pi-times"></i>
+          </button>
+        }
+      </div>
+    </ng-template>
+  }
+
+  <!-- Body content -->
+  <ng-content></ng-content>
+
+  <!-- Footer -->
+  @if (showFooter) {
+    <ng-template pTemplate="footer">
+      @if (customFooterTemplate) {
+        <div class="thaca-modal__custom-footer">
+          <ng-container *ngTemplateOutlet="customFooterTemplate"></ng-container>
+        </div>
+      } @else {
+        <div class="thaca-modal__footer-actions">
+          <thaca-button variant="ghost" (clicked)="handleCancel()">
+            {{ cancelText | translate }}
+          </thaca-button>
+          <thaca-button
+            variant="primary"
+            [disabled]="isSubmitDisabled"
+            [loading]="loading"
+            (clicked)="handleSubmit()"
+          >
+            {{ submitText | translate }}
+          </thaca-button>
+        </div>
+      }
+    </ng-template>
+  }
+</p-dialog>

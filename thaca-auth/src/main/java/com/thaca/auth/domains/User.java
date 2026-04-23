@@ -38,7 +38,7 @@ public class User extends BaseEntityAudit {
 
     @Column(name = "is_locked", nullable = false)
     @Builder.Default
-    private boolean isLocked = false;
+    private Boolean isLocked = false;
 
     @JsonIgnore
     @Column(name = "refresh_token", columnDefinition = "TEXT")

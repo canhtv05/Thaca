@@ -15,6 +15,7 @@ import {
 } from '../../../shared/components/thaca-dropdown/thaca-dropdown.component';
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thaca-modal.component';
 
 @Component({
   selector: 'app-user-list',
@@ -28,6 +29,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     ThacaDropdownComponent,
     ThacaButtonComponent,
     TranslateModule,
+    ThacaModalComponent,
   ],
   templateUrl: './user-list.component.html',
 })
@@ -36,16 +38,25 @@ export class UserListComponent {
   private translate = inject(TranslateService);
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
+  @ViewChild('createModal') createModal!: ThacaModalComponent;
 
   filter = signal({
     username: '',
     email: '',
-    isActivated: true,
+    isActivated: null,
+    isLocked: null,
   });
 
   statusOptions: IDropdownOption[] = [
+    { label: 'common.all', value: null },
     { label: 'user.active', value: true },
     { label: 'user.inactive', value: false },
+  ];
+
+  lockedOptions: IDropdownOption[] = [
+    { label: 'common.all', value: null },
+    { label: 'user.safe', value: false },
+    { label: 'user.locked', value: true },
   ];
 
   tableConfig: ITableConfig = {
@@ -105,5 +116,9 @@ export class UserListComponent {
       default:
         console.warn('Unknown action:', actionKey);
     }
+  }
+
+  onCreate() {
+    this.createModal.show();
   }
 }

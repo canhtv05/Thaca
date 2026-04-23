@@ -125,7 +125,7 @@ public class UserService {
     @FwMode(name = ServiceMethod.CMS_LOCK_USER, type = ModeType.HANDLE)
     public void changeLockUser(Long id, boolean isLocked) {
         User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setLocked(isLocked);
+        user.setIsLocked(isLocked);
         userRepository.save(user);
     }
 
@@ -283,6 +283,9 @@ public class UserService {
                 }
                 if (Objects.nonNull(filter.getIsActivated())) {
                     predicates.add(cb.equal(root.get("isActivated"), filter.getIsActivated()));
+                }
+                if (Objects.nonNull(filter.getIsLocked())) {
+                    predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));

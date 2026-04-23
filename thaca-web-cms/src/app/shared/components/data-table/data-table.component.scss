@@ -404,6 +404,18 @@
   justify-content: center;
 }
 
+.dt-pager-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dt-pager-pages {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
 .dt-pg-btn {
   display: inline-flex;
   align-items: center;
@@ -456,4 +468,81 @@
 
 .dt-pager-size {
   flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .dt-pager {
+    height: auto;
+    min-height: 52px;
+    padding: 8px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .dt-pager-center {
+    order: 1;
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .dt-pager-size {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .dt-pager-info {
+    order: 3;
+    width: 100%;
+    text-align: center;
+    font-size: 0.68rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .dt-pager {
+    padding: 8px 10px;
+  }
+
+  .dt-pager-center {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dt-pager-pages {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .dt-pager-pages::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dt-pager-pages .dt-pg-btn:not(.dt-pg-btn--active),
+  .dt-pager-pages .dt-pg-ellipsis {
+    display: none;
+  }
+
+  .dt-pg-first,
+  .dt-pg-last {
+    display: none;
+  }
+
+  .dt-pager-size {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .dt-pager-size thaca-dropdown {
+    width: 100%;
+    display: block;
+  }
+
+  .dt-pager-info {
+    font-size: 0.66rem;
+  }
 }

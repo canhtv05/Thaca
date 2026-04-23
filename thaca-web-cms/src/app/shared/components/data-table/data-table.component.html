@@ -1,3 +1,8 @@
+@if (headerActions) {
+  <div class="flex justify-end items-center mb-4">
+    <ng-container *ngTemplateOutlet="headerActions"></ng-container>
+  </div>
+}
 <div class="dt-wrapper">
   <!-- ── Header Bar ── -->
   <div class="dt-header">
@@ -137,65 +142,68 @@
     </span>
 
     <div class="dt-pager-center">
-      <!-- Prev controls -->
-      <button
-        type="button"
-        class="dt-pg-btn dt-pg-nav"
-        [disabled]="pagination().page === 0"
-        (click)="goToPage(0)"
-        [pTooltip]="'common.first' | translate"
-        [tooltipPosition]="'left'"
-      >
-        <i class="pi pi-angle-double-left"></i>
-      </button>
-      <button
-        type="button"
-        class="dt-pg-btn dt-pg-nav"
-        [disabled]="pagination().page === 0"
-        (click)="goToPage(pagination().page - 1)"
-        [pTooltip]="'common.previous' | translate"
-        [tooltipPosition]="'left'"
-      >
-        <i class="pi pi-angle-left"></i>
-      </button>
+      <div class="dt-pager-nav">
+        <button
+          type="button"
+          class="dt-pg-btn dt-pg-nav dt-pg-first"
+          [disabled]="pagination().page === 0"
+          (click)="goToPage(0)"
+          [pTooltip]="'common.first' | translate"
+          [tooltipPosition]="'left'"
+        >
+          <i class="pi pi-angle-double-left"></i>
+        </button>
+        <button
+          type="button"
+          class="dt-pg-btn dt-pg-nav dt-pg-prev"
+          [disabled]="pagination().page === 0"
+          (click)="goToPage(pagination().page - 1)"
+          [pTooltip]="'common.previous' | translate"
+          [tooltipPosition]="'left'"
+        >
+          <i class="pi pi-angle-left"></i>
+        </button>
+      </div>
 
-      <!-- Page numbers -->
-      @for (p of visiblePages(); track p) {
-        @if (p === -1) {
-          <span class="dt-pg-ellipsis">…</span>
-        } @else {
-          <button
-            type="button"
-            class="dt-pg-btn"
-            [class.dt-pg-btn--active]="p === pagination().page"
-            (click)="p !== pagination().page && goToPage(p)"
-          >
-            {{ p + 1 }}
-          </button>
+      <div class="dt-pager-pages">
+        @for (p of visiblePages(); track p) {
+          @if (p === -1) {
+            <span class="dt-pg-ellipsis">…</span>
+          } @else {
+            <button
+              type="button"
+              class="dt-pg-btn"
+              [class.dt-pg-btn--active]="p === pagination().page"
+              (click)="p !== pagination().page && goToPage(p)"
+            >
+              {{ p + 1 }}
+            </button>
+          }
         }
-      }
+      </div>
 
-      <!-- Next controls -->
-      <button
-        type="button"
-        class="dt-pg-btn dt-pg-nav"
-        [disabled]="pagination().page >= totalPages() - 1"
-        (click)="goToPage(pagination().page + 1)"
-        [pTooltip]="'common.next' | translate"
-        [tooltipPosition]="'right'"
-      >
-        <i class="pi pi-angle-right"></i>
-      </button>
-      <button
-        type="button"
-        class="dt-pg-btn dt-pg-nav"
-        [disabled]="pagination().page >= totalPages() - 1"
-        (click)="goToPage(totalPages() - 1)"
-        [pTooltip]="'common.last' | translate"
-        [tooltipPosition]="'right'"
-      >
-        <i class="pi pi-angle-double-right"></i>
-      </button>
+      <div class="dt-pager-nav">
+        <button
+          type="button"
+          class="dt-pg-btn dt-pg-nav dt-pg-next"
+          [disabled]="pagination().page >= totalPages() - 1"
+          (click)="goToPage(pagination().page + 1)"
+          [pTooltip]="'common.next' | translate"
+          [tooltipPosition]="'right'"
+        >
+          <i class="pi pi-angle-right"></i>
+        </button>
+        <button
+          type="button"
+          class="dt-pg-btn dt-pg-nav dt-pg-last"
+          [disabled]="pagination().page >= totalPages() - 1"
+          (click)="goToPage(totalPages() - 1)"
+          [pTooltip]="'common.last' | translate"
+          [tooltipPosition]="'right'"
+        >
+          <i class="pi pi-angle-double-right"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Rows per page -->

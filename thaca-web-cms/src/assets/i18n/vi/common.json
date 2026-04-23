@@ -1,5 +1,6 @@
 {
   "common": {
+    "all": "Tất cả",
     "loading": "Đang xử lý...",
     "loading_data": "Đang tải dữ liệu...",
     "no_data_found": "Không có dữ liệu",
@@ -22,7 +23,8 @@
       "save": "Lưu",
       "close": "Đóng",
       "back": "Quay lại",
-      "search": "Tìm kiếm"
+      "search": "Tìm kiếm",
+      "export": "Xuất bảng"
     }
   }
 }

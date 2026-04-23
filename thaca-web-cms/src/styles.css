@@ -3,6 +3,7 @@
 @import './styles/tooltip.scss';
 @import './styles/thaca.scss';
 @import './styles/badge.scss';
+@import './styles/dialog.scss';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -147,7 +148,7 @@
     padding-right: 0 !important;
     margin-right: 0 !important;
     position: relative;
-    @apply bg-background font-nunito text-foreground/80 antialiased;
+    @apply bg-background font-nunito text-foreground/80 antialiased leading-none;
   }
 
   header.fixed,

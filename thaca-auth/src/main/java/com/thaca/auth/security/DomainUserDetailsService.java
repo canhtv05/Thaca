@@ -59,7 +59,7 @@ public class DomainUserDetailsService implements UserDetailsService {
         if (userObj instanceof User user) {
             username = user.getUsername();
             password = user.getPassword();
-            isLocked = user.isLocked();
+            isLocked = user.getIsLocked();
             isActivated = user.getIsActivated();
             grantedAuthorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
         } else if (userObj instanceof SystemCredential sc) {

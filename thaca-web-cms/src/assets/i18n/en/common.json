@@ -1,5 +1,6 @@
 {
   "common": {
+    "all": "All",
     "loading": "Loading...",
     "loading_data": "Loading data...",
     "no_data_found": "No data found",
@@ -22,7 +23,8 @@
       "save": "Save",
       "close": "Close",
       "back": "Back",
-      "search": "Search"
+      "search": "Search",
+      "export": "Export"
     }
   }
 }
