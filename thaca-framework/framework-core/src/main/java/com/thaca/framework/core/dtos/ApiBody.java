@@ -18,13 +18,13 @@ public class ApiBody<T> {
     private String status; // OK | FAILED
     private T data;
 
-    private PaginationResponse pagination;
+    private PaginationResponse<?> pagination;
 
     public static <T> ApiBody<T> success(String transId, T data) {
         return ApiBody.<T>builder().transId(transId).status("OK").data(data).build();
     }
 
-    public static <T> ApiBody<T> success(String transId, T data, PaginationResponse pagination) {
+    public static <T> ApiBody<T> success(String transId, T data, PaginationResponse<?> pagination) {
         return ApiBody.<T>builder().transId(transId).status("OK").data(data).pagination(pagination).build();
     }
 

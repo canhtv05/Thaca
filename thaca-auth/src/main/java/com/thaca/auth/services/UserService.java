@@ -37,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -250,7 +251,7 @@ public class UserService {
     @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.VALIDATE)
     public SearchResponse<UserDTO> search(SearchRequest<UserDTO> request) {
         Specification<User> spec = createSpecification(request);
-        Page<User> users = userRepository.findAll(spec, request.getPage().toPageable());
+        Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "createdAt"));
         return new SearchResponse<>(
             users
                 .getContent()

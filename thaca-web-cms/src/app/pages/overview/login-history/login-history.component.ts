@@ -81,6 +81,12 @@ export class LoginHistoryComponent {
     showStt: true,
     columns: [
       { field: 'loginTime', header: 'auth.loginTime', sortable: true, width: '180px' },
+      { field: 'country', header: 'auth.country' },
+      { field: 'city', header: 'auth.city' },
+      { field: 'latitude', header: 'auth.latitude' },
+      { field: 'longitude', header: 'auth.longitude' },
+      { field: 'approxLocation', header: 'auth.approxLocation' },
+      { field: 'countryIsoCode', header: 'auth.countryIsoCode' },
       { field: 'ipAddress', header: 'auth.ipAddress', width: '130px' },
       {
         field: 'location',
@@ -92,8 +98,8 @@ export class LoginHistoryComponent {
         field: 'device',
         header: 'auth.device',
         render: (row: ILoginHistoryDTO) => `
-          <div class="flex flex-col gap-0.5">
-            <span class="text-xs opacity-70">${row.deviceType || 'UNKNOWN'}</span>
+          <div class="flex flex-col gap-0.5 min-w-52">
+            <span class="text-xs opacity-70">${this.translate.instant(row.deviceType || 'auth.unknown')}</span>
             <span>${row.os || ''} / ${row.browser || ''}</span>
           </div>
         `,

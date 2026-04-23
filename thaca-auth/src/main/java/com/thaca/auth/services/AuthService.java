@@ -22,6 +22,7 @@ import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.common.dtos.TokenPair;
+import com.thaca.common.dtos.search.PaginationRequest;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -50,6 +51,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -317,7 +319,11 @@ public class AuthService {
     @FwMode(name = ServiceMethod.AUTH_SEARCH_LOGIN_HISTORY, type = ModeType.HANDLE)
     public SearchResponse<LoginHistoryDTO> searchLoginHistory(SearchRequest<LoginHistoryDTO> request) {
         Specification<LoginHistory> spec = createLoginHistorySpecification(request);
-        Page<LoginHistory> page = loginHistoryRepository.findAll(spec, request.getPage().toPageable());
+        PaginationRequest paginationRequest = request.getPage();
+        Page<LoginHistory> page = loginHistoryRepository.findAll(
+            spec,
+            paginationRequest.toPageable(Sort.Direction.DESC, "loginTime")
+        );
         return new SearchResponse<>(
             page.getContent().stream().map(LoginHistoryDTO::fromEntity).collect(Collectors.toList()),
             PaginationResponse.of(page)
