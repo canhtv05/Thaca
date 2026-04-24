@@ -30,6 +30,7 @@
     "api_keys": "API Key Management",
     "system_logs": "System Logs",
     "development_ui": "Development & UI",
-    "ui_components": "UI Components"
+    "ui_components": "UI Components",
+    "user_list": "User List"
   }
 }

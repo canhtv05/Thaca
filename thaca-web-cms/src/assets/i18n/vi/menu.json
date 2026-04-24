@@ -30,6 +30,7 @@
     "api_keys": "Quản lý API Keys",
     "system_logs": "Logs hệ thống",
     "development_ui": "Phát triển & UI",
-    "ui_components": "Thành phần giao diện"
+    "ui_components": "Thành phần giao diện",
+    "user_list": "Danh sách người dùng"
   }
 }

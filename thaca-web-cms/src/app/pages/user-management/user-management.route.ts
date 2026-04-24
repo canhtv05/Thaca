@@ -9,7 +9,7 @@ export const userManagementRoute: Route[] = [
     path: '',
     canActivateChild: [AuthGuard],
     resolve: { i18n: I18nResolver },
-    data: { i18n: ['user', 'auth'] },
+    data: { i18n: ['user', 'auth', 'menu'] },
     children: [
       {
         path: 'list',
