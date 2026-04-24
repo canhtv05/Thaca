@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ServletOnly
 @Order(1)
-public class FwValidationAspect {
+public class FwModeAspect {
 
     private final Map<String, List<Method>> validatorCache = new ConcurrentHashMap<>();
 

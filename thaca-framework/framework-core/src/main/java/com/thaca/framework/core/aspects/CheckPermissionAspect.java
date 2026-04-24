@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @ServletOnly
 @ConditionalOnBean(PermissionProvider.class)
 @RequiredArgsConstructor
-public class PermissionAspect {
+public class CheckPermissionAspect {
 
     private final PermissionProvider permissionProvider;
 

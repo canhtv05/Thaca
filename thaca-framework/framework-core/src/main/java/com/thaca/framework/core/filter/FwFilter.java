@@ -1,6 +1,7 @@
 package com.thaca.framework.core.filter;
 
 import com.thaca.common.enums.CommonErrorMessage;
+import com.thaca.framework.core.constants.FwHttpHeaderConstants;
 import com.thaca.framework.core.context.FwContextBody;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.dtos.ApiBody;
@@ -33,9 +34,6 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 public class FwFilter extends OncePerRequestFilter {
 
     private final IdempotencyGuard requestGuard;
-    private static final String TRACE_ID_HEADER = "X-Trace-Id";
-    private static final String TRANS_ID_HEADER = "X-Trans-Id";
-    private static final String SPAN_ID_HEADER = "X-Span-Id";
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -80,9 +78,9 @@ public class FwFilter extends OncePerRequestFilter {
 
         log.info("IN - URI: '[{}] {}', User: [{}], IP: [{}], Payload: {}", method, uri, username, clientIp, payload);
         long startTime = System.currentTimeMillis();
-        response.setHeader(TRACE_ID_HEADER, traceId);
-        response.setHeader(TRANS_ID_HEADER, transId);
-        response.setHeader(SPAN_ID_HEADER, spanId);
+        response.setHeader(FwHttpHeaderConstants.TRACE_ID_HEADER, traceId);
+        response.setHeader(FwHttpHeaderConstants.TRANS_ID_HEADER, transId);
+        response.setHeader(FwHttpHeaderConstants.SPAN_ID_HEADER, spanId);
 
         if (
             envelope == null ||
@@ -105,8 +103,7 @@ public class FwFilter extends OncePerRequestFilter {
         if (
             requestBody.length > 0 &&
             !ChannelType.WEB.name().equals(envelope.getHeader().getChannel()) &&
-            !ChannelType.MOBILE.name().equals(envelope.getHeader().getChannel()) &&
-            !ChannelType.INTERNAL.name().equals(envelope.getHeader().getChannel())
+            !ChannelType.MOBILE.name().equals(envelope.getHeader().getChannel())
         ) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -120,7 +117,7 @@ public class FwFilter extends OncePerRequestFilter {
         }
 
         RLock locked = null;
-        boolean isInternal = "true".equals(request.getHeader("X-Internal-Call"));
+        boolean isInternal = "true".equals(request.getHeader(FwHttpHeaderConstants.INTERNAL_CALL_HEADER));
         String lockKey = (username != null ? username : clientIp) + ":" + transId;
         try {
             if (!isInternal) {
@@ -209,7 +206,7 @@ public class FwFilter extends OncePerRequestFilter {
     }
 
     private String resolveTraceId(HttpServletRequest request) {
-        String traceId = request.getHeader(TRACE_ID_HEADER);
+        String traceId = request.getHeader(FwHttpHeaderConstants.TRACE_ID_HEADER);
         if (StringUtils.hasText(traceId)) {
             return traceId.trim();
         }

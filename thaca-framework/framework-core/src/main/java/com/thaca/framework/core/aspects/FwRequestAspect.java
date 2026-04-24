@@ -30,7 +30,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 @RequiredArgsConstructor
 @ServletOnly
-public class FwSecurityAspect {
+public class FwRequestAspect {
 
     private final FrameworkProperties frameworkProperties;
 

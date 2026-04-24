@@ -51,5 +51,9 @@ public class FrameworkProperties {
 
         private String authService;
         private String adminService;
+
+        public String authServiceInternalRoute() {
+            return this.authService + "/internal";
+        }
     }
 }
