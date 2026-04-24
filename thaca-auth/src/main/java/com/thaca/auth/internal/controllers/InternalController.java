@@ -2,8 +2,6 @@ package com.thaca.auth.internal.controllers;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
-import com.thaca.auth.internal.services.InternalService;
-import com.thaca.auth.services.AuthService;
 import com.thaca.common.dtos.internal.AuthUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
@@ -12,11 +10,8 @@ import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.constants.CommonConstants;
-import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.RequestType;
-import com.thaca.framework.core.security.SecurityUtils;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.thaca.framework.core.services.FwApiProcess;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -29,53 +24,45 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class InternalController {
 
-    private final AuthService authService;
-    private final InternalService internalService;
+    private final FwApiProcess fwApiProcess;
 
     @PostMapping("/refresh-token")
     @FwRequest(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = RequestType.INTERNAL)
     public ResponseEntity<RefreshTokenRes> refreshToken(
-        @CookieValue(name = CommonConstants.COOKIE_NAME, required = false) String cookieValue,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse response
+        @CookieValue(name = CommonConstants.COOKIE_NAME, required = false) String cookieValue
     ) {
-        String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : null;
-        return ResponseEntity.ok(authService.refreshToken(cookieValue, channel, httpServletRequest, response));
+        return ResponseEntity.ok(fwApiProcess.process(cookieValue));
     }
 
     @PostMapping("/cms/sign-in")
     @FwRequest(name = ServiceMethod.CMS_AUTHENTICATE, type = RequestType.INTERNAL)
-    public ResponseEntity<AuthenticateRes> signIn(
-        LoginReq loginReq,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
-        return ResponseEntity.ok(authService.authenticateCms(loginReq, httpServletRequest, httpServletResponse));
+    public ResponseEntity<AuthenticateRes> signIn(LoginReq loginReq) {
+        return ResponseEntity.ok(fwApiProcess.process(loginReq));
     }
 
     @PostMapping("/cms/profile")
     @FwRequest(name = ServiceMethod.CMS_GET_PROFILE, type = RequestType.INTERNAL)
     public ResponseEntity<AuthUserDTO> getProfile() {
-        return ResponseEntity.ok(internalService.getSystemProfile(SecurityUtils.getCurrentUsername()));
+        return ResponseEntity.ok(fwApiProcess.process(null));
     }
 
     @PostMapping("/cms/users/search")
     @FwRequest(name = ServiceMethod.CMS_SEARCH_USERS, type = RequestType.INTERNAL)
     public ResponseEntity<SearchResponse<UserDTO>> search(SearchRequest<UserDTO> criteria) {
-        return ResponseEntity.ok(internalService.search(criteria));
+        return ResponseEntity.ok(fwApiProcess.process(criteria));
     }
 
     @PostMapping("/cms/users/lock")
     @FwRequest(name = ServiceMethod.CMS_LOCK_USER, type = RequestType.INTERNAL)
     public ResponseEntity<Void> lockUser(Long id) {
-        internalService.changeLockUser(id, true);
+        fwApiProcess.process(id);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/cms/users/unlock")
     @FwRequest(name = ServiceMethod.CMS_UNLOCK_USER, type = RequestType.INTERNAL)
     public ResponseEntity<Void> unlockUser(Long id) {
-        internalService.changeLockUser(id, false);
+        fwApiProcess.process(id);
         return ResponseEntity.ok().build();
     }
 }

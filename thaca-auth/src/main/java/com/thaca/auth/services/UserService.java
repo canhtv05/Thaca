@@ -24,6 +24,7 @@ import com.thaca.framework.blocking.starter.services.SessionStore;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
+import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.DateUtils;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +37,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +63,8 @@ public class UserService {
     }
 
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.VALIDATE)
-    public void validateCreateUser(UserDTO request, boolean isAdmin) {
+    public void validateCreateUser(UserDTO request) {
+        boolean isAdmin = SecurityUtils.isSuperAdmin();
         Validator<UserDTO> validator = new Validator<>(
             List.of(new EmailRule<>(), new FullnameRule<>(), new PasswordRule<>(), new UsernameRule<>())
         );
@@ -75,7 +79,8 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.HANDLE)
-    public void createUser(UserDTO request, boolean isAdmin) {
+    public void createUser(UserDTO request) {
+        boolean isAdmin = SecurityUtils.isSuperAdmin();
         User user = User.builder()
             .username(request.getUsername())
             .isActivated(isAdmin && request.getIsActivated())
@@ -173,7 +178,7 @@ public class UserService {
     }
 
     @FwMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = ModeType.VALIDATE)
-    public void validateChangePassword(ChangePasswordReq request, HttpServletResponse response) {
+    public void validateChangePassword(ChangePasswordReq request) {
         if (CommonUtils.isEmpty(request.getCurrentPassword().trim(), request.getNewPassword().trim())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
@@ -184,7 +189,7 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_CHANGE_PASSWORD, type = ModeType.HANDLE)
-    public void changePassword(ChangePasswordReq req, HttpServletResponse response) {
+    public void changePassword(ChangePasswordReq req) {
         String userLogin = CommonService.getCurrentUserLogin();
         Optional<User> optionalUser = userRepository.findByUsername(userLogin);
         if (optionalUser.isEmpty()) {
@@ -199,7 +204,7 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         userRepository.save(user);
-        authService.logoutAllDevices(response);
+        authService.logoutAllDevices();
     }
 
     @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.VALIDATE)

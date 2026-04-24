@@ -5,6 +5,7 @@ import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.annotations.ServletOnly;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.context.FwContextHeader;
+import com.thaca.framework.core.context.FwServiceContext;
 import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.exceptions.FwException;
@@ -36,53 +37,54 @@ public class FwRequestAspect {
 
     @Around("@annotation(com.thaca.framework.core.annotations.FwRequest)")
     public Object checkSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (SecurityUtils.isSuperAdmin()) {
-            return joinPoint.proceed();
-        }
-
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         FwRequest requestMode = method.getAnnotation(FwRequest.class);
         if (Objects.isNull(requestMode)) {
             requestMode = joinPoint.getTarget().getClass().getAnnotation(FwRequest.class);
         }
-
-        if (Objects.nonNull(requestMode) && RequestType.PUBLIC.equals(requestMode.type())) {
-            return joinPoint.proceed();
+        if (Objects.nonNull(requestMode)) {
+            FwServiceContext.set(requestMode.name());
         }
-
-        if (Objects.nonNull(requestMode) && RequestType.PROTECTED.equals(requestMode.type())) {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-                throw new FwException(CommonErrorMessage.UNAUTHORIZED);
+        try {
+            if (SecurityUtils.isSuperAdmin()) {
+                return joinPoint.proceed();
             }
-            return joinPoint.proceed();
-        }
-
-        if (Objects.nonNull(requestMode) && RequestType.INTERNAL.equals(requestMode.type())) {
-            String expectedApiKey = frameworkProperties.getHttpClient().getApiKey();
-
-            ApiHeader contextHeader = FwContextHeader.get();
-            if (contextHeader != null && StringUtils.hasText(contextHeader.getApiKey())) {
-                if (Objects.equals(contextHeader.getApiKey(), expectedApiKey)) {
-                    return joinPoint.proceed();
+            if (Objects.nonNull(requestMode) && RequestType.PUBLIC.equals(requestMode.type())) {
+                return joinPoint.proceed();
+            }
+            if (Objects.nonNull(requestMode) && RequestType.PROTECTED.equals(requestMode.type())) {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+                    throw new FwException(CommonErrorMessage.UNAUTHORIZED);
                 }
+                return joinPoint.proceed();
             }
+            if (Objects.nonNull(requestMode) && RequestType.INTERNAL.equals(requestMode.type())) {
+                String expectedApiKey = frameworkProperties.getHttpClient().getApiKey();
 
-            ServletRequestAttributes attributes =
-                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            if (attributes != null) {
-                HttpServletRequest request = attributes.getRequest();
-                String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-                if (StringUtils.hasText(authHeader) && authHeader.startsWith("Basic ")) {
-                    String apiKey = authHeader.substring(6);
-                    if (Objects.equals(apiKey, expectedApiKey)) {
+                ApiHeader contextHeader = FwContextHeader.get();
+                if (contextHeader != null && StringUtils.hasText(contextHeader.getApiKey())) {
+                    if (Objects.equals(contextHeader.getApiKey(), expectedApiKey)) {
                         return joinPoint.proceed();
                     }
                 }
+                ServletRequestAttributes attributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                if (attributes != null) {
+                    HttpServletRequest request = attributes.getRequest();
+                    String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+                    if (StringUtils.hasText(authHeader) && authHeader.startsWith("Basic ")) {
+                        String apiKey = authHeader.substring(6);
+                        if (Objects.equals(apiKey, expectedApiKey)) {
+                            return joinPoint.proceed();
+                        }
+                    }
+                }
+                throw new FwException(CommonErrorMessage.UNAUTHORIZED);
             }
-            throw new FwException(CommonErrorMessage.UNAUTHORIZED);
+            return joinPoint.proceed();
+        } finally {
+            FwServiceContext.clear();
         }
-
-        return joinPoint.proceed();
     }
 }

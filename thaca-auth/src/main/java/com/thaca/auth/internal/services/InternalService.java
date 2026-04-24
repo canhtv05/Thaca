@@ -19,6 +19,7 @@ import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
+import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.DateUtils;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -79,7 +80,8 @@ public class InternalService {
 
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.CMS_GET_PROFILE, type = ModeType.HANDLE)
-    public AuthUserDTO getSystemProfile(String username) {
+    public AuthUserDTO getSystemProfile() {
+        String username = SecurityUtils.getCurrentUsername();
         return systemCredentialRepository
             .findByUsername(username)
             .map(sc -> {
@@ -99,7 +101,7 @@ public class InternalService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.HANDLE)
     public SearchResponse<UserDTO> search(SearchRequest<UserDTO> request) {
         Specification<User> spec = createSpecification(request);
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "createdAt"));
@@ -128,9 +130,17 @@ public class InternalService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.CMS_LOCK_USER, type = ModeType.HANDLE)
-    public void changeLockUser(Long id, boolean isLocked) {
+    public void lockUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setIsLocked(isLocked);
+        user.setIsLocked(true);
+        userRepository.save(user);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.CMS_UNLOCK_USER, type = ModeType.HANDLE)
+    public void unlockUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        user.setIsLocked(false);
         userRepository.save(user);
     }
 

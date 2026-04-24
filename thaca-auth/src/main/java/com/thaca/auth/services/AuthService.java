@@ -65,6 +65,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 @RequiredArgsConstructor
@@ -98,11 +100,13 @@ public class AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.HANDLE)
-    public AuthenticateRes authenticate(
-        LoginReq loginReq,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
+    public AuthenticateRes authenticate(LoginReq loginReq) {
+        HttpServletRequest httpServletRequest = (
+            (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()
+        ).getRequest();
+        HttpServletResponse httpServletResponse = (
+            (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()
+        ).getResponse();
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             loginReq.getUsername(),
             loginReq.getPassword()
@@ -138,11 +142,13 @@ public class AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.HANDLE)
-    public AuthenticateRes authenticateCms(
-        LoginReq loginReq,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
+    public AuthenticateRes authenticateCms(LoginReq loginReq) {
+        HttpServletRequest httpServletRequest = (
+            (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
+        ).getRequest();
+        HttpServletResponse httpServletResponse = (
+            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes()
+        ).getResponse();
         try {
             SystemCredential sc = systemCredentialRepository
                 .findByUsername(loginReq.getUsername())
@@ -210,12 +216,17 @@ public class AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.HANDLE)
-    public RefreshTokenRes refreshToken(
-        String cookieValue,
-        String channel,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
+    public RefreshTokenRes refreshToken(String cookieValue) {
+        HttpServletRequest httpServletRequest = (
+            (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
+        ).getRequest();
+        HttpServletResponse httpServletResponse = (
+            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes()
+        ).getResponse();
+        if (httpServletResponse == null) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : null;
         return tokenProvider.refreshToken(cookieValue, httpServletRequest, httpServletResponse, channel);
     }
 
@@ -243,7 +254,10 @@ public class AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_LOGOUT, type = ModeType.HANDLE)
-    public void logout(HttpServletResponse response) {
+    public void logout() {
+        HttpServletResponse response = (
+            (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
+        ).getResponse();
         String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : ChannelType.WEB.name();
         tokenProvider.revokeToken(ChannelType.valueOf(channel));
         cookieUtils.deleteCookie(response);
@@ -291,7 +305,10 @@ public class AuthService {
 
     @Transactional
     @FwMode(name = ServiceMethod.AUTH_LOGOUT_ALL_DEVICES, type = ModeType.HANDLE)
-    public void logoutAllDevices(HttpServletResponse response) {
+    public void logoutAllDevices() {
+        HttpServletResponse response = (
+            (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
+        ).getResponse();
         tokenProvider.revokeAllTokens();
         cookieUtils.deleteCookie(response);
         SecurityUtils.clear();
@@ -325,9 +342,7 @@ public class AuthService {
             throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
         }
 
-        AuthUserDTO userInfoDTO = isCms
-            ? internalService.getSystemProfile(loginReq.getUsername())
-            : getUserProfile(loginReq.getUsername());
+        AuthUserDTO userInfoDTO = isCms ? internalService.getSystemProfile() : getUserProfile(loginReq.getUsername());
 
         saveLoginHistory(userInfoDTO, httpServletRequest, LoginStatus.SUCCESS, null, isCms);
 
