@@ -1,4 +1,4 @@
-package com.thaca.auth.dtos.req;
+package com.thaca.common.dtos.internal.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,8 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LogoutReq {
+public class LoginReq {
 
-    private String channel;
+    private String username;
+    private String password;
 }

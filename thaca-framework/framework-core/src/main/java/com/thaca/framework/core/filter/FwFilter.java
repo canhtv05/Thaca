@@ -75,6 +75,7 @@ public class FwFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         String clientIp = request.getRemoteAddr();
         String payload = new String(requestBody, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
+        payload = maskSensitiveData(payload);
         String username = extractUsername();
 
         log.info("IN - URI: '[{}] {}', User: [{}], IP: [{}], Payload: {}", method, uri, username, clientIp, payload);
@@ -104,7 +105,8 @@ public class FwFilter extends OncePerRequestFilter {
         if (
             requestBody.length > 0 &&
             !ChannelType.WEB.name().equals(envelope.getHeader().getChannel()) &&
-            !ChannelType.MOBILE.name().equals(envelope.getHeader().getChannel())
+            !ChannelType.MOBILE.name().equals(envelope.getHeader().getChannel()) &&
+            !ChannelType.INTERNAL.name().equals(envelope.getHeader().getChannel())
         ) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -145,6 +147,7 @@ public class FwFilter extends OncePerRequestFilter {
             long duration = System.currentTimeMillis() - startTime;
             byte[] responseArray = responseWrapper.getContentAsByteArray();
             String responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
+            responseStr = maskSensitiveData(responseStr);
 
             int status = responseWrapper.getStatus();
             String logMsg = "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}";
@@ -180,6 +183,7 @@ public class FwFilter extends OncePerRequestFilter {
         response.getWriter().write(responseStr);
 
         long duration = System.currentTimeMillis() - startTime;
+        String logResponseStr = maskSensitiveData(responseStr.replaceAll("[\\r\\n]+", ""));
         log.error(
             "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}",
             method,
@@ -187,7 +191,7 @@ public class FwFilter extends OncePerRequestFilter {
             username,
             response.getStatus(),
             duration,
-            responseStr.replaceAll("[\\r\\n]+", "")
+            logResponseStr
         );
 
         MDC.clear();
@@ -212,5 +216,12 @@ public class FwFilter extends OncePerRequestFilter {
             return envelope.getBody().getTransId().trim();
         }
         return UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
+    }
+
+    private String maskSensitiveData(String payload) {
+        if (payload == null) {
+            return null;
+        }
+        return payload.replaceAll("\"password\"\\s*:\\s*\"[^\"]+\"", "\"password\":\"******\"");
     }
 }

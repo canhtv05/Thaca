@@ -3,6 +3,12 @@ package com.thaca.auth.constants;
 public class ServiceMethod {
 
     public static final String INTERNAL_ACTIVE_USER = "internal.activeUserByUserName";
+    public static final String CMS_AUTHENTICATE = "internal.cmsAuthenticate";
+    public static final String CMS_SEARCH_USERS = "internal.cmsSearchUsers";
+    public static final String CMS_GET_USER_BY_ID = "internal.cmsGetUserById";
+    public static final String CMS_LOCK_USER = "internal.cmsLockUser";
+    public static final String CMS_UNLOCK_USER = "internal.cmsUnlockUser";
+    public static final String CMS_GET_PROFILE = "internal.cmsGetProfile";
 
     public static final String AUTH_FORGOT_PASSWORD_REQUEST = "auth.forgotPasswordRequest";
     public static final String AUTH_AUTHENTICATE = "auth.authenticate";
@@ -17,15 +23,4 @@ public class ServiceMethod {
     public static final String AUTH_LOGOUT = "auth.logout";
     public static final String AUTH_LOGOUT_ALL_DEVICES = "auth.logoutAllDevices";
     public static final String AUTH_SEARCH_LOGIN_HISTORY = "auth.searchLoginHistory";
-
-    public static final String CMS_AUTHENTICATE = "cms.authenticate";
-    public static final String CMS_SEARCH_USERS = "cms.searchUsers";
-    public static final String CMS_GET_USER_BY_ID = "cms.getUserById";
-    public static final String CMS_CREATE_USER = "cms.createUser";
-    public static final String CMS_UPDATE_USER = "cms.updateUser";
-    public static final String CMS_LOCK_USER = "cms.lockUser";
-    public static final String CMS_UNLOCK_USER = "cms.unlockUser";
-    public static final String ADMIN_GET_USER_PERMISSION = "cms.getUserPermission";
-    public static final String ADMIN_UPDATE_USER_PERMISSION = "cms.updateUserPermission";
-    public static final String CMS_GET_PROFILE = "cms.getProfile";
 }

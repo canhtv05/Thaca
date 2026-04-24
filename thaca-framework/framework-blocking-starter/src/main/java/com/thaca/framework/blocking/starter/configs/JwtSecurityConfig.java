@@ -19,6 +19,6 @@ public class JwtSecurityConfig implements SecurityCustomizer {
     public void customize(HttpSecurity http) {
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterAfter(fwFilter, JwtFilter.class);
-        http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
+        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
     }
 }

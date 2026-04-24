@@ -15,6 +15,7 @@ application:
     apiKey: ${APPLICATION_HTTP_CLIENT_API_KEY:test-api-key}
   routes:
     authService: ${APPLICATION_ROUTES_AUTH_SERVICE:http://localhost:1001}
+    adminService: ${APPLICATION_ROUTES_ADMIN_SERVICE:http://localhost:1002}
 
 logging:
   level:

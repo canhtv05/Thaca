@@ -2,17 +2,14 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
-import com.thaca.auth.dtos.AuthUserDTO;
 import com.thaca.auth.dtos.DeviceInfo;
 import com.thaca.auth.dtos.GeoInfo;
 import com.thaca.auth.dtos.LoginHistoryDTO;
-import com.thaca.auth.dtos.UserDTO;
-import com.thaca.auth.dtos.req.LoginReq;
-import com.thaca.auth.dtos.res.AuthenticateRes;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.dtos.res.VerifyTokenRes;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.enums.LoginStatus;
+import com.thaca.auth.internal.services.InternalService;
 import com.thaca.auth.repositories.LoginHistoryRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
@@ -22,6 +19,10 @@ import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.common.dtos.TokenPair;
+import com.thaca.common.dtos.internal.AuthUserDTO;
+import com.thaca.common.dtos.internal.UserDTO;
+import com.thaca.common.dtos.internal.req.LoginReq;
+import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.PaginationRequest;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
@@ -80,6 +81,7 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final CommonService commonService;
     private final LoginHistoryRepository loginHistoryRepository;
+    private final InternalService internalService;
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
     public void validateAuthenticate(
@@ -258,26 +260,6 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthUserDTO getSystemProfile(String username) {
-        return systemCredentialRepository
-            .findByUsername(username)
-            .map(sc -> {
-                SystemUser su = sc.getSystemUser();
-                return AuthUserDTO.builder()
-                    .id(su.getId())
-                    .username(sc.getUsername())
-                    .email(su.getEmail())
-                    .fullname(su.getFullname())
-                    .isActivated(su.getIsActivated())
-                    .isLocked(su.isLocked())
-                    .isSuperAdmin(su.isSuperAdmin())
-                    .roles(sc.getRoles().stream().map(Role::getCode).collect(Collectors.toSet()))
-                    .build();
-            })
-            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-    }
-
-    @Transactional(readOnly = true)
     public AuthUserDTO getUserProfile(String username) {
         return userRepository
             .findByUsername(username)
@@ -344,7 +326,7 @@ public class AuthService {
         }
 
         AuthUserDTO userInfoDTO = isCms
-            ? getSystemProfile(loginReq.getUsername())
+            ? internalService.getSystemProfile(loginReq.getUsername())
             : getUserProfile(loginReq.getUsername());
 
         saveLoginHistory(userInfoDTO, httpServletRequest, LoginStatus.SUCCESS, null, isCms);

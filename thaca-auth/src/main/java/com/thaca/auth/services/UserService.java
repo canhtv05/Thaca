@@ -2,7 +2,6 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.User;
-import com.thaca.auth.dtos.UserDTO;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
 import com.thaca.auth.dtos.req.ResetPasswordReq;
@@ -14,12 +13,10 @@ import com.thaca.auth.validators.rules.EmailRule;
 import com.thaca.auth.validators.rules.FullnameRule;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
+import com.thaca.common.dtos.internal.UserDTO;
 // import com.thaca.common.constants.EventConstants;
 // import com.thaca.common.dtos.events.UserCreationEvent;
 // import com.thaca.common.dtos.events.VerificationEmailEvent;
-import com.thaca.common.dtos.search.PaginationResponse;
-import com.thaca.common.dtos.search.SearchRequest;
-import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.CommonService;
@@ -28,17 +25,13 @@ import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.CommonUtils;
-import jakarta.persistence.criteria.Predicate;
+import com.thaca.framework.core.utils.DateUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -62,7 +55,7 @@ public class UserService {
     public UserDTO findById(Long id) {
         return userRepository
             .findById(id)
-            .map(UserDTO::fromEntity)
+            .map(this::toUserDTO)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
@@ -119,15 +112,7 @@ public class UserService {
         // HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
         // }
         userRepository.save(user);
-        return UserDTO.fromEntity(user);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_LOCK_USER, type = ModeType.HANDLE)
-    public void changeLockUser(Long id, boolean isLocked) {
-        User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setIsLocked(isLocked);
-        userRepository.save(user);
+        return toUserDTO(user);
     }
 
     @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.VALIDATE)
@@ -247,48 +232,9 @@ public class UserService {
         redisService.put(keyForgotPassword, otp, 5, TimeUnit.MINUTES);
     }
 
-    @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.VALIDATE)
-    public SearchResponse<UserDTO> search(SearchRequest<UserDTO> request) {
-        Specification<User> spec = createSpecification(request);
-        Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "createdAt"));
-        return new SearchResponse<>(
-            users
-                .getContent()
-                .stream()
-                .map(u -> UserDTO.fromEntity(u, true))
-                .collect(Collectors.toList()),
-            PaginationResponse.of(users)
-        );
-    }
-
     private boolean hasOTP(String username) {
         String keyForgotPassword = sessionStore.getKeyForgotPassword(username);
         return StringUtils.isNotEmpty(redisService.get(keyForgotPassword, String.class));
-    }
-
-    private Specification<User> createSpecification(SearchRequest<UserDTO> req) {
-        return (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            if (req.getFilter() != null) {
-                UserDTO filter = req.getFilter();
-                if (StringUtils.isNotBlank(filter.getUsername())) {
-                    predicates.add(
-                        cb.like(cb.lower(root.get("username")), "%" + filter.getUsername().toLowerCase() + "%")
-                    );
-                }
-                if (StringUtils.isNotBlank(filter.getEmail())) {
-                    predicates.add(cb.like(cb.lower(root.get("email")), "%" + filter.getEmail().toLowerCase() + "%"));
-                }
-                if (Objects.nonNull(filter.getIsActivated())) {
-                    predicates.add(cb.equal(root.get("isActivated"), filter.getIsActivated()));
-                }
-                if (Objects.nonNull(filter.getIsLocked())) {
-                    predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
-                }
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
     }
 
     // private void publishUserEvent(UserDTO request, User user, boolean isAdmin) {
@@ -304,4 +250,29 @@ public class UserService {
     // }
     // kafkaProducerService.sendAndWait(topic, user.getUsername(), payload);
     // }
+
+    public UserDTO toUserDTO(User user) {
+        return toUserDTO(user, false);
+    }
+
+    public UserDTO toUserDTO(User user, boolean isCms) {
+        if (user == null) {
+            return null;
+        }
+        UserDTO dto = UserDTO.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .isActivated(user.getIsActivated())
+            .isLocked(user.getIsLocked())
+            .build();
+
+        if (isCms) {
+            dto.setCreatedAt(DateUtils.dateToString(user.getCreatedAt()));
+            dto.setUpdatedAt(DateUtils.dateToString(user.getUpdatedAt()));
+            dto.setCreatedBy(user.getCreatedBy());
+            dto.setUpdatedBy(user.getUpdatedBy());
+        }
+        return dto;
+    }
 }

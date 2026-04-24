@@ -103,10 +103,6 @@ public class TokenProvider {
         // c = 1 là CMS, c = 0 là User
         int c = userDetails.isCmsUser() ? 1 : 0;
 
-        if (c == 1 && channel != ChannelType.WEB) {
-            throw new FwException(ErrorMessage.CHANNEL_INVALID);
-        }
-
         String oldToken = userSessionService.isUserOnline(name, channel);
         String sessionId = UUID.randomUUID().toString();
 

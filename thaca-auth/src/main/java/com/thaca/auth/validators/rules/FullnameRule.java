@@ -1,8 +1,8 @@
 package com.thaca.auth.validators.rules;
 
-import com.thaca.auth.dtos.UserDTO;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.validators.core.ValidateRule;
+import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.exceptions.FwException;
 import org.apache.commons.lang3.StringUtils;
