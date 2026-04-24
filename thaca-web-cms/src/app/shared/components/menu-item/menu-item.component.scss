@@ -46,8 +46,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 48px;
-  padding: 0 16px;
+  min-height: 48px;
+  padding: 8px 16px;
   margin: 4px 12px;
   border-radius: var(--radius-md);
   color: var(--color-foreground);
@@ -57,8 +57,6 @@
   text-decoration: none;
   cursor: pointer;
   position: relative;
-  white-space: nowrap;
-  overflow: hidden;
   transition: none !important;
 }
 
@@ -153,9 +151,9 @@
 }
 
 .submenu .menu-link {
-  height: 36px;
+  min-height: 36px;
   font-size: 0.825rem;
-  padding: 0 16px;
+  padding: 6px 16px;
   margin: 2px 12px;
   opacity: 0.65;
 }

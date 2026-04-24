@@ -16,6 +16,15 @@ export const userManagementRoute: Route[] = [
         component: UserListComponent,
       },
       {
+        path: 'verify',
+        loadComponent: () =>
+          import('./user-verification.component').then((m) => m.UserVerificationComponent),
+      },
+      {
+        path: 'permissions',
+        component: UserListComponent, // Reuse or change to dedicated component later
+      },
+      {
         path: 'login-history',
         component: LoginHistoryComponent,
       },

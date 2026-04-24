@@ -50,33 +50,136 @@ export class Sidebar implements OnInit, OnDestroy {
 
     this.model = [
       {
-        label: 'menu.overview',
+        label: 'menu.core',
         items: [
-          { label: 'menu.dashboard', icon: 'pi pi-home', routerLink: ['/home'] },
+          { label: 'menu.dashboard', icon: 'pi pi-chart-line', routerLink: ['/home'] },
+          { label: 'menu.analytics', icon: 'pi pi-chart-bar', routerLink: ['/analytics'] },
+          { label: 'menu.login_history', icon: 'pi pi-history', routerLink: ['/login-history'] },
+        ],
+      },
+      {
+        label: 'menu.moderation',
+        items: [
           {
-            label: 'menu.login_history',
-            icon: 'pi pi-history',
-            routerLink: ['/login-history'],
+            label: 'menu.content_management',
+            icon: 'pi pi-clone',
+            path: '/content',
+            items: [
+              { label: 'menu.post_list', icon: 'pi pi-list', routerLink: ['/content/posts'] },
+              {
+                label: 'menu.comment_list',
+                icon: 'pi pi-comments',
+                routerLink: ['/content/comments'],
+              },
+              { label: 'menu.media_library', icon: 'pi pi-images', routerLink: ['/content/media'] },
+            ],
+          },
+          {
+            label: 'menu.report_management',
+            icon: 'pi pi-flag',
+            path: '/moderation/reports',
+            items: [
+              {
+                label: 'menu.user_reports',
+                icon: 'pi pi-user-minus',
+                routerLink: ['/moderation/reports/users'],
+              },
+              {
+                label: 'menu.post_reports',
+                icon: 'pi pi-exclamation-triangle',
+                routerLink: ['/moderation/reports/posts'],
+              },
+            ],
           },
         ],
       },
       {
-        label: 'menu.user_management',
+        label: 'menu.user_engagement',
         items: [
           {
-            label: 'menu.user_list',
+            label: 'menu.user_management',
             icon: 'pi pi-users',
-            routerLink: ['/user-management/list'],
+            path: '/user-management',
+            items: [
+              {
+                label: 'menu.end_user_list',
+                icon: 'pi pi-user',
+                routerLink: ['/user-management/list'],
+              },
+              {
+                label: 'menu.verification',
+                icon: 'pi pi-verified',
+                routerLink: ['/user-management/verify'],
+              },
+            ],
           },
           {
-            label: 'menu.permissions',
-            icon: 'pi pi-shield',
-            routerLink: ['/user-management/permissions'],
+            label: 'menu.point_system',
+            icon: 'pi pi-star',
+            path: '/engagement/points',
+            items: [
+              {
+                label: 'menu.point_rules',
+                icon: 'pi pi-list',
+                routerLink: ['/engagement/points/rules'],
+              },
+              {
+                label: 'menu.point_history',
+                icon: 'pi pi-history',
+                routerLink: ['/engagement/points/history'],
+              },
+            ],
           },
+          { label: 'menu.notifications', icon: 'pi pi-bell', routerLink: ['/notifications'] },
         ],
       },
       {
-        label: 'menu.ui_components',
+        label: 'menu.system_administration',
+        items: [
+          {
+            label: 'menu.access_control',
+            icon: 'pi pi-shield',
+            path: '/system/access',
+            items: [
+              {
+                label: 'menu.admin_accounts',
+                icon: 'pi pi-id-card',
+                routerLink: ['/system/admins'],
+              },
+              {
+                label: 'menu.role_permission',
+                icon: 'pi pi-key',
+                routerLink: ['/user-management/permissions'],
+              },
+            ],
+          },
+          {
+            label: 'menu.global_configuration',
+            icon: 'pi pi-cog',
+            path: '/system/settings',
+            items: [
+              {
+                label: 'menu.mail_settings',
+                icon: 'pi pi-envelope',
+                routerLink: ['/system/settings/mail'],
+              },
+              {
+                label: 'menu.storage_settings',
+                icon: 'pi pi-database',
+                routerLink: ['/system/settings/storage'],
+              },
+              {
+                label: 'menu.api_keys',
+                icon: 'pi pi-lock',
+                routerLink: ['/system/settings/api-keys'],
+              },
+            ],
+          },
+          { label: 'menu.system_logs', icon: 'pi pi-server', routerLink: ['/system/logs'] },
+        ],
+      },
+      {
+        label: 'menu.development_ui',
         items: [
           {
             label: 'menu.ui_components',
@@ -92,21 +195,6 @@ export class Sidebar implements OnInit, OnDestroy {
               { label: 'Chart', icon: 'pi pi-chart-bar', routerLink: ['/uikit/charts'] },
             ],
           },
-        ],
-      },
-      {
-        label: 'menu.pages',
-        items: [
-          {
-            label: 'menu.auth',
-            icon: 'pi pi-lock',
-            path: '/auth',
-            items: [
-              { label: 'menu.login', icon: 'pi pi-sign-in', routerLink: ['/auth/login'] },
-              { label: 'menu.error', icon: 'pi pi-times-circle', routerLink: ['/auth/error'] },
-            ],
-          },
-          { label: 'menu.crud', icon: 'pi pi-pencil', routerLink: ['/pages/crud'] },
         ],
       },
     ];
