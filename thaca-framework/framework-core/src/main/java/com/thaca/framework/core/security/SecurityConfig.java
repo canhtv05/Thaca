@@ -1,5 +1,6 @@
 package com.thaca.framework.core.security;
 
+import com.thaca.framework.core.annotations.ServletOnly;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -15,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@ServletOnly
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 

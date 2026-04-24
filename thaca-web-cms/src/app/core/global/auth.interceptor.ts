@@ -60,7 +60,7 @@ export const authInterceptor: HttpInterceptorFn = (
             return error;
           });
         case 403:
-          router.navigate(['/forbidden']);
+          router.navigate(['/403']);
           toastrService.warning(message, title);
           break;
         case 0:

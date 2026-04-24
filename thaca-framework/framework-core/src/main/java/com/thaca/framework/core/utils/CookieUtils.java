@@ -1,6 +1,7 @@
 package com.thaca.framework.core.utils;
 
 import com.thaca.common.dtos.TokenPair;
+import com.thaca.framework.core.annotations.ServletOnly;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.CommonConstants;
 import jakarta.servlet.http.Cookie;
@@ -14,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 @Component
 @RequiredArgsConstructor
+@ServletOnly
 public class CookieUtils {
 
     private final FrameworkProperties properties;

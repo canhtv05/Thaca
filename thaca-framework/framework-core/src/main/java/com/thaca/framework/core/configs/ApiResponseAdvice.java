@@ -1,5 +1,6 @@
 package com.thaca.framework.core.configs;
 
+import com.thaca.framework.core.annotations.ServletOnly;
 import com.thaca.framework.core.dtos.ApiPayload;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 @Slf4j
 @RestControllerAdvice
+@ServletOnly
 public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
 
     @Override

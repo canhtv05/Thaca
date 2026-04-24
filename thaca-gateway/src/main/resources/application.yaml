@@ -4,12 +4,10 @@ server:
 app:
   api-prefix: /api/v1
 
-
 logging:
   level:
     '[root]': WARN
-    '[com.leaf]': INFO
-    '[org.springframework]': WARN
+    '[com.thaca.gateway]': INFO
 
 spring:
   application:
@@ -30,48 +28,6 @@ spring:
             - id: auth-service
               uri: ${APPLICATION_ROUTES_AUTH_SERVICE:http://localhost:1001}
               predicates:
-                - Path=${app.api-prefix}/auth/**, ${app.api-prefix}/cms/**, ${app.api-prefix}/admin/**
-              filters:
-                - RewritePath=${app.api-prefix}/(?<segment>.*), /api/$\{segment}
-
-            - id: file-service
-              uri: lb://file
-              predicates:
-                - Path=${app.api-prefix}/files/**
-              filters:
-                - StripPrefix=2
-
-            - id: profile-service
-              uri: lb://user-profile
-              predicates:
-                - Path=${app.api-prefix}/user-profile/**
-              filters:
-                - StripPrefix=2
-
-            - id: notification-service
-              uri: lb://notification
-              predicates:
-                - Path=${app.api-prefix}/notifications/**
-              filters:
-                - StripPrefix=2
-
-            - id: graphql-bff
-              uri: lb://graphql-bff
-              predicates:
-                - Path=${app.api-prefix}/graphql/**
-              filters:
-                - StripPrefix=2
-
-            - id: websocket-service-ws
-              uri: lb:ws://websocket-service
-              predicates:
-                - Path=/ws/**
-              filters:
-                - SetPath=/ws
-
-            - id: websocket-service-http
-              uri: lb://websocket-service
-              predicates:
-                - Path=${app.api-prefix}/presence/**
+                - Path=${app.api-prefix}/auth/**, ${app.api-prefix}/cms/**
               filters:
                 - StripPrefix=2

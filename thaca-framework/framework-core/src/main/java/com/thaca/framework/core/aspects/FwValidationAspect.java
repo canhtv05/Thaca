@@ -1,6 +1,7 @@
 package com.thaca.framework.core.aspects;
 
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.annotations.ServletOnly;
 import com.thaca.framework.core.enums.ModeType;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Aspect
 @Component
+@ServletOnly
 @Order(1)
 public class FwValidationAspect {
 

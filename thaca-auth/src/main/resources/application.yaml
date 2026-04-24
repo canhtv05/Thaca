@@ -2,7 +2,7 @@ server:
   port: 1001
 
   servlet:
-    context-path: /api
+    context-path:
 
 spring:
   application:

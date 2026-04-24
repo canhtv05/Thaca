@@ -2,6 +2,7 @@ package com.thaca.framework.core.aspects;
 
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.annotations.CheckPermission;
+import com.thaca.framework.core.annotations.ServletOnly;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.PermissionProvider;
 import com.thaca.framework.core.security.SecurityUtils;
@@ -16,6 +17,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
+@ServletOnly
+@ConditionalOnBean(PermissionProvider.class)
 @RequiredArgsConstructor
 public class PermissionAspect {
 

@@ -1,8 +1,10 @@
 package com.thaca.framework.reactive.starter.utils;
 
+import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -49,14 +51,14 @@ public class JwtUtils {
         });
     }
 
-    public Mono<com.thaca.common.enums.TokenStatus> validateToken(String token) {
+    public Mono<TokenStatus> validateToken(String token) {
         return this.parseToken(token)
-            .map(claims -> com.thaca.common.enums.TokenStatus.VALID)
+            .map(claims -> TokenStatus.VALID)
             .onErrorResume(e -> {
-                if (e instanceof io.jsonwebtoken.ExpiredJwtException) {
-                    return Mono.just(com.thaca.common.enums.TokenStatus.EXPIRED);
+                if (e instanceof ExpiredJwtException) {
+                    return Mono.just(TokenStatus.EXPIRED);
                 }
-                return Mono.just(com.thaca.common.enums.TokenStatus.INVALID);
+                return Mono.just(TokenStatus.INVALID);
             });
     }
 }

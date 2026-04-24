@@ -1,5 +1,6 @@
 package com.thaca.framework.core.configs;
 
+import com.thaca.framework.core.annotations.ServletOnly;
 import com.thaca.framework.core.context.FwContextBody;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.dtos.ApiPayload;
@@ -19,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
+@ServletOnly
 public class ApiPayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final ObjectMapper objectMapper;

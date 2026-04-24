@@ -64,6 +64,26 @@
       "name": "application.security.base64-secret",
       "type": "java.lang.String",
       "description": "A description for 'application.security.base64-secret'"
+    },
+    {
+      "name": "application.security.cmsValidDurationInSeconds",
+      "type": "java.lang.String",
+      "description": "A description for 'application.security.cmsValidDurationInSeconds'"
+    },
+    {
+      "name": "application.httpClient.api-key",
+      "type": "java.lang.String",
+      "description": "A description for 'application.httpClient.api-key'"
+    },
+    {
+      "name": "application.routes.auth-service",
+      "type": "java.lang.String",
+      "description": "A description for 'application.routes.auth-service'"
+    },
+    {
+      "name": "app.api-prefix",
+      "type": "java.lang.String",
+      "description": "A description for 'app.api-prefix'"
     }
   ]
 }

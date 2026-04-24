@@ -15,6 +15,7 @@ import com.thaca.framework.reactive.starter.utils.ReactiveCookieUtils;
 import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -34,24 +35,12 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private final FrameworkProperties frameworkProperties;
     private final JwtUtils jwtUtil;
     private final ReactiveCookieUtils reactiveCookieUtils;
-    private final WebClient.Builder webClientBuilder;
-
-    public AuthenticationFilter(
-        FrameworkProperties frameworkProperties,
-        JwtUtils jwtUtil,
-        ReactiveCookieUtils reactiveCookieUtils,
-        WebClient.Builder webClientBuilder
-    ) {
-        this.frameworkProperties = frameworkProperties;
-        this.jwtUtil = jwtUtil;
-        this.reactiveCookieUtils = reactiveCookieUtils;
-        this.webClientBuilder = webClientBuilder;
-    }
 
     @Override
     public int getOrder() {
@@ -83,7 +72,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 return chain.filter(exchange);
             })
             .onErrorResume(e -> {
-                log.error("Error validating token", e);
                 return chain.filter(exchange);
             });
     }
@@ -94,11 +82,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         reqBody.setBody(new ApiBody<>());
 
         String authServiceUrl = frameworkProperties.getRoutes().getAuthService();
-
-        return webClientBuilder
+        return WebClient.builder()
             .build()
             .post()
-            .uri(authServiceUrl + "/api/auth/refresh-token")
+            .uri(authServiceUrl + "/internal/refresh-token")
             .cookie(CommonConstants.COOKIE_NAME, refreshToken)
             .header(HttpHeaders.AUTHORIZATION, "Basic " + frameworkProperties.getHttpClient().getApiKey())
             .bodyValue(reqBody)

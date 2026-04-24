@@ -111,6 +111,8 @@ export class DataTableComponent {
     sortOrder: '',
   });
 
+  private isFirstLoad = true;
+
   pageSizeOptions: IDropdownOption[] = [
     { label: '10 / ' + this.translate.instant('common.page'), value: 10 },
     { label: '20 / ' + this.translate.instant('common.page'), value: 20 },
@@ -135,13 +137,7 @@ export class DataTableComponent {
     return pages;
   });
 
-  constructor() {
-    effect(() => {
-      if (this.externalFilter) {
-        untracked(() => this.refresh());
-      }
-    });
-  }
+  constructor() {}
 
   async load(pageReq: IPaginationRequest) {
     this.pagination.set(pageReq);
@@ -191,7 +187,9 @@ export class DataTableComponent {
     const sortField = (event.sortField as string) || '';
     const sortOrder = event.sortOrder === 1 ? 'ASC' : event.sortOrder === -1 ? 'DESC' : '';
     const cur = this.pagination();
-    if (sortField !== cur.sortField || sortOrder !== cur.sortOrder) {
+
+    if (this.isFirstLoad || sortField !== cur.sortField || sortOrder !== cur.sortOrder) {
+      this.isFirstLoad = false;
       this.load({ ...cur, sortField, sortOrder, page: 0 });
     }
   }

@@ -66,7 +66,7 @@ export class UserListComponent {
   ];
 
   tableConfig: ITableConfig = {
-    url: `${this.configService.getApiUrl()}/admin/users/search`,
+    url: `${this.configService.getApiUrl()}/cms/users/search`,
     rows: 10,
     withAudit: true,
     actionFixed: true,

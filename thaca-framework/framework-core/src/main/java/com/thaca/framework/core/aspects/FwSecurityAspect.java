@@ -2,6 +2,7 @@ package com.thaca.framework.core.aspects;
 
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.annotations.FwRequest;
+import com.thaca.framework.core.annotations.ServletOnly;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.exceptions.FwException;
@@ -26,6 +27,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Aspect
 @Component
 @RequiredArgsConstructor
+@ServletOnly
 public class FwSecurityAspect {
 
     private final FrameworkProperties frameworkProperties;

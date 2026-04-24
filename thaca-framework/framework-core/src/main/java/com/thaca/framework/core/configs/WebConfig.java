@@ -1,5 +1,6 @@
 package com.thaca.framework.core.configs;
 
+import com.thaca.framework.core.annotations.ServletOnly;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
+@ServletOnly
 public class WebConfig implements WebMvcConfigurer {
 
     private final ApiPayloadArgumentResolver apiPayloadArgumentResolver;
