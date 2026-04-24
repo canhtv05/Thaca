@@ -48,4 +48,15 @@ public class JwtUtils {
             return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, authorities);
         });
     }
+
+    public Mono<com.thaca.common.enums.TokenStatus> validateToken(String token) {
+        return this.parseToken(token)
+            .map(claims -> com.thaca.common.enums.TokenStatus.VALID)
+            .onErrorResume(e -> {
+                if (e instanceof io.jsonwebtoken.ExpiredJwtException) {
+                    return Mono.just(com.thaca.common.enums.TokenStatus.EXPIRED);
+                }
+                return Mono.just(com.thaca.common.enums.TokenStatus.INVALID);
+            });
+    }
 }

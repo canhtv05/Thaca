@@ -2,23 +2,33 @@ package com.thaca.framework.core.aspects;
 
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.annotations.FwRequest;
+import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Aspect
 @Component
+@RequiredArgsConstructor
 public class FwSecurityAspect {
+
+    private final FrameworkProperties frameworkProperties;
 
     @Around("@annotation(com.thaca.framework.core.annotations.FwRequest)")
     public Object checkSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -45,8 +55,19 @@ public class FwSecurityAspect {
         }
 
         if (Objects.nonNull(requestMode) && RequestType.INTERNAL.equals(requestMode.type())) {
-            // todo handle internal security logic
-            return joinPoint.proceed();
+            ServletRequestAttributes attributes =
+                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+                if (StringUtils.hasText(authHeader) && authHeader.startsWith("Basic ")) {
+                    String apiKey = authHeader.substring(6);
+                    if (Objects.equals(apiKey, frameworkProperties.getHttpClient().getApiKey())) {
+                        return joinPoint.proceed();
+                    }
+                }
+            }
+            throw new FwException(CommonErrorMessage.UNAUTHORIZED);
         }
 
         return joinPoint.proceed();

@@ -50,7 +50,7 @@ public class UserAuthController {
     }
 
     @PostMapping("/refresh-token")
-    @FwRequest(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = RequestType.INTERNAL)
     public ResponseEntity<RefreshTokenRes> refreshToken(
         @CookieValue(name = CommonConstants.COOKIE_NAME, required = false) String cookieValue,
         HttpServletRequest httpServletRequest,

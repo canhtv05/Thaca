@@ -117,6 +117,7 @@ public class TokenProvider {
             Thread.startVirtualThread(() -> this.handleKickOldSessionAsync(name, token, oldToken, channel));
         }
 
+        // For CMS/Admin (c=1), refreshToken is null. For others (c=0), check channel.
         String refreshToken = null;
         if (c == 0 && channel != ChannelType.WEB) {
             refreshToken = this.generateToken(authentication, this.refreshTokenValidityDuration, channel, sessionId);

@@ -12,6 +12,7 @@ public class FrameworkProperties {
     private SecurityConfig security = new SecurityConfig();
     private RedisConfig redis = new RedisConfig();
     private HttpClientConfig httpClient = new HttpClientConfig();
+    private java.util.Map<String, String> routes = new java.util.HashMap<>();
 
     @Getter
     @Setter
