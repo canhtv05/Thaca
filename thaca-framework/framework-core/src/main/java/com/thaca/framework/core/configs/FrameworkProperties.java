@@ -14,6 +14,10 @@ public class FrameworkProperties {
     private HttpClientConfig httpClient = new HttpClientConfig();
     private java.util.Map<String, String> routes = new java.util.HashMap<>();
 
+    public java.util.Map<String, String> getRoutes() {
+        return routes;
+    }
+
     @Getter
     @Setter
     public static class SecurityConfig {
