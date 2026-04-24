@@ -4,9 +4,6 @@ server:
 app:
   api-prefix: /api/v1
 
-application:
-  routes:
-    auth-service: ${AUTH_SERVICE_URL:http://localhost:1001}
 
 logging:
   level:
@@ -31,7 +28,7 @@ spring:
         webflux:
           routes:
             - id: auth-service
-              uri: ${AUTH_SERVICE_URL:http://localhost:1001}
+              uri: ${APPLICATION_ROUTES_AUTH_SERVICE:http://localhost:1001}
               predicates:
                 - Path=${app.api-prefix}/auth/**, ${app.api-prefix}/cms/**, ${app.api-prefix}/admin/**
               filters:

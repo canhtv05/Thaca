@@ -12,11 +12,7 @@ public class FrameworkProperties {
     private SecurityConfig security = new SecurityConfig();
     private RedisConfig redis = new RedisConfig();
     private HttpClientConfig httpClient = new HttpClientConfig();
-    private java.util.Map<String, String> routes = new java.util.HashMap<>();
-
-    public java.util.Map<String, String> getRoutes() {
-        return routes;
-    }
+    private RoutesConfig routes = new RoutesConfig();
 
     @Getter
     @Setter
@@ -47,5 +43,12 @@ public class FrameworkProperties {
         private String apiKey;
         private Integer connectTimeout = 5000;
         private Integer readTimeout = 5000;
+    }
+
+    @Getter
+    @Setter
+    public static class RoutesConfig {
+
+        private String authService;
     }
 }

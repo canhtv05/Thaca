@@ -1,7 +1,6 @@
 package com.thaca.gateway.config;
 
 import com.thaca.common.dtos.TokenPair;
-import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.core.configs.FrameworkProperties;
@@ -13,13 +12,9 @@ import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.JsonF;
 import com.thaca.framework.reactive.starter.utils.JwtUtils;
 import com.thaca.framework.reactive.starter.utils.ReactiveCookieUtils;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -64,7 +59,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull GatewayFilterChain chain) {
         TokenPair tokens = resolveTokens(exchange);
         String accessToken = tokens.accessToken();
         String refreshToken = tokens.refreshToken();
@@ -98,7 +93,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         reqBody.setHeader(new ApiHeader());
         reqBody.setBody(new ApiBody<>());
 
-        String authServiceUrl = frameworkProperties.getRoutes().getOrDefault("auth-service", "http://localhost:1001");
+        String authServiceUrl = frameworkProperties.getRoutes().getAuthService();
 
         return webClientBuilder
             .build()
@@ -148,7 +143,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         List<String> authHeaders = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
 
         if (!CollectionUtils.isEmpty(authHeaders)) {
-            String bearer = authHeaders.get(0).replace("Bearer ", "");
+            String bearer = authHeaders.getFirst().replace("Bearer ", "");
             return new TokenPair(bearer, null);
         }
 

@@ -8,7 +8,6 @@ import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.utils.JsonF;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
