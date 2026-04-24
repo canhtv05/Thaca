@@ -4,6 +4,8 @@ import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.annotations.ServletOnly;
 import com.thaca.framework.core.configs.FrameworkProperties;
+import com.thaca.framework.core.context.FwContextHeader;
+import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
@@ -57,6 +59,15 @@ public class FwSecurityAspect {
         }
 
         if (Objects.nonNull(requestMode) && RequestType.INTERNAL.equals(requestMode.type())) {
+            String expectedApiKey = frameworkProperties.getHttpClient().getApiKey();
+
+            ApiHeader contextHeader = FwContextHeader.get();
+            if (contextHeader != null && StringUtils.hasText(contextHeader.getApiKey())) {
+                if (Objects.equals(contextHeader.getApiKey(), expectedApiKey)) {
+                    return joinPoint.proceed();
+                }
+            }
+
             ServletRequestAttributes attributes =
                 (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
@@ -64,7 +75,7 @@ public class FwSecurityAspect {
                 String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
                 if (StringUtils.hasText(authHeader) && authHeader.startsWith("Basic ")) {
                     String apiKey = authHeader.substring(6);
-                    if (Objects.equals(apiKey, frameworkProperties.getHttpClient().getApiKey())) {
+                    if (Objects.equals(apiKey, expectedApiKey)) {
                         return joinPoint.proceed();
                     }
                 }

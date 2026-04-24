@@ -120,30 +120,35 @@ public class FwFilter extends OncePerRequestFilter {
         }
 
         RLock locked = null;
+        boolean isInternal = "true".equals(request.getHeader("X-Internal-Call"));
         String lockKey = (username != null ? username : clientIp) + ":" + transId;
         try {
-            locked = requestGuard.tryAcquire(lockKey);
-            if (locked == null) {
-                log.warn(
-                    "[FwFilter] Duplicate transId detected: [{}], URI: '[{}] {}', User: [{}]",
-                    transId,
-                    method,
-                    uri,
-                    username
-                );
-                response.setStatus(HttpServletResponse.SC_CONFLICT);
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            if (!isInternal) {
+                locked = requestGuard.tryAcquire(lockKey);
+                if (locked == null) {
+                    log.warn(
+                        "[FwFilter] Duplicate transId detected: [{}], URI: '[{}] {}', User: [{}]",
+                        transId,
+                        method,
+                        uri,
+                        username
+                    );
+                    response.setStatus(HttpServletResponse.SC_CONFLICT);
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-                ApiPayload<?> dupError = ApiPayload.error(CommonErrorMessage.DUPLICATE_TRANS_ID);
-                dupError.setHeader(envelope.getHeader());
+                    ApiPayload<?> dupError = ApiPayload.error(CommonErrorMessage.DUPLICATE_TRANS_ID);
+                    dupError.setHeader(envelope.getHeader());
 
-                this.processLog(response, dupError, startTime, method, uri, username);
-                return;
+                    this.processLog(response, dupError, startTime, method, uri, username);
+                    return;
+                }
             }
             filterChain.doFilter(requestWrapper, responseWrapper);
         } finally {
-            requestGuard.release(locked);
+            if (locked != null) {
+                requestGuard.release(locked);
+            }
             long duration = System.currentTimeMillis() - startTime;
             byte[] responseArray = responseWrapper.getContentAsByteArray();
             String responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");

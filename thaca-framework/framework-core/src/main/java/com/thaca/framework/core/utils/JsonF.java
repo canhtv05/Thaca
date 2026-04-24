@@ -4,11 +4,14 @@ import com.thaca.framework.core.utils.json.InstantToStringSerializer;
 import com.thaca.framework.core.utils.json.StringToInstantDeserializer;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.type.TypeFactory;
 
 @Slf4j
 public class JsonF {
@@ -58,6 +61,18 @@ public class JsonF {
             return objectMapper.readValue(str, type);
         } catch (Exception e) {
             log.error("[JsonF] jsonToObject()]:: ", e);
+            return null;
+        }
+    }
+
+    public static <T> T jsonToObject(String str, ParameterizedTypeReference<T> typeRef) {
+        if (str == null) return null;
+        try {
+            TypeFactory typeFactory = objectMapper.getTypeFactory();
+            JavaType javaType = typeFactory.constructType(typeRef.getType());
+            return objectMapper.readValue(str, javaType);
+        } catch (Exception e) {
+            log.error("[JsonF] jsonToObject(ParameterizedTypeReference):: ", e);
             return null;
         }
     }

@@ -1,19 +1,24 @@
 package com.thaca.framework.blocking.starter.services;
 
 import com.thaca.common.dtos.ErrorData;
+import com.thaca.framework.core.configs.FrameworkProperties;
+import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.dtos.ApiBody;
 import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
-import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.JsonF;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,42 +32,74 @@ import tools.jackson.core.type.TypeReference;
 public class InternalApiServiceClient {
 
     private final RestTemplate restTemplate;
+    private final FrameworkProperties frameworkProperties;
 
-    /**
-     * Call API nội bộ chuẩn ApiPayload (Chỉ hỗ trợ POST)
-     *
-     * @param url          Đường dẫn API
-     * @param requestData  Dữ liệu nghiệp vụ (sẽ được bọc vào ApiPayload.body.data)
-     * @param responseType Kiểu dữ liệu trả về mong muốn
-     * @param <T>          Kiểu của Request Data
-     * @param <R>          Kiểu của Response
-     * @return Dữ liệu trả về từ API
-     */
     public <T, R> R post(String url, T requestData, ParameterizedTypeReference<R> responseType) {
-        log.info("[InternalApiClient] POST Request to URL: {}", url);
-
-        // 1. Build ApiHeader chuẩn Internal
-        ApiHeader header = ApiHeader.builder()
-            .channel(ChannelType.INTERNAL.name())
-            .username(SecurityUtils.getCurrentUsername())
-            .timestamp(System.currentTimeMillis())
+        ApiHeader contextHeader = FwContextHeader.get();
+        if (contextHeader == null) {
+            contextHeader = ApiHeader.builder().build();
+        }
+        ApiBody<T> body = ApiBody.<T>builder()
+            .transId(MDC.get("transId"))
+            .status("OK")
+            .data(requestData != null ? requestData : (T) new HashMap<>())
             .build();
+        ApiPayload<T> payload = ApiPayload.<T>builder().header(contextHeader).body(body).build();
 
-        // 2. Build ApiBody kèm transId từ MDC
-        ApiBody<T> body = ApiBody.<T>builder().transId(MDC.get("transId")).status("OK").data(requestData).build();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("X-Internal-Call", "true");
+        String apiKey = StringUtils.defaultIfBlank(
+            contextHeader.getApiKey(),
+            frameworkProperties.getHttpClient().getApiKey()
+        );
+        httpHeaders.set(HttpHeaders.AUTHORIZATION, "Basic " + apiKey);
 
-        // 3. Đóng gói vào ApiPayload
-        ApiPayload<T> payload = ApiPayload.<T>builder().header(header).body(body).build();
+        org.springframework.web.context.request.ServletRequestAttributes attributes =
+            (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+        if (attributes != null) {
+            jakarta.servlet.http.HttpServletRequest currentRequest = attributes.getRequest();
+            String cookieHeader = currentRequest.getHeader(HttpHeaders.COOKIE);
+            if (StringUtils.isNotBlank(cookieHeader)) {
+                httpHeaders.add(HttpHeaders.COOKIE, cookieHeader);
+            }
+            String authHeader = currentRequest.getHeader(HttpHeaders.AUTHORIZATION);
+            if (StringUtils.isNotBlank(authHeader) && authHeader.startsWith("Bearer ")) {
+                httpHeaders.add(HttpHeaders.AUTHORIZATION, authHeader);
+            }
+            String userAgent = currentRequest.getHeader(HttpHeaders.USER_AGENT);
+            if (StringUtils.isNotBlank(userAgent)) {
+                httpHeaders.set(HttpHeaders.USER_AGENT, userAgent);
+            }
+        }
 
         try {
-            // 4. Thực hiện call
-            ResponseEntity<R> response = restTemplate.exchange(
+            ResponseEntity<ApiPayload<R>> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
-                new HttpEntity<>(payload),
-                responseType
+                new HttpEntity<>(payload, httpHeaders),
+                new ParameterizedTypeReference<>() {}
             );
-            return response.getBody();
+
+            List<String> setCookieHeaders = response.getHeaders().get(HttpHeaders.SET_COOKIE);
+            if (setCookieHeaders != null && !setCookieHeaders.isEmpty()) {
+                org.springframework.web.context.request.ServletRequestAttributes respAttributes =
+                    (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+                if (respAttributes != null) {
+                    jakarta.servlet.http.HttpServletResponse currentResponse = respAttributes.getResponse();
+                    if (currentResponse != null) {
+                        for (String cookie : setCookieHeaders) {
+                            currentResponse.addHeader(HttpHeaders.SET_COOKIE, cookie);
+                        }
+                    }
+                }
+            }
+
+            ApiPayload<R> responsePayload = response.getBody();
+            if (responsePayload != null && responsePayload.getBody() != null) {
+                String rawJson = JsonF.toJson(responsePayload.getBody().getData());
+                return JsonF.jsonToObject(rawJson, responseType);
+            }
+            return null;
         } catch (HttpStatusCodeException ex) {
             String responseBodyAsString = ex.getResponseBodyAsString(StandardCharsets.UTF_8);
             if (!responseBodyAsString.isEmpty()) {

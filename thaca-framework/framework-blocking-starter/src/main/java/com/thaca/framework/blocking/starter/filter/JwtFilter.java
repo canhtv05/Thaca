@@ -1,6 +1,7 @@
 package com.thaca.framework.blocking.starter.filter;
 
 import com.thaca.common.dtos.TokenPair;
+import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.servlet.FilterChain;
@@ -35,8 +36,14 @@ public class JwtFilter extends OncePerRequestFilter {
         String jwt = resolveToken(request);
         if (StringUtils.hasText(jwt)) {
             try {
-                Authentication authentication = jwtUtils.getBasicAuthentication(jwt);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                TokenStatus status = jwtUtils.validateToken(jwt);
+                if (TokenStatus.VALID.equals(status)) {
+                    Authentication authentication = jwtUtils.getBasicAuthentication(jwt);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    log.debug("[JwtFilter] token validation failed: {}", status);
+                    SecurityContextHolder.clearContext();
+                }
             } catch (Exception e) {
                 log.debug("[JwtFilter] authentication failed", e);
                 SecurityContextHolder.clearContext();

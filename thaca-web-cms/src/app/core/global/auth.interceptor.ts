@@ -53,12 +53,9 @@ export const authInterceptor: HttpInterceptorFn = (
       switch (error.status) {
         case 401:
           authService.logout();
-          router.navigate(['/login']);
+          router.navigateByUrl('/login');
           toastrService.error(message, title);
-          return throwError(() => {
-            authService.logout();
-            return error;
-          });
+          return throwError(() => error);
         case 403:
           router.navigate(['/403']);
           toastrService.warning(message, title);

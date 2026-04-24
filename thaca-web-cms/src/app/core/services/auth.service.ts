@@ -34,7 +34,10 @@ export class AuthService {
 
   async getUserProfile(force = false): Promise<IApiPayload<IAuthUserDTO>> {
     if (currentUser() && !force) {
-      return currentUser()!;
+      return { body: currentUser() } as any;
+    }
+    if (isInitialAuthChecked() && !force) {
+      return { body: { status: 'FAILED' } } as any;
     }
     if (this.profileRequest && !force) {
       return this.profileRequest;
@@ -59,6 +62,7 @@ export class AuthService {
 
   logout() {
     currentUser.set(null);
+    isInitialAuthChecked.set(false);
     this.profileRequest = null;
   }
 }
