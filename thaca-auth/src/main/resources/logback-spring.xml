@@ -1,10 +1,11 @@
 <configuration scan="true">
+  <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="unknown-service"/>
 
   <!-- Console appender -->
   <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>
-        [%d{yyyy-MM-dd HH:mm:ss.SSS}] [traceId=%X{traceId}, spanId=%X{spanId}, transId=%X{transId}] %msg%n
+        [%d{yyyy-MM-dd HH:mm:ss.SSS}] [${appName}] [traceId=%X{traceId}, spanId=%X{spanId}, transId=%X{transId}] %msg%n
       </pattern>
       <charset>UTF-8</charset>
     </encoder>
@@ -20,7 +21,7 @@
     </rollingPolicy>
     <encoder>
       <pattern>
-        [%d{yyyy-MM-dd HH:mm:ss.SSS}] [traceId=%X{traceId}, spanId=%X{spanId}, transId=%X{transId}] %msg%n
+        [%d{yyyy-MM-dd HH:mm:ss.SSS}] [${appName}] [traceId=%X{traceId}, spanId=%X{spanId}, transId=%X{transId}] %msg%n
       </pattern>
       <charset>UTF-8</charset>
     </encoder>
