@@ -1,3 +1,9 @@
+<div align="center">
+  <a href="README.md"><b>README</b></a> | 
+  <a href="THACA_FRAMEWORK_GUIDE.md"><b>FRAMEWORK GUIDE</b></a> | 
+  <a href="CONTRIBUTING.md"><b>CONTRIBUTING</b></a>
+</div>
+
 # 🌟 Thaca Project - Hệ Thống Quản Trị & Xác Thực Tập Trung
 
 Chào mừng bạn đến với **Thaca**, một hệ sinh thái được xây dựng trên nền tảng Spring Boot hiện đại, tập trung vào tính bảo mật, khả năng mở rộng và trải nghiệm người dùng cao cấp.
