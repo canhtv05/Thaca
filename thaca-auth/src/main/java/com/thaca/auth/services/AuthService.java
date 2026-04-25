@@ -2,8 +2,8 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
-import com.thaca.auth.dtos.DeviceInfo;
-import com.thaca.auth.dtos.GeoInfo;
+import com.thaca.auth.dtos.DeviceInfoDTO;
+import com.thaca.auth.dtos.GeoInfoDTO;
 import com.thaca.auth.dtos.LoginHistoryDTO;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.dtos.res.VerifyTokenRes;
@@ -363,8 +363,8 @@ public class AuthService {
                 .map(h -> StringUtils.trimToNull(h.getDeviceId()))
                 .orElse(null);
 
-            GeoInfo geo = commonService.lookup(ip);
-            DeviceInfo device = commonService.parse(ua);
+            GeoInfoDTO geo = commonService.lookup(ip);
+            DeviceInfoDTO device = commonService.parse(ua);
             boolean isNewDevice = isNewDevice(userDTO.getId(), isCms, deviceId, status);
 
             LoginHistory history = LoginHistory.builder()

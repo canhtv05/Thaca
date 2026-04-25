@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GeoInfo {
+public class GeoInfoDTO {
 
     private String country;
     private String countryIsoCode;
@@ -21,8 +21,8 @@ public class GeoInfo {
     private Boolean isTor;
     private Integer riskScore;
 
-    public static GeoInfo unknown() {
-        return GeoInfo.builder()
+    public static GeoInfoDTO unknown() {
+        return GeoInfoDTO.builder()
             .country("unknown")
             .countryIsoCode("unknown")
             .city("unknown")

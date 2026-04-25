@@ -2,8 +2,8 @@ package com.thaca.auth.services;
 
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.CityResponse;
-import com.thaca.auth.dtos.DeviceInfo;
-import com.thaca.auth.dtos.GeoInfo;
+import com.thaca.auth.dtos.DeviceInfoDTO;
+import com.thaca.auth.dtos.GeoInfoDTO;
 import com.thaca.auth.enums.DeviceType;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
@@ -28,12 +28,12 @@ public class CommonService {
         this.anonymousReader = anonymousReader;
     }
 
-    public DeviceInfo parse(String userAgentString) {
-        if (userAgentString == null) return DeviceInfo.unknown();
+    public DeviceInfoDTO parse(String userAgentString) {
+        if (userAgentString == null) return DeviceInfoDTO.unknown();
 
         Client client = parser.parse(userAgentString);
 
-        return DeviceInfo.builder()
+        return DeviceInfoDTO.builder()
             .browser(client.userAgent.family + " " + client.userAgent.major)
             .os(client.os.family + " " + client.os.major)
             .device(client.device.family)
@@ -57,10 +57,10 @@ public class CommonService {
         return request.getRemoteAddr();
     }
 
-    public GeoInfo lookup(String ipAddress) {
+    public GeoInfoDTO lookup(String ipAddress) {
         try {
             InetAddress ip = InetAddress.getByName(ipAddress);
-            GeoInfo.GeoInfoBuilder builder = GeoInfo.builder();
+            GeoInfoDTO.GeoInfoDTOBuilder builder = GeoInfoDTO.builder();
 
             // 1. Get Location Info
             if (cityReader != null) {
@@ -108,10 +108,10 @@ public class CommonService {
 
             builder.riskScore(score);
 
-            GeoInfo result = builder.build();
-            return result.getCountry() != null ? result : GeoInfo.unknown();
+            GeoInfoDTO result = builder.build();
+            return result.getCountry() != null ? result : GeoInfoDTO.unknown();
         } catch (Exception e) {
-            return GeoInfo.unknown();
+            return GeoInfoDTO.unknown();
         }
     }
 }

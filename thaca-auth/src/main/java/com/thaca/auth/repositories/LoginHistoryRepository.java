@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LoginHistoryRepository
-    extends JpaRepository<LoginHistory, String>, JpaSpecificationExecutor<LoginHistory>
+    extends JpaRepository<LoginHistory, Long>, JpaSpecificationExecutor<LoginHistory>
 {
     boolean existsByUser_IdAndDeviceIdAndStatus(Long userId, String deviceId, LoginStatus status);
 

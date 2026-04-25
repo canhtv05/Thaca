@@ -8,15 +8,15 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeviceInfo {
+public class DeviceInfoDTO {
 
     private String browser;
     private String os;
     private String device;
     private DeviceType deviceType;
 
-    public static DeviceInfo unknown() {
-        return DeviceInfo.builder()
+    public static DeviceInfoDTO unknown() {
+        return DeviceInfoDTO.builder()
             .browser("unknown")
             .device("unknown")
             .deviceType(DeviceType.UNKNOWN)

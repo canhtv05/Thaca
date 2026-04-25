@@ -21,7 +21,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginHistoryDTO {
 
-    private String id;
+    private Long id;
     private Long userId;
     private String username;
     private String ipAddress;

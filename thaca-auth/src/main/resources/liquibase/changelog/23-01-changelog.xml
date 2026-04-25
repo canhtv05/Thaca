@@ -11,7 +11,7 @@
       <not><tableExists tableName="login_history" schemaName="auth"/></not>
     </preConditions>
     <createTable schemaName="auth" tableName="login_history">
-      <column name="id" type="VARCHAR(50)">
+      <column name="id" type="BIGINT">
         <constraints nullable="false" primaryKey="true" primaryKeyName="pk_login_history"/>
       </column>
       <column name="system_user_id" type="BIGINT"/>
@@ -278,14 +278,26 @@
                              referencedTableSchemaName="auth"/>
   </changeSet>
 
-  <changeSet id="1776913763345-19" author="CanhPC">
+  <changeSet id="26-04-001" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sequenceExists sequenceName="thaca_seq" schemaName="auth"/>
+      <not><sequenceExists sequenceName="user_seq" schemaName="auth"/></not>
     </preConditions>
-    <dropSequence schemaName="auth" sequenceName="thaca_seq"/>
+    <createSequence sequenceName="user_seq" schemaName="auth" startValue="1000" incrementBy="1"/>
   </changeSet>
 
-  <!-- ═══ Seed Data ═══════════════════════════════════════════════════════ -->
+  <changeSet id="26-04-002" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><sequenceExists sequenceName="system_user_seq" schemaName="auth"/></not>
+    </preConditions>
+    <createSequence sequenceName="system_user_seq" schemaName="auth" startValue="1000" incrementBy="1"/>
+  </changeSet>
+
+  <changeSet id="26-04-003" author="CanhPC">
+    <preConditions onFail="MARK_RAN">
+      <not><sequenceExists sequenceName="user_login_seq" schemaName="auth"/></not>
+    </preConditions>
+    <createSequence sequenceName="user_login_seq" schemaName="auth" startValue="1" incrementBy="1"/>
+  </changeSet>
 
   <changeSet id="load-data-permissions" author="CanhPC">
     <preConditions onFail="MARK_RAN">

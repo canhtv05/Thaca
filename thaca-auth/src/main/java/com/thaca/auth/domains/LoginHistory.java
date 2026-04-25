@@ -21,9 +21,9 @@ import lombok.Setter;
 public class LoginHistory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", length = 50, nullable = false, unique = true)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_login_seq")
+    @SequenceGenerator(name = "user_login_seq", allocationSize = 1)
+    private Long id;
 
     @Column(name = "username", length = 50)
     private String username;
