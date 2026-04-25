@@ -2,6 +2,8 @@ package com.thaca.cms.clients;
 
 import com.thaca.cms.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.AuthUserDTO;
+import com.thaca.common.dtos.internal.PermissionDTO;
+import com.thaca.common.dtos.internal.RoleDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
@@ -40,10 +42,20 @@ public class AuthClient {
     }
 
     @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.HANDLE)
-    public SearchResponse<UserDTO> search(SearchRequest<UserDTO> criteria) {
+    public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> search) {
+        return internalApiClient.post(authBaseUrl + "/cms/users/search", search, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_SEARCH_ROLES, type = ModeType.HANDLE)
+    public SearchResponse<RoleDTO> searchRoles(SearchRequest<RoleDTO> search) {
+        return internalApiClient.post(authBaseUrl + "/cms/roles/search", search, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_SEARCH_ROLES, type = ModeType.HANDLE)
+    public SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> search) {
         return internalApiClient.post(
-            authBaseUrl + "/cms/users/search",
-            criteria,
+            authBaseUrl + "/cms/permissions/search",
+            search,
             new ParameterizedTypeReference<>() {}
         );
     }

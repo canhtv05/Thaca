@@ -7,14 +7,12 @@ import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
-public class RolePermissionMappingService {
+public class RolePermissionService {
 
     private final RoleRepository roleRepository;
     private final RedisCacheService redisService;
@@ -28,9 +26,8 @@ public class RolePermissionMappingService {
         }
     }
 
-    public void syncRoleToRedis(Role role) {
+    private void syncRoleToRedis(Role role) {
         List<String> permissions = role.getPermissions().stream().map(Permission::getCode).collect(Collectors.toList());
-
         String key = REDIS_ROLE_PERM_PREFIX + role.getCode();
         redisService.put(key, permissions);
     }

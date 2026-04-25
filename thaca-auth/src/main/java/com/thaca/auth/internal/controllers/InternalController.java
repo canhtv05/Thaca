@@ -2,7 +2,10 @@ package com.thaca.auth.internal.controllers;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
+import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.AuthUserDTO;
+import com.thaca.common.dtos.internal.PermissionDTO;
+import com.thaca.common.dtos.internal.RoleDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
@@ -35,32 +38,46 @@ public class InternalController {
     }
 
     @PostMapping("/cms/sign-in")
-    @FwRequest(name = ServiceMethod.CMS_AUTHENTICATE, type = RequestType.INTERNAL)
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_AUTHENTICATE, type = RequestType.INTERNAL)
     public ResponseEntity<AuthenticateRes> signIn(LoginReq loginReq) {
         return ResponseEntity.ok(fwApiProcess.process(loginReq));
     }
 
     @PostMapping("/cms/profile")
-    @FwRequest(name = ServiceMethod.CMS_GET_PROFILE, type = RequestType.INTERNAL)
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_PROFILE, type = RequestType.INTERNAL)
     public ResponseEntity<AuthUserDTO> getProfile() {
         return ResponseEntity.ok(fwApiProcess.process(null));
     }
 
     @PostMapping("/cms/users/search")
-    @FwRequest(name = ServiceMethod.CMS_SEARCH_USERS, type = RequestType.INTERNAL)
-    public ResponseEntity<SearchResponse<UserDTO>> search(SearchRequest<UserDTO> criteria) {
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_USERS, type = RequestType.INTERNAL)
+    public ResponseEntity<SearchResponse<UserDTO>> searchUsers(SearchRequest<UserDTO> criteria) {
         return ResponseEntity.ok(fwApiProcess.process(criteria));
     }
 
+    @PostMapping("/cms/roles/search")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_ROLES, type = RequestType.INTERNAL)
+    public ResponseEntity<SearchResponse<RoleDTO>> searchRoles(SearchRequest<RoleDTO> criteria) {
+        return ResponseEntity.ok(fwApiProcess.process(criteria));
+    }
+
+    @PostMapping("/cms/roles/search")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_PERMISSIONS, type = RequestType.INTERNAL)
+    public ResponseEntity<SearchResponse<PermissionDTO>> searchPermissions(SearchRequest<PermissionDTO> criteria) {
+        return ResponseEntity.ok(fwApiProcess.process(criteria));
+    }
+
+    // làm sau
     @PostMapping("/cms/users/lock")
-    @FwRequest(name = ServiceMethod.CMS_LOCK_USER, type = RequestType.INTERNAL)
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_LOCK_USER, type = RequestType.INTERNAL)
     public ResponseEntity<Void> lockUser(Long id) {
         fwApiProcess.process(id);
         return ResponseEntity.ok().build();
     }
 
+    // làm sau
     @PostMapping("/cms/users/unlock")
-    @FwRequest(name = ServiceMethod.CMS_UNLOCK_USER, type = RequestType.INTERNAL)
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_UNLOCK_USER, type = RequestType.INTERNAL)
     public ResponseEntity<Void> unlockUser(Long id) {
         fwApiProcess.process(id);
         return ResponseEntity.ok().build();

@@ -29,9 +29,6 @@ public class Role extends BaseEntityAudit {
     @Column(name = "description")
     private String description;
 
-    //    @ManyToMany(mappedBy = "roles")
-    //    private Set<SystemCredential> systemCredentials;
-
     @JsonIgnore
     @ManyToMany
     @JoinTable(
@@ -40,5 +37,5 @@ public class Role extends BaseEntityAudit {
         inverseJoinColumns = { @JoinColumn(name = "permission_code", referencedColumnName = "code") }
     )
     @Builder.Default
-    private Set<Permission> permissions = new HashSet<Permission>();
+    private Set<Permission> permissions = new HashSet<>();
 }

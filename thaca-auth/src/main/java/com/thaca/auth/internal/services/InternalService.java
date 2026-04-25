@@ -1,13 +1,21 @@
 package com.thaca.auth.internal.services;
 
-import com.thaca.auth.constants.ServiceMethod;
+import com.thaca.auth.domains.Permission;
 import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.SystemUser;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.mappers.PermissionMapper;
+import com.thaca.auth.mappers.RoleMapper;
+import com.thaca.auth.mappers.UserMapper;
+import com.thaca.auth.repositories.PermissionRepository;
+import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.UserRepository;
+import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.AuthUserDTO;
+import com.thaca.common.dtos.internal.PermissionDTO;
+import com.thaca.common.dtos.internal.RoleDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 // import com.thaca.auth.services.KafkaProducerService;
 import com.thaca.common.dtos.internal.VerifyEmailTokenDTO;
@@ -21,6 +29,8 @@ import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.DateUtils;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +52,14 @@ public class InternalService {
 
     private final UserRepository userRepository;
     private final SystemCredentialRepository systemCredentialRepository;
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
 
     // private final KafkaProducerService kafkaProducerService;
     // private final RedisCacheService redisService;
     // private final SessionStore sessionStore;
 
-    @FwMode(name = ServiceMethod.INTERNAL_ACTIVE_USER, type = ModeType.VALIDATE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_ACTIVE_USER, type = ModeType.VALIDATE)
     public void validateActiveUserByUserName(VerifyEmailTokenDTO request) {
         if (request.email().contains("+")) {
             throw new FwException(ErrorMessage.EMAIL_INVALID);
@@ -55,7 +67,7 @@ public class InternalService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.INTERNAL_ACTIVE_USER, type = ModeType.HANDLE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_ACTIVE_USER, type = ModeType.HANDLE)
     public VerifyEmailTokenDTO activeUserByUserName(VerifyEmailTokenDTO request) {
         User user = userRepository
             .findByUsername(request.username())
@@ -79,7 +91,7 @@ public class InternalService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_GET_PROFILE, type = ModeType.HANDLE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_PROFILE, type = ModeType.HANDLE)
     public AuthUserDTO getSystemProfile() {
         String username = SecurityUtils.getCurrentUsername();
         return systemCredentialRepository
@@ -101,35 +113,53 @@ public class InternalService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.HANDLE)
-    public SearchResponse<UserDTO> search(SearchRequest<UserDTO> request) {
-        Specification<User> spec = createSpecification(request);
+    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_USERS, type = ModeType.HANDLE)
+    public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> request) {
+        Specification<User> spec = createUserSpecification(request);
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "createdAt"));
         return new SearchResponse<>(
-            users.getContent().stream().map(this::toUserDTO).collect(Collectors.toList()),
+            users
+                .getContent()
+                .stream()
+                .map(u -> UserMapper.fromEntityWithCms(u, true))
+                .collect(Collectors.toList()),
             PaginationResponse.of(users)
         );
     }
 
-    private UserDTO toUserDTO(User user) {
-        if (user == null) {
-            return null;
-        }
-        return UserDTO.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .isActivated(user.getIsActivated())
-            .isLocked(user.getIsLocked())
-            .createdAt(DateUtils.dateToString(user.getCreatedAt()))
-            .updatedAt(DateUtils.dateToString(user.getUpdatedAt()))
-            .createdBy(user.getCreatedBy())
-            .updatedBy(user.getUpdatedBy())
-            .build();
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_ROLES, type = ModeType.HANDLE)
+    public SearchResponse<RoleDTO> searchRoles(SearchRequest<RoleDTO> request) {
+        Specification<Role> spec = createRoleSpecification(request);
+        Page<Role> roles = roleRepository.findAll(spec, request.getPage().toPageable());
+        return new SearchResponse<>(
+            roles.getContent().stream().map(RoleMapper::fromEntity).collect(Collectors.toList()),
+            PaginationResponse.of(roles)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_PERMISSIONS, type = ModeType.HANDLE)
+    public SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> request) {
+        Specification<Permission> spec = createPermissonSpecification(request);
+        Page<Permission> permissions = permissionRepository.findAll(spec, request.getPage().toPageable());
+        return new SearchResponse<>(
+            permissions.getContent().stream().map(PermissionMapper::fromEntity).collect(Collectors.toList()),
+            PaginationResponse.of(permissions)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_USER_BY_ID, type = ModeType.HANDLE)
+    public UserDTO findById(Long id) {
+        return userRepository
+            .findById(id)
+            .map(u -> UserMapper.fromEntityWithCms(u, true))
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_LOCK_USER, type = ModeType.HANDLE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_USER, type = ModeType.HANDLE)
     public void lockUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
         user.setIsLocked(true);
@@ -137,14 +167,14 @@ public class InternalService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_UNLOCK_USER, type = ModeType.HANDLE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_UNLOCK_USER, type = ModeType.HANDLE)
     public void unlockUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
         user.setIsLocked(false);
         userRepository.save(user);
     }
 
-    private Specification<User> createSpecification(SearchRequest<UserDTO> req) {
+    private Specification<User> createUserSpecification(SearchRequest<UserDTO> req) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (req.getFilter() != null) {
@@ -162,6 +192,39 @@ public class InternalService {
                 }
                 if (Objects.nonNull(filter.getIsLocked())) {
                     predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private Specification<Role> createRoleSpecification(SearchRequest<RoleDTO> req) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (req.getFilter() != null) {
+                RoleDTO filter = req.getFilter();
+                if (StringUtils.isNotBlank(filter.getCode())) {
+                    predicates.add(cb.like(cb.lower(root.get("code")), "%" + filter.getCode().toLowerCase() + "%"));
+                }
+                if (StringUtils.isNotBlank(filter.getName())) {
+                    predicates.add(cb.like(cb.lower(root.get("name")), "%" + filter.getName().toLowerCase() + "%"));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private Specification<Permission> createPermissonSpecification(SearchRequest<PermissionDTO> req) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (req.getFilter() != null) {
+                PermissionDTO filter = req.getFilter();
+                if (StringUtils.isNotBlank(filter.getCode())) {
+                    predicates.add(cb.like(cb.lower(root.get("code")), "%" + filter.getCode().toLowerCase() + "%"));
+                }
+                if (StringUtils.isNotBlank(filter.getRoleCode())) {
+                    Join<Permission, Role> roleJoin = root.join("roles", JoinType.INNER);
+                    predicates.add(cb.equal(roleJoin.get("code"), filter.getRoleCode()));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));

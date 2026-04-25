@@ -7,12 +7,14 @@ import com.thaca.auth.dtos.req.ForgotPasswordReq;
 import com.thaca.auth.dtos.req.ResetPasswordReq;
 import com.thaca.auth.dtos.req.VerifyOTPReq;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.mappers.UserMapper;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.EmailRule;
 import com.thaca.auth.validators.rules.FullnameRule;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
+import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.UserDTO;
 // import com.thaca.common.constants.EventConstants;
 // import com.thaca.common.dtos.events.UserCreationEvent;
@@ -27,7 +29,6 @@ import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.DateUtils;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +38,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 @RequiredArgsConstructor
@@ -52,15 +51,6 @@ public class UserService {
     // private final KafkaProducerService kafkaProducerService;
     private final RedisCacheService redisService;
     private final SessionStore sessionStore;
-
-    @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_GET_USER_BY_ID, type = ModeType.HANDLE)
-    public UserDTO findById(Long id) {
-        return userRepository
-            .findById(id)
-            .map(this::toUserDTO)
-            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-    }
 
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.VALIDATE)
     public void validateCreateUser(UserDTO request) {
@@ -117,7 +107,7 @@ public class UserService {
         // HashSet<>(roleRepository.findAllByCodeIn(request.getRoles())));
         // }
         userRepository.save(user);
-        return toUserDTO(user);
+        return UserMapper.fromEntity(user);
     }
 
     @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.VALIDATE)
@@ -255,29 +245,4 @@ public class UserService {
     // }
     // kafkaProducerService.sendAndWait(topic, user.getUsername(), payload);
     // }
-
-    public UserDTO toUserDTO(User user) {
-        return toUserDTO(user, false);
-    }
-
-    public UserDTO toUserDTO(User user, boolean isCms) {
-        if (user == null) {
-            return null;
-        }
-        UserDTO dto = UserDTO.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .isActivated(user.getIsActivated())
-            .isLocked(user.getIsLocked())
-            .build();
-
-        if (isCms) {
-            dto.setCreatedAt(DateUtils.dateToString(user.getCreatedAt()));
-            dto.setUpdatedAt(DateUtils.dateToString(user.getUpdatedAt()));
-            dto.setCreatedBy(user.getCreatedBy());
-            dto.setUpdatedBy(user.getUpdatedBy());
-        }
-        return dto;
-    }
 }

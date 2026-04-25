@@ -6,6 +6,8 @@ public class ServiceMethod {
 
     public static final String CMS_AUTHENTICATE = "cms.authenticate";
     public static final String CMS_SEARCH_USERS = "cms.searchUsers";
+    public static final String CMS_SEARCH_ROLES = "cms.searchRoles";
+    public static final String CMS_SEARCH_PERMISSIONS = "cms.searchPermissions";
     public static final String CMS_GET_USER_BY_ID = "cms.getUserById";
     public static final String CMS_CREATE_USER = "cms.createUser";
     public static final String CMS_UPDATE_USER = "cms.updateUser";

@@ -10,6 +10,7 @@ import com.thaca.auth.dtos.res.VerifyTokenRes;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.enums.LoginStatus;
 import com.thaca.auth.internal.services.InternalService;
+import com.thaca.auth.mappers.UserMapper;
 import com.thaca.auth.repositories.LoginHistoryRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
@@ -18,6 +19,7 @@ import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.PasswordRule;
+import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.dtos.internal.AuthUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
@@ -131,7 +133,7 @@ public class AuthService {
         }
     }
 
-    @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.VALIDATE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_AUTHENTICATE, type = ModeType.VALIDATE)
     public void validateAuthenticateCms(
         LoginReq loginReq,
         HttpServletRequest httpServletRequest,
@@ -141,7 +143,7 @@ public class AuthService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.HANDLE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_AUTHENTICATE, type = ModeType.HANDLE)
     public AuthenticateRes authenticateCms(LoginReq loginReq) {
         HttpServletRequest httpServletRequest = (
             (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
@@ -197,6 +199,15 @@ public class AuthService {
                 );
             throw e;
         }
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.USER_GET_USER_PROFILE, type = ModeType.HANDLE)
+    public UserDTO findById(Long id) {
+        return userRepository
+            .findById(id)
+            .map(UserMapper::fromEntity)
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.VALIDATE)
