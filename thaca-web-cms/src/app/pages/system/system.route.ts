@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { SystemSettingsComponent } from './system-settings.component';
 import { I18nResolver } from '../../core/i18n/i18n.resolver';
+import { RolePermissionComponent } from './role-permission/role-permission.component';
 
 export const systemRoutes: Routes = [
   {
@@ -35,6 +36,12 @@ export const systemRoutes: Routes = [
   {
     path: 'admins',
     component: SystemSettingsComponent,
+    resolve: { i18n: I18nResolver },
+    data: { i18n: ['common'] },
+  },
+  {
+    path: 'role-permission',
+    component: RolePermissionComponent,
     resolve: { i18n: I18nResolver },
     data: { i18n: ['common'] },
   },

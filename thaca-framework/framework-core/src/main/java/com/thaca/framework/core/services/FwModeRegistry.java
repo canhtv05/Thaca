@@ -2,6 +2,8 @@ package com.thaca.framework.core.services;
 
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.enums.ModeType;
+import com.thaca.framework.core.exceptions.FwException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +31,16 @@ public class FwModeRegistry implements BeanPostProcessor {
             FwMode fwMode = AnnotationUtils.findAnnotation(method, FwMode.class);
             if (fwMode != null && ModeType.HANDLE.equals(fwMode.type())) {
                 String name = fwMode.name();
+                if (handleMethods.containsKey(name)) {
+                    throw new IllegalStateException(
+                        "Duplicate HANDLE FwMode name detected: '" +
+                            name +
+                            "' in " +
+                            targetClass.getName() +
+                            "." +
+                            method.getName()
+                    );
+                }
                 Function<Object, Object> handler = req -> {
                     try {
                         method.setAccessible(true);
@@ -36,6 +48,12 @@ public class FwModeRegistry implements BeanPostProcessor {
                             return method.invoke(bean);
                         }
                         return method.invoke(bean, req);
+                    } catch (InvocationTargetException ex) {
+                        Throwable target = ex.getTargetException();
+                        if (target instanceof RuntimeException runtimeException) {
+                            throw runtimeException;
+                        }
+                        throw new RuntimeException(target);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

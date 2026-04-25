@@ -51,7 +51,7 @@ public class AuthClient {
         return internalApiClient.post(authBaseUrl + "/cms/roles/search", search, new ParameterizedTypeReference<>() {});
     }
 
-    @FwMode(name = ServiceMethod.CMS_SEARCH_ROLES, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_PERMISSIONS, type = ModeType.HANDLE)
     public SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> search) {
         return internalApiClient.post(
             authBaseUrl + "/cms/permissions/search",

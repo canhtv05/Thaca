@@ -2,8 +2,6 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
-import com.thaca.auth.dtos.DeviceInfoDTO;
-import com.thaca.auth.dtos.GeoInfoDTO;
 import com.thaca.auth.dtos.LoginHistoryDTO;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.dtos.res.VerifyTokenRes;
@@ -13,7 +11,6 @@ import com.thaca.auth.internal.services.InternalService;
 import com.thaca.auth.mappers.UserMapper;
 import com.thaca.auth.repositories.LoginHistoryRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
-import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.security.jwt.TokenProvider;
@@ -35,7 +32,6 @@ import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
-import com.thaca.framework.core.context.FwContextBody;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.enums.ModeType;
@@ -47,7 +43,6 @@ import com.thaca.framework.core.utils.JsonF;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -78,21 +73,16 @@ public class AuthService {
     private final CookieUtils cookieUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final SystemUserRepository systemUserRepository;
     private final SystemCredentialRepository systemCredentialRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final JwtUtils jwtUtils;
-    private final CommonService commonService;
     private final LoginHistoryRepository loginHistoryRepository;
     private final InternalService internalService;
+    private final LoginHistoryService loginHistoryService;
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
-    public void validateAuthenticate(
-        LoginReq loginReq,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
+    public void validateAuthenticate(LoginReq loginReq) {
         if (StringUtils.isEmpty(loginReq.getUsername())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
@@ -104,10 +94,10 @@ public class AuthService {
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.HANDLE)
     public AuthenticateRes authenticate(LoginReq loginReq) {
         HttpServletRequest httpServletRequest = (
-            (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()
+            (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
         ).getRequest();
         HttpServletResponse httpServletResponse = (
-            (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()
+            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes()
         ).getResponse();
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             loginReq.getUsername(),
@@ -121,7 +111,7 @@ public class AuthService {
             userRepository
                 .findByUsername(loginReq.getUsername())
                 .ifPresent(user ->
-                    saveLoginHistory(
+                    loginHistoryService.saveLoginHistory(
                         AuthUserDTO.builder().id(user.getId()).build(),
                         httpServletRequest,
                         LoginStatus.FAILED,
@@ -129,17 +119,16 @@ public class AuthService {
                         false
                     )
                 );
+            if (e instanceof FwException) {
+                throw (FwException) e;
+            }
             throw e;
         }
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_AUTHENTICATE, type = ModeType.VALIDATE)
-    public void validateAuthenticateCms(
-        LoginReq loginReq,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
-        validateAuthenticate(loginReq, httpServletRequest, httpServletResponse);
+    public void validateAuthenticateCms(LoginReq loginReq) {
+        validateAuthenticate(loginReq);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -189,7 +178,7 @@ public class AuthService {
             systemCredentialRepository
                 .findByUsername(loginReq.getUsername())
                 .ifPresent(sc ->
-                    saveLoginHistory(
+                    loginHistoryService.saveLoginHistory(
                         AuthUserDTO.builder().id(sc.getSystemUser().getId()).build(),
                         httpServletRequest,
                         LoginStatus.FAILED,
@@ -197,6 +186,9 @@ public class AuthService {
                         true
                     )
                 );
+            if (e instanceof FwException) {
+                throw (FwException) e;
+            }
             throw e;
         }
     }
@@ -354,76 +346,8 @@ public class AuthService {
         }
 
         AuthUserDTO userInfoDTO = isCms ? internalService.getSystemProfile() : getUserProfile(loginReq.getUsername());
-
-        saveLoginHistory(userInfoDTO, httpServletRequest, LoginStatus.SUCCESS, null, isCms);
-
+        loginHistoryService.saveLoginHistory(userInfoDTO, httpServletRequest, LoginStatus.SUCCESS, null, isCms);
         return new AuthenticateRes(true, userInfoDTO);
-    }
-
-    private void saveLoginHistory(
-        AuthUserDTO userDTO,
-        HttpServletRequest request,
-        LoginStatus status,
-        String failureReason,
-        boolean isCms
-    ) {
-        try {
-            String ip = commonService.extractIpAddress(request);
-            String ua = request.getHeader("User-Agent");
-            String deviceId = Optional.ofNullable(FwContextHeader.get())
-                .map(h -> StringUtils.trimToNull(h.getDeviceId()))
-                .orElse(null);
-
-            GeoInfoDTO geo = commonService.lookup(ip);
-            DeviceInfoDTO device = commonService.parse(ua);
-            boolean isNewDevice = isNewDevice(userDTO.getId(), isCms, deviceId, status);
-
-            LoginHistory history = LoginHistory.builder()
-                .username(userDTO.getUsername())
-                .user(isCms ? null : userRepository.getReferenceById(userDTO.getId()))
-                .systemUser(isCms ? systemUserRepository.getReferenceById(userDTO.getId()) : null)
-                .ipAddress(ip)
-                .userAgent(ua)
-                .browser(device.getBrowser())
-                .os(device.getOs())
-                .deviceType(device.getDeviceType())
-                .country(geo.getCountry())
-                .countryIsoCode(geo.getCountryIsoCode())
-                .city(geo.getCity())
-                .latitude(geo.getLatitude())
-                .longitude(geo.getLongitude())
-                .approxLocation(geo.getApproxLocation())
-                .isVpn(geo.getIsVpn())
-                .riskScore(geo.getRiskScore())
-                .channel(
-                    ChannelType.valueOf(
-                        StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name())
-                    )
-                )
-                .status(status)
-                .failureReason(failureReason)
-                .loginTime(Instant.now())
-                .requestId(FwContextBody.get().getTransId())
-                .deviceId(deviceId)
-                .isNewDevice(isNewDevice)
-                .build();
-
-            loginHistoryRepository.save(history);
-        } catch (Exception ignored) {}
-    }
-
-    private boolean isNewDevice(Long userId, boolean isCms, String deviceId, LoginStatus status) {
-        if (userId == null || StringUtils.isBlank(deviceId) || !LoginStatus.SUCCESS.equals(status)) {
-            return false;
-        }
-        if (isCms) {
-            return !loginHistoryRepository.existsBySystemUser_IdAndDeviceIdAndStatus(
-                userId,
-                deviceId,
-                LoginStatus.SUCCESS
-            );
-        }
-        return !loginHistoryRepository.existsByUser_IdAndDeviceIdAndStatus(userId, deviceId, LoginStatus.SUCCESS);
     }
 
     public static String getRoleString(SystemCredential sc, List<GrantedAuthority> authorities) {
@@ -439,11 +363,6 @@ public class AuthService {
             List<Predicate> predicates = new ArrayList<>();
             if (req.getFilter() != null) {
                 LoginHistoryDTO filter = req.getFilter();
-                if (StringUtils.isNotBlank(filter.getUsername())) {
-                    predicates.add(
-                        cb.like(cb.lower(root.get("username")), "%" + filter.getUsername().toLowerCase() + "%")
-                    );
-                }
                 if (filter.getIsCms() != null) {
                     if (filter.getIsCms()) {
                         predicates.add(cb.isNotNull(root.get("systemUser")));

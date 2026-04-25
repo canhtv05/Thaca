@@ -149,7 +149,7 @@ export class Sidebar implements OnInit, OnDestroy {
               {
                 label: 'menu.role_permission',
                 icon: 'pi pi-key',
-                routerLink: ['/user-management/permissions'],
+                routerLink: ['/system/role-permission'],
               },
             ],
           },

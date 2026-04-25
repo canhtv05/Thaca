@@ -25,9 +25,6 @@ public class LoginHistory {
     @SequenceGenerator(name = "user_login_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "username", length = 50)
-    private String username;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;

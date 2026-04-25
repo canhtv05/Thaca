@@ -15,7 +15,6 @@
         <constraints nullable="false" primaryKey="true" primaryKeyName="pk_login_history"/>
       </column>
       <column name="system_user_id" type="BIGINT"/>
-      <column name="username" type="VARCHAR(50)"/>
       <column name="device_id" type="VARCHAR(255)"/>
       <column name="country_iso_code" type="VARCHAR(20)"/>
       <column name="user_id" type="BIGINT"/>
