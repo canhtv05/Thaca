@@ -167,7 +167,10 @@ export class DataTableComponent {
     }
   }
 
-  refresh() {
+  refresh(filter?: any) {
+    if (filter !== undefined) {
+      this.externalFilter = filter;
+    }
     this.load({ ...this.pagination(), page: 0 });
   }
 

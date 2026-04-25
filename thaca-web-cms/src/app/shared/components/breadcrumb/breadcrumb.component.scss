@@ -1,44 +1,152 @@
 :host {
+  display: block;
   width: 100%;
 }
 
-:host ::ng-deep .p-breadcrumb {
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+// ── Root container ────────────────────────────────────────────────────────────
+.bc-root {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 6px;
 }
 
-:host ::ng-deep .p-breadcrumb::-webkit-scrollbar {
-  display: none;
+// ── Header row (title + back btn) ─────────────────────────────────────────────
+.bc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-:host ::ng-deep .p-breadcrumb.p-component {
-  background: transparent !important;
-  padding: 0px !important;
-  color: var(--foreground) !important;
-  font-size: var(--text-xs) !important;
+// ── Title ─────────────────────────────────────────────────────────────────────
+// Cùng line-height với breadcrumb để không bị nhảy spacing
+.bc-title {
+  font-size: 0.95rem; // không quá to so với content phía dưới
+  font-weight: 700;
+  color: var(--foreground);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  margin: 0;
 }
 
-:host ::ng-deep .p-icon {
-  width: 12px !important;
-  height: 12px !important;
-}
-
+// ── Back button ───────────────────────────────────────────────────────────────
 .bc-back-btn {
-  width: 24px;
-  height: 24px;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
   border: none;
   border-radius: var(--radius-sm);
-  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
   color: var(--primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  font-size: 10px;
+  transition: background 0.15s;
 
   &:hover {
-    background: color-mix(in oklch, var(--primary) 16%, transparent);
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
   }
+}
+
+// ── PrimeNG breadcrumb reset ──────────────────────────────────────────────────
+:host ::ng-deep .p-breadcrumb {
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  ul {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  // Separator — dấu > nhỏ, mờ
+  .p-breadcrumb-separator {
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+    color: var(--muted-foreground);
+    opacity: 0.35;
+    font-size: 9px;
+    user-select: none;
+    line-height: 1;
+  }
+
+  // Home icon
+  .p-breadcrumb-home a {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted-foreground);
+    opacity: 0.55;
+    text-decoration: none;
+    transition:
+      opacity 0.15s,
+      color 0.15s;
+    line-height: 1;
+
+    &:hover {
+      opacity: 0.9;
+      color: var(--primary);
+    }
+  }
+
+  .p-icon {
+    width: 12px !important;
+    height: 12px !important;
+  }
+}
+
+// ── Crumb items ───────────────────────────────────────────────────────────────
+.bc-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    color 0.15s,
+    opacity 0.15s;
+}
+
+.bc-crumb-icon {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+// Clickable parent items
+.bc-crumb--link {
+  color: var(--muted-foreground);
+  opacity: 0.65;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+    color: var(--primary);
+  }
+}
+
+// Current page — đậm hơn, không phải link
+.bc-crumb--active {
+  color: var(--foreground);
+  opacity: 0.75;
+  font-weight: 600;
+  cursor: default;
 }

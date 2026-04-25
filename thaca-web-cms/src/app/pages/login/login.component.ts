@@ -15,7 +15,7 @@ import { ValidationMessageComponent } from '../../shared/components/validation-m
 import { AuthService } from '../../core/services/auth.service';
 import { ILoginReq } from '../../core/models/auth.model';
 import { TranslateModule } from '@ngx-translate/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ThacaButtonComponent } from '../../shared/components/thaca-button/thaca-button.component';
 
 @Component({
@@ -37,7 +37,8 @@ import { ThacaButtonComponent } from '../../shared/components/thaca-button/thaca
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
-  private router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   readonly APP_CONFIG_ICONS = APP_CONFIG_ICONS;
 
   form = this.fb.group({
@@ -51,8 +52,16 @@ export class LoginComponent {
       return;
     }
     const res = await this.authService.login(this.form.value as ILoginReq);
+    const returnUrl =
+      this.route.snapshot.queryParamMap.get('returnUrl') ||
+      this.route.snapshot.queryParamMap.get('returnByUrl');
+
     if (res.body.status === 'OK') {
-      this.router.navigate(['/home']);
+      this.authService.getUserProfile().then((res) => {
+        if (res.body.status === 'OK') {
+          this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : '/home');
+        }
+      });
     }
   }
 }

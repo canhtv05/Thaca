@@ -107,7 +107,7 @@ export class UserListComponent {
   };
 
   onSearch() {
-    this.table.refresh();
+    this.table.refresh(this.filter());
   }
 
   handleAction(event: { actionKey: string; row: any }) {

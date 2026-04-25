@@ -1,0 +1,9 @@
+::ng-deep .p-dialog .p-dialog-close-button {
+  background-color: transparent !important;
+  color: var(--foreground) !important;
+  border-radius: 50%;
+}
+
+::ng-deep .p-dialog .p-dialog-close-button:hover {
+  background-color: color-mix(in srgb, var(--foreground) 10%, transparent) !important;
+}

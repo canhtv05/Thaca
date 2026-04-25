@@ -17,6 +17,7 @@ export const AuthGuard: CanActivateChildFn = async (_, state) => {
 
   if (!currentUser()) {
     void router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    void authService.logout();
     return false;
   }
   return true;

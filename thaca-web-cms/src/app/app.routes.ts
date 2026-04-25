@@ -2,8 +2,6 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './pages/login/login.component';
 import { ForbiddenComponent } from './pages/403/403.component';
 import { NotFoundComponent } from './pages/404/404.component';
-import { importProvidersFrom } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
 import { I18nResolver } from './core/i18n/i18n.resolver';
 import { GuestGuard } from './core/guards/guest.guard';
 

@@ -168,6 +168,6 @@ export class LoginHistoryComponent {
     } else {
       this.filter.update((f) => ({ ...f, fromDate: null, toDate: null }));
     }
-    this.table.refresh();
+    this.table.refresh(this.filter());
   }
 }

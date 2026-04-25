@@ -1,5 +1,5 @@
 @if (headerActions) {
-  <div class="flex justify-end items-center mb-4">
+  <div class="flex justify-end items-center gap-4 [&>div]:w-full [&>div]:flex-1 card mb-5 p-4">
     <ng-container *ngTemplateOutlet="headerActions"></ng-container>
   </div>
 }
@@ -120,7 +120,7 @@
           >
             <div class="dt-empty-inner">
               <div class="dt-empty-icon">
-                <i class="pi pi-inbox text-muted-foreground opacity-50 text-md"></i>
+                <i class="pi pi-inbox text-foreground opacity-50 text-md"></i>
               </div>
               <p class="dt-empty-title">{{ 'common.no_data_found' | translate }}</p>
               <p class="dt-empty-sub">{{ 'common.try_changing_filters_or_search' | translate }}</p>

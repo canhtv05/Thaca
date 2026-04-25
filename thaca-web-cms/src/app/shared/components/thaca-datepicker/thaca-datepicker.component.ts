@@ -330,6 +330,9 @@ export class ThacaDatepickerComponent implements ControlValueAccessor {
     if (this.disabled || this.readonly) return;
     this.value.set(null);
     this.onChange(null);
+    setTimeout(() => {
+      this.value.set(null);
+    });
     this.onTouched();
   }
 

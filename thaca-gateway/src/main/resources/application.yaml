@@ -11,7 +11,7 @@ logging:
 
 spring:
   application:
-    name: gateway
+    name: thaca-gateway
 
   profiles:
     include: framework
