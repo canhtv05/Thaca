@@ -61,7 +61,7 @@ public class InternalController {
         return ResponseEntity.ok(fwApiProcess.process(criteria));
     }
 
-    @PostMapping("/cms/roles/search")
+    @PostMapping("/cms/permissions/search")
     @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_PERMISSIONS, type = RequestType.INTERNAL)
     public ResponseEntity<SearchResponse<PermissionDTO>> searchPermissions(SearchRequest<PermissionDTO> criteria) {
         return ResponseEntity.ok(fwApiProcess.process(criteria));
