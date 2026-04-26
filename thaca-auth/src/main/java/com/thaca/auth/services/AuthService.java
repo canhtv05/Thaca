@@ -11,11 +11,13 @@ import com.thaca.auth.internal.services.InternalService;
 import com.thaca.auth.mappers.UserMapper;
 import com.thaca.auth.repositories.LoginHistoryRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
+import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.PasswordRule;
+import com.thaca.auth.validators.rules.UsernameRule;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.dtos.internal.AuthUserDTO;
@@ -43,6 +45,7 @@ import com.thaca.framework.core.utils.JsonF;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +62,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -67,13 +69,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class AuthService {
 
     private final CookieUtils cookieUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final SystemCredentialRepository systemCredentialRepository;
+    private final SystemUserRepository systemUserRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final JwtUtils jwtUtils;
@@ -83,11 +85,8 @@ public class AuthService {
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
     public void validateAuthenticate(LoginReq loginReq) {
-        if (StringUtils.isEmpty(loginReq.getUsername())) {
-            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
-        }
-        Validator<UserDTO> validator = new Validator<>(List.of(new PasswordRule<>()));
-        validator.validate(UserDTO.builder().password(loginReq.getPassword()).build());
+        Validator<UserDTO> validator = new Validator<>(List.of(new UsernameRule<>(), new PasswordRule<>()));
+        validator.validate(UserDTO.builder().username(loginReq.getUsername()).password(loginReq.getPassword()).build());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -144,19 +143,38 @@ public class AuthService {
             SystemCredential sc = systemCredentialRepository
                 .findByUsername(loginReq.getUsername())
                 .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-            if (!passwordEncoder.matches(loginReq.getPassword(), sc.getPassword())) {
-                throw new FwException(ErrorMessage.PASSWORD_INVALID);
-            }
             SystemUser su = sc.getSystemUser();
-            if (su.isLocked()) {
+            if (su.getLockedUntil() != null && su.getLockedUntil().isAfter(Instant.now())) {
+                throw new FwException(ErrorMessage.USER_TEMPORARILY_LOCKED);
+            }
+            if (Boolean.TRUE.equals(su.getIsLocked())) {
                 throw new FwException(ErrorMessage.USER_LOCKED);
             }
-            if (!su.getIsActivated()) {
+            if (!Boolean.TRUE.equals(su.getIsActivated())) {
                 throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
             }
+
+            if (!passwordEncoder.matches(loginReq.getPassword(), sc.getPassword())) {
+                int attempts = loginHistoryService.recordFailedLoginAttempt(su.getId());
+                if (attempts >= 5) {
+                    throw new FwException(ErrorMessage.USER_TEMPORARILY_LOCKED);
+                }
+                int remaining = 5 - attempts;
+                Map<String, Object> errorData = new HashMap<>();
+                errorData.put("remainingAttempts", remaining);
+
+                throw new FwException(ErrorMessage.PASSWORD_INVALID_WITH_RETRY, errorData);
+            }
+
+            if (su.getFailedLoginAttempts() != null && su.getFailedLoginAttempts() > 0) {
+                su.setFailedLoginAttempts(0);
+                su.setLockedUntil(null);
+                systemUserRepository.save(su);
+            }
+
             List<GrantedAuthority> authorities = new ArrayList<>();
             String rolesString;
-            if (su.isSuperAdmin()) {
+            if (Boolean.TRUE.equals(su.getIsSuperAdmin())) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
             } else {
@@ -168,7 +186,7 @@ public class AuthService {
                 authorities,
                 rolesString,
                 StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
-                su.isSuperAdmin(),
+                su.getIsSuperAdmin(),
                 true
             );
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
@@ -339,7 +357,6 @@ public class AuthService {
         Authentication authentication,
         boolean isCms
     ) {
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = tokenProvider.createToken(authentication, httpServletResponse);
         if (StringUtils.isBlank(token)) {
             throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);

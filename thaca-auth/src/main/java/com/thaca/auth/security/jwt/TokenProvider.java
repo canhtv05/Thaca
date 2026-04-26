@@ -296,7 +296,7 @@ public class TokenProvider {
         } else if (userObj instanceof SystemCredential sc) {
             username = sc.getUsername();
             password = sc.getPassword();
-            isSuperAdmin = sc.getSystemUser().isSuperAdmin();
+            isSuperAdmin = sc.getSystemUser().getIsSuperAdmin();
             if (isSuperAdmin) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));

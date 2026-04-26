@@ -1,5 +1,5 @@
-code;name;description;created_by;created_at;updated_by;updated_at
-SUPER_ADMIN;ROLE_SUPER_ADMIN;Role cho siêu admin;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-ADMIN;ROLE_ADMIN;Role cho admin;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-MANAGER;ROLE_MANAGER;Role cho quản lý;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
-USER;ROLE_USER;Role cho user;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+code;description
+SUPER_ADMIN;Role cho siêu admin
+ADMIN;Role cho admin
+MANAGER;Role cho quản lý
+USER;Role cho user

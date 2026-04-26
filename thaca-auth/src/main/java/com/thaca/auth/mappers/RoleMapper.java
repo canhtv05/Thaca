@@ -7,10 +7,6 @@ public class RoleMapper {
 
     public static RoleDTO fromEntity(Role entity) {
         if (entity == null) return null;
-        return RoleDTO.builder()
-            .code(entity.getCode())
-            .name(entity.getName())
-            .description(entity.getDescription())
-            .build();
+        return RoleDTO.builder().code(entity.getCode()).description(entity.getDescription()).build();
     }
 }

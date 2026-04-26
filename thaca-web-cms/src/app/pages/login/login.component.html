@@ -17,7 +17,11 @@
             [required]="true"
             formControlName="username"
           />
-          <validation-message [control]="form.get('username')"></validation-message>
+          <validation-message
+            [control]="form.get('username')"
+            i18nPrefix="auth.validation"
+            fieldName="username"
+          ></validation-message>
         </div>
         <div class="flex flex-col justify-center w-full">
           <thaca-input
@@ -28,7 +32,11 @@
             type="password"
             formControlName="password"
           />
-          <validation-message [control]="form.get('password')"></validation-message>
+          <validation-message
+            [control]="form.get('password')"
+            i18nPrefix="auth.validation"
+            fieldName="password"
+          ></validation-message>
         </div>
       </div>
       <div id="options-section" class="flex items-center justify-end py-2">

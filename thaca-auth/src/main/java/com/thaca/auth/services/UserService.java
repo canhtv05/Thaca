@@ -14,7 +14,6 @@ import com.thaca.auth.validators.rules.EmailRule;
 import com.thaca.auth.validators.rules.FullnameRule;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
-import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.UserDTO;
 // import com.thaca.common.constants.EventConstants;
 // import com.thaca.common.dtos.events.UserCreationEvent;
@@ -28,8 +27,8 @@ import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
-import com.thaca.framework.core.utils.DateUtils;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +53,6 @@ public class UserService {
 
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.VALIDATE)
     public void validateCreateUser(UserDTO request) {
-        boolean isAdmin = SecurityUtils.isSuperAdmin();
         Validator<UserDTO> validator = new Validator<>(
             List.of(new EmailRule<>(), new FullnameRule<>(), new PasswordRule<>(), new UsernameRule<>())
         );

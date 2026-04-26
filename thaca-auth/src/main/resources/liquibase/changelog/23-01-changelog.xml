@@ -8,7 +8,9 @@
 
   <changeSet id="1776913763345-1" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><tableExists tableName="login_history" schemaName="auth"/></not>
+      <not>
+        <tableExists tableName="login_history" schemaName="auth"/>
+      </not>
     </preConditions>
     <createTable schemaName="auth" tableName="login_history">
       <column name="id" type="BIGINT">
@@ -44,16 +46,14 @@
 
   <changeSet id="1776913763345-2" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><tableExists tableName="permissions" schemaName="auth"/></not>
+      <not>
+        <tableExists tableName="permissions" schemaName="auth"/>
+      </not>
     </preConditions>
     <createTable schemaName="auth" tableName="permissions">
       <column name="code" type="VARCHAR(50)">
         <constraints nullable="false" primaryKey="true" primaryKeyName="pk_permissions"/>
       </column>
-      <column name="created_at" type="DATETIME"/>
-      <column name="updated_at" type="DATETIME"/>
-      <column name="created_by" type="VARCHAR(255)"/>
-      <column name="updated_by" type="VARCHAR(255)"/>
       <column name="description" type="VARCHAR(255)">
         <constraints nullable="false"/>
       </column>
@@ -62,7 +62,9 @@
 
   <changeSet id="1776913763345-3" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><tableExists tableName="role_permissions" schemaName="auth"/></not>
+      <not>
+        <tableExists tableName="role_permissions" schemaName="auth"/>
+      </not>
     </preConditions>
     <createTable schemaName="auth" tableName="role_permissions">
       <column name="permission_code" type="VARCHAR(50)">
@@ -76,26 +78,25 @@
 
   <changeSet id="1776913763345-4" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><tableExists tableName="roles" schemaName="auth"/></not>
+      <not>
+        <tableExists tableName="roles" schemaName="auth"/>
+      </not>
     </preConditions>
     <createTable schemaName="auth" tableName="roles">
       <column name="code" type="VARCHAR(50)">
         <constraints nullable="false" primaryKey="true" primaryKeyName="pk_roles"/>
       </column>
-      <column name="created_at" type="DATETIME"/>
-      <column name="updated_at" type="DATETIME"/>
-      <column name="created_by" type="VARCHAR(255)"/>
-      <column name="updated_by" type="VARCHAR(255)"/>
-      <column name="name" type="VARCHAR(255)">
+      <column name="description" type="VARCHAR(255)">
         <constraints nullable="false"/>
       </column>
-      <column name="description" type="VARCHAR(255)"/>
     </createTable>
   </changeSet>
 
   <changeSet id="1776913763345-5" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><tableExists tableName="system_credential_roles" schemaName="auth"/></not>
+      <not>
+        <tableExists tableName="system_credential_roles" schemaName="auth"/>
+      </not>
     </preConditions>
     <createTable schemaName="auth" tableName="system_credential_roles">
       <column name="credential_id" type="VARCHAR(255)">
@@ -109,7 +110,9 @@
 
   <changeSet id="1776913763345-6" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><tableExists tableName="system_credentials" schemaName="auth"/></not>
+      <not>
+        <tableExists tableName="system_credentials" schemaName="auth"/>
+      </not>
     </preConditions>
     <createTable schemaName="auth" tableName="system_credentials">
       <column name="username" type="VARCHAR(255)">
@@ -130,7 +133,9 @@
 
   <changeSet id="1776913763345-7" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><tableExists tableName="system_users" schemaName="auth"/></not>
+      <not>
+        <tableExists tableName="system_users" schemaName="auth"/>
+      </not>
     </preConditions>
     <createTable schemaName="auth" tableName="system_users">
       <column name="id" type="BIGINT">
@@ -150,6 +155,9 @@
       <column name="is_locked" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
+      <column name="avatar_url" type="TEXT"/>
+      <column name="locked_until" type="DATETIME"/>
+      <column name="failed_login_attempts" type="INT"/>
       <column name="is_super_admin" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
@@ -158,7 +166,9 @@
 
   <changeSet id="1776913763345-8" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><tableExists tableName="users" schemaName="auth"/></not>
+      <not>
+        <tableExists tableName="users" schemaName="auth"/>
+      </not>
     </preConditions>
     <createTable schemaName="auth" tableName="users">
       <column name="id" type="BIGINT">
@@ -189,7 +199,10 @@
 
   <changeSet id="1776913763345-9" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><uniqueConstraintExists tableName="system_credentials" constraintName="uc_system_credentials_system_user" schemaName="auth"/></not>
+      <not>
+        <uniqueConstraintExists tableName="system_credentials" constraintName="uc_system_credentials_system_user"
+                                schemaName="auth"/>
+      </not>
     </preConditions>
     <addUniqueConstraint columnNames="system_user_id" constraintName="uc_system_credentials_system_user"
                          schemaName="auth" tableName="system_credentials"/>
@@ -197,7 +210,9 @@
 
   <changeSet id="1776913763345-10" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><uniqueConstraintExists tableName="system_users" constraintName="uc_system_users_email" schemaName="auth"/></not>
+      <not>
+        <uniqueConstraintExists tableName="system_users" constraintName="uc_system_users_email" schemaName="auth"/>
+      </not>
     </preConditions>
     <addUniqueConstraint columnNames="email" constraintName="uc_system_users_email" schemaName="auth"
                          tableName="system_users"/>
@@ -205,21 +220,27 @@
 
   <changeSet id="1776913763345-11" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><uniqueConstraintExists tableName="users" constraintName="uc_users_email" schemaName="auth"/></not>
+      <not>
+        <uniqueConstraintExists tableName="users" constraintName="uc_users_email" schemaName="auth"/>
+      </not>
     </preConditions>
     <addUniqueConstraint columnNames="email" constraintName="uc_users_email" schemaName="auth" tableName="users"/>
   </changeSet>
 
   <changeSet id="1776913763345-12" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><uniqueConstraintExists tableName="users" constraintName="uc_users_username" schemaName="auth"/></not>
+      <not>
+        <uniqueConstraintExists tableName="users" constraintName="uc_users_username" schemaName="auth"/>
+      </not>
     </preConditions>
     <addUniqueConstraint columnNames="username" constraintName="uc_users_username" schemaName="auth" tableName="users"/>
   </changeSet>
 
   <changeSet id="1776913763345-13" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><foreignKeyConstraintExists foreignKeyName="FK_LOGIN_HISTORY_ON_USER" schemaName="auth"/></not>
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="FK_LOGIN_HISTORY_ON_USER" schemaName="auth"/>
+      </not>
     </preConditions>
     <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="login_history" baseTableSchemaName="auth"
                              constraintName="FK_LOGIN_HISTORY_ON_USER" referencedColumnNames="id"
@@ -231,7 +252,9 @@
 
   <changeSet id="1776913763345-14" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><foreignKeyConstraintExists foreignKeyName="FK_SYSTEM_CREDENTIALS_ON_SYSTEM_USER" schemaName="auth"/></not>
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="FK_SYSTEM_CREDENTIALS_ON_SYSTEM_USER" schemaName="auth"/>
+      </not>
     </preConditions>
     <addForeignKeyConstraint baseColumnNames="system_user_id" baseTableName="system_credentials"
                              baseTableSchemaName="auth" constraintName="FK_SYSTEM_CREDENTIALS_ON_SYSTEM_USER"
@@ -241,7 +264,9 @@
 
   <changeSet id="1776913763345-15" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><foreignKeyConstraintExists foreignKeyName="fk_rolper_on_permission" schemaName="auth"/></not>
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="fk_rolper_on_permission" schemaName="auth"/>
+      </not>
     </preConditions>
     <addForeignKeyConstraint baseColumnNames="permission_code" baseTableName="role_permissions"
                              baseTableSchemaName="auth" constraintName="fk_rolper_on_permission"
@@ -251,7 +276,9 @@
 
   <changeSet id="1776913763345-16" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><foreignKeyConstraintExists foreignKeyName="fk_rolper_on_role" schemaName="auth"/></not>
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="fk_rolper_on_role" schemaName="auth"/>
+      </not>
     </preConditions>
     <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="role_permissions" baseTableSchemaName="auth"
                              constraintName="fk_rolper_on_role" referencedColumnNames="code" referencedTableName="roles"
@@ -260,7 +287,9 @@
 
   <changeSet id="1776913763345-17" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><foreignKeyConstraintExists foreignKeyName="fk_syscrerol_on_role" schemaName="auth"/></not>
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="fk_syscrerol_on_role" schemaName="auth"/>
+      </not>
     </preConditions>
     <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="system_credential_roles"
                              baseTableSchemaName="auth" constraintName="fk_syscrerol_on_role"
@@ -269,7 +298,9 @@
 
   <changeSet id="1776913763345-18" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><foreignKeyConstraintExists foreignKeyName="fk_syscrerol_on_system_credential" schemaName="auth"/></not>
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="fk_syscrerol_on_system_credential" schemaName="auth"/>
+      </not>
     </preConditions>
     <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_roles"
                              baseTableSchemaName="auth" constraintName="fk_syscrerol_on_system_credential"
@@ -279,28 +310,35 @@
 
   <changeSet id="26-04-001" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><sequenceExists sequenceName="user_seq" schemaName="auth"/></not>
+      <not>
+        <sequenceExists sequenceName="user_seq" schemaName="auth"/>
+      </not>
     </preConditions>
     <createSequence sequenceName="user_seq" schemaName="auth" startValue="1000" incrementBy="1"/>
   </changeSet>
 
   <changeSet id="26-04-002" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><sequenceExists sequenceName="system_user_seq" schemaName="auth"/></not>
+      <not>
+        <sequenceExists sequenceName="system_user_seq" schemaName="auth"/>
+      </not>
     </preConditions>
     <createSequence sequenceName="system_user_seq" schemaName="auth" startValue="1000" incrementBy="1"/>
   </changeSet>
 
   <changeSet id="26-04-003" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <not><sequenceExists sequenceName="user_login_seq" schemaName="auth"/></not>
+      <not>
+        <sequenceExists sequenceName="user_login_seq" schemaName="auth"/>
+      </not>
     </preConditions>
     <createSequence sequenceName="user_login_seq" schemaName="auth" startValue="1" incrementBy="1"/>
   </changeSet>
 
   <changeSet id="load-data-permissions" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.permissions</sqlCheck>
+      <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                   FROM auth.permissions</sqlCheck>
     </preConditions>
     <loadData file="liquibase/data/permission.csv" separator=";" tableName="permissions" schemaName="auth">
       <column name="code" type="string"/>
@@ -314,22 +352,19 @@
 
   <changeSet id="load-data-roles" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.roles</sqlCheck>
+      <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                   FROM auth.roles</sqlCheck>
     </preConditions>
     <loadData file="liquibase/data/role.csv" separator=";" tableName="roles" schemaName="auth">
       <column name="code" type="string"/>
-      <column name="name" type="string"/>
       <column name="description" type="string"/>
-      <column name="created_by" type="string"/>
-      <column name="created_at" type="timestamp"/>
-      <column name="updated_by" type="string"/>
-      <column name="updated_at" type="timestamp"/>
     </loadData>
   </changeSet>
 
   <changeSet id="load-data-users" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.users</sqlCheck>
+      <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                   FROM auth.users</sqlCheck>
     </preConditions>
     <loadData file="liquibase/data/user.csv" separator=";" tableName="users" schemaName="auth">
       <column name="id" type="numeric"/>
@@ -347,7 +382,8 @@
 
   <changeSet id="load-data-role-permissions" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.role_permissions</sqlCheck>
+      <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                   FROM auth.role_permissions</sqlCheck>
     </preConditions>
     <loadData file="liquibase/data/role_permissions.csv" separator=";" tableName="role_permissions" schemaName="auth">
       <column name="role_code" type="string"/>
@@ -357,10 +393,12 @@
 
   <changeSet id="load-data-system-users" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_users</sqlCheck>
+      <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                   FROM auth.system_users</sqlCheck>
     </preConditions>
     <loadData file="liquibase/data/system_user.csv" separator=";" tableName="system_users" schemaName="auth">
       <column name="id" type="numeric"/>
+      <column name="avatar_url" type="text"/>
       <column name="fullname" type="string"/>
       <column name="email" type="string"/>
       <column name="is_activated" type="boolean"/>
@@ -375,9 +413,11 @@
 
   <changeSet id="load-data-system-credentials" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_credentials</sqlCheck>
+      <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                   FROM auth.system_credentials</sqlCheck>
     </preConditions>
-    <loadData file="liquibase/data/system_credential.csv" separator=";" tableName="system_credentials" schemaName="auth">
+    <loadData file="liquibase/data/system_credential.csv" separator=";" tableName="system_credentials"
+              schemaName="auth">
       <column name="username" type="string"/>
       <column name="password" type="string"/>
       <column name="system_user_id" type="numeric"/>
@@ -390,9 +430,11 @@
 
   <changeSet id="load-data-system-credential-roles" author="CanhPC">
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM auth.system_credential_roles</sqlCheck>
+      <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                   FROM auth.system_credential_roles</sqlCheck>
     </preConditions>
-    <loadData file="liquibase/data/system_credential_roles.csv" separator=";" tableName="system_credential_roles" schemaName="auth">
+    <loadData file="liquibase/data/system_credential_roles.csv" separator=";" tableName="system_credential_roles"
+              schemaName="auth">
       <column name="credential_id" type="string"/>
       <column name="role_code" type="string"/>
     </loadData>

@@ -23,5 +23,6 @@ public class AuthUserDTO {
     private Boolean isActivated;
     private Boolean isLocked;
     private Boolean isSuperAdmin;
+    private String avatarUrl;
     private Set<String> roles;
 }

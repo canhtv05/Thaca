@@ -28,7 +28,6 @@ import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
-import com.thaca.framework.core.utils.DateUtils;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -104,8 +103,9 @@ public class InternalService {
                     .email(su.getEmail())
                     .fullname(su.getFullname())
                     .isActivated(su.getIsActivated())
-                    .isLocked(su.isLocked())
-                    .isSuperAdmin(su.isSuperAdmin())
+                    .isLocked(su.getIsLocked())
+                    .isSuperAdmin(su.getIsSuperAdmin())
+                    .avatarUrl(su.getAvatarUrl())
                     .roles(sc.getRoles().stream().map(Role::getCode).collect(Collectors.toSet()))
                     .build();
             })
@@ -205,9 +205,6 @@ public class InternalService {
                 RoleDTO filter = req.getFilter();
                 if (StringUtils.isNotBlank(filter.getCode())) {
                     predicates.add(cb.like(cb.lower(root.get("code")), "%" + filter.getCode().toLowerCase() + "%"));
-                }
-                if (StringUtils.isNotBlank(filter.getName())) {
-                    predicates.add(cb.like(cb.lower(root.get("name")), "%" + filter.getName().toLowerCase() + "%"));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));

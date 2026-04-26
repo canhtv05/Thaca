@@ -1,7 +1,6 @@
 package com.thaca.auth.domains;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
@@ -15,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "permissions", schema = "auth")
-public class Permission extends BaseEntityAudit {
+public class Permission {
 
     @Id
     @Column(name = "code", length = 50, unique = true, nullable = false)

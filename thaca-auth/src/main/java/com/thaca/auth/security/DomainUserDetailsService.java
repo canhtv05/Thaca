@@ -66,9 +66,9 @@ public class DomainUserDetailsService implements UserDetailsService {
             SystemUser su = sc.getSystemUser();
             username = sc.getUsername();
             password = sc.getPassword();
-            isLocked = su.isLocked();
+            isLocked = su.getIsLocked();
             isActivated = su.getIsActivated();
-            isSuperAdmin = su.isSuperAdmin();
+            isSuperAdmin = su.getIsSuperAdmin();
 
             Set<Role> roles = sc.getRoles();
             if (isSuperAdmin) {

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thaca.common.dtos.ErrorData;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.validations.ErrorMessageRule;
+import com.thaca.framework.core.utils.CommonUtils;
+import java.util.Map;
 import lombok.*;
 
 @Getter
@@ -33,6 +35,26 @@ public class ApiBody<T> {
     }
 
     public static ApiBody<ErrorData> error(String transId, ErrorMessageRule error) {
+        return error(transId, error, null, null, null);
+    }
+
+    public static ApiBody<ErrorData> error(String transId, ErrorMessageRule error, Map<String, Object> data) {
+        return error(transId, error, null, null, data);
+    }
+
+    public static ApiBody<ErrorData> error(
+        String transId,
+        ErrorMessageRule error,
+        String customMessageVi,
+        String customMessageEn,
+        Map<String, Object> data
+    ) {
+        String msgVi = customMessageVi != null ? customMessageVi : error.messageVi();
+        String msgEn = customMessageEn != null ? customMessageEn : error.messageEn();
+
+        msgVi = CommonUtils.formatMessage(msgVi, data);
+        msgEn = CommonUtils.formatMessage(msgEn, data);
+
         return ApiBody.<ErrorData>builder()
             .transId(transId)
             .status("FAILED")
@@ -41,8 +63,9 @@ public class ApiBody<T> {
                     .code(error.code())
                     .titleVi(error.titleVi())
                     .titleEn(error.titleEn())
-                    .messageVi(error.messageVi())
-                    .messageEn(error.messageEn())
+                    .messageVi(msgVi)
+                    .messageEn(msgEn)
+                    .data(data)
                     .build()
             )
             .build();

@@ -22,7 +22,7 @@ export const authInterceptor: HttpInterceptorFn = (
   const authService = inject(AuthService);
   const toastrService = inject(ToastrService);
 
-  const skipLoading = req.context.get(SKIP_LOADING);
+  const skipLoading = req.context.get(SKIP_LOADING) || req.url.includes('/assets/');
 
   const authReq = req.clone({
     withCredentials: true,

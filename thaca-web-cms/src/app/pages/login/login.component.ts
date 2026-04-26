@@ -42,8 +42,24 @@ export class LoginComponent {
   readonly APP_CONFIG_ICONS = APP_CONFIG_ICONS;
 
   form = this.fb.group({
-    username: ['', [Validators.required]],
-    password: ['', [Validators.required]],
+    username: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(4),
+        Validators.maxLength(50),
+        Validators.pattern(/^[a-z0-9._-]+$/),
+      ],
+    ],
+    password: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.maxLength(100),
+        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&._-]).+$/),
+      ],
+    ],
   });
 
   async onSubmit(): Promise<void> {

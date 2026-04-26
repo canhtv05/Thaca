@@ -31,10 +31,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FwException.class)
     public ResponseEntity<ApiPayload<ErrorData>> handleFwException(FwException ex) {
         log.error("[GlobalExceptionHandler] FwException]:: ", ex);
-        if (ex.getErrorMessage().code().equalsIgnoreCase(CommonErrorMessage.UNAUTHORIZED.code())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiPayload.error(ex.getErrorMessage()));
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiPayload.error(ex.getErrorMessage()));
+        HttpStatus status = ex.getErrorMessage().code().equalsIgnoreCase(CommonErrorMessage.UNAUTHORIZED.code())
+            ? HttpStatus.UNAUTHORIZED
+            : HttpStatus.BAD_REQUEST;
+
+        return ResponseEntity.status(status).body(
+            ApiPayload.error(ex.getErrorMessage(), ex.getCustomMessageVi(), ex.getCustomMessageEn(), ex.getData())
+        );
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

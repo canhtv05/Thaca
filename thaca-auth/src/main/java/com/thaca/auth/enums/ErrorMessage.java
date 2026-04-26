@@ -14,10 +14,17 @@ public enum ErrorMessage implements ErrorMessageRule {
     ),
     PASSWORD_INVALID(
         "PASSWORD.INVALID",
-        "Mật khẩu không hợp lệ",
-        "Mật khẩu không hợp lệ",
-        "Password invalid",
-        "Password invalid"
+        "Tên đăng nhập hoặc mật khẩu không chính xác",
+        "Tên đăng nhập hoặc mật khẩu không chính xác",
+        "Username or password invalid",
+        "Username or password invalid"
+    ),
+    PASSWORD_INVALID_WITH_RETRY(
+        "PASSWORD.INVALID.WITH.RETRY",
+        "Mật khẩu không chính xác",
+        "Mật khẩu không chính xác. Bạn còn {{remainingAttempts}} lần thử.",
+        "Incorrect password",
+        "Incorrect password. You have {{remainingAttempts}} attempts left."
     ),
     USER_NOT_FOUND(
         "USER.NOT.FOUND",
@@ -25,6 +32,13 @@ public enum ErrorMessage implements ErrorMessageRule {
         "Tài khoản không tồn tại",
         "Account not found",
         "Account not found"
+    ),
+    USER_TEMPORARILY_LOCKED(
+        "USER.TEMPORARILY.LOCKED",
+        "Tài khoản đã bị khóa tạm thời.",
+        "Tài khoản của bạn đã bị khóa tạm thời do nhập sai mật khẩu quá nhiều lần.",
+        "Account temporarily locked.",
+        "Your account has been temporarily locked due to multiple failed login attempts."
     ),
     USER_LOCKED("USER.LOCKED", "Tài khoản đã bị khóa", "Tài khoản đã bị khóa", "Account locked", "Account locked"),
     USER_NOT_ACTIVATED(

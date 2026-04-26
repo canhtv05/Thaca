@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpContext, HttpClient } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { forkJoin, Observable, of, switchMap, tap } from 'rxjs';
 import { currentLang } from '../stores/app.store';
+import { SKIP_LOADING } from '../global/http-context';
 
 @Injectable({ providedIn: 'root' })
 export class I18nService {
@@ -40,7 +41,11 @@ export class I18nService {
     if (!toLoad.length) {
       return this.translate.use(lang);
     }
-    const requests = toLoad.map((file) => this.http.get(`/assets/i18n/${lang}/${file}.json`));
+    const requests = toLoad.map((file) =>
+      this.http.get(`/assets/i18n/${lang}/${file}.json`, {
+        context: new HttpContext().set(SKIP_LOADING, true),
+      }),
+    );
     return forkJoin(requests).pipe(
       tap((responses) => {
         const merged = Object.assign({}, ...responses);

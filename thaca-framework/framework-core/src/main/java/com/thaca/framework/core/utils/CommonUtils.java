@@ -13,6 +13,17 @@ import org.apache.commons.lang3.ObjectUtils;
 
 public class CommonUtils {
 
+    public static String formatMessage(String message, Map<String, Object> data) {
+        if (message == null || data == null || data.isEmpty()) {
+            return message;
+        }
+        String result = message;
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            result = result.replace("{{" + entry.getKey() + "}}", String.valueOf(entry.getValue()));
+        }
+        return result;
+    }
+
     private static final Pattern NON_ALPHANUMERIC_PATTERN = Pattern.compile("[^A-Za-z0-9]+");
 
     public static boolean isEmpty(Object... args) {

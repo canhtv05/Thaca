@@ -1,6 +1,12 @@
 package com.thaca.common.dtos;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thaca.common.validations.ErrorMessageRule;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorData implements ErrorMessageRule {
 
     private String code;
@@ -19,6 +26,22 @@ public class ErrorData implements ErrorMessageRule {
     private String titleEn;
     private String messageVi;
     private String messageEn;
+
+    @JsonIgnore
+    private Map<String, Object> data;
+
+    @JsonAnyGetter
+    public Map<String, Object> any() {
+        return data;
+    }
+
+    @JsonAnySetter
+    public void any(String key, Object value) {
+        if (this.data == null) {
+            this.data = new HashMap<>();
+        }
+        this.data.put(key, value);
+    }
 
     @Override
     public String code() {
