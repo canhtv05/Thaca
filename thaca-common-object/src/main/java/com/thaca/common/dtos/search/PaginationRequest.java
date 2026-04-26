@@ -21,7 +21,7 @@ public class PaginationRequest {
     private String sortOrder;
 
     private int safePage() {
-        return (page == null || page < 1) ? 0 : page - 1;
+        return (page == null || page < 0) ? 0 : page;
     }
 
     private int safeSize() {
@@ -29,19 +29,27 @@ public class PaginationRequest {
     }
 
     public Pageable toPageable() {
-        if (StringUtils.hasText(sortField) && StringUtils.hasText(sortOrder)) {
-            return PageRequest.of(safePage(), safeSize(), Sort.Direction.fromString(sortOrder), sortField);
-        }
-        return PageRequest.of(safePage(), safeSize());
+        return toPageable(null, null);
     }
 
     public Pageable toPageable(Sort.Direction defaultSort, String defaultField) {
-        if (StringUtils.hasText(sortField) && StringUtils.hasText(sortOrder)) {
-            return PageRequest.of(safePage(), safeSize(), Sort.Direction.fromString(sortOrder), sortField);
+        int p = safePage();
+        int s = safeSize();
+
+        if (StringUtils.hasText(sortField)) {
+            Sort.Direction direction = Sort.Direction.ASC;
+            if (StringUtils.hasText(sortOrder)) {
+                try {
+                    direction = Sort.Direction.fromString(sortOrder.toUpperCase());
+                } catch (Exception ignored) {}
+            }
+            return PageRequest.of(p, s, direction, sortField);
         }
+
         if (defaultSort != null && StringUtils.hasText(defaultField)) {
-            return PageRequest.of(safePage(), safeSize(), defaultSort, defaultField);
+            return PageRequest.of(p, s, defaultSort, defaultField);
         }
-        return PageRequest.of(safePage(), safeSize());
+
+        return PageRequest.of(p, s);
     }
 }

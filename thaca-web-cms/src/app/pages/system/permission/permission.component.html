@@ -8,7 +8,7 @@
           [(ngModel)]="filter().code"
           [placeholder]="'role_permission.permission.search_by_code' | translate"
           [label]="'role_permission.permission.code' | translate"
-          (keyup.enter)="onSearch()"
+          (onEnter)="onSearch()"
         />
         <thaca-button size="md" variant="primary" (clicked)="onSearch()">
           <span class="text-white"> {{ 'common.button.search' | translate }} </span>

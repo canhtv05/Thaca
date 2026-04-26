@@ -80,7 +80,7 @@ export class LoginHistoryComponent {
     rows: 10,
     showStt: true,
     columns: [
-      { field: 'loginTime', header: 'auth.loginTime', sortable: true, width: '180px' },
+      { field: 'loginTime', header: 'auth.loginTime', width: '180px' },
       { field: 'country', header: 'auth.country' },
       { field: 'city', header: 'auth.city' },
       { field: 'latitude', header: 'auth.latitude' },

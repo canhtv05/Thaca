@@ -53,7 +53,7 @@ public class RolePermissionService {
         } else {
             roleDescription = null;
         }
-        Specification<Permission> spec = createPermissonSpecification(request);
+        Specification<Permission> spec = createPermissionSpecification(request);
         Page<Permission> permissions = permissionRepository.findAll(spec, request.getPage().toPageable());
         List<PermissionDTO> content = permissions
             .getContent()
@@ -76,7 +76,7 @@ public class RolePermissionService {
         };
     }
 
-    private Specification<Permission> createPermissonSpecification(SearchRequest<PermissionDTO> req) {
+    private Specification<Permission> createPermissionSpecification(SearchRequest<PermissionDTO> req) {
         return (root, query, cb) -> {
             Join<Permission, Role> roleJoin;
             if (Permission.class.equals(query.getResultType())) {

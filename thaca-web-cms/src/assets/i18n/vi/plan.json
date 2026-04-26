@@ -1,13 +1,15 @@
 {
-  "title": "Quản lý Gói dịch vụ (Plan)",
-  "code": "Mã gói",
-  "name": "Tên gói",
-  "type": "Loại gói",
-  "max_users": "User tối đa",
-  "status": "Trạng thái",
-  "actions": {
-    "create": "Thêm gói mới",
-    "edit": "Chỉnh sửa gói",
-    "delete": "Xóa gói"
+  "tenant": {
+    "title": "Quản lý Gói dịch vụ (Plan)",
+    "code": "Mã gói",
+    "name": "Tên gói",
+    "type": "Loại gói",
+    "max_users": "User tối đa",
+    "status": "Trạng thái",
+    "actions": {
+      "create": "Thêm gói mới",
+      "edit": "Chỉnh sửa gói",
+      "delete": "Xóa gói"
+    }
   }
 }

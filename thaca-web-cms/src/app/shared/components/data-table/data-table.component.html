@@ -23,6 +23,7 @@
     }
 
     <p-table
+      #table
       [value]="data()"
       [columns]="displayColumns()"
       [lazy]="true"
@@ -30,7 +31,8 @@
       (onLazyLoad)="onLazyLoad($event)"
       [totalRecords]="totalRecords()"
       [loading]="false"
-      [rows]="pagination().size"
+      [rows]="config.rows || 10"
+      [defaultSortOrder]="-1"
       [paginator]="false"
       [scrollable]="true"
       scrollHeight="flex"

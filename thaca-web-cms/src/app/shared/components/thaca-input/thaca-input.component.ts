@@ -7,6 +7,8 @@ import {
   computed,
   Injector,
   inject,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -49,6 +51,7 @@ export class ThacaInputComponent implements ControlValueAccessor {
   @Input() label?: string;
   @Input() required?: boolean;
   @Input() id: string = `thaca-input-${Math.random().toString(36).substring(2, 15)}`;
+  @Output() onEnter = new EventEmitter<void>();
 
   value = signal<string>('');
   disabled = false;
@@ -93,6 +96,12 @@ export class ThacaInputComponent implements ControlValueAccessor {
     const input = event.target as HTMLInputElement;
     this.value.set(input.value);
     this.onChange(input.value);
+  }
+
+  onKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.onEnter.emit();
+    }
   }
 
   onBlur() {

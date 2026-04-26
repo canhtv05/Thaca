@@ -8,12 +8,12 @@ import {
   signal,
   computed,
   inject,
-  OnChanges,
-  SimpleChanges,
+  ChangeDetectorRef,
+  NgZone,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TableLazyLoadEvent, TableModule } from 'primeng/table';
+import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
@@ -21,6 +21,7 @@ import { IPaginationRequest, ISearchRequest, IApiPayload } from '../../../core/m
 import { GlobalHttp } from '../../../core/global/global-http';
 import { createBody, createHeader } from '../../../utils/common.utils';
 import { TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ViewChild } from '@angular/core';
 import {
   ThacaDropdownComponent,
   IDropdownOption,
@@ -81,8 +82,10 @@ export interface ITableConfig<T = any> {
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })
-export class DataTableComponent implements OnChanges {
+export class DataTableComponent {
   private translate = inject(TranslateService);
+  private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
   @Input({ required: true }) config!: ITableConfig;
   @Input() externalFilter: any = {};
 
@@ -105,14 +108,9 @@ export class DataTableComponent implements OnChanges {
     return cols;
   });
 
+  @ViewChild('table') pTable!: Table;
   @ContentChild('searchTemplate') searchTemplate?: TemplateRef<any>;
   @ContentChild('headerActions') headerActions?: TemplateRef<any>;
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['externalFilter'] && !changes['externalFilter'].firstChange) {
-      this.load({ ...this.pagination(), page: 0 });
-    }
-  }
 
   data = signal<any[]>([]);
   totalRecords = signal(0);
@@ -149,53 +147,83 @@ export class DataTableComponent implements OnChanges {
     return pages;
   });
 
-  constructor() {}
+  first = computed(() => this.pagination().page * this.pagination().size);
 
   async load(pageReq: IPaginationRequest) {
-    this.pagination.set(pageReq);
-    this.loading.set(true);
+    this.zone.run(async () => {
+      this.pagination.set(pageReq);
+      this.loading.set(true);
+      this.cdr.detectChanges();
 
-    const searchRequest: ISearchRequest<any> = {
-      filter: { ...this.config.defaultFilter, ...this.config.fixedFilter, ...this.externalFilter },
-      page: pageReq,
-    };
+      const searchRequest: ISearchRequest<any> = {
+        filter: {
+          ...this.config.defaultFilter,
+          ...this.config.fixedFilter,
+          ...this.externalFilter,
+        },
+        page: pageReq,
+      };
 
-    const payload: IApiPayload<ISearchRequest<any>> = {
-      header: createHeader(),
-      body: createBody(searchRequest),
-    };
+      const payload: IApiPayload<ISearchRequest<any>> = {
+        header: createHeader(),
+        body: createBody(searchRequest),
+      };
 
-    try {
-      const res = await GlobalHttp.post<IApiPayload<any>>(this.config.url, payload, {
-        skipLoading: true,
-      });
-      if (res.body.status === 'OK') {
-        this.data.set(res.body.data.data);
-        this.totalRecords.set(res.body.data.pagination.total);
-        this.onDataLoaded.emit(res.body.data.data);
+      try {
+        const res = await GlobalHttp.post<IApiPayload<any>>(this.config.url, payload, {
+          skipLoading: true,
+        });
+        if (res.body.status === 'OK') {
+          this.data.set(res.body.data.data);
+          this.totalRecords.set(res.body.data.pagination.total);
+          this.onDataLoaded.emit(res.body.data.data);
+        }
+      } finally {
+        this.loading.set(false);
+        this.cdr.detectChanges();
       }
-    } finally {
-      this.loading.set(false);
-    }
+    });
   }
 
   refresh(filter?: any) {
     if (filter !== undefined) {
       this.externalFilter = filter;
     }
-    this.load({ ...this.pagination(), page: 0 });
+    if (this.pTable) {
+      if (this.pTable.first === 0) {
+        this.onLazyLoad({
+          first: 0,
+          rows: this.pTable.rows,
+          sortField: this.pTable.sortField,
+          sortOrder: this.pTable.sortOrder,
+        });
+      } else {
+        this.pTable.first = 0;
+      }
+    } else {
+      this.load({ ...this.pagination(), page: 0 });
+    }
   }
 
   goToPage(page: number) {
     const cur = this.pagination();
     if (page < 0 || page >= this.totalPages() || page === cur.page) return;
-    this.load({ ...cur, page });
+    if (this.pTable) {
+      this.pTable.first = page * cur.size; // This will trigger onLazyLoad
+    } else {
+      this.load({ ...cur, page });
+    }
   }
 
   onPageSizeChange(size: number) {
     const cur = this.pagination();
     if (size === cur.size) return;
-    this.load({ ...cur, page: 0, size });
+    if (this.pTable) {
+      this.pTable.rows = size;
+      this.pTable.reset(); // Trigger onLazyLoad
+    } else {
+      this.load({ ...cur, page: 0, size });
+    }
   }
 
   onLazyLoad(event: TableLazyLoadEvent) {
