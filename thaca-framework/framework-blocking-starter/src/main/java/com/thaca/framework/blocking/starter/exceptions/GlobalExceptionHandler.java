@@ -35,9 +35,7 @@ public class GlobalExceptionHandler {
             ? HttpStatus.UNAUTHORIZED
             : HttpStatus.BAD_REQUEST;
 
-        return ResponseEntity.status(status).body(
-            ApiPayload.error(ex.getErrorMessage(), ex.getCustomMessageVi(), ex.getCustomMessageEn(), ex.getData())
-        );
+        return ResponseEntity.status(status).body(ApiPayload.error(ex.getErrorMessage(), ex.getData()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
