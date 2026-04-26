@@ -1,0 +1,13 @@
+{
+  "title": "Plan Management",
+  "code": "Plan Code",
+  "name": "Plan Name",
+  "type": "Plan Type",
+  "max_users": "Max Users",
+  "status": "Status",
+  "actions": {
+    "create": "Add New Plan",
+    "edit": "Edit Plan",
+    "delete": "Delete Plan"
+  }
+}

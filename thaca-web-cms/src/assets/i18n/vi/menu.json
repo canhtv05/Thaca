@@ -22,6 +22,7 @@
     "notifications": "Thông báo hệ thống",
     "system_administration": "Quản trị tối cao",
     "tenant_management": "Quản lý Tenant",
+    "plan_management": "Quản lý Gói dịch vụ",
     "access_control": "Kiểm soát truy cập",
     "admin_accounts": "Tài khoản quản trị",
     "role_permission": "Vai trò & Quyền hạn",

@@ -1,10 +1,9 @@
 package com.thaca.auth.services;
 
 import com.thaca.auth.domains.Plan;
-import com.thaca.auth.domains.Tenant;
-import com.thaca.auth.mappers.TenantMapper;
-import com.thaca.auth.repositories.TenantRepository;
-import com.thaca.common.dtos.internal.TenantDTO;
+import com.thaca.auth.mappers.PlanMapper;
+import com.thaca.auth.repositories.PlanRepository;
+import com.thaca.common.dtos.internal.PlanDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -26,76 +25,64 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TenantService {
+public class PlanService {
 
-    private final TenantRepository tenantRepository;
+    private final PlanRepository planRepository;
 
     @Transactional(readOnly = true)
-    @FwMode(name = "cms.searchTenants", type = ModeType.HANDLE)
-    public SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> request) {
-        Specification<Tenant> spec = createTenantSpecification(request);
-        Page<Tenant> tenants = tenantRepository.findAll(
-            spec,
-            request.getPage().toPageable(Sort.Direction.DESC, "createdAt")
-        );
+    @FwMode(name = "cms.searchPlans", type = ModeType.HANDLE)
+    public SearchResponse<PlanDTO> searchPlans(SearchRequest<PlanDTO> request) {
+        Specification<Plan> spec = createPlanSpecification(request);
+        Page<Plan> plans = planRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "createdAt"));
         return new SearchResponse<>(
-            tenants.getContent().stream().map(TenantMapper::fromEntity).collect(Collectors.toList()),
-            PaginationResponse.of(tenants)
+            plans.getContent().stream().map(PlanMapper::fromEntity).collect(Collectors.toList()),
+            PaginationResponse.of(plans)
         );
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = "cms.getTenant", type = ModeType.HANDLE)
-    public TenantDTO getTenant(Long id) {
-        return tenantRepository
+    @FwMode(name = "cms.getPlan", type = ModeType.HANDLE)
+    public PlanDTO getPlan(Long id) {
+        return planRepository
             .findById(id)
-            .map(TenantMapper::fromEntity)
+            .map(PlanMapper::fromEntity)
             .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
     }
 
     @Transactional
-    @FwMode(name = "cms.saveTenant", type = ModeType.HANDLE)
-    public TenantDTO saveTenant(TenantDTO dto) {
-        Tenant tenant;
+    @FwMode(name = "cms.savePlan", type = ModeType.HANDLE)
+    public PlanDTO savePlan(PlanDTO dto) {
+        Plan plan;
         if (dto.getId() != null) {
-            tenant = tenantRepository
+            plan = planRepository
                 .findById(dto.getId())
                 .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
-            tenant.setName(dto.getName());
-            tenant.setDomain(dto.getDomain());
-            tenant.setStatus(dto.getStatus());
-            if (dto.getPlanId() != null) {
-                tenant.setPlan(Plan.builder().id(dto.getPlanId()).build());
-            }
-            tenant.setPlanType(dto.getPlanType());
-            tenant.setExpiresAt(dto.getExpiresAt());
-            tenant.setContactEmail(dto.getContactEmail());
-            tenant.setLogoUrl(dto.getLogoUrl());
+            plan.setName(dto.getName());
+            plan.setType(dto.getType());
+            plan.setMaxUsers(dto.getMaxUsers());
+            plan.setStatus(dto.getStatus());
         } else {
-            tenant = Tenant.builder()
+            plan = Plan.builder()
                 .code(dto.getCode())
                 .name(dto.getName())
-                .domain(dto.getDomain())
+                .type(dto.getType())
+                .maxUsers(dto.getMaxUsers())
                 .status(dto.getStatus())
-                .plan(dto.getPlanId() != null ? Plan.builder().id(dto.getPlanId()).build() : null)
-                .planType(dto.getPlanType())
-                .expiresAt(dto.getExpiresAt())
-                .contactEmail(dto.getContactEmail())
-                .logoUrl(dto.getLogoUrl())
                 .build();
         }
-        return TenantMapper.fromEntity(tenantRepository.save(tenant));
+        return PlanMapper.fromEntity(planRepository.save(plan));
     }
 
     @Transactional
-    @FwMode(name = "cms.deleteTenant", type = ModeType.HANDLE)
-    public void deleteTenant(Long id) {
-        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
-        tenant.setDeletedAt(java.time.LocalDateTime.now());
-        tenantRepository.save(tenant);
+    @FwMode(name = "cms.deletePlan", type = ModeType.HANDLE)
+    public void deletePlan(Long id) {
+        if (!planRepository.existsById(id)) {
+            throw new FwException(CommonErrorMessage.NOT_FOUND);
+        }
+        planRepository.deleteById(id);
     }
 
-    private Specification<Tenant> createTenantSpecification(SearchRequest<TenantDTO> request) {
+    private Specification<Plan> createPlanSpecification(SearchRequest<PlanDTO> request) {
         return (root, query, cb) -> {
             Predicate p = cb.conjunction();
             if (request.getFilter() != null) {
@@ -110,6 +97,9 @@ public class TenantService {
                         p,
                         cb.like(cb.lower(root.get("name")), "%" + request.getFilter().getName().toLowerCase() + "%")
                     );
+                }
+                if (request.getFilter().getType() != null) {
+                    p = cb.and(p, cb.equal(root.get("type"), request.getFilter().getType()));
                 }
                 if (request.getFilter().getStatus() != null) {
                     p = cb.and(p, cb.equal(root.get("status"), request.getFilter().getStatus()));

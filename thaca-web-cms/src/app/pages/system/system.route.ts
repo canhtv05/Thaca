@@ -55,4 +55,16 @@ export const systemRoutes: Routes = [
       },
     ],
   },
+  {
+    path: 'tenants',
+    loadComponent: () => import('./tenant/tenant.component').then((m) => m.TenantComponent),
+    resolve: { i18n: I18nResolver },
+    data: { i18n: ['common', 'tenant'] },
+  },
+  {
+    path: 'plans',
+    loadComponent: () => import('./plan/plan.component').then((m) => m.PlanComponent),
+    resolve: { i18n: I18nResolver },
+    data: { i18n: ['common', 'plan'] },
+  },
 ];

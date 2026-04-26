@@ -8,6 +8,15 @@ public class ServiceMethod {
     public static final String CMS_SEARCH_USERS = "cms.searchUsers";
     public static final String CMS_SEARCH_ROLES = "cms.searchRoles";
     public static final String CMS_SEARCH_TENANTS = "cms.searchTenants";
+    public static final String CMS_GET_TENANT = "cms.getTenant";
+    public static final String CMS_SAVE_TENANT = "cms.saveTenant";
+    public static final String CMS_DELETE_TENANT = "cms.deleteTenant";
+
+    public static final String CMS_SEARCH_PLANS = "cms.searchPlans";
+    public static final String CMS_GET_PLAN = "cms.getPlan";
+    public static final String CMS_SAVE_PLAN = "cms.savePlan";
+    public static final String CMS_DELETE_PLAN = "cms.deletePlan";
+
     public static final String CMS_SEARCH_PERMISSIONS = "cms.searchPermissions";
     public static final String CMS_GET_USER_BY_ID = "cms.getUserById";
     public static final String CMS_CREATE_USER = "cms.createUser";

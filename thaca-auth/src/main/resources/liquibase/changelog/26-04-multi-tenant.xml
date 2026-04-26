@@ -6,8 +6,27 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="2026-04-26-multi-tenant-1" author="CanhPC">
+        <createSequence sequenceName="plan_seq" schemaName="auth" startValue="1" incrementBy="1"/>
+        <createTable tableName="plans" schemaName="auth">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="VARCHAR(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)"/>
+            <column name="max_users" type="INTEGER"/>
+            <column name="status" type="VARCHAR(50)" defaultValue="ACTIVE"/>
+            <column name="created_by" type="VARCHAR(50)"/>
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_by" type="VARCHAR(50)"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
         <createSequence sequenceName="tenant_seq" schemaName="auth" startValue="1" incrementBy="1"/>
-        
         <createTable tableName="tenants" schemaName="auth">
             <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
@@ -20,11 +39,36 @@
             </column>
             <column name="domain" type="VARCHAR(255)"/>
             <column name="status" type="VARCHAR(50)" defaultValue="ACTIVE"/>
+            <column name="plan_id" type="BIGINT"/>
+            <column name="plan_type" type="VARCHAR(50)"/>
+            <column name="expires_at" type="TIMESTAMP"/>
+            <column name="contact_email" type="VARCHAR(255)"/>
+            <column name="logo_url" type="VARCHAR(255)"/>
+            <column name="deleted_at" type="TIMESTAMP"/>
+            <column name="version" type="BIGINT" defaultValueNumeric="0"/>
             <column name="created_by" type="VARCHAR(50)"/>
             <column name="created_at" type="TIMESTAMP"/>
             <column name="updated_by" type="VARCHAR(50)"/>
             <column name="updated_at" type="TIMESTAMP"/>
         </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="plan_id" baseTableName="tenants" baseTableSchemaName="auth"
+                                 constraintName="fk_tenants_plan_id" referencedColumnNames="id"
+                                 referencedTableName="plans" referencedTableSchemaName="auth"/>
+
+        <loadData file="liquibase/data/plan.csv"
+                  separator=";"
+                  tableName="plans"
+                  schemaName="auth">
+            <column name="id" type="NUMERIC"/>
+            <column name="code" type="STRING"/>
+            <column name="name" type="STRING"/>
+            <column name="type" type="STRING"/>
+            <column name="max_users" type="NUMERIC"/>
+            <column name="status" type="STRING"/>
+            <column name="created_by" type="STRING"/>
+            <column name="created_at" type="DATE"/>
+        </loadData>
 
         <loadData file="liquibase/data/tenant.csv"
                   separator=";"
@@ -35,6 +79,8 @@
             <column name="name" type="STRING"/>
             <column name="domain" type="STRING"/>
             <column name="status" type="STRING"/>
+            <column name="plan_id" type="NUMERIC"/>
+            <column name="plan_type" type="STRING"/>
             <column name="created_by" type="STRING"/>
             <column name="created_at" type="DATE"/>
             <column name="updated_by" type="STRING"/>

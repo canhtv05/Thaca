@@ -1,0 +1,23 @@
+{
+  "title": "Quản lý Đối tác (Tenant)",
+  "code": "Mã định danh",
+  "name": "Tên đối tác",
+  "domain": "Tên miền",
+  "status": "Trạng thái",
+  "plan": "Gói dịch vụ",
+  "plan_type": "Loại gói",
+  "expires_at": "Ngày hết hạn",
+  "contact_email": "Email liên hệ",
+  "logo_url": "Link Logo",
+  "actions": {
+    "create": "Thêm đối tác mới",
+    "edit": "Chỉnh sửa đối tác",
+    "delete": "Xóa đối tác"
+  },
+  "plans": {
+    "FREE": "Miễn phí",
+    "BASIC": "Cơ bản",
+    "PRO": "Nâng cao",
+    "ENTERPRISE": "Doanh nghiệp"
+  }
+}

@@ -1,0 +1,5 @@
+id;code;name;type;max_users;status;created_by;created_at
+1;FREE;Free Plan;FREE;10;ACTIVE;system;2025-01-01 00:00:00
+2;BASIC;Basic Plan;BASIC;50;ACTIVE;system;2025-01-01 00:00:00
+3;PRO;Pro Plan;PRO;500;ACTIVE;system;2025-01-01 00:00:00
+4;ENTERPRISE;Enterprise Plan;ENTERPRISE;999999;ACTIVE;system;2025-01-01 00:00:00

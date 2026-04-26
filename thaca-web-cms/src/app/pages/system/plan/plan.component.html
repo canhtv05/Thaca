@@ -1,0 +1,87 @@
+<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+
+<div class="card thaca-card p-0 overflow-hidden">
+  <div
+    class="flex flex-column md:flex-row md:align-items-center justify-content-between p-4 gap-3 bg-white border-bottom-1 border-gray-100"
+  >
+    <div class="flex flex-column sm:flex-row sm:align-items-center gap-3 w-full md:w-auto">
+      <thaca-input
+        [(ngModel)]="filter().code"
+        [placeholder]="'plan.code' | translate"
+        (onEnter)="onSearch()"
+        class="w-full sm:w-15rem"
+      ></thaca-input>
+      <thaca-input
+        [(ngModel)]="filter().name"
+        [placeholder]="'plan.name' | translate"
+        (onEnter)="onSearch()"
+        class="w-full sm:w-15rem"
+      ></thaca-input>
+      <thaca-dropdown
+        [(ngModel)]="filter().status"
+        [options]="statusOptions"
+        [placeholder]="'plan.status' | translate"
+        (onChange)="onSearch()"
+        class="w-full sm:w-12rem"
+      ></thaca-dropdown>
+      <thaca-button (click)="onSearch()" icon="pi pi-search"></thaca-button>
+    </div>
+
+    <div class="flex gap-2">
+      <thaca-button icon="pi pi-plus" (click)="onCreate()">{{
+        'common.button.create' | translate
+      }}</thaca-button>
+    </div>
+  </div>
+
+  <app-data-table [config]="tableConfig" (onAction)="handleAction($event)"></app-data-table>
+</div>
+
+<thaca-modal
+  #planModal
+  [title]="(planForm.value.id ? 'plan.actions.edit' : 'plan.actions.create') | translate"
+>
+  <form [formGroup]="planForm" class="grid p-fluid mt-2">
+    <div class="col-12 field">
+      <label class="font-semibold block mb-2"
+        >{{ 'plan.code' | translate }} <span class="text-red-500">*</span></label
+      >
+      <thaca-input
+        formControlName="code"
+        [placeholder]="'plan.code' | translate"
+        [disabled]="!!planForm.value.id"
+      ></thaca-input>
+    </div>
+    <div class="col-12 field">
+      <label class="font-semibold block mb-2"
+        >{{ 'plan.name' | translate }} <span class="text-red-500">*</span></label
+      >
+      <thaca-input formControlName="name" [placeholder]="'plan.name' | translate"></thaca-input>
+    </div>
+    <div class="col-12 md:col-6 field">
+      <label class="font-semibold block mb-2"
+        >{{ 'plan.type' | translate }} <span class="text-red-500">*</span></label
+      >
+      <thaca-dropdown formControlName="type" [options]="planTypeOptions"></thaca-dropdown>
+    </div>
+    <div class="col-12 md:col-6 field">
+      <label class="font-semibold block mb-2"
+        >{{ 'plan.max_users' | translate }} <span class="text-red-500">*</span></label
+      >
+      <thaca-input type="number" formControlName="maxUsers"></thaca-input>
+    </div>
+    <div class="col-12 field">
+      <label class="font-semibold block mb-2">{{ 'plan.status' | translate }}</label>
+      <thaca-dropdown formControlName="status" [options]="statusOptions.slice(1)"></thaca-dropdown>
+    </div>
+  </form>
+
+  <div footer class="flex justify-content-end gap-2 mt-3">
+    <thaca-button color="secondary" variant="outline" (click)="planModal.hide()">
+      {{ 'common.button.cancel' | translate }}
+    </thaca-button>
+    <thaca-button (click)="onSave()" [disabled]="planForm.invalid">
+      {{ 'common.button.save' | translate }}
+    </thaca-button>
+  </div>
+</thaca-modal>

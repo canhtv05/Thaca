@@ -84,6 +84,11 @@ export class Sidebar implements OnInit, OnDestroy {
           icon: 'pi pi-building',
           routerLink: ['/system/tenants'],
         });
+        systemAdminItems.unshift({
+          label: 'menu.plan_management',
+          icon: 'pi pi-list',
+          routerLink: ['/system/plans'],
+        });
       }
 
       this.model = [

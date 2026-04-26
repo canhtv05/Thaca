@@ -22,6 +22,7 @@
     "notifications": "System Notifications",
     "system_administration": "Administration",
     "tenant_management": "Tenant Management",
+    "plan_management": "Plan Management",
     "access_control": "Access Control",
     "admin_accounts": "Admin Accounts",
     "role_permission": "Roles & Permissions",
