@@ -14,6 +14,7 @@ public class CustomUserDetails extends User implements UserPrincipal {
     private final String channel;
     private final boolean isSuperAdmin;
     private final boolean isCmsUser;
+    private final Long tenantId;
 
     public CustomUserDetails(
         String username,
@@ -22,13 +23,15 @@ public class CustomUserDetails extends User implements UserPrincipal {
         String roles,
         String channel,
         boolean isSuperAdmin,
-        boolean isCmsUser
+        boolean isCmsUser,
+        Long tenantId
     ) {
         super(username, password, authorities);
         this.role = roles;
         this.channel = channel;
         this.isSuperAdmin = isSuperAdmin;
         this.isCmsUser = isCmsUser;
+        this.tenantId = tenantId;
     }
 
     @Override

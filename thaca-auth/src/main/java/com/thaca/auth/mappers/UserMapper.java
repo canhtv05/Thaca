@@ -6,6 +6,8 @@ import com.thaca.framework.core.utils.DateUtils;
 
 public class UserMapper {
 
+    private UserMapper() {}
+
     public static UserDTO fromEntity(User user) {
         return fromEntityWithCms(user, false);
     }

@@ -14,6 +14,7 @@ import { MenuItem } from 'primeng/api';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
 import { GlobalToast } from '../../../core/global/global-toast';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-permission',
@@ -34,6 +35,7 @@ export class PermissionComponent implements OnInit {
   private configService = inject(AppConfigService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private translateService = inject(TranslateService);
   table = viewChild(DataTableComponent);
   roleDescription = computed(() => {
     const data = this.table()?.data();
@@ -41,6 +43,13 @@ export class PermissionComponent implements OnInit {
       return data[0].roleDescription;
     }
     return null;
+  });
+  title = computed(() => {
+    const roleDescription = this.roleDescription();
+    if (roleDescription) {
+      return this.translateService.instant('menu.permission') + ' - ' + roleDescription;
+    }
+    return this.translateService.instant('menu.permission');
   });
 
   breadcrumbItems: MenuItem[] = [

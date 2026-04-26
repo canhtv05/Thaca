@@ -187,7 +187,8 @@ public class AuthService {
                 rolesString,
                 StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
                 su.getIsSuperAdmin(),
-                true
+                true,
+                sc.getTenantId()
             );
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -298,7 +299,14 @@ public class AuthService {
     public AuthUserDTO getUserProfile(String username) {
         return userRepository
             .findByUsername(username)
-            .map(u -> AuthUserDTO.builder().id(u.getId()).username(u.getUsername()).email(u.getEmail()).build())
+            .map(u ->
+                AuthUserDTO.builder()
+                    .id(u.getId())
+                    .tenantId(u.getTenantId())
+                    .username(u.getUsername())
+                    .email(u.getEmail())
+                    .build()
+            )
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 

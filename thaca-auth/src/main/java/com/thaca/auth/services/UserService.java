@@ -15,9 +15,10 @@ import com.thaca.auth.validators.rules.FullnameRule;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
 import com.thaca.common.dtos.internal.UserDTO;
-// import com.thaca.common.constants.EventConstants;
-// import com.thaca.common.dtos.events.UserCreationEvent;
-// import com.thaca.common.dtos.events.VerificationEmailEvent;
+import com.thaca.common.dtos.internal.VerifyEmailTokenDTO;
+import com.thaca.common.dtos.search.PaginationResponse;
+import com.thaca.common.dtos.search.SearchRequest;
+import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.CommonService;
@@ -27,12 +28,18 @@ import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -50,6 +57,65 @@ public class UserService {
     // private final KafkaProducerService kafkaProducerService;
     private final RedisCacheService redisService;
     private final SessionStore sessionStore;
+
+    @Transactional(readOnly = true)
+    public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> request) {
+        Specification<User> spec = createUserSpecification(request);
+        Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "createdAt"));
+        return new SearchResponse<>(
+            users
+                .getContent()
+                .stream()
+                .map(u -> UserMapper.fromEntityWithCms(u, true))
+                .collect(Collectors.toList()),
+            PaginationResponse.of(users)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public UserDTO findById(Long id) {
+        return userRepository
+            .findById(id)
+            .map(u -> UserMapper.fromEntityWithCms(u, true))
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void lockUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        user.setIsLocked(true);
+        userRepository.save(user);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void unlockUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        user.setIsLocked(false);
+        userRepository.save(user);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public VerifyEmailTokenDTO activeUserByUserName(VerifyEmailTokenDTO request) {
+        User user = userRepository
+            .findByUsername(request.username())
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        user.setIsActivated(true);
+        userRepository.save(user);
+
+        // kafkaProducerService.sendAndWait(
+        // EventConstants.USER_CREATED_TOPIC,
+        // user.getUsername(),
+        // new UserCreationEvent(user.getUsername(), request.fullname())
+        // );
+
+        return new VerifyEmailTokenDTO(
+            user.getUsername(),
+            request.fullname(),
+            request.email(),
+            request.expiredAt(),
+            request.jti()
+        );
+    }
 
     @FwMode(name = ServiceMethod.AUTH_CREATE_USER, type = ModeType.VALIDATE)
     public void validateCreateUser(UserDTO request) {
@@ -223,6 +289,30 @@ public class UserService {
         String keyForgotPassword = sessionStore.getKeyForgotPassword(user.getUsername());
         String otp = "123456";
         redisService.put(keyForgotPassword, otp, 5, TimeUnit.MINUTES);
+    }
+
+    private Specification<User> createUserSpecification(SearchRequest<UserDTO> req) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (req.getFilter() != null) {
+                UserDTO filter = req.getFilter();
+                if (StringUtils.isNotBlank(filter.getUsername())) {
+                    predicates.add(
+                        cb.like(cb.lower(root.get("username")), "%" + filter.getUsername().toLowerCase() + "%")
+                    );
+                }
+                if (StringUtils.isNotBlank(filter.getEmail())) {
+                    predicates.add(cb.like(cb.lower(root.get("email")), "%" + filter.getEmail().toLowerCase() + "%"));
+                }
+                if (filter.getIsActivated() != null) {
+                    predicates.add(cb.equal(root.get("isActivated"), filter.getIsActivated()));
+                }
+                if (filter.getIsLocked() != null) {
+                    predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     private boolean hasOTP(String username) {

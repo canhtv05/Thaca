@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-4 w-full">
-  <app-breadcrumb [title]="'menu.permission'" [items]="breadcrumbItems" />
+  <app-breadcrumb [title]="title()" [items]="breadcrumbItems" />
 
   <app-data-table [config]="tableConfig" [externalFilter]="filter()">
     <ng-template #searchTemplate>

@@ -1,0 +1,20 @@
+package com.thaca.common.dtos.internal;
+
+import com.thaca.common.dtos.BaseAuditResponse;
+import com.thaca.common.enums.TenantStatus;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TenantDTO extends BaseAuditResponse {
+
+    private Long id;
+    private String code;
+    private String name;
+    private String domain;
+    private TenantStatus status;
+}

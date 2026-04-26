@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "roles", schema = "auth")
-public class Role {
+public class Role extends BaseTenantEntity {
 
     @Id
     @Column(name = "code", length = 50, unique = true, nullable = false)

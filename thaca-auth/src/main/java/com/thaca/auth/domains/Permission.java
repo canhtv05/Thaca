@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "permissions", schema = "auth")
-public class Permission {
+public class Permission extends BaseTenantEntity {
 
     @Id
     @Column(name = "code", length = 50, unique = true, nullable = false)

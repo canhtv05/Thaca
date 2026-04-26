@@ -5,6 +5,7 @@ export interface ILoginReq {
 
 export interface IAuthUserDTO {
   id: number;
+  tenantId?: number;
   username: string;
   email: string;
   fullname?: string;

@@ -40,6 +40,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 if (TokenStatus.VALID.equals(status)) {
                     Authentication authentication = jwtUtils.getBasicAuthentication(jwt);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    io.jsonwebtoken.Claims claims = jwtUtils.parseToken(jwt);
+                    Long tenantId = claims.get("tenantId", Long.class);
+                    if (tenantId != null) {
+                        com.thaca.framework.core.context.TenantContext.set(tenantId);
+                    }
                 } else {
                     log.debug("[JwtFilter] token validation failed: {}", status);
                     SecurityContextHolder.clearContext();
@@ -49,7 +55,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.clearContext();
             }
         }
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            com.thaca.framework.core.context.TenantContext.clear();
+        }
     }
 
     private String resolveToken(HttpServletRequest request) {

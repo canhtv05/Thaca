@@ -1,0 +1,3 @@
+id;code;name;status;created_by;created_at;updated_by;updated_at
+1;DEFAULT;Default Tenant;1;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+2;TENANT_A;Tenant A;1;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00

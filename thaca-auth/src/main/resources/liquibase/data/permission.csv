@@ -1,4 +1,4 @@
-code;description
-USER_MAKER;Quyền quản trị người dùng
-CMS_VIEW;Quyền xem CMS
-CMS_EDIT;Quyền sửa CMS
+code;description;tenant_id
+USER_MAKER;Quyền quản trị người dùng;1
+CMS_VIEW;Quyền xem CMS;1
+CMS_EDIT;Quyền sửa CMS;1

@@ -1,7 +1,6 @@
 package com.thaca.auth.domains;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "users", schema = "auth")
-public class User extends BaseEntityAudit {
+public class User extends BaseTenantEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")

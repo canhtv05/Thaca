@@ -13,4 +13,5 @@
   <property name="datetimeType" value="datetime" dbms="postgresql"/>
 
   <include file="/liquibase/changelog/23-01-changelog.xml"/>
+  <include file="/liquibase/changelog/26-04-multi-tenant.xml"/>
 </databaseChangeLog>

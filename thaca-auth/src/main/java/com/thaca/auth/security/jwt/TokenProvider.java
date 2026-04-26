@@ -203,6 +203,7 @@ public class TokenProvider {
             .claim(ROLE_KEY, userDetails.getRole())
             .claim(CommonConstants.CHANNEL_KEY, channel)
             .claim("c", userDetails.isCmsUser() ? 1 : 0)
+            .claim("tenantId", userDetails.getTenantId())
             .issuedAt(new Date(now))
             .expiration(validity)
             .signWith(key, Jwts.SIG.HS512)
@@ -289,14 +290,17 @@ public class TokenProvider {
         boolean isSuperAdmin = false;
         List<GrantedAuthority> authorities = new ArrayList<>();
 
+        Long tenantId = null;
         if (userObj instanceof User u) {
             username = u.getUsername();
             password = u.getPassword();
+            tenantId = u.getTenantId();
             authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
         } else if (userObj instanceof SystemCredential sc) {
             username = sc.getUsername();
             password = sc.getPassword();
             isSuperAdmin = sc.getSystemUser().getIsSuperAdmin();
+            tenantId = sc.getTenantId();
             if (isSuperAdmin) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
@@ -315,7 +319,8 @@ public class TokenProvider {
             rolesString,
             channel.name(),
             isSuperAdmin,
-            cmsUser
+            cmsUser,
+            tenantId
         );
         return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }

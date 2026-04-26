@@ -17,6 +17,7 @@ import lombok.Setter;
 public class AuthUserDTO {
 
     private Long id;
+    private Long tenantId;
     private String username;
     private String email;
     private String fullname;

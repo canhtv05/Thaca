@@ -53,6 +53,7 @@ public class DomainUserDetailsService implements UserDetailsService {
         boolean isLocked;
         boolean isActivated;
         boolean isSuperAdmin = false;
+        Long tenantId = null;
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         String rolesString = AuthoritiesConstants.USER;
 
@@ -61,6 +62,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             password = user.getPassword();
             isLocked = user.getIsLocked();
             isActivated = user.getIsActivated();
+            tenantId = user.getTenantId();
             grantedAuthorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
         } else if (userObj instanceof SystemCredential sc) {
             SystemUser su = sc.getSystemUser();
@@ -68,6 +70,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             password = sc.getPassword();
             isLocked = su.getIsLocked();
             isActivated = su.getIsActivated();
+            tenantId = sc.getTenantId();
             isSuperAdmin = su.getIsSuperAdmin();
 
             Set<Role> roles = sc.getRoles();
@@ -104,7 +107,8 @@ public class DomainUserDetailsService implements UserDetailsService {
             rolesString,
             StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
             isSuperAdmin,
-            cmsUser
+            cmsUser,
+            tenantId
         );
     }
 }

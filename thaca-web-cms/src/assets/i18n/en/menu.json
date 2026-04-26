@@ -21,6 +21,7 @@
     "point_history": "Point History",
     "notifications": "System Notifications",
     "system_administration": "Administration",
+    "tenant_management": "Tenant Management",
     "access_control": "Access Control",
     "admin_accounts": "Admin Accounts",
     "role_permission": "Roles & Permissions",

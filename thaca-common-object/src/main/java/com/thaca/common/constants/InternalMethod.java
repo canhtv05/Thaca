@@ -11,4 +11,5 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_LOCK_USER = "internal.cmsLockUser";
     public static final String INTERNAL_CMS_UNLOCK_USER = "internal.cmsUnlockUser";
     public static final String INTERNAL_CMS_GET_PROFILE = "internal.cmsGetProfile";
+    public static final String INTERNAL_CMS_SEARCH_TENANTS = "internal.cmsSearchTenants";
 }

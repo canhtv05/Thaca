@@ -1,6 +1,5 @@
 package com.thaca.common.dtos.internal;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter

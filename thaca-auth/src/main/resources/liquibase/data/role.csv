@@ -1,5 +1,5 @@
-code;description
-SUPER_ADMIN;Role cho siêu admin
-ADMIN;Role cho admin
-MANAGER;Role cho quản lý
-USER;Role cho user
+code;description;tenant_id
+SUPER_ADMIN;Role cho siêu admin;1
+ADMIN;Role cho admin;1
+MANAGER;Role cho quản lý;1
+USER;Role cho user;1
