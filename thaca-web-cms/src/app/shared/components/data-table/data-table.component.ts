@@ -10,7 +10,6 @@ import {
   inject,
   OnChanges,
   SimpleChanges,
-  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -82,7 +81,7 @@ export interface ITableConfig<T = any> {
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })
-export class DataTableComponent implements OnChanges, OnInit {
+export class DataTableComponent implements OnChanges {
   private translate = inject(TranslateService);
   @Input({ required: true }) config!: ITableConfig;
   @Input() externalFilter: any = {};
@@ -112,14 +111,6 @@ export class DataTableComponent implements OnChanges, OnInit {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['externalFilter'] && !changes['externalFilter'].firstChange) {
       this.load({ ...this.pagination(), page: 0 });
-    }
-  }
-
-  ngOnInit() {
-    if (this.config.autoLoad !== false) {
-      setTimeout(() => {
-        this.load({ ...this.pagination(), page: 0 });
-      });
     }
   }
 
@@ -211,10 +202,15 @@ export class DataTableComponent implements OnChanges, OnInit {
     const sortField = (event.sortField as string) || '';
     const sortOrder = event.sortOrder === 1 ? 'ASC' : event.sortOrder === -1 ? 'DESC' : '';
     const cur = this.pagination();
+    const page = (event.first || 0) / (event.rows || cur.size);
 
-    if (sortField !== cur.sortField || sortOrder !== cur.sortOrder) {
-      this.load({ ...cur, sortField, sortOrder, page: 0 });
-    }
+    this.load({
+      ...cur,
+      page,
+      size: event.rows || cur.size,
+      sortField,
+      sortOrder,
+    });
   }
 
   handleAction(action: ITableAction, row: any, event: Event) {

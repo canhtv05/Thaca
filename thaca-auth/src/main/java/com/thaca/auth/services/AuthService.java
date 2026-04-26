@@ -41,7 +41,11 @@ import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.CookieUtils;
 import com.thaca.framework.core.utils.JsonF;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Instant;
@@ -385,8 +389,28 @@ public class AuthService {
     private Specification<LoginHistory> createLoginHistorySpecification(SearchRequest<LoginHistoryDTO> req) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (req.getFilter() != null) {
-                LoginHistoryDTO filter = req.getFilter();
+            String currentUsername = SecurityUtils.getCurrentUsername();
+            LoginHistoryDTO filter = req.getFilter();
+            boolean hasExplicitUserFilter =
+                filter != null && (filter.getUserId() != null || filter.getSystemUserId() != null);
+            if (!hasExplicitUserFilter) {
+                if ("ANONYMOUS".equals(currentUsername)) {
+                    predicates.add(cb.disjunction());
+                } else {
+                    Join<LoginHistory, User> userJoin = root.join("user", JoinType.LEFT);
+                    Predicate isUser = cb.equal(userJoin.get("username"), currentUsername);
+                    Subquery<Long> subquery = query.subquery(Long.class);
+                    Root<SystemCredential> scRoot = subquery.from(SystemCredential.class);
+                    subquery
+                        .select(scRoot.get("systemUser").get("id"))
+                        .where(cb.equal(scRoot.get("username"), currentUsername));
+
+                    Predicate isSystemUser = root.get("systemUser").get("id").in(subquery);
+                    predicates.add(cb.or(isUser, isSystemUser));
+                }
+            }
+
+            if (filter != null) {
                 if (filter.getIsCms() != null) {
                     if (filter.getIsCms()) {
                         predicates.add(cb.isNotNull(root.get("systemUser")));
@@ -405,6 +429,12 @@ public class AuthService {
                 }
                 if (filter.getChannel() != null) {
                     predicates.add(cb.equal(root.get("channel"), filter.getChannel()));
+                }
+                if (filter.getUserId() != null) {
+                    predicates.add(cb.equal(root.get("user").get("id"), filter.getUserId()));
+                }
+                if (filter.getSystemUserId() != null) {
+                    predicates.add(cb.equal(root.get("systemUser").get("id"), filter.getSystemUserId()));
                 }
                 if (StringUtils.isNotBlank(filter.getBrowser())) {
                     predicates.add(

@@ -23,6 +23,7 @@ public class LoginHistoryDTO {
 
     private Long id;
     private Long userId;
+    private Long systemUserId;
     private String ipAddress;
     private String country;
     private String city;
@@ -54,6 +55,7 @@ public class LoginHistoryDTO {
         return LoginHistoryDTO.builder()
             .id(entity.getId())
             .userId(entity.getUser() != null ? entity.getUser().getId() : null)
+            .systemUserId(entity.getSystemUser() != null ? entity.getSystemUser().getId() : null)
             .ipAddress(entity.getIpAddress())
             .country(entity.getCountry())
             .city(entity.getCity())
