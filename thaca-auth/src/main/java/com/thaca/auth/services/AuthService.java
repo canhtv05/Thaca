@@ -225,12 +225,7 @@ public class AuthService {
     }
 
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.VALIDATE)
-    public void validateRefreshToken(
-        String cookieValue,
-        String channel,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse
-    ) {
+    public void validateRefreshToken(String cookieValue, String channel) {
         if (StringUtils.isBlank(cookieValue) || StringUtils.isBlank(channel)) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
@@ -298,7 +293,6 @@ public class AuthService {
         return systemCredentialRepository.findByUsername(username).orElse(null);
     }
 
-    @Transactional(readOnly = true)
     public AuthUserDTO getUserProfile(String username) {
         return userRepository
             .findByUsername(username)

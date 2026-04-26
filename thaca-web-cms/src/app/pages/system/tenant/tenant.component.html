@@ -1,7 +1,9 @@
 <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 
 <div class="card thaca-card p-0 overflow-hidden">
-  <div class="flex flex-column md:flex-row md:align-items-center justify-content-between p-4 gap-3 bg-white border-bottom-1 border-gray-100">
+  <div
+    class="flex flex-column md:flex-row md:align-items-center justify-content-between p-4 gap-3 bg-white border-bottom-1 border-gray-100"
+  >
     <div class="flex flex-column sm:flex-row sm:align-items-center gap-3 w-full md:w-auto">
       <thaca-input
         [(ngModel)]="filter().code"
@@ -26,41 +28,49 @@
     </div>
 
     <div class="flex gap-2">
-      <thaca-button
-        [label]="'tenant.actions.create' | translate"
-        icon="pi pi-plus"
-        (click)="onCreate()"
-      ></thaca-button>
+      <thaca-button (click)="onCreate()" icon="pi pi-plus">
+        {{ 'tenant.actions.create' | translate }}
+      </thaca-button>
     </div>
   </div>
 
-  <app-data-table
-    [config]="tableConfig"
-    (onAction)="handleAction($event)"
-  ></app-data-table>
+  <app-data-table [config]="tableConfig" (onAction)="handleAction($event)"></app-data-table>
 </div>
 
 <thaca-modal
   #tenantModal
   [title]="(tenantForm.value.id ? 'tenant.actions.edit' : 'tenant.actions.create') | translate"
-  [width]="'600px'"
 >
   <form [formGroup]="tenantForm" class="grid p-fluid mt-2">
     <div class="col-12 md:col-6 field">
-      <label class="font-semibold block mb-2">{{ 'tenant.code' | translate }} <span class="text-red-500">*</span></label>
-      <thaca-input formControlName="code" [placeholder]="'tenant.code' | translate" [disabled]="!!tenantForm.value.id"></thaca-input>
+      <label class="font-semibold block mb-2"
+        >{{ 'tenant.code' | translate }} <span class="text-red-500">*</span></label
+      >
+      <thaca-input
+        formControlName="code"
+        [placeholder]="'tenant.code' | translate"
+        [disabled]="!!tenantForm.value.id"
+      ></thaca-input>
     </div>
     <div class="col-12 md:col-6 field">
-      <label class="font-semibold block mb-2">{{ 'tenant.name' | translate }} <span class="text-red-500">*</span></label>
+      <label class="font-semibold block mb-2"
+        >{{ 'tenant.name' | translate }} <span class="text-red-500">*</span></label
+      >
       <thaca-input formControlName="name" [placeholder]="'tenant.name' | translate"></thaca-input>
     </div>
     <div class="col-12 md:col-6 field">
       <label class="font-semibold block mb-2">{{ 'tenant.domain' | translate }}</label>
-      <thaca-input formControlName="domain" [placeholder]="'tenant.domain' | translate"></thaca-input>
+      <thaca-input
+        formControlName="domain"
+        [placeholder]="'tenant.domain' | translate"
+      ></thaca-input>
     </div>
     <div class="col-12 md:col-6 field">
       <label class="font-semibold block mb-2">{{ 'tenant.contact_email' | translate }}</label>
-      <thaca-input formControlName="contactEmail" [placeholder]="'tenant.contact_email' | translate"></thaca-input>
+      <thaca-input
+        formControlName="contactEmail"
+        [placeholder]="'tenant.contact_email' | translate"
+      ></thaca-input>
     </div>
     <div class="col-12 md:col-6 field">
       <label class="font-semibold block mb-2">{{ 'tenant.plan_type' | translate }}</label>
@@ -72,25 +82,27 @@
     </div>
     <div class="col-12 md:col-6 field">
       <label class="font-semibold block mb-2">{{ 'tenant.expires_at' | translate }}</label>
-      <p-datepicker formControlName="expiresAt" [showIcon]="true" [placeholder]="'tenant.expires_at' | translate"></p-datepicker>
+      <p-datepicker
+        formControlName="expiresAt"
+        [showIcon]="true"
+        [placeholder]="'tenant.expires_at' | translate"
+      ></p-datepicker>
     </div>
     <div class="col-12 md:col-6 field">
       <label class="font-semibold block mb-2">{{ 'tenant.logo_url' | translate }}</label>
-      <thaca-input formControlName="logoUrl" [placeholder]="'tenant.logo_url' | translate"></thaca-input>
+      <thaca-input
+        formControlName="logoUrl"
+        [placeholder]="'tenant.logo_url' | translate"
+      ></thaca-input>
     </div>
   </form>
 
   <div footer class="flex justify-content-end gap-2 mt-3">
-    <thaca-button
-      [label]="'common.button.cancel' | translate"
-      color="secondary"
-      variant="outlined"
-      (click)="tenantModal.hide()"
-    ></thaca-button>
-    <thaca-button
-      [label]="'common.button.save' | translate"
-      (click)="onSave()"
-      [disabled]="tenantForm.invalid"
-    ></thaca-button>
+    <thaca-button (click)="tenantModal.hide()" color="secondary" variant="outline">
+      {{ 'common.button.cancel' | translate }}
+    </thaca-button>
+    <thaca-button (click)="onSave()" [disabled]="tenantForm.invalid">
+      {{ 'common.button.save' | translate }}
+    </thaca-button>
   </div>
 </thaca-modal>

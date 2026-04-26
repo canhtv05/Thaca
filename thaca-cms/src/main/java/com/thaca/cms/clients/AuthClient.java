@@ -66,6 +66,41 @@ public class AuthClient {
         );
     }
 
+    @FwMode(name = ServiceMethod.CMS_GET_TENANT, type = ModeType.HANDLE)
+    public TenantDTO getTenant(Long id) {
+        return internalApiClient.post(authBaseUrl + "/cms/tenants/get", id, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_SAVE_TENANT, type = ModeType.HANDLE)
+    public TenantDTO saveTenant(TenantDTO tenant) {
+        return internalApiClient.post(authBaseUrl + "/cms/tenants/save", tenant, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_DELETE_TENANT, type = ModeType.HANDLE)
+    public Void deleteTenant(Long id) {
+        return internalApiClient.post(authBaseUrl + "/cms/tenants/delete", id, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_SEARCH_PLANS, type = ModeType.HANDLE)
+    public SearchResponse<PlanDTO> searchPlans(SearchRequest<PlanDTO> search) {
+        return internalApiClient.post(authBaseUrl + "/cms/plans/search", search, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_GET_PLAN, type = ModeType.HANDLE)
+    public PlanDTO getPlan(Long id) {
+        return internalApiClient.post(authBaseUrl + "/cms/plans/get", id, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_SAVE_PLAN, type = ModeType.HANDLE)
+    public PlanDTO savePlan(PlanDTO plan) {
+        return internalApiClient.post(authBaseUrl + "/cms/plans/save", plan, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_DELETE_PLAN, type = ModeType.HANDLE)
+    public Void deletePlan(Long id) {
+        return internalApiClient.post(authBaseUrl + "/cms/plans/delete", id, new ParameterizedTypeReference<>() {});
+    }
+
     @FwMode(name = ServiceMethod.CMS_LOCK_USER, type = ModeType.HANDLE)
     public Void lockUser(Long id) {
         return internalApiClient.post(authBaseUrl + "/cms/users/lock", id, new ParameterizedTypeReference<>() {});

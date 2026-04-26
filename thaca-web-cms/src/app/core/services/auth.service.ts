@@ -50,7 +50,7 @@ export class AuthService {
       },
     )
       .then((profile) => {
-        currentUser.set(profile.body);
+        currentUser.set(profile.body?.data);
         return profile;
       })
       .finally(() => {

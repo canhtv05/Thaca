@@ -3,22 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MenuItem } from 'primeng/api';
-import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
+import { BreadcrumbComponent } from '../../../shared/components/breadcrumb/breadcrumb.component';
 import {
   DataTableComponent,
   ITableActionEvent,
   ITableConfig,
-} from '../../../../shared/components/data-table/data-table.component';
-import { ThacaButtonComponent } from '../../../../shared/components/thaca-button/thaca-button.component';
-import { ThacaInputComponent } from '../../../../shared/components/thaca-input/thaca-input.component';
+} from '../../../shared/components/data-table/data-table.component';
+import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
+import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
 import {
-  ThacaDropdownComponent,
   IDropdownOption,
-} from '../../../../shared/components/thaca-dropdown/thaca-dropdown.component';
-import { ThacaModalComponent } from '../../../../shared/components/thaca-modal/thaca-modal.component';
-import { AppConfigService } from '../../../../core/configs/app-config.service';
-import { PlanService } from '../../../../core/services/plan.service';
-import { PlanDTO } from '../../../../core/models/plan.model';
+  ThacaDropdownComponent,
+} from '../../../shared/components/thaca-dropdown/thaca-dropdown.component';
+import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thaca-modal.component';
+import { AppConfigService } from '../../../core/configs/app-config.service';
+import { PlanService } from '../../../core/services/plan.service';
+import { PlanDTO } from '../../../core/models/plan.model';
 
 @Component({
   selector: 'app-plan',
