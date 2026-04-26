@@ -1,0 +1,21 @@
+{
+  "role_permission": {
+    "role": {
+      "code": "Mã vai trò",
+      "description": "Mô tả vai trò",
+      "search_by_code": "Tìm kiếm theo mã vai trò"
+    },
+    "permission": {
+      "code": "Mã quyền",
+      "description": "Mô tả quyền",
+      "search_by_code": "Tìm kiếm theo mã quyền"
+    },
+    "actions": {
+      "view_permission": "Xem quyền"
+    },
+    "toast": {
+      "error": "Đã xảy ra lỗi",
+      "role_code_is_invalid": "Mã vai trò không hợp lệ"
+    }
+  }
+}

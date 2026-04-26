@@ -7,9 +7,10 @@ import {
   TemplateRef,
   signal,
   computed,
-  effect,
-  untracked,
   inject,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -37,10 +38,17 @@ export interface ITableColumn {
 }
 
 export interface ITableAction {
-  icon: string;
+  icon?: string;
+  key: string;
   titleKey: string;
   color?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger';
   condition?: (row: any) => boolean;
+}
+
+export interface ITableActionEvent<T = any> {
+  key: string;
+  row: T;
+  action: ITableAction;
 }
 
 export interface ITableConfig<T = any> {
@@ -54,6 +62,7 @@ export interface ITableConfig<T = any> {
   actionFixed?: boolean;
   showStt?: boolean;
   withAudit?: boolean;
+  autoLoad?: boolean;
 }
 
 @Component({
@@ -73,14 +82,14 @@ export interface ITableConfig<T = any> {
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })
-export class DataTableComponent {
+export class DataTableComponent implements OnChanges, OnInit {
   private translate = inject(TranslateService);
   @Input({ required: true }) config!: ITableConfig;
   @Input() externalFilter: any = {};
 
   @Output() onRowClick = new EventEmitter<any>();
   @Output() onDataLoaded = new EventEmitter<any[]>();
-  @Output() onAction = new EventEmitter<{ actionKey: string; row: any }>();
+  @Output() onAction = new EventEmitter<ITableActionEvent>();
 
   private auditColumns: ITableColumn[] = [
     { field: 'createdAt', header: 'common.createdAt', width: '180px', sortable: true },
@@ -100,6 +109,20 @@ export class DataTableComponent {
   @ContentChild('searchTemplate') searchTemplate?: TemplateRef<any>;
   @ContentChild('headerActions') headerActions?: TemplateRef<any>;
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['externalFilter'] && !changes['externalFilter'].firstChange) {
+      this.load({ ...this.pagination(), page: 0 });
+    }
+  }
+
+  ngOnInit() {
+    if (this.config.autoLoad !== false) {
+      setTimeout(() => {
+        this.load({ ...this.pagination(), page: 0 });
+      });
+    }
+  }
+
   data = signal<any[]>([]);
   totalRecords = signal(0);
   loading = signal(false);
@@ -110,8 +133,6 @@ export class DataTableComponent {
     sortField: '',
     sortOrder: '',
   });
-
-  private isFirstLoad = true;
 
   pageSizeOptions: IDropdownOption[] = [
     { label: '10 / ' + this.translate.instant('common.page'), value: 10 },
@@ -191,15 +212,15 @@ export class DataTableComponent {
     const sortOrder = event.sortOrder === 1 ? 'ASC' : event.sortOrder === -1 ? 'DESC' : '';
     const cur = this.pagination();
 
-    if (this.isFirstLoad || sortField !== cur.sortField || sortOrder !== cur.sortOrder) {
-      this.isFirstLoad = false;
+    if (sortField !== cur.sortField || sortOrder !== cur.sortOrder) {
       this.load({ ...cur, sortField, sortOrder, page: 0 });
     }
   }
 
-  handleAction(actionKey: string, row: any, event: Event) {
+  handleAction(action: ITableAction, row: any, event: Event) {
     event.stopPropagation();
-    this.onAction.emit({ actionKey, row });
+    const finalKey = action.key || action.titleKey;
+    this.onAction.emit({ key: finalKey, row, action });
   }
 
   getIndex(rowIndex: number): number {

@@ -1,13 +1,13 @@
-@if (headerActions) {
+@if (searchTemplate) {
   <div class="flex justify-end items-center gap-4 [&>div]:w-full [&>div]:flex-1 card mb-5 p-4">
-    <ng-container *ngTemplateOutlet="headerActions"></ng-container>
+    <ng-container *ngTemplateOutlet="searchTemplate"></ng-container>
   </div>
 }
 <div class="dt-wrapper">
   <!-- ── Header Bar ── -->
   <div class="dt-header">
     <div class="dt-header-search flex-1">
-      <ng-container *ngTemplateOutlet="searchTemplate"></ng-container>
+      <ng-container *ngTemplateOutlet="headerActions"></ng-container>
     </div>
   </div>
 
@@ -26,6 +26,7 @@
       [value]="data()"
       [columns]="displayColumns()"
       [lazy]="true"
+      [lazyLoadOnInit]="false"
       (onLazyLoad)="onLazyLoad($event)"
       [totalRecords]="totalRecords()"
       [loading]="false"
@@ -90,13 +91,13 @@
           @if (config.actions?.length) {
             <td class="dt-td dt-td--action" [class.dt-td--fixed]="config.actionFixed">
               <div class="dt-action-group">
-                @for (action of config.actions; track action.titleKey) {
+                @for (action of config.actions; track action.key || action.titleKey) {
                   @if (!action.condition || action.condition(rowData)) {
                     <button
                       type="button"
                       class="dt-act dt-act--{{ action.color || 'default' }}"
-                      (click)="handleAction(action.titleKey, rowData, $event)"
-                      [pTooltip]="action.titleKey | translate"
+                      (click)="handleAction(action, rowData, $event)"
+                      [pTooltip]="action.titleKey || action.key || '' | translate"
                       tooltipPosition="top"
                     >
                       <i [class]="action.icon"></i>

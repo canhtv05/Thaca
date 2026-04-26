@@ -1,6 +1,6 @@
 package com.thaca.common.dtos.internal;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter
@@ -12,7 +12,6 @@ public class PermissionDTO {
 
     private String code;
     private String description;
-
-    @JsonIgnore
+    private String roleDescription;
     private String roleCode;
 }

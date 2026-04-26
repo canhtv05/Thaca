@@ -2,6 +2,8 @@ import { Component, inject, signal, ViewChild } from '@angular/core';
 import { BreadcrumbComponent } from '../../../shared/components/breadcrumb/breadcrumb.component';
 import {
   DataTableComponent,
+  ITableAction,
+  ITableActionEvent,
   ITableConfig,
 } from '../../../shared/components/data-table/data-table.component';
 import { AppConfigService } from '../../../core/configs/app-config.service';
@@ -96,10 +98,16 @@ export class UserListComponent {
       },
     ],
     actions: [
-      { icon: 'pi pi-pencil', titleKey: 'common.button.update', color: 'secondary' },
+      {
+        icon: 'pi pi-pencil',
+        titleKey: 'common.button.update',
+        key: 'edit',
+        color: 'secondary',
+      },
       {
         icon: 'pi pi-trash',
         titleKey: 'common.button.delete',
+        key: 'delete',
         color: 'danger',
         condition: (row) => !row.isActivated,
       },
@@ -110,18 +118,18 @@ export class UserListComponent {
     this.table.refresh(this.filter());
   }
 
-  handleAction(event: { actionKey: string; row: any }) {
-    const { actionKey, row } = event;
+  handleAction(event: ITableActionEvent) {
+    const { key } = event;
 
-    switch (actionKey) {
+    switch (key) {
       case 'Edit':
-        console.log('Editing user:', row);
+        console.log('Editing user:', event.row);
         break;
       case 'Delete':
-        console.log('Deleting user:', row);
+        console.log('Deleting user:', event.row);
         break;
       default:
-        console.warn('Unknown action:', actionKey);
+        console.warn('Unknown action:', key);
     }
   }
 

@@ -31,12 +31,12 @@ public class ErrorData implements ErrorMessageRule {
     private Map<String, Object> data;
 
     @JsonAnyGetter
-    public Map<String, Object> any() {
+    public Map<String, Object> getData() {
         return data;
     }
 
     @JsonAnySetter
-    public void any(String key, Object value) {
+    public void setData(String key, Object value) {
         if (this.data == null) {
             this.data = new HashMap<>();
         }

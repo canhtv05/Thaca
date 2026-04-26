@@ -24,6 +24,7 @@
     "access_control": "Access Control",
     "admin_accounts": "Admin Accounts",
     "role_permission": "Roles & Permissions",
+    "permission": "Permissions",
     "global_configuration": "Global Config",
     "mail_settings": "Mail Settings",
     "storage_settings": "Storage Settings",

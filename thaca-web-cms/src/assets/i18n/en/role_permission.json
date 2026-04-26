@@ -1,0 +1,21 @@
+{
+  "role_permission": {
+    "role": {
+      "code": "Role code",
+      "description": "Role description",
+      "search_by_code": "Search by role code"
+    },
+    "permission": {
+      "code": "Permission code",
+      "description": "Permission description",
+      "search_by_code": "Search by permission code"
+    },
+    "actions": {
+      "view_permission": "View permission"
+    },
+    "toast": {
+      "error": "An error occurred",
+      "role_code_is_invalid": "Role code is invalid"
+    }
+  }
+}

@@ -5,8 +5,11 @@ import com.thaca.common.dtos.internal.PermissionDTO;
 
 public class PermissionMapper {
 
-    public static PermissionDTO fromEntity(Permission entity) {
-        if (entity == null) return null;
-        return PermissionDTO.builder().code(entity.getCode()).description(entity.getDescription()).build();
+    public static PermissionDTO fromEntity(Permission permission, String roleDescription) {
+        return PermissionDTO.builder()
+            .code(permission.getCode())
+            .description(permission.getDescription())
+            .roleDescription(roleDescription)
+            .build();
     }
 }

@@ -141,12 +141,21 @@ public class InternalService {
     @Transactional(readOnly = true)
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_PERMISSIONS, type = ModeType.HANDLE)
     public SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> request) {
+        String roleCode = request.getFilter() != null ? request.getFilter().getRoleCode() : null;
+        String roleDescription;
+        if (StringUtils.isNotBlank(roleCode)) {
+            roleDescription = roleRepository.findByCode(roleCode).map(Role::getDescription).orElse(null);
+        } else {
+            roleDescription = null;
+        }
         Specification<Permission> spec = createPermissonSpecification(request);
         Page<Permission> permissions = permissionRepository.findAll(spec, request.getPage().toPageable());
-        return new SearchResponse<>(
-            permissions.getContent().stream().map(PermissionMapper::fromEntity).collect(Collectors.toList()),
-            PaginationResponse.of(permissions)
-        );
+        List<PermissionDTO> content = permissions
+            .getContent()
+            .stream()
+            .map(p -> PermissionMapper.fromEntity(p, roleDescription))
+            .toList();
+        return new SearchResponse<>(content, PaginationResponse.of(permissions));
     }
 
     @Transactional(readOnly = true)
@@ -213,6 +222,11 @@ public class InternalService {
 
     private Specification<Permission> createPermissonSpecification(SearchRequest<PermissionDTO> req) {
         return (root, query, cb) -> {
+            Join<Permission, Role> roleJoin;
+            if (Permission.class.equals(query.getResultType())) {
+                root.fetch("roles", JoinType.LEFT);
+                query.distinct(true);
+            }
             List<Predicate> predicates = new ArrayList<>();
             if (req.getFilter() != null) {
                 PermissionDTO filter = req.getFilter();
@@ -220,7 +234,7 @@ public class InternalService {
                     predicates.add(cb.like(cb.lower(root.get("code")), "%" + filter.getCode().toLowerCase() + "%"));
                 }
                 if (StringUtils.isNotBlank(filter.getRoleCode())) {
-                    Join<Permission, Role> roleJoin = root.join("roles", JoinType.INNER);
+                    roleJoin = root.join("roles", JoinType.INNER);
                     predicates.add(cb.equal(roleJoin.get("code"), filter.getRoleCode()));
                 }
             }

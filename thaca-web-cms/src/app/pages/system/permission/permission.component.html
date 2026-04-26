@@ -1,0 +1,26 @@
+<div class="flex flex-col gap-4 w-full">
+  <app-breadcrumb [title]="'menu.permission'" [items]="breadcrumbItems" />
+
+  <app-data-table [config]="tableConfig" [externalFilter]="filter()">
+    <ng-template #searchTemplate>
+      <div class="flex justify-end items-end gap-4 leading-none">
+        <thaca-input
+          [(ngModel)]="filter().code"
+          [placeholder]="'role_permission.permission.search_by_code' | translate"
+          [label]="'role_permission.permission.code' | translate"
+          (keyup.enter)="onSearch()"
+        />
+        <thaca-button size="md" variant="primary" (clicked)="onSearch()">
+          <span class="text-white"> {{ 'common.button.search' | translate }} </span>
+        </thaca-button>
+      </div>
+    </ng-template>
+    <ng-template #headerActions>
+      <div class="flex justify-end items-center gap-4 leading-none">
+        <thaca-button size="md" variant="secondary">
+          <span class="text-foreground"> {{ 'common.button.export' | translate }} </span>
+        </thaca-button>
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>

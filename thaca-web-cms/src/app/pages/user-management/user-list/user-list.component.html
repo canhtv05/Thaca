@@ -6,7 +6,7 @@
     [externalFilter]="filter()"
     (onAction)="handleAction($event)"
   >
-    <ng-template #headerActions>
+    <ng-template #searchTemplate>
       <div
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 place-content-end place-items-end"
       >
@@ -44,7 +44,7 @@
         </thaca-button>
       </div>
     </ng-template>
-    <ng-template #searchTemplate>
+    <ng-template #headerActions>
       <div class="flex justify-end items-center gap-4">
         <thaca-button size="md" variant="secondary">
           <span class="text-foreground"> {{ 'common.button.export' | translate }} </span>
