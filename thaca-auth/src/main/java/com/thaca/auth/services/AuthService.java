@@ -7,7 +7,6 @@ import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.dtos.res.VerifyTokenRes;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.enums.LoginStatus;
-import com.thaca.auth.internal.services.InternalService;
 import com.thaca.auth.mappers.UserMapper;
 import com.thaca.auth.repositories.LoginHistoryRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
@@ -80,7 +79,7 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final JwtUtils jwtUtils;
     private final LoginHistoryRepository loginHistoryRepository;
-    private final InternalService internalService;
+    private final SystemUserService systemUserService;
     private final LoginHistoryService loginHistoryService;
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
@@ -370,7 +369,7 @@ public class AuthService {
             throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
         }
 
-        AuthUserDTO userInfoDTO = isCms ? internalService.getSystemProfile() : getUserProfile(loginReq.getUsername());
+        AuthUserDTO userInfoDTO = isCms ? systemUserService.getSystemProfile() : getUserProfile(loginReq.getUsername());
         loginHistoryService.saveLoginHistory(userInfoDTO, httpServletRequest, LoginStatus.SUCCESS, null, isCms);
         return new AuthenticateRes(true, userInfoDTO);
     }

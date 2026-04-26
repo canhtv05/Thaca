@@ -11,7 +11,7 @@
   <groupId>com.thaca</groupId>
   <artifactId>thaca-cms</artifactId>
   <version>1.0.0</version>
-  <name>cms</name>
+  <name>thaca-cms</name>
   <description>Thaca cms for Spring Boot</description>
   <url/>
   <licenses>

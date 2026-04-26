@@ -75,6 +75,7 @@ public class LoginHistoryService {
             .requestId(FwContextBody.get().getTransId())
             .deviceId(deviceId)
             .isNewDevice(isNewDevice)
+            .tenantId(userDTO.getTenantId())
             .build();
 
         loginHistoryRepository.save(history);

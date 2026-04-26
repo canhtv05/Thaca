@@ -1,10 +1,7 @@
 package com.thaca.cms.clients;
 
 import com.thaca.cms.constants.ServiceMethod;
-import com.thaca.common.dtos.internal.AuthUserDTO;
-import com.thaca.common.dtos.internal.PermissionDTO;
-import com.thaca.common.dtos.internal.RoleDTO;
-import com.thaca.common.dtos.internal.UserDTO;
+import com.thaca.common.dtos.internal.*;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.SearchRequest;
@@ -55,6 +52,15 @@ public class AuthClient {
     public SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> search) {
         return internalApiClient.post(
             authBaseUrl + "/cms/permissions/search",
+            search,
+            new ParameterizedTypeReference<>() {}
+        );
+    }
+
+    @FwMode(name = ServiceMethod.CMS_SEARCH_TENANTS, type = ModeType.HANDLE)
+    public SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> search) {
+        return internalApiClient.post(
+            authBaseUrl + "/cms/tenants/search",
             search,
             new ParameterizedTypeReference<>() {}
         );

@@ -11,7 +11,7 @@
   <groupId>com.thaca</groupId>
   <artifactId>thaca-auth</artifactId>
   <version>1.0.0</version>
-  <name>auth</name>
+  <name>thaca-auth</name>
   <description>Thaca auth for Spring Boot</description>
   <url/>
   <licenses>
