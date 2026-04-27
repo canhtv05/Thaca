@@ -4,6 +4,7 @@
 .popup-backdrop {
   position: fixed;
   inset: 0;
+  background: rgba(0, 0, 0, 0.48) !important;
   z-index: 2147483646;
   backdrop-filter: blur(4px);
 }
