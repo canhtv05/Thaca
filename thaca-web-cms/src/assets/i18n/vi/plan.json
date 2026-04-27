@@ -25,6 +25,14 @@
       "unlock": {
         "title": "Xác nhận mở khóa gói",
         "message": "Bạn có chắc chắn muốn mở khóa gói này không?"
+      },
+      "update": {
+        "title": "Xác nhận cập nhật gói",
+        "message": "Bạn có chắc chắn muốn cập nhật gói này không?"
+      },
+      "create": {
+        "title": "Xác nhận tạo gói",
+        "message": "Bạn có chắc chắn muốn tạo gói này không?"
       }
     },
     "toast": {
@@ -39,6 +47,18 @@
         "messageSuccess": "Gói đã được mở khóa thành công",
         "titleError": "Gói không được mở khóa",
         "messageError": "Gói không được mở khóa thành công"
+      },
+      "update": {
+        "titleSuccess": "Gói đã được cập nhật",
+        "messageSuccess": "Gói đã được cập nhật thành công",
+        "titleError": "Gói không được cập nhật",
+        "messageError": "Gói không được cập nhật thành công"
+      },
+      "create": {
+        "titleSuccess": "Gói đã được tạo",
+        "messageSuccess": "Gói đã được tạo thành công",
+        "titleError": "Gói không được tạo",
+        "messageError": "Gói không được tạo thành công"
       }
     }
   }

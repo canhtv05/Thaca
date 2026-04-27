@@ -42,7 +42,13 @@
   }
 
   <!-- Body content -->
-  <ng-content></ng-content>
+  <form
+    [formGroup]="formGroup!"
+    (ngSubmit)="handleSubmit()"
+    (keydown.enter)="onEnterKey($any($event))"
+  >
+    <ng-content></ng-content>
+  </form>
 
   <!-- Footer -->
   @if (showFooter) {

@@ -18,10 +18,31 @@ export class PlanService {
       header: createHeader(),
       body: createBody(req),
     };
-    const res = await GlobalHttp.post<IApiPayload<any>>(
+    return await GlobalHttp.post<IApiPayload<any>>(
       `${this.config.getApiUrl()}/cms/plans/lock-unlock`,
       payload,
     );
-    return res;
+  }
+
+  async update(req: IPlanDTO): Promise<IApiPayload<IPlanDTO>> {
+    const payload: IApiPayload<IPlanDTO> = {
+      header: createHeader(),
+      body: createBody(req),
+    };
+    return await GlobalHttp.post<IApiPayload<any>>(
+      `${this.config.getApiUrl()}/cms/plans/update`,
+      payload,
+    );
+  }
+
+  async create(req: IPlanDTO): Promise<IApiPayload<IPlanDTO>> {
+    const payload: IApiPayload<IPlanDTO> = {
+      header: createHeader(),
+      body: createBody(req),
+    };
+    return await GlobalHttp.post<IApiPayload<any>>(
+      `${this.config.getApiUrl()}/cms/plans/create`,
+      payload,
+    );
   }
 }

@@ -6,7 +6,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="2026-04-26-multi-tenant-1" author="CanhPC">
-        <createSequence sequenceName="plan_seq" schemaName="auth" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="plan_seq" schemaName="auth" startValue="5" incrementBy="1"/>
         <createTable tableName="plans" schemaName="auth">
             <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
@@ -26,7 +26,7 @@
             <column name="updated_at" type="TIMESTAMP"/>
         </createTable>
 
-        <createSequence sequenceName="tenant_seq" schemaName="auth" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="tenant_seq" schemaName="auth" startValue="3" incrementBy="1"/>
         <createTable tableName="tenants" schemaName="auth">
             <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>

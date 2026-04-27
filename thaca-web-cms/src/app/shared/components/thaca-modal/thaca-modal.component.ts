@@ -1,20 +1,42 @@
-import { Component, Input, Output, EventEmitter, ContentChild, TemplateRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ContentChild,
+  TemplateRef,
+  HostListener,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ThacaButtonComponent } from '../thaca-button/thaca-button.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { EscapeStackService } from '../../../core/services/escape-stack.service';
+import { isLoading } from '../../../core/stores/app.store';
 
 export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
 @Component({
   selector: 'thaca-modal',
   standalone: true,
-  imports: [CommonModule, DialogModule, ThacaButtonComponent, TranslateModule],
+  imports: [
+    CommonModule,
+    DialogModule,
+    ThacaButtonComponent,
+    TranslateModule,
+    ReactiveFormsModule,
+    FormsModule,
+  ],
   templateUrl: './thaca-modal.component.html',
   styleUrl: './thaca-modal.component.scss',
 })
 export class ThacaModalComponent {
+  private readonly escapeStack = inject(EscapeStackService);
+  private readonly _escapeHandler = () => this.handleCancel();
+
   @Input() title: string = '';
   @Input() description: string = '';
   @Input() cancelText: string = 'common.button.cancel';
@@ -28,7 +50,7 @@ export class ThacaModalComponent {
   @Input() dismissableMask: boolean = true;
   @Input() appendTo: any = 'body';
   @Input() formGroup?: FormGroup;
-  @Input() loading: boolean = false;
+  @Input() loading: boolean = isLoading();
   @Input() showFooter: boolean = true;
   @Input() headerIcon: string = '';
   @Input() maximizable: boolean = false;
@@ -39,6 +61,8 @@ export class ThacaModalComponent {
 
   /** Internal visible state — bound one-way to p-dialog [visible] */
   _visible = false;
+
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /**
    * PrimeNG fires (onHide) spuriously on component init (when visible=false).
@@ -66,8 +90,10 @@ export class ThacaModalComponent {
   /** Call via @ViewChild: myModal.hide() */
   hide() {
     if (!this._visible) return;
+    this.escapeStack.unregister(this._escapeHandler);
     this._canHide = false;
     this._visible = false;
+    this.cdr.detectChanges(); // Ép cập nhật UI ngay lập tức
     this.visibleChange.emit(false);
     this.onHide.emit();
   }
@@ -78,6 +104,7 @@ export class ThacaModalComponent {
    */
   pDialogOnShow() {
     this._canHide = true;
+    this.escapeStack.register(this._escapeHandler);
     this.onShow.emit(); // ✅ chuyển vào đây
   }
 
@@ -87,9 +114,9 @@ export class ThacaModalComponent {
    * This blocks the spurious (onHide) PrimeNG fires during initialization.
    */
   handleHide() {
-    if (!this._canHide) return;
+    if (!this._canHide || !this._visible) return;
+    this.escapeStack.unregister(this._escapeHandler);
     this._canHide = false;
-    if (!this._visible) return;
     this._visible = false;
     this.visibleChange.emit(false);
     this.onHide.emit();
@@ -101,14 +128,24 @@ export class ThacaModalComponent {
   }
 
   handleSubmit() {
-    if (this.isSubmitDisabled) return;
+    if (this.isSubmitDisabled) {
+      this.formGroup?.markAllAsTouched();
+      return;
+    }
     this.onSubmit.emit();
+  }
+
+  onEnterKey(event: KeyboardEvent) {
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'TEXTAREA') return;
+    event.preventDefault();
+    this.handleSubmit();
   }
 
   get isSubmitDisabled(): boolean {
     if (this.disableSubmit) return true;
     if (this.loading) return true;
-    if (this.formGroup) return this.formGroup.invalid;
+    if (this.formGroup && this.formGroup.invalid) return true;
     return false;
   }
 }

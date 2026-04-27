@@ -22,6 +22,7 @@ import { IPlanDTO } from '../../../core/models/plan.model';
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { Popup } from '../../../core/global/popup-notify';
 import { GlobalToast } from '../../../core/global/global-toast';
+import { isLoading } from '../../../core/stores/app.store';
 
 @Component({
   selector: 'app-plan',
@@ -46,6 +47,7 @@ export class PlanComponent {
   private planService = inject(PlanService);
   private translate = inject(TranslateService);
   private fb = inject(FormBuilder);
+  readonly isLoading = isLoading;
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
   @ViewChild('planModal') planModal!: ThacaModalComponent;
@@ -82,6 +84,7 @@ export class PlanComponent {
     name: ['', [Validators.required]],
     type: ['FREE', [Validators.required]],
     maxUsers: [0, [Validators.required, Validators.min(1)]],
+    isUpdate: [false],
   });
 
   tableConfig: ITableConfig = {
@@ -139,8 +142,9 @@ export class PlanComponent {
   }
 
   onCreate() {
-    this.planForm.reset({ type: 'FREE', maxUsers: 10 });
+    this.planForm.reset({ type: 'FREE', maxUsers: 10, isUpdate: false });
     this.planForm.get('code')?.enable();
+    this.originalValue = this.planForm.getRawValue();
     this.planModal.show();
   }
 
@@ -148,6 +152,7 @@ export class PlanComponent {
     if (event.key === 'update') {
       this.planForm.patchValue(event.row);
       this.planForm.get('code')?.disable();
+      this.planForm.get('isUpdate')?.setValue(true);
       this.originalValue = this.planForm.getRawValue();
       this.planModal.show();
     } else if (event.key === 'lock' || event.key === 'unlock') {
@@ -178,10 +183,33 @@ export class PlanComponent {
       });
     }
   }
+
   isUnchanged(): boolean {
     return (
       JSON.stringify(this.planForm.getRawValue()) === JSON.stringify(this.originalValue) ||
       this.planForm.invalid
     );
+  }
+
+  async onSubmit(): Promise<void> {
+    if (this.isUnchanged()) return;
+    const req = this.planForm.getRawValue() as unknown as IPlanDTO & { isUpdate: boolean };
+    const isUpdate = req?.isUpdate;
+    const confirmed = await Popup.confirm({
+      title: isUpdate ? 'plan.popup.update.title' : 'plan.popup.create.title',
+      message: isUpdate ? 'plan.popup.update.message' : 'plan.popup.create.message',
+      acceptText: isUpdate ? 'common.button.update' : 'common.button.create',
+      cancelText: 'common.button.cancel',
+    });
+    if (!confirmed) return;
+    const res = isUpdate ? await this.planService.update(req) : await this.planService.create(req);
+    if (res.body.status === 'OK') {
+      GlobalToast.success(
+        isUpdate ? 'plan.toast.update.messageSuccess' : 'plan.toast.create.messageSuccess',
+        isUpdate ? 'plan.toast.update.titleSuccess' : 'plan.toast.create.titleSuccess',
+      );
+      this.onSearch();
+      this.planModal.hide();
+    }
   }
 }
