@@ -2,8 +2,11 @@ package com.thaca.common.excel.result;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Result of an Excel import operation.
@@ -55,7 +58,7 @@ public class ImportResult<T> {
      * Returns error rows grouped by row index.
      */
     public Map<Integer, List<RowError>> getErrorsByRow() {
-        Map<Integer, List<RowError>> map = new java.util.LinkedHashMap<>();
+        Map<Integer, List<RowError>> map = new LinkedHashMap<>();
         for (RowError error : errors) {
             map.computeIfAbsent(error.getRowIndex(), k -> new ArrayList<>()).add(error);
         }
@@ -65,8 +68,8 @@ public class ImportResult<T> {
     /**
      * Returns the set of row indices that had at least one error.
      */
-    public java.util.Set<Integer> getErrorRowIndices() {
-        java.util.Set<Integer> set = new java.util.LinkedHashSet<>();
+    public Set<Integer> getErrorRowIndices() {
+        Set<Integer> set = new LinkedHashSet<>();
         for (RowError error : errors) {
             set.add(error.getRowIndex());
         }

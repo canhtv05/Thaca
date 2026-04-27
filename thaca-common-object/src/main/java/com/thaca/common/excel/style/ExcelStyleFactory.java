@@ -1,8 +1,6 @@
 package com.thaca.common.excel.style;
 
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFFont;
 
 /**
  * Factory for creating consistent, professional Excel cell styles.
@@ -40,7 +38,7 @@ public final class ExcelStyleFactory {
     public static CellStyle createRequiredHeaderStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         Font font = workbook.createFont();
-        font.setBold(false);
+        font.setBold(true);
         font.setFontHeightInPoints((short) 11);
         font.setFontName("Arial");
         font.setColor(IndexedColors.RED.getIndex()); // Keep red text for required fields but no bold/bg
