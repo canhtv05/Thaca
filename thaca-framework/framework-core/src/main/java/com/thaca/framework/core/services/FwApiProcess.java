@@ -16,6 +16,10 @@ public class FwApiProcess {
 
     private final FwModeRegistry registry;
 
+    public <T> T process(Void request) {
+        return process(request);
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T process(Object request) {
         String serviceName = FwServiceContext.get();

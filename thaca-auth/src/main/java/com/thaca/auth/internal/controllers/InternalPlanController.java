@@ -7,6 +7,7 @@ import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,5 +49,11 @@ public class InternalPlanController {
     @FwRequest(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_PLAN, type = RequestType.INTERNAL)
     public ResponseEntity<Void> lockUnlockPlan(PlanDTO request) {
         return ResponseEntity.ok(fwApiProcess.process(request));
+    }
+
+    @PostMapping("/cms/plans/all")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_ALL_PLANS, type = RequestType.INTERNAL)
+    public ResponseEntity<List<PlanDTO>> getAllPlans() {
+        return ResponseEntity.ok(fwApiProcess.process(Void.TYPE));
     }
 }

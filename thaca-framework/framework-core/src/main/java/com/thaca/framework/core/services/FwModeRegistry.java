@@ -2,7 +2,6 @@ package com.thaca.framework.core.services;
 
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.enums.ModeType;
-import com.thaca.framework.core.exceptions.FwException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;

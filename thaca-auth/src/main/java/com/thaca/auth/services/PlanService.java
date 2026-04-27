@@ -17,6 +17,7 @@ import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,7 @@ public class PlanService {
     @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_PLAN, type = ModeType.VALIDATE)
     public void validateCreatePlan(PlanDTO request) {
         validatePlan(request);
-        if (request.getId() != null && planRepository.existsById(request.getId())) {
+        if (planRepository.existsByCode(request.getCode())) {
             throw new FwException(CommonErrorMessage.CONFLICT);
         }
     }
@@ -90,13 +91,16 @@ public class PlanService {
     @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_PLAN, type = ModeType.VALIDATE)
     public void validateUpdatePlan(PlanDTO request) {
         validatePlan(request);
+        if (CommonUtils.isEmpty(request.getCode())) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_PLAN, type = ModeType.HANDLE)
     public PlanDTO updatePlan(PlanDTO request) {
         Plan plan = planRepository
-            .findById(request.getId())
+            .findByCode(request.getCode())
             .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
         plan.setName(request.getName());
         plan.setType(request.getType());
@@ -105,8 +109,8 @@ public class PlanService {
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_PLAN, type = ModeType.VALIDATE)
-    public void validateDeletePlan(PlanDTO request) {
-        if (request.getId() == null) {
+    public void validateLockUnlockPlan(PlanDTO request) {
+        if (CommonUtils.isEmpty(request.getCode())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
     }
@@ -115,10 +119,19 @@ public class PlanService {
     @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_PLAN, type = ModeType.HANDLE)
     public void lockUnlockPlan(PlanDTO request) {
         Plan plan = planRepository
-            .findById(request.getId())
+            .findByCode(request.getCode())
             .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
         plan.setStatus(request.getStatus());
         planRepository.save(plan);
+    }
+
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_PLANS, type = ModeType.HANDLE)
+    public List<PlanDTO> getAllPlans() {
+        return planRepository
+            .findAllActivePlansOrderByCreatedAtDesc()
+            .stream()
+            .map(PlanMapper::fromEntity)
+            .collect(Collectors.toList());
     }
 
     private Specification<Plan> createPlanSpecification(SearchRequest<PlanDTO> request) {
