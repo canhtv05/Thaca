@@ -2,9 +2,13 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.domains.Plan;
 import com.thaca.auth.domains.Tenant;
+import com.thaca.auth.domains.projections.PlanInfoProjection;
 import com.thaca.auth.mappers.TenantMapper;
+import com.thaca.auth.repositories.PlanRepository;
 import com.thaca.auth.repositories.TenantRepository;
+import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.TenantDTO;
+import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -12,7 +16,10 @@ import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,33 +36,42 @@ import org.springframework.transaction.annotation.Transactional;
 public class TenantService {
 
     private final TenantRepository tenantRepository;
+    private final PlanRepository planRepository;
 
     @Transactional(readOnly = true)
-    @FwMode(name = "cms.searchTenants", type = ModeType.HANDLE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_TENANTS, type = ModeType.HANDLE)
     public SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> request) {
         Specification<Tenant> spec = createTenantSpecification(request);
         Page<Tenant> tenants = tenantRepository.findAll(
             spec,
             request.getPage().toPageable(Sort.Direction.DESC, "updatedAt")
         );
+        Map<Long, PlanInfoProjection> planMap = planRepository
+            .findAllPlanInfo()
+            .stream()
+            .collect(Collectors.toMap(PlanInfoProjection::getId, p -> p));
         return new SearchResponse<>(
-            tenants.getContent().stream().map(TenantMapper::fromEntity).collect(Collectors.toList()),
+            tenants
+                .getContent()
+                .stream()
+                .map(tenant -> {
+                    TenantDTO tenantDTO = TenantMapper.fromEntity(tenant);
+                    PlanInfoProjection planInfo = planMap.getOrDefault(tenant.getPlan().getId(), null);
+                    tenantDTO.setPlan(
+                        planInfo != null
+                            ? PlanInfoPrj.builder().id(planInfo.getId()).name(planInfo.getName()).build()
+                            : null
+                    );
+                    return tenantDTO;
+                })
+                .collect(Collectors.toList()),
             PaginationResponse.of(tenants)
         );
     }
 
-    @Transactional(readOnly = true)
-    @FwMode(name = "cms.getTenant", type = ModeType.HANDLE)
-    public TenantDTO getTenant(Long id) {
-        return tenantRepository
-            .findById(id)
-            .map(TenantMapper::fromEntity)
-            .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
-    }
-
     @Transactional
-    @FwMode(name = "cms.saveTenant", type = ModeType.HANDLE)
-    public TenantDTO saveTenant(TenantDTO dto) {
+    @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_TENANT, type = ModeType.HANDLE)
+    public TenantDTO createTenant(TenantDTO dto) {
         Tenant tenant;
         if (dto.getId() != null) {
             tenant = tenantRepository
@@ -67,7 +83,6 @@ public class TenantService {
             if (dto.getPlanId() != null) {
                 tenant.setPlan(Plan.builder().id(dto.getPlanId()).build());
             }
-            tenant.setPlanType(dto.getPlanType());
             tenant.setExpiresAt(dto.getExpiresAt());
             tenant.setContactEmail(dto.getContactEmail());
             tenant.setLogoUrl(dto.getLogoUrl());
@@ -78,7 +93,6 @@ public class TenantService {
                 .domain(dto.getDomain())
                 .status(dto.getStatus())
                 .plan(dto.getPlanId() != null ? Plan.builder().id(dto.getPlanId()).build() : null)
-                .planType(dto.getPlanType())
                 .expiresAt(dto.getExpiresAt())
                 .contactEmail(dto.getContactEmail())
                 .logoUrl(dto.getLogoUrl())
@@ -88,10 +102,12 @@ public class TenantService {
     }
 
     @Transactional
-    @FwMode(name = "cms.deleteTenant", type = ModeType.HANDLE)
-    public void deleteTenant(Long id) {
-        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
-        tenant.setDeletedAt(java.time.LocalDateTime.now());
+    @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_TENANT, type = ModeType.HANDLE)
+    public void lockUnlockTenant(TenantDTO dto) {
+        Tenant tenant = tenantRepository
+            .findById(dto.getId())
+            .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
+        tenant.setStatus(dto.getStatus());
         tenantRepository.save(tenant);
     }
 
@@ -113,6 +129,10 @@ public class TenantService {
                 }
                 if (request.getFilter().getStatus() != null) {
                     p = cb.and(p, cb.equal(root.get("status"), request.getFilter().getStatus()));
+                }
+                if (request.getFilter().getPlanId() != null) {
+                    Join<Tenant, Plan> join = root.join("plan", JoinType.LEFT);
+                    p = cb.and(p, cb.equal(join.get("id"), request.getFilter().getPlanId()));
                 }
             }
             return p;

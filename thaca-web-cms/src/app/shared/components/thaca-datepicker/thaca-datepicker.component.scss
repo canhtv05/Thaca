@@ -151,30 +151,38 @@
 // → dùng CSS ~ để đẩy calendar icon khi clear hiện
 .thaca-clear-btn {
   position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
+  right: var(--thaca-control-px, 12px);
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
   border: none;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1;
   font-family:
     system-ui,
     -apple-system,
+    'Segoe UI',
+    Roboto,
     sans-serif;
-  color: var(--foreground);
-  background: color-mix(in srgb, var(--border) 40%, transparent);
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--border) 35%, transparent);
   cursor: pointer;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   z-index: 2;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease,
+    visibility 0.15s ease;
 
   &.is-visible {
     opacity: 1;
@@ -183,8 +191,13 @@
 
     // Đẩy calendar icon sang trái khi clear visible
     & ~ .thaca-icon--calendar {
-      right: 31px;
+      right: 36px;
     }
+  }
+
+  span {
+    display: block;
+    transform: translateY(-1px);
   }
 
   &:hover {

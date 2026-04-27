@@ -6,7 +6,6 @@
     "domain": "Domain",
     "status": "Status",
     "plan": "Plan",
-    "plan_type": "Plan Type",
     "expires_at": "Expiration Date",
     "contact_email": "Contact Email",
     "logo_url": "Logo URL",

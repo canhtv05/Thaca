@@ -11,8 +11,8 @@
     <label class="thaca-label" [for]="id">{{ label | translate }}</label>
   }
   <button type="button" class="tdd-trigger" (click)="toggle()" [disabled]="disabled" [id]="id">
-    <span class="tdd-trigger-label" [class.tdd-placeholder]="!selectedLabel()">
-      {{ selectedLabel() ?? placeholder | translate }}
+    <span class="tdd-trigger-label" [class.tdd-placeholder]="!selectedLabel">
+      {{ selectedLabel ?? placeholder | translate }}
     </span>
     <span
       class="tdd-clear-btn"

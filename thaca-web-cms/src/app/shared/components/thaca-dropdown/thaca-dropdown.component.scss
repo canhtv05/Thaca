@@ -24,7 +24,7 @@
 
   &.tdd-disabled {
     opacity: 0.45;
-    pointer-events: none;
+    cursor: not-allowed;
   }
 }
 
@@ -51,6 +51,11 @@
     border-color: color-mix(in oklch, var(--primary) 55%, transparent);
   }
 
+  .tdd-disabled & {
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   .tdd-open & {
     background: color-mix(in oklch, var(--primary) 15%);
     border-color: var(--primary);
@@ -74,6 +79,11 @@
   align-items: center;
   color: var(--primary);
   flex-shrink: 0;
+
+  .tdd-disabled & {
+    color: var(--muted-foreground);
+    opacity: 0.5;
+  }
 
   svg {
     width: 13px;

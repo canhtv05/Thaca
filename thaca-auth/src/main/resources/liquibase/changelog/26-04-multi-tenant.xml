@@ -40,7 +40,6 @@
             <column name="domain" type="VARCHAR(255)"/>
             <column name="status" type="VARCHAR(50)" defaultValue="ACTIVE"/>
             <column name="plan_id" type="BIGINT"/>
-            <column name="plan_type" type="VARCHAR(50)"/>
             <column name="expires_at" type="TIMESTAMP"/>
             <column name="contact_email" type="VARCHAR(255)"/>
             <column name="logo_url" type="VARCHAR(255)"/>
@@ -80,7 +79,6 @@
             <column name="domain" type="STRING"/>
             <column name="status" type="STRING"/>
             <column name="plan_id" type="NUMERIC"/>
-            <column name="plan_type" type="STRING"/>
             <column name="created_by" type="STRING"/>
             <column name="created_at" type="DATE"/>
             <column name="updated_by" type="STRING"/>

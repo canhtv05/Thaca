@@ -8,7 +8,6 @@ import {
   signal,
   computed,
   inject,
-  ChangeDetectorRef,
   NgZone,
   AfterViewInit,
 } from '@angular/core';
@@ -85,7 +84,6 @@ export interface ITableConfig<T = any> {
 })
 export class DataTableComponent implements AfterViewInit {
   private translate = inject(TranslateService);
-  private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
   @Input({ required: true }) config!: ITableConfig;
   @Input() externalFilter: any = {};
@@ -163,12 +161,11 @@ export class DataTableComponent implements AfterViewInit {
     this.zone.run(async () => {
       this.pagination.set(pageReq);
       this.loading.set(true);
-      // Sync PrimeNG sort state before CD to prevent icon revert
+      // Sync PrimeNG sort state to prevent icon revert
       if (this.pTable) {
         this.pTable.sortField = pageReq.sortField;
         this.pTable.sortOrder = pageReq.sortOrder === 'DESC' ? -1 : 1;
       }
-      this.cdr.detectChanges();
 
       const searchRequest: ISearchRequest<any> = {
         filter: {
@@ -195,13 +192,11 @@ export class DataTableComponent implements AfterViewInit {
         }
       } finally {
         this.loading.set(false);
-        // Sync PrimeNG's internal sort state with the actual request
-        // so cdr.detectChanges() doesn't revert the sort icon
+        // Sync PrimeNG sort state after data load
         if (this.pTable) {
           this.pTable.sortField = pageReq.sortField;
           this.pTable.sortOrder = pageReq.sortOrder === 'DESC' ? -1 : 1;
         }
-        this.cdr.detectChanges();
       }
     });
   }

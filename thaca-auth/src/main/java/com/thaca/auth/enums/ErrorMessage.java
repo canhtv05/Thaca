@@ -209,6 +209,13 @@ public enum ErrorMessage implements ErrorMessageRule {
         "Plan đã bị khóa không thể cập nhật. Vui lòng mở khóa plan để cập nhật",
         "Plan is inactive",
         "Plan is inactive cannot update. Please unlock plan to update"
+    ),
+    PLAN_CODE_INVALID(
+        "PLAN.CODE.INVALID",
+        "Mã gói không hợp lệ",
+        "Mã gói không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9",
+        "Plan code invalid",
+        "Plan code invalid. It must contain only letters A-Z, a-z, 0-9"
     );
 
     private final String code;

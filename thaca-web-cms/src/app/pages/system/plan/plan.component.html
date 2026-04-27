@@ -25,6 +25,7 @@
           [options]="planTypeOptions"
           [placeholder]="'plan.type' | translate"
           class="w-full"
+          (onChange)="onSearch()"
         ></thaca-dropdown>
         <thaca-dropdown
           [label]="'plan.status' | translate"
@@ -32,6 +33,7 @@
           [options]="statusOptions"
           [placeholder]="'plan.status' | translate"
           class="w-full"
+          (onChange)="onSearch()"
         ></thaca-dropdown>
         <thaca-button size="md" class="w-full" variant="primary" (clicked)="onSearch()">
           <span class="text-white">{{ 'common.button.search' | translate }}</span>
@@ -71,7 +73,12 @@
           formControlName="code"
           [placeholder]="'plan.code' | translate"
         ></thaca-input>
-        <validation-message [control]="planForm.get('code')"></validation-message>
+        <validation-message
+          [control]="planForm.get('code')"
+          [customMessages]="{
+            pattern: 'plan.validation.codePattern',
+          }"
+        ></validation-message>
       </div>
       <div class="form-control">
         <thaca-input

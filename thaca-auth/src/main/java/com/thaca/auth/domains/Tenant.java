@@ -1,6 +1,5 @@
 package com.thaca.auth.domains;
 
-import com.thaca.common.enums.PlanType;
 import com.thaca.common.enums.TenantStatus;
 import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
@@ -41,10 +40,6 @@ public class Tenant extends BaseEntityAudit {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id")
     private Plan plan;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "plan_type")
-    private PlanType planType;
 
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;

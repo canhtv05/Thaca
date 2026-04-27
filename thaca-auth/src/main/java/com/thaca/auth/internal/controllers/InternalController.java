@@ -64,12 +64,6 @@ public class InternalController {
         return ResponseEntity.ok(fwApiProcess.process(criteria));
     }
 
-    @PostMapping("/cms/tenants/search")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_TENANTS, type = RequestType.INTERNAL)
-    public ResponseEntity<SearchResponse<TenantDTO>> searchTenants(SearchRequest<TenantDTO> criteria) {
-        return ResponseEntity.ok(fwApiProcess.process(criteria));
-    }
-
     // làm sau
     @PostMapping("/cms/users/lock")
     @FwRequest(name = InternalMethod.INTERNAL_CMS_LOCK_USER, type = RequestType.INTERNAL)

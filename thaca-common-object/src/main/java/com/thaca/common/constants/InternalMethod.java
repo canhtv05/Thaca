@@ -11,7 +11,6 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_LOCK_USER = "internal.cmsLockUser";
     public static final String INTERNAL_CMS_UNLOCK_USER = "internal.cmsUnlockUser";
     public static final String INTERNAL_CMS_GET_PROFILE = "internal.cmsGetProfile";
-    public static final String INTERNAL_CMS_SEARCH_TENANTS = "internal.cmsSearchTenants";
 
     public static final String INTERNAL_CMS_SEARCH_PLANS = "internal.cmsSearchPlans";
     public static final String INTERNAL_CMS_GET_PLAN = "internal.cmsGetPlan";
@@ -20,4 +19,12 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_LOCK_UNLOCK_PLAN = "internal.cmsLockUnlockPlan";
     public static final String INTERNAL_CMS_GET_ALL_PLANS = "internal.cmsGetAllPlans";
     public static final String INTERNAL_CMS_EXPORT_PLAN = "internal.cmsExportPlan";
+
+    public static final String INTERNAL_CMS_SEARCH_TENANTS = "internal.cmsSearchTenants";
+    public static final String INTERNAL_CMS_CREATE_TENANT = "internal.cmsCreateTenant";
+    public static final String INTERNAL_CMS_UPDATE_TENANT = "internal.cmsUpdateTenant";
+    public static final String INTERNAL_CMS_LOCK_UNLOCK_TENANT = "internal.cmsLockUnlockTenant";
+    public static final String INTERNAL_CMS_GET_TENANT = "internal.cmsGetTenant";
+    public static final String INTERNAL_CMS_GET_ALL_TENANTS = "internal.cmsGetAllTenants";
+    public static final String INTERNAL_CMS_EXPORT_TENANT = "internal.cmsExportTenant";
 }

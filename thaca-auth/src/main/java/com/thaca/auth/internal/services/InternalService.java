@@ -3,13 +3,11 @@ package com.thaca.auth.internal.services;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.services.RolePermissionService;
 import com.thaca.auth.services.SystemUserService;
-import com.thaca.auth.services.TenantService;
 import com.thaca.auth.services.UserService;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.AuthUserDTO;
 import com.thaca.common.dtos.internal.PermissionDTO;
 import com.thaca.common.dtos.internal.RoleDTO;
-import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.VerifyEmailTokenDTO;
 import com.thaca.common.dtos.search.SearchRequest;
@@ -29,7 +27,6 @@ public class InternalService {
 
     private final UserService userService;
     private final RolePermissionService rolePermissionService;
-    private final TenantService tenantService;
     private final SystemUserService systemUserService;
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_ACTIVE_USER, type = ModeType.VALIDATE)
@@ -85,11 +82,5 @@ public class InternalService {
     @FwMode(name = InternalMethod.INTERNAL_CMS_UNLOCK_USER, type = ModeType.HANDLE)
     public void unlockUser(Long id) {
         userService.unlockUser(id);
-    }
-
-    @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_TENANTS, type = ModeType.HANDLE)
-    public SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> request) {
-        return tenantService.searchTenants(request);
     }
 }

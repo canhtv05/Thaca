@@ -1,0 +1,25 @@
+@if (label) {
+  <label class="thaca-label" [for]="id">
+    {{ label }}
+    @if (required) {
+      <span class="thaca-required">(*)</span>
+    }
+  </label>
+}
+
+<div
+  class="thaca-textarea-wrap"
+  [class.is-error]="hasError()"
+  [class.is-disabled]="disabled"
+>
+  <textarea
+    class="thaca-textarea"
+    [id]="id"
+    [placeholder]="placeholder"
+    [value]="value()"
+    [disabled]="disabled"
+    [rows]="rows"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+  ></textarea>
+</div>

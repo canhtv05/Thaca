@@ -1,9 +1,8 @@
-import { Component, inject, signal, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MenuItem } from 'primeng/api';
-import { DatePickerModule } from 'primeng/datepicker';
 import { BreadcrumbComponent } from '../../../shared/components/breadcrumb/breadcrumb.component';
 import {
   DataTableComponent,
@@ -18,8 +17,15 @@ import {
 } from '../../../shared/components/thaca-dropdown/thaca-dropdown.component';
 import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thaca-modal.component';
 import { AppConfigService } from '../../../core/configs/app-config.service';
-import { TenantService } from '../../../core/services/tenant.service';
+import { TenantService } from './tenant.service';
 import { TenantDTO } from '../../../core/models/tenant.model';
+import { PlanService } from '../plan/plan.service';
+import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
+import { ThacaDatepickerComponent } from '../../../shared/components/thaca-datepicker/thaca-datepicker.component';
+import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
+import { Popup } from '../../../core/global/popup-notify';
+import { GlobalToast } from '../../../core/global/global-toast';
+import { isLoading } from '../../../core/stores/app.store';
 
 @Component({
   selector: 'app-tenant',
@@ -29,21 +35,28 @@ import { TenantDTO } from '../../../core/models/tenant.model';
     FormsModule,
     ReactiveFormsModule,
     TranslateModule,
-    DatePickerModule,
     BreadcrumbComponent,
     DataTableComponent,
     ThacaButtonComponent,
     ThacaInputComponent,
     ThacaDropdownComponent,
     ThacaModalComponent,
+    ValidationMessageComponent,
+    ThacaDatepickerComponent,
+    ThacaTextareaComponent,
   ],
   templateUrl: './tenant.component.html',
 })
-export class TenantComponent {
+export class TenantComponent implements OnInit {
   private configService = inject(AppConfigService);
   private tenantService = inject(TenantService);
   private translate = inject(TranslateService);
   private fb = inject(FormBuilder);
+  private planService = inject(PlanService);
+  readonly isLoading = isLoading;
+
+  private originalValue: any;
+  planOptions = signal<IDropdownOption[]>([]);
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
   @ViewChild('tenantModal') tenantModal!: ThacaModalComponent;
@@ -57,6 +70,7 @@ export class TenantComponent {
     code: '',
     name: '',
     status: null,
+    planId: null,
   });
 
   statusOptions: IDropdownOption[] = [
@@ -66,20 +80,13 @@ export class TenantComponent {
     { label: 'common.status.inactive', value: 'INACTIVE' },
   ];
 
-  planTypeOptions: IDropdownOption[] = [
-    { label: 'tenant.plans.FREE', value: 'FREE' },
-    { label: 'tenant.plans.BASIC', value: 'BASIC' },
-    { label: 'tenant.plans.PRO', value: 'PRO' },
-    { label: 'tenant.plans.ENTERPRISE', value: 'ENTERPRISE' },
-  ];
-
   tenantForm = this.fb.group({
     id: [null],
-    code: ['', [Validators.required]],
+    code: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     name: ['', [Validators.required]],
     domain: [''],
-    status: ['ACTIVE', [Validators.required]],
-    planType: ['FREE'],
+    status: [{ value: 'ACTIVE', disabled: true }, [Validators.required]],
+    planId: [null, [Validators.required]],
     expiresAt: [null],
     contactEmail: ['', [Validators.email]],
     logoUrl: [''],
@@ -90,16 +97,25 @@ export class TenantComponent {
     rows: 10,
     showStt: true,
     withAudit: true,
+    actionFixed: true,
     columns: [
       { field: 'code', header: 'tenant.code', sortable: true, width: '150px' },
       { field: 'name', header: 'tenant.name', sortable: true },
       { field: 'domain', header: 'tenant.domain' },
       {
-        field: 'planType',
-        header: 'tenant.plan_type',
+        field: 'plan.name',
+        header: 'tenant.plan',
         render: (row: TenantDTO) => {
-          if (!row.planType) return '';
-          return this.translate.instant(`tenant.plans.${row.planType}`);
+          if (!row.plan) return '';
+          return row.plan.name;
+        },
+      },
+      {
+        field: 'expiresAt',
+        header: 'tenant.expires_at',
+        render: (row: TenantDTO) => {
+          if (!row.expiresAt) return this.translate.instant('common.infinite');
+          return row.expiresAt;
         },
       },
       {
@@ -118,12 +134,26 @@ export class TenantComponent {
     ],
   };
 
+  async ngOnInit(): Promise<void> {
+    const plans = await this.planService.getAll();
+    if (plans.body.status === 'OK') {
+      this.planOptions.set(
+        plans.body.data.map((plan) => ({
+          label: plan.name,
+          value: plan.id,
+        })),
+      );
+    }
+  }
+
   onSearch() {
     this.table.refresh(this.filter());
   }
 
   onCreate() {
-    this.tenantForm.reset({ status: 'ACTIVE', planType: 'FREE' });
+    this.tenantForm.reset({ status: 'ACTIVE' });
+    this.tenantForm.get('code')?.enable();
+    this.originalValue = this.tenantForm.getRawValue();
     this.tenantModal.show();
   }
 
@@ -133,14 +163,56 @@ export class TenantComponent {
         ...event.row,
         expiresAt: event.row.expiresAt ? new Date(event.row.expiresAt) : null,
       });
+      this.tenantForm.get('code')?.disable();
+      this.originalValue = this.tenantForm.getRawValue();
       this.tenantModal.show();
     } else if (event.key === 'delete') {
-      if (confirm(this.translate.instant('common.confirm_delete'))) {
-        this.tenantService.delete(event.row.id).subscribe(() => {
-          this.onSearch();
-        });
-      }
+      Popup.confirm({
+        title: 'tenant.popup.delete.title',
+        message: 'common.confirm_delete',
+        acceptText: 'common.button.delete',
+        cancelText: 'common.button.cancel',
+      }).then((result) => {
+        if (result) {
+          this.tenantService.delete(event.row.id).subscribe(() => {
+            GlobalToast.success(
+              'tenant.toast.delete.messageSuccess',
+              'tenant.toast.delete.titleSuccess',
+            );
+            this.onSearch();
+          });
+        }
+      });
     }
+  }
+
+  isUnchanged(): boolean {
+    return (
+      JSON.stringify(this.tenantForm.getRawValue()) === JSON.stringify(this.originalValue) ||
+      this.tenantForm.invalid
+    );
+  }
+
+  async onSubmit() {
+    if (this.isUnchanged()) return;
+    const isUpdate = !!this.tenantForm.value.id;
+    const confirmed = await Popup.confirm({
+      title: isUpdate ? 'tenant.popup.update.title' : 'tenant.popup.create.title',
+      message: isUpdate ? 'tenant.popup.update.message' : 'tenant.popup.create.message',
+      acceptText: isUpdate ? 'common.button.update' : 'common.button.create',
+      cancelText: 'common.button.cancel',
+    });
+    if (!confirmed) return;
+
+    const data = this.tenantForm.getRawValue() as any;
+    this.tenantService.save(data).subscribe(() => {
+      GlobalToast.success(
+        isUpdate ? 'tenant.toast.update.messageSuccess' : 'tenant.toast.create.messageSuccess',
+        isUpdate ? 'tenant.toast.update.titleSuccess' : 'tenant.toast.create.titleSuccess',
+      );
+      this.tenantModal.hide();
+      this.onSearch();
+    });
   }
 
   onSave() {

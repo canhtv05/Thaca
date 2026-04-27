@@ -11,6 +11,9 @@
       "edit": "Chỉnh sửa gói",
       "delete": "Xóa gói"
     },
+    "validation": {
+      "codePattern": "Mã gói không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9"
+    },
     "plans": {
       "FREE": "Miễn phí",
       "BASIC": "Cơ bản",

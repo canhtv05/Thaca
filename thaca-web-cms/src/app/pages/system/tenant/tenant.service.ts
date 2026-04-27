@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ISearchRequest, ISearchResponse } from '../models/common.model';
-import { TenantDTO } from '../models/tenant.model';
+import { ISearchRequest, ISearchResponse } from '../../../core/models/common.model';
+import { TenantDTO } from '../../../core/models/tenant.model';
 
 @Injectable({
   providedIn: 'root',

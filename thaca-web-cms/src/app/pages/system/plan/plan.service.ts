@@ -50,4 +50,15 @@ export class PlanService {
     const url = `${this.config.getApiUrl()}/cms/plans/export`;
     await this.commonService.downloadFile(url, 'thaca-plans-export.xlsx', req || {});
   }
+
+  async getAll(): Promise<IApiPayload<IPlanDTO[]>> {
+    const payload: IApiPayload<any> = {
+      header: createHeader(),
+      body: createBody({}),
+    };
+    return await GlobalHttp.post<IApiPayload<IPlanDTO[]>>(
+      `${this.config.getApiUrl()}/cms/plans/all`,
+      payload,
+    );
+  }
 }

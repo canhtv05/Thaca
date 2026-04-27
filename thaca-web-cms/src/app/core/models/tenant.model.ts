@@ -4,8 +4,10 @@ export interface TenantDTO {
   name: string;
   domain?: string;
   status: 'ACTIVE' | 'INACTIVE';
-  plan?: number;
-  planType?: 'FREE' | 'BASIC' | 'PRO' | 'ENTERPRISE';
+  plan?: {
+    id: number;
+    name: string;
+  };
   expiresAt?: string;
   contactEmail?: string;
   logoUrl?: string;

@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PlanService {
 
     private final PlanRepository planRepository;
+    private final String REGEX_CODE = "^[a-zA-Z0-9]+$";
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_PLANS, type = ModeType.VALIDATE)
     public void validateSearchPlans(SearchRequest<PlanDTO> request) {
@@ -270,6 +271,9 @@ public class PlanService {
     private void validatePlan(PlanDTO request) {
         if (CommonUtils.isEmpty(request.getCode(), request.getName(), request.getType())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        if (!request.getCode().matches(REGEX_CODE)) {
+            throw new FwException(ErrorMessage.PLAN_CODE_INVALID);
         }
         if (request.getType() == null) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);

@@ -11,6 +11,7 @@ import com.thaca.framework.core.services.FwApiProcess;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,13 @@ public class PlanController {
     @FwRequest(name = ServiceMethod.CMS_GET_PLAN, type = RequestType.PROTECTED)
     public ResponseEntity<PlanDTO> get(PlanDTO plan) {
         return ResponseEntity.ok(process.process(plan));
+    }
+
+    @PostMapping("/all")
+    @FwSecurity(isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.CMS_GET_ALL_PLANS, type = RequestType.PROTECTED)
+    public ResponseEntity<List<PlanDTO>> getAll() {
+        return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/create")

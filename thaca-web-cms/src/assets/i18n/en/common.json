@@ -45,6 +45,7 @@
       "inactive": "Inactive",
       "all": "All",
       "suspended": "Suspended"
-    }
+    },
+    "infinite": "Infinite"
   }
 }

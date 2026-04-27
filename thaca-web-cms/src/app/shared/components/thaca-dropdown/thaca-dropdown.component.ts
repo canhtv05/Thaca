@@ -4,7 +4,6 @@ import {
   Output,
   EventEmitter,
   signal,
-  computed,
   HostListener,
   forwardRef,
   ElementRef,
@@ -76,10 +75,10 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
   private _onChange: (v: any) => void = () => {};
   private _onTouched: () => void = () => {};
 
-  selectedLabel = computed(() => {
+  get selectedLabel(): string | null {
     const opt = this.options.find((o) => o.value === this.value());
     return opt ? opt.label : null;
-  });
+  }
 
   // ── AfterViewChecked: move panel ra body ngay sau khi Angular render nó ──
 
