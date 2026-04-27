@@ -75,7 +75,16 @@ export class Sidebar implements OnInit, OnDestroy {
             },
           ],
         },
-        { label: 'menu.system_logs', icon: 'pi pi-server', routerLink: ['/system/logs'] },
+        {
+          label: 'menu.system_logs',
+          icon: 'pi pi-server',
+          routerLink: ['/system/logs'],
+        },
+        {
+          label: 'Excel Engine Test',
+          icon: 'pi pi-file-excel',
+          routerLink: ['/system/excel-test'],
+        },
       ];
       if (isSuperAdmin) {
         systemAdminItems.unshift({

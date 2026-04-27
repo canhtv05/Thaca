@@ -46,14 +46,16 @@ public class FwFilter extends OncePerRequestFilter {
         HttpServletResponse response,
         FilterChain filterChain
     ) throws ServletException, IOException {
+        String contentType = request.getContentType();
+        if (contentType == null || !contentType.toLowerCase().contains(MediaType.APPLICATION_JSON_VALUE)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         CachedBodyRequestWrapper requestWrapper = new CachedBodyRequestWrapper(request);
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
 
         byte[] requestBody = requestWrapper.getCachedBody();
-        if (!MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(request.getContentType())) {
-            filterChain.doFilter(requestWrapper, responseWrapper);
-            return;
-        }
         ApiPayload<?> envelope = JsonF.jsonToObject(requestBody, ApiPayload.class);
         String transId = resolveTransId(envelope);
         String traceId = resolveTraceId(request);

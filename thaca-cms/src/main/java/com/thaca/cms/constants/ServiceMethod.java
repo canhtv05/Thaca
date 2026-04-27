@@ -29,4 +29,8 @@ public class ServiceMethod {
     public static final String CMS_GET_USER_PERMISSION = "cms.getUserPermission";
     public static final String CMS_UPDATE_USER_PERMISSION = "cms.updateUserPermission";
     public static final String CMS_GET_PROFILE = "cms.getProfile";
+
+    public static final String CMS_EXCEL_GENERATE_TEMPLATE = "cms.excel.generateTemplate";
+    public static final String CMS_EXCEL_IMPORT = "cms.excel.import";
+    public static final String CMS_EXCEL_EXPORT = "cms.excel.export";
 }

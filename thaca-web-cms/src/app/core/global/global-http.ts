@@ -48,14 +48,15 @@ export class GlobalHttp {
         }),
       );
     }
+    const isFormData = body instanceof FormData;
     const response = await fetch(url, {
       method,
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...options.headers,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: isFormData ? body : body ? JSON.stringify(body) : undefined,
     });
     const data = await this.parseResponse(response);
     if (!response.ok) {
