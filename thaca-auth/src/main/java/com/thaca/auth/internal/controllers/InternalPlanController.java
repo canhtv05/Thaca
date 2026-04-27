@@ -7,6 +7,9 @@ import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
+import com.thaca.framework.core.utils.CommonUtils;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +58,11 @@ public class InternalPlanController {
     @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_ALL_PLANS, type = RequestType.INTERNAL)
     public ResponseEntity<List<PlanDTO>> getAllPlans() {
         return ResponseEntity.ok(fwApiProcess.process(null));
+    }
+
+    @PostMapping("/cms/plans/export")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_EXPORT_PLAN, type = RequestType.INTERNAL)
+    public void exportPlan(SearchRequest<PlanDTO> request, HttpServletResponse response) throws IOException {
+        CommonUtils.writeExcelResponse(response, fwApiProcess.process(request), "thaca-plans-export.xlsx");
     }
 }

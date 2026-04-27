@@ -19,4 +19,5 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_UPDATE_PLAN = "internal.cmsUpdatePlan";
     public static final String INTERNAL_CMS_LOCK_UNLOCK_PLAN = "internal.cmsLockUnlockPlan";
     public static final String INTERNAL_CMS_GET_ALL_PLANS = "internal.cmsGetAllPlans";
+    public static final String INTERNAL_CMS_EXPORT_PLAN = "internal.cmsExportPlan";
 }

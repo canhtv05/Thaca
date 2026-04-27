@@ -8,6 +8,9 @@ import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.annotations.FwSecurity;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
+import com.thaca.framework.core.utils.CommonUtils;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -56,5 +59,12 @@ public class PlanController {
     @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_PLAN, type = RequestType.PROTECTED)
     public ResponseEntity<Void> lockUnlock(PlanDTO plan) {
         return ResponseEntity.ok(process.process(plan));
+    }
+
+    @PostMapping("/export")
+    @FwSecurity(isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_PLAN, type = RequestType.PROTECTED)
+    public void export(SearchRequest<PlanDTO> request, HttpServletResponse response) throws IOException {
+        CommonUtils.writeExcelResponse(response, process.process(request), "thaca-plans-export.xlsx");
     }
 }

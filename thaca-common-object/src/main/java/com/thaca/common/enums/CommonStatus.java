@@ -25,4 +25,8 @@ public enum CommonStatus implements EnumRule {
     public String getNameEn() {
         return this.nameEn;
     }
+
+    public String getLabel(boolean isVietnamese) {
+        return isVietnamese ? this.nameVi : this.nameEn;
+    }
 }

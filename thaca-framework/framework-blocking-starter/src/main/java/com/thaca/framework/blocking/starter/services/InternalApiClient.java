@@ -35,6 +35,11 @@ public class InternalApiClient {
     private final FrameworkProperties frameworkProperties;
 
     public <T, R> R post(String url, T requestData, ParameterizedTypeReference<ApiPayload<R>> responseType) {
+        if (isByteType(responseType)) {
+            @SuppressWarnings("unchecked")
+            R result = (R) postRaw(url, requestData);
+            return result;
+        }
         ApiHeader header = FwContextHeader.get();
         if (header == null) {
             header = ApiHeader.builder().build();
@@ -52,6 +57,38 @@ public class InternalApiClient {
             );
             forwardCookies(response);
             return unwrap(response);
+        } catch (HttpStatusCodeException ex) {
+            handleError(ex);
+            throw ex;
+        }
+    }
+
+    private boolean isByteType(ParameterizedTypeReference<?> responseType) {
+        java.lang.reflect.Type type = responseType.getType();
+        if (type instanceof java.lang.reflect.ParameterizedType pt) {
+            return pt.getActualTypeArguments().length > 0 && pt.getActualTypeArguments()[0].equals(byte[].class);
+        }
+        return false;
+    }
+
+    public <T> byte[] postRaw(String url, T requestData) {
+        ApiHeader header = FwContextHeader.get();
+        if (header == null) {
+            header = ApiHeader.builder().build();
+        }
+        Object safeData = (requestData != null) ? requestData : new HashMap<>();
+        ApiBody<Object> body = ApiBody.builder().transId(MDC.get("transId")).status("OK").data(safeData).build();
+        ApiPayload<Object> payload = ApiPayload.builder().header(header).body(body).build();
+        HttpHeaders httpHeaders = buildHeaders();
+        try {
+            ResponseEntity<byte[]> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                new HttpEntity<>(payload, httpHeaders),
+                byte[].class
+            );
+            forwardCookies(response);
+            return response.getBody();
         } catch (HttpStatusCodeException ex) {
             handleError(ex);
             throw ex;

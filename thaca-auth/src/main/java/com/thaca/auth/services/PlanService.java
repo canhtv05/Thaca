@@ -12,13 +12,23 @@ import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.CommonStatus;
 import com.thaca.common.enums.PlanType;
+import com.thaca.common.excel.ExcelEngine;
+import com.thaca.common.excel.schema.ExcelColumn;
+import com.thaca.common.excel.schema.ExcelDataType;
+import com.thaca.common.excel.schema.ExcelSchema;
 import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.context.FwContextHeader;
+import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -136,6 +146,98 @@ public class PlanService {
             .stream()
             .map(PlanMapper::fromEntity)
             .collect(Collectors.toList());
+    }
+
+    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_PLAN, type = ModeType.HANDLE)
+    public byte[] exportPlan(SearchRequest<PlanDTO> request) throws IOException {
+        Specification<Plan> spec = createPlanSpecification(request);
+        List<PlanDTO> plans = planRepository
+            .findAll(spec, Sort.by(Sort.Direction.DESC, "updatedAt"))
+            .stream()
+            .map(PlanMapper::fromEntity)
+            .collect(Collectors.toList());
+        List<Map<String, Object>> rows = new ArrayList<>();
+        ApiHeader header = FwContextHeader.get();
+        boolean isVietnamese = "vi".equals(header.getLanguage());
+        for (PlanDTO plan : plans) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("code", plan.getCode());
+            row.put("name", plan.getName());
+            row.put("type", plan.getType().getValue());
+            row.put("maxUsers", plan.getMaxUsers());
+            row.put("status", plan.getStatus().getLabel(isVietnamese));
+            row.put("createdAt", plan.getCreatedAt());
+            row.put("createdBy", plan.getCreatedBy());
+            row.put("updatedAt", plan.getUpdatedAt());
+            row.put("updatedBy", plan.getUpdatedBy());
+            rows.add(row);
+        }
+        return ExcelEngine.exportData(buildSchema(isVietnamese), rows);
+    }
+
+    private ExcelSchema buildSchema(boolean isVietnamese) {
+        return ExcelSchema.builder()
+            .sheetName(ObjectUtils.notEqual(isVietnamese, false) ? "Danh sách kế hoạch" : "Plans")
+            .addColumn(
+                ExcelColumn.builder("code", ObjectUtils.notEqual(isVietnamese, false) ? "Mã" : "Code")
+                    .required()
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("name", ObjectUtils.notEqual(isVietnamese, false) ? "Tên" : "Name")
+                    .required()
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("type", ObjectUtils.notEqual(isVietnamese, false) ? "Loại" : "Type")
+                    .required()
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder(
+                    "maxUsers",
+                    ObjectUtils.notEqual(isVietnamese, false) ? "Số lượng người dùng tối đa" : "Max Users"
+                )
+                    .required()
+                    .dataType(ExcelDataType.NUMBER)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("status", ObjectUtils.notEqual(isVietnamese, false) ? "Trạng thái" : "Status")
+                    .required()
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("createdAt", ObjectUtils.notEqual(isVietnamese, false) ? "Ngày tạo" : "Created At")
+                    .dataType(ExcelDataType.DATE)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("createdBy", ObjectUtils.notEqual(isVietnamese, false) ? "Người tạo" : "Created By")
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder(
+                    "updatedAt",
+                    ObjectUtils.notEqual(isVietnamese, false) ? "Ngày cập nhật" : "Updated At"
+                )
+                    .dataType(ExcelDataType.DATE)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder(
+                    "updatedBy",
+                    ObjectUtils.notEqual(isVietnamese, false) ? "Người cập nhật" : "Updated By"
+                )
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .build();
     }
 
     private Specification<Plan> createPlanSpecification(SearchRequest<PlanDTO> request) {

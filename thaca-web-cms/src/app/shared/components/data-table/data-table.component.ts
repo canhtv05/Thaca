@@ -252,6 +252,17 @@ export class DataTableComponent {
     return page * size + rowIndex + 1;
   }
 
+  getSearchRequest(): ISearchRequest<any> {
+    return {
+      filter: {
+        ...this.config.defaultFilter,
+        ...this.config.fixedFilter,
+        ...this.externalFilter,
+      },
+      page: this.pagination(),
+    };
+  }
+
   min(a: number, b: number) {
     return Math.min(a, b);
   }

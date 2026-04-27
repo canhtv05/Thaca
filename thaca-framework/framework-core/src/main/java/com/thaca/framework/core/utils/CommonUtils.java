@@ -3,6 +3,8 @@ package com.thaca.framework.core.utils;
 import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.enums.AuthKey;
 import com.thaca.framework.core.constants.CommonConstants;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -10,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.http.HttpHeaders;
 
 public class CommonUtils {
 
@@ -101,5 +104,13 @@ public class CommonUtils {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    public static void writeExcelResponse(HttpServletResponse response, byte[] content, String fileName)
+        throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+        response.getOutputStream().write(content);
+        response.flushBuffer();
     }
 }
