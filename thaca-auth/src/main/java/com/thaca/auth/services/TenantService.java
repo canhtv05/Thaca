@@ -36,7 +36,7 @@ public class TenantService {
         Specification<Tenant> spec = createTenantSpecification(request);
         Page<Tenant> tenants = tenantRepository.findAll(
             spec,
-            request.getPage().toPageable(Sort.Direction.DESC, "createdAt")
+            request.getPage().toPageable(Sort.Direction.DESC, "updatedAt")
         );
         return new SearchResponse<>(
             tenants.getContent().stream().map(TenantMapper::fromEntity).collect(Collectors.toList()),

@@ -111,7 +111,12 @@ export class PlanComponent {
       },
     ],
     actions: [
-      { icon: 'pi pi-pencil', key: 'update', titleKey: 'common.button.update' },
+      {
+        icon: 'pi pi-pencil',
+        key: 'update',
+        titleKey: 'common.button.update',
+        condition: (row: IPlanDTO) => row.status === 'ACTIVE',
+      },
       {
         icon: 'pi pi-key',
         key: 'lock',

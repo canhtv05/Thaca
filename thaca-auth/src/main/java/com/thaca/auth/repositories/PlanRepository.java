@@ -19,8 +19,8 @@ public interface PlanRepository extends JpaRepository<Plan, Long>, JpaSpecificat
         value = """
         SELECT p.* FROM auth.plans p
         WHERE p.status = 'ACTIVE'
-        ORDER BY p.created_at DESC
+        ORDER BY p.updated_at DESC
         """
     )
-    List<Plan> findAllActivePlansOrderByCreatedAtDesc();
+    List<Plan> findAllActivePlansOrderByUpdatedAtDesc();
 }

@@ -1,6 +1,7 @@
 package com.thaca.auth.services;
 
 import com.thaca.auth.domains.Plan;
+import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.mappers.PlanMapper;
 import com.thaca.auth.repositories.PlanRepository;
 import com.thaca.common.constants.InternalMethod;
@@ -102,6 +103,9 @@ public class PlanService {
         Plan plan = planRepository
             .findByCode(request.getCode())
             .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
+        if (CommonStatus.INACTIVE.equals(plan.getStatus())) {
+            throw new FwException(ErrorMessage.PLAN_INACTIVE_CANNOT_UPDATE);
+        }
         plan.setName(request.getName());
         plan.setType(request.getType());
         plan.setMaxUsers(ObjectUtils.getIfNull(request.getMaxUsers(), 0));
@@ -128,7 +132,7 @@ public class PlanService {
     @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_PLANS, type = ModeType.HANDLE)
     public List<PlanDTO> getAllPlans() {
         return planRepository
-            .findAllActivePlansOrderByCreatedAtDesc()
+            .findAllActivePlansOrderByUpdatedAtDesc()
             .stream()
             .map(PlanMapper::fromEntity)
             .collect(Collectors.toList());

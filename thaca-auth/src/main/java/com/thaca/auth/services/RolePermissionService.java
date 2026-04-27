@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,7 @@ public class RolePermissionService {
     @Transactional(readOnly = true)
     public SearchResponse<RoleDTO> searchRoles(SearchRequest<RoleDTO> request) {
         Specification<Role> spec = createRoleSpecification(request);
-        Page<Role> roles = roleRepository.findAll(spec, request.getPage().toPageable());
+        Page<Role> roles = roleRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
         return new SearchResponse<>(
             roles.getContent().stream().map(RoleMapper::fromEntity).collect(Collectors.toList()),
             PaginationResponse.of(roles)
@@ -54,7 +55,10 @@ public class RolePermissionService {
             roleDescription = null;
         }
         Specification<Permission> spec = createPermissionSpecification(request);
-        Page<Permission> permissions = permissionRepository.findAll(spec, request.getPage().toPageable());
+        Page<Permission> permissions = permissionRepository.findAll(
+            spec,
+            request.getPage().toPageable(Sort.Direction.DESC, "updatedAt")
+        );
         List<PermissionDTO> content = permissions
             .getContent()
             .stream()

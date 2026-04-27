@@ -202,6 +202,13 @@ public enum ErrorMessage implements ErrorMessageRule {
         "Email không được vượt quá 255 ký tự",
         "Email length invalid",
         "Email must not exceed 255 characters"
+    ),
+    PLAN_INACTIVE_CANNOT_UPDATE(
+        "PLAN.INACTIVE",
+        "Plan đã bị khóa",
+        "Plan đã bị khóa không thể cập nhật. Vui lòng mở khóa plan để cập nhật",
+        "Plan is inactive",
+        "Plan is inactive cannot update. Please unlock plan to update"
     );
 
     private final String code;

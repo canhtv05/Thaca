@@ -119,8 +119,8 @@ export class DataTableComponent {
   pagination = signal<IPaginationRequest>({
     page: 0,
     size: 10,
-    sortField: '',
-    sortOrder: '',
+    sortField: 'updatedAt',
+    sortOrder: 'DESC',
   });
 
   pageSizeOptions: IDropdownOption[] = [
