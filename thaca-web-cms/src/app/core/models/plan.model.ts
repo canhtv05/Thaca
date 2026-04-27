@@ -1,4 +1,4 @@
-export interface PlanDTO {
+export interface IPlanDTO {
   id?: number;
   code: string;
   name: string;

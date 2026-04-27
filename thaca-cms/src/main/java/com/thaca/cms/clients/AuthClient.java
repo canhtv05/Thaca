@@ -11,6 +11,7 @@ import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.enums.ModeType;
 import jakarta.annotation.PostConstruct;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -87,18 +88,32 @@ public class AuthClient {
     }
 
     @FwMode(name = ServiceMethod.CMS_GET_PLAN, type = ModeType.HANDLE)
-    public PlanDTO getPlan(Long id) {
-        return internalApiClient.post(authBaseUrl + "/cms/plans/get", id, new ParameterizedTypeReference<>() {});
+    public PlanDTO getPlan(PlanDTO plan) {
+        return internalApiClient.post(authBaseUrl + "/cms/plans/get", plan, new ParameterizedTypeReference<>() {});
     }
 
-    @FwMode(name = ServiceMethod.CMS_SAVE_PLAN, type = ModeType.HANDLE)
-    public PlanDTO savePlan(PlanDTO plan) {
-        return internalApiClient.post(authBaseUrl + "/cms/plans/save", plan, new ParameterizedTypeReference<>() {});
+    @FwMode(name = ServiceMethod.CMS_GET_ALL_PLANS, type = ModeType.HANDLE)
+    public List<PlanDTO> getAllPlans() {
+        return internalApiClient.post(authBaseUrl + "/cms/plans/all", null, new ParameterizedTypeReference<>() {});
     }
 
-    @FwMode(name = ServiceMethod.CMS_DELETE_PLAN, type = ModeType.HANDLE)
-    public Void deletePlan(Long id) {
-        return internalApiClient.post(authBaseUrl + "/cms/plans/delete", id, new ParameterizedTypeReference<>() {});
+    @FwMode(name = ServiceMethod.CMS_CREATE_PLAN, type = ModeType.HANDLE)
+    public PlanDTO createPlan(PlanDTO plan) {
+        return internalApiClient.post(authBaseUrl + "/cms/plans/create", plan, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_UPDATE_PLAN, type = ModeType.HANDLE)
+    public PlanDTO updatePlan(PlanDTO plan) {
+        return internalApiClient.post(authBaseUrl + "/cms/plans/update", plan, new ParameterizedTypeReference<>() {});
+    }
+
+    @FwMode(name = ServiceMethod.CMS_LOCK_UNLOCK_PLAN, type = ModeType.HANDLE)
+    public Void lockUnlockPlan(PlanDTO plan) {
+        return internalApiClient.post(
+            authBaseUrl + "/cms/plans/lock-unlock",
+            plan,
+            new ParameterizedTypeReference<>() {}
+        );
     }
 
     @FwMode(name = ServiceMethod.CMS_LOCK_USER, type = ModeType.HANDLE)

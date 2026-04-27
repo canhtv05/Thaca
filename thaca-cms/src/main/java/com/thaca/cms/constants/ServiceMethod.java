@@ -14,7 +14,10 @@ public class ServiceMethod {
 
     public static final String CMS_SEARCH_PLANS = "cms.searchPlans";
     public static final String CMS_GET_PLAN = "cms.getPlan";
-    public static final String CMS_SAVE_PLAN = "cms.savePlan";
+    public static final String CMS_GET_ALL_PLANS = "cms.getAllPlans";
+    public static final String CMS_CREATE_PLAN = "cms.createPlan";
+    public static final String CMS_UPDATE_PLAN = "cms.updatePlan";
+    public static final String CMS_LOCK_UNLOCK_PLAN = "cms.lockUnlockPlan";
     public static final String CMS_DELETE_PLAN = "cms.deletePlan";
 
     public static final String CMS_SEARCH_PERMISSIONS = "cms.searchPermissions";

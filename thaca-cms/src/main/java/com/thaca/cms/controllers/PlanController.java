@@ -33,22 +33,28 @@ public class PlanController {
     @PostMapping("/get")
     @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_GET_PLAN, type = RequestType.PROTECTED)
-    public ResponseEntity<PlanDTO> get(Long id) {
-        return ResponseEntity.ok(process.process(id));
+    public ResponseEntity<PlanDTO> get(PlanDTO plan) {
+        return ResponseEntity.ok(process.process(plan));
     }
 
-    @PostMapping("/save")
+    @PostMapping("/create")
     @FwSecurity(isSuperAdmin = true)
-    @FwRequest(name = ServiceMethod.CMS_SAVE_PLAN, type = RequestType.PROTECTED)
-    public ResponseEntity<PlanDTO> save(PlanDTO request) {
-        return ResponseEntity.ok(process.process(request));
+    @FwRequest(name = ServiceMethod.CMS_CREATE_PLAN, type = RequestType.PROTECTED)
+    public ResponseEntity<PlanDTO> create(PlanDTO plan) {
+        return ResponseEntity.ok(process.process(plan));
     }
 
-    @PostMapping("/delete")
+    @PostMapping("/update")
     @FwSecurity(isSuperAdmin = true)
-    @FwRequest(name = ServiceMethod.CMS_DELETE_PLAN, type = RequestType.PROTECTED)
-    public ResponseEntity<Void> delete(Long id) {
-        process.process(id);
-        return ResponseEntity.ok().build();
+    @FwRequest(name = ServiceMethod.CMS_UPDATE_PLAN, type = RequestType.PROTECTED)
+    public ResponseEntity<PlanDTO> update(PlanDTO plan) {
+        return ResponseEntity.ok(process.process(plan));
+    }
+
+    @PostMapping("/lock-unlock")
+    @FwSecurity(isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_PLAN, type = RequestType.PROTECTED)
+    public ResponseEntity<Void> lockUnlock(PlanDTO plan) {
+        return ResponseEntity.ok(process.process(plan));
     }
 }

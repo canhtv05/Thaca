@@ -17,10 +17,11 @@ import {
 } from '../../../shared/components/thaca-dropdown/thaca-dropdown.component';
 import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thaca-modal.component';
 import { AppConfigService } from '../../../core/configs/app-config.service';
-import { PlanService } from '../../../core/services/plan.service';
-import { PlanDTO } from '../../../core/models/plan.model';
+import { PlanService } from './plan.service';
+import { IPlanDTO } from '../../../core/models/plan.model';
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { Popup } from '../../../core/global/popup-notify';
+import { GlobalToast } from '../../../core/global/global-toast';
 
 @Component({
   selector: 'app-plan',
@@ -94,7 +95,7 @@ export class PlanComponent {
       {
         field: 'type',
         header: 'plan.type',
-        render: (row: PlanDTO) => {
+        render: (row: IPlanDTO) => {
           return this.translate.instant(`plan.plans.${row.type}`);
         },
       },
@@ -102,7 +103,7 @@ export class PlanComponent {
       {
         field: 'status',
         header: 'plan.status',
-        render: (row: PlanDTO) => {
+        render: (row: IPlanDTO) => {
           const variant = row.status === 'ACTIVE' ? 'success' : 'warning';
           const label = this.translate.instant(`common.status.${row.status.toLowerCase()}`);
           return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
@@ -116,14 +117,14 @@ export class PlanComponent {
         key: 'lock',
         titleKey: 'common.button.lock',
         color: 'info',
-        condition: (row: PlanDTO) => row.status === 'ACTIVE',
+        condition: (row: IPlanDTO) => row.status === 'ACTIVE',
       },
       {
         icon: 'pi pi-unlock',
         key: 'unlock',
         titleKey: 'common.button.unlock',
         color: 'info',
-        condition: (row: PlanDTO) => row.status === 'INACTIVE',
+        condition: (row: IPlanDTO) => row.status === 'INACTIVE',
       },
     ],
   };
@@ -146,29 +147,32 @@ export class PlanComponent {
       this.planModal.show();
     } else if (event.key === 'lock' || event.key === 'unlock') {
       Popup.confirm({
-        title: 'common.confirm_delete',
-        message: this.translate.instant('common.confirm_delete'),
-        acceptText: 'common.button.delete',
+        title: event.key === 'lock' ? 'plan.popup.lock.title' : 'plan.popup.unlock.title',
+        message: event.key === 'lock' ? 'plan.popup.lock.message' : 'plan.popup.unlock.message',
+        acceptText: event.key === 'lock' ? 'common.button.lock' : 'common.button.unlock',
         cancelText: 'common.button.cancel',
-      }).then((result: boolean) => {
+      }).then(async (result: boolean) => {
         if (result) {
-          this.planService.delete(event.row.id).subscribe(() => {
-            this.onSearch();
-          });
+          if (event.key === 'lock' || event.key === 'unlock') {
+            const req = { ...event.row, status: event.key === 'lock' ? 'INACTIVE' : 'ACTIVE' };
+            const res = await this.planService.lockUnlock(req);
+            if (res.body.status === 'OK') {
+              const messageKey =
+                event.key === 'lock'
+                  ? 'plan.toast.lock.messageSuccess'
+                  : 'plan.toast.unlock.messageSuccess';
+              const titleKey =
+                event.key === 'lock'
+                  ? 'plan.toast.lock.titleSuccess'
+                  : 'plan.toast.unlock.titleSuccess';
+              GlobalToast.success(messageKey, titleKey);
+              this.onSearch();
+            }
+          }
         }
       });
     }
   }
-
-  onSave() {
-    if (this.planForm.invalid) return;
-    const data = this.planForm.value as any;
-    this.planService.save(data).subscribe(() => {
-      this.planModal.hide();
-      this.onSearch();
-    });
-  }
-
   isUnchanged(): boolean {
     return (
       JSON.stringify(this.planForm.getRawValue()) === JSON.stringify(this.originalValue) ||

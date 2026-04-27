@@ -16,6 +16,30 @@
       "BASIC": "Cơ bản",
       "PRO": "Nâng cao",
       "ENTERPRISE": "Doanh nghiệp"
+    },
+    "popup": {
+      "lock": {
+        "title": "Xác nhận khóa gói",
+        "message": "Bạn có chắc chắn muốn khóa gói này không?"
+      },
+      "unlock": {
+        "title": "Xác nhận mở khóa gói",
+        "message": "Bạn có chắc chắn muốn mở khóa gói này không?"
+      }
+    },
+    "toast": {
+      "lock": {
+        "titleSuccess": "Gói đã được khóa",
+        "messageSuccess": "Gói đã được khóa thành công",
+        "titleError": "Gói không được khóa",
+        "messageError": "Gói không được khóa thành công"
+      },
+      "unlock": {
+        "titleSuccess": "Gói đã được mở khóa",
+        "messageSuccess": "Gói đã được mở khóa thành công",
+        "titleError": "Gói không được mở khóa",
+        "messageError": "Gói không được mở khóa thành công"
+      }
     }
   }
 }

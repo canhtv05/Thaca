@@ -16,6 +16,30 @@
       "BASIC": "Basic",
       "PRO": "Pro",
       "ENTERPRISE": "Enterprise"
+    },
+    "popup": {
+      "lock": {
+        "title": "Confirm Lock Plan",
+        "message": "Are you sure you want to lock this plan?"
+      },
+      "unlock": {
+        "title": "Confirm Unlock Plan",
+        "message": "Are you sure you want to unlock this plan?"
+      }
+    },
+    "toast": {
+      "lock": {
+        "titleSuccess": "Plan Locked",
+        "messageSuccess": "Plan locked successfully",
+        "titleError": "Plan Not Locked",
+        "messageError": "Plan not locked successfully"
+      },
+      "unlock": {
+        "titleSuccess": "Plan Unlocked",
+        "messageSuccess": "Plan unlocked successfully",
+        "titleError": "Plan Not Unlocked",
+        "messageError": "Plan not unlocked successfully"
+      }
     }
   }
 }

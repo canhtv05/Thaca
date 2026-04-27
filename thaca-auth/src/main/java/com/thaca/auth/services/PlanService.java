@@ -45,7 +45,7 @@ public class PlanService {
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_PLANS, type = ModeType.HANDLE)
     public SearchResponse<PlanDTO> searchPlans(SearchRequest<PlanDTO> request) {
         Specification<Plan> spec = createPlanSpecification(request);
-        Page<Plan> plans = planRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "createdAt"));
+        Page<Plan> plans = planRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
         return new SearchResponse<>(
             plans.getContent().stream().map(PlanMapper::fromEntity).collect(Collectors.toList()),
             PaginationResponse.of(plans)

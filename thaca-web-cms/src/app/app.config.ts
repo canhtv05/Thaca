@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { routes } from './app.routes';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
@@ -19,7 +19,7 @@ import { provideIcons } from '@ng-icons/core';
 import { APP_CONFIG_ICONS } from './core/configs/app-config.icon';
 import { ThemeService } from './core/theme/theme.service';
 import { authInterceptor } from './core/global/auth.interceptor';
-import { provideToastr } from 'ngx-toastr';
+import { provideToastr, ToastrService } from 'ngx-toastr';
 import { PopupService } from './core/services/popup.service';
 
 export const appConfig: ApplicationConfig = {
@@ -44,7 +44,9 @@ export const appConfig: ApplicationConfig = {
       const appConfig = inject(AppConfigService);
       const http = inject(HttpClient);
       const popup = inject(PopupService);
-      (window as any).__appGlobal = { httpClient: http, popup };
+      const toastr = inject(ToastrService);
+      const translate = inject(TranslateService);
+      (window as any).__appGlobal = { httpClient: http, popup, toastr, translate };
 
       await firstValueFrom(i18n.bootstrapLanguage());
       await appConfig.loadConfig();
