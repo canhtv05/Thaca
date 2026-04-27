@@ -12,6 +12,7 @@ import {
   OnDestroy,
   NgZone,
   PLATFORM_ID,
+  AfterViewChecked,
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -38,7 +39,7 @@ export interface IDropdownOption {
   templateUrl: './thaca-dropdown.component.html',
   styleUrl: './thaca-dropdown.component.scss',
 })
-export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
+export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, AfterViewChecked {
   @Input() options: IDropdownOption[] = [];
   @Input() placeholder = 'Chọn...';
   @Input() disabled = false;
@@ -48,8 +49,9 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
   @Input() label?: string;
   @Input() id: string = `thaca-dropdown-${Math.random().toString(36).substring(2, 15)}`;
   /**
-   * 'body' → panel renders via fixed positioning, escapes overflow/z-index traps.
-   * null (default) → panel renders inline inside the component (absolute).
+   * 'body' → panel được move ra document.body sau khi Angular render,
+   *           thoát hoàn toàn khỏi overflow/z-index/modal trap.
+   * null (default) → panel render inline bên trong component (absolute).
    */
   @Input() appendTo: 'body' | null = null;
 
@@ -62,8 +64,11 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
 
   open = signal(false);
   value = signal<any>(null);
-
   panelStyle = signal<Record<string, string>>({});
+
+  // Track xem panel đã được move ra body chưa
+  private panelMovedToBody = false;
+  private movedPanelEl: HTMLElement | null = null;
 
   private scrollHandler = () => this.zone.run(() => this.updatePortalPosition());
   private resizeHandler = () => this.zone.run(() => this.updatePortalPosition());
@@ -76,33 +81,67 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
     return opt ? opt.label : null;
   });
 
+  // ── AfterViewChecked: move panel ra body ngay sau khi Angular render nó ──
+
+  ngAfterViewChecked() {
+    if (!this.isBrowser || this.appendTo !== 'body') return;
+
+    const host = this.el.nativeElement as HTMLElement;
+    const panel = host.querySelector('.tdd-portal-panel') as HTMLElement | null;
+
+    if (panel && !this.panelMovedToBody) {
+      // Move DOM node ra thẳng body — thoát hoàn toàn khỏi mọi stacking context
+      document.body.appendChild(panel);
+      this.panelMovedToBody = true;
+      this.movedPanelEl = panel;
+      this.updatePortalPosition();
+    }
+
+    if (!panel && this.panelMovedToBody) {
+      // Angular đã xóa panel (open = false) → reset tracking
+      this.panelMovedToBody = false;
+      this.movedPanelEl = null;
+    }
+  }
+
+  // ── Portal positioning ────────────────────────────────────
+
   private updatePortalPosition() {
     if (!this.isBrowser) return;
-    const trigger = (this.el.nativeElement as HTMLElement).querySelector('.tdd-trigger');
+    const trigger = (this.el.nativeElement as HTMLElement).querySelector(
+      '.tdd-trigger',
+    ) as HTMLElement | null;
     if (!trigger) return;
+
     const rect = trigger.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
     const openUp = spaceBelow < 200 && spaceAbove > spaceBelow;
 
+    const styles: Record<string, string> = {
+      position: 'fixed',
+      left: `${rect.left}px`,
+      minWidth: `${rect.width}px`,
+      zIndex: '99999',
+    };
+
     if (openUp) {
-      this.panelStyle.set({
-        position: 'fixed',
-        bottom: `${window.innerHeight - rect.top + 4}px`,
-        top: 'auto',
-        left: `${rect.left}px`,
-        minWidth: `${rect.width}px`,
-      });
+      styles['bottom'] = `${window.innerHeight - rect.top + 4}px`;
+      styles['top'] = 'auto';
     } else {
-      this.panelStyle.set({
-        position: 'fixed',
-        top: `${rect.bottom + 4}px`,
-        bottom: 'auto',
-        left: `${rect.left}px`,
-        minWidth: `${rect.width}px`,
-      });
+      styles['top'] = `${rect.bottom + 4}px`;
+      styles['bottom'] = 'auto';
+    }
+
+    this.panelStyle.set(styles);
+
+    // Nếu panel đã bị move ra body, apply style trực tiếp lên DOM node
+    if (this.movedPanelEl) {
+      Object.assign(this.movedPanelEl.style, styles);
     }
   }
+
+  // ── Actions ──────────────────────────────────────────────
 
   toggle() {
     if (this.disabled || this.readonly) return;
@@ -111,7 +150,7 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
     this._onTouched();
 
     if (next && this.appendTo === 'body' && this.isBrowser) {
-      this.updatePortalPosition();
+      // Position sẽ được set sau khi ngAfterViewChecked move panel ra body
       window.addEventListener('scroll', this.scrollHandler, true);
       window.addEventListener('resize', this.resizeHandler);
     } else {
@@ -184,5 +223,9 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy {
 
   ngOnDestroy() {
     this.removeGlobalListeners();
+    // Dọn panel nếu còn trên body khi component bị destroy
+    if (this.movedPanelEl && document.body.contains(this.movedPanelEl)) {
+      document.body.removeChild(this.movedPanelEl);
+    }
   }
 }

@@ -19,6 +19,7 @@ import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thac
 import { AppConfigService } from '../../../core/configs/app-config.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { PlanDTO } from '../../../core/models/plan.model';
+import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 
 @Component({
   selector: 'app-plan',
@@ -34,6 +35,7 @@ import { PlanDTO } from '../../../core/models/plan.model';
     ThacaInputComponent,
     ThacaDropdownComponent,
     ThacaModalComponent,
+    ValidationMessageComponent,
   ],
   templateUrl: './plan.component.html',
 })

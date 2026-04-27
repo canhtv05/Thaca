@@ -13,8 +13,30 @@
   [class.has-icon-right]="hasRightSlot()"
   [class.is-error]="hasError()"
   [class.is-disabled]="disabled"
+  [class.is-number]="type === 'number'"
 >
-  @if (startIcon) {
+  @if (type === 'number') {
+    <!-- Nút − bên trái -->
+    <button
+      tabindex="-1"
+      type="button"
+      class="thaca-step-btn thaca-step-btn--left"
+      [disabled]="disabled || readonly"
+      (click)="stepDown()"
+      aria-label="Giảm"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+    </button>
+  } @else if (startIcon) {
     <span class="thaca-icon thaca-icon--left">
       <ng-icon [name]="startIcon.name" />
     </span>
@@ -43,13 +65,45 @@
         "
       />
     </span>
+  } @else if (type === 'number') {
+    <!-- Clear nằm trước nút + -->
+    <button
+      tabindex="-1"
+      type="button"
+      class="thaca-clear-btn"
+      [class.is-visible]="showClearButton()"
+      (click)="clearValue($event)"
+      aria-label="Clear input"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+
+    <!-- Nút + bên phải -->
+    <button
+      tabindex="-1"
+      type="button"
+      class="thaca-step-btn thaca-step-btn--right"
+      [disabled]="disabled || readonly"
+      (click)="stepUp()"
+      aria-label="Tăng"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+    </button>
   } @else if (endIcon) {
     <span class="thaca-icon thaca-icon--right">
       <ng-icon [name]="endIcon.name" />
     </span>
-  }
-
-  @if (type !== 'password' && !endIcon) {
+  } @else {
     <button
       tabindex="-1"
       type="button"
@@ -58,7 +112,7 @@
       (click)="clearValue($event)"
       [attr.aria-label]="'Clear input'"
     >
-      <span aria-hidden="true">&times;</span>
+      <span aria-hidden="true" class="flex items-center justify-center">&times;</span>
     </button>
   }
 </div>

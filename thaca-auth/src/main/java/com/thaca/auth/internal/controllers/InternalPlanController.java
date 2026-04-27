@@ -54,6 +54,6 @@ public class InternalPlanController {
     @PostMapping("/cms/plans/all")
     @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_ALL_PLANS, type = RequestType.INTERNAL)
     public ResponseEntity<List<PlanDTO>> getAllPlans() {
-        return ResponseEntity.ok(fwApiProcess.process(Void.TYPE));
+        return ResponseEntity.ok(fwApiProcess.process());
     }
 }

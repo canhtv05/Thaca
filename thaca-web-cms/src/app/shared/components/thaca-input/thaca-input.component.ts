@@ -38,6 +38,9 @@ import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
 export class ThacaInputComponent implements ControlValueAccessor {
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() readonly = false;
+  @Input() step: number = 1;
+  @Input() min?: number;
+  @Input() max?: number;
 
   @HostBinding('class')
   get hostClass(): string {
@@ -59,6 +62,7 @@ export class ThacaInputComponent implements ControlValueAccessor {
   isPasswordVisible = signal(false);
   private injector = inject(Injector);
   private _ngControl?: NgControl | null;
+
   get ngControl(): NgControl | null {
     if (this._ngControl === undefined) {
       this._ngControl = this.injector.get(NgControl, null, { self: true });
@@ -118,6 +122,28 @@ export class ThacaInputComponent implements ControlValueAccessor {
     if (this.disabled || this.readonly) return;
     this.value.set('');
     this.onChange('');
+    this.onTouched();
+  }
+
+  stepUp() {
+    if (this.disabled || this.readonly) return;
+    const current = parseFloat(this.value()) || 0;
+    const next = current + this.step;
+    if (this.max !== undefined && next > this.max) return;
+    const result = String(parseFloat(next.toFixed(10)));
+    this.value.set(result);
+    this.onChange(result);
+    this.onTouched();
+  }
+
+  stepDown() {
+    if (this.disabled || this.readonly) return;
+    const current = parseFloat(this.value()) || 0;
+    const next = current - this.step;
+    if (this.min !== undefined && next < this.min) return;
+    const result = String(parseFloat(next.toFixed(10)));
+    this.value.set(result);
+    this.onChange(result);
     this.onTouched();
   }
 
