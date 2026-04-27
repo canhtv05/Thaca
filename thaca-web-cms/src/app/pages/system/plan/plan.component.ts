@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewChild } from '@angular/core';
+import { Component, computed, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -48,6 +48,7 @@ export class PlanComponent {
   @ViewChild(DataTableComponent) table!: DataTableComponent;
   @ViewChild('planModal') planModal!: ThacaModalComponent;
 
+  private originalValue: any;
   breadcrumbItems: MenuItem[] = [
     { icon: 'pi pi-cog', label: 'menu.system_administration' },
     { icon: 'pi pi-list', label: 'plan.title' },
@@ -75,12 +76,10 @@ export class PlanComponent {
   ];
 
   planForm = this.fb.group({
-    id: [null],
-    code: ['', [Validators.required]],
+    code: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     name: ['', [Validators.required]],
     type: ['FREE', [Validators.required]],
     maxUsers: [0, [Validators.required, Validators.min(1)]],
-    status: ['ACTIVE', [Validators.required]],
   });
 
   tableConfig: ITableConfig = {
@@ -110,8 +109,21 @@ export class PlanComponent {
       },
     ],
     actions: [
-      { icon: 'pi pi-pencil', key: 'edit', titleKey: 'plan.actions.edit' },
-      { icon: 'pi pi-trash', key: 'delete', titleKey: 'plan.actions.delete', color: 'danger' },
+      { icon: 'pi pi-pencil', key: 'update', titleKey: 'common.button.update' },
+      {
+        icon: 'pi pi-key',
+        key: 'lock',
+        titleKey: 'common.button.lock',
+        color: 'info',
+        condition: (row: PlanDTO) => row.status === 'ACTIVE',
+      },
+      {
+        icon: 'pi pi-unlock',
+        key: 'unlock',
+        titleKey: 'common.button.unlock',
+        color: 'info',
+        condition: (row: PlanDTO) => row.status === 'INACTIVE',
+      },
     ],
   };
 
@@ -120,13 +132,16 @@ export class PlanComponent {
   }
 
   onCreate() {
-    this.planForm.reset({ status: 'ACTIVE', type: 'FREE', maxUsers: 10 });
+    this.planForm.reset({ type: 'FREE', maxUsers: 10 });
+    this.planForm.get('code')?.enable();
     this.planModal.show();
   }
 
   handleAction(event: ITableActionEvent) {
-    if (event.key === 'edit') {
+    if (event.key === 'update') {
       this.planForm.patchValue(event.row);
+      this.planForm.get('code')?.disable();
+      this.originalValue = this.planForm.getRawValue();
       this.planModal.show();
     } else if (event.key === 'delete') {
       if (confirm(this.translate.instant('common.confirm_delete'))) {
@@ -144,5 +159,12 @@ export class PlanComponent {
       this.planModal.hide();
       this.onSearch();
     });
+  }
+
+  isUnchanged(): boolean {
+    return (
+      JSON.stringify(this.planForm.getRawValue()) === JSON.stringify(this.originalValue) ||
+      this.planForm.invalid
+    );
   }
 }

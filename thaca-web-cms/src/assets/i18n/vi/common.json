@@ -24,7 +24,9 @@
       "close": "Đóng",
       "back": "Quay lại",
       "search": "Tìm kiếm",
-      "export": "Xuất bảng"
+      "export": "Xuất bảng",
+      "lock": "Khóa",
+      "unlock": "Mở khóa"
     },
     "createdAt": "Ngày tạo",
     "createdBy": "Người tạo",

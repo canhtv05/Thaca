@@ -24,7 +24,9 @@
       "close": "Close",
       "back": "Back",
       "search": "Search",
-      "export": "Export"
+      "export": "Export",
+      "lock": "Lock",
+      "unlock": "Unlock"
     },
     "createdAt": "Created At",
     "createdBy": "Created By",

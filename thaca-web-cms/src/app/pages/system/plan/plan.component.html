@@ -54,9 +54,11 @@
 <thaca-modal
   #planModal
   size="lg"
-  [title]="(planForm.value.id ? 'plan.actions.edit' : 'plan.actions.create') | translate"
+  [title]="(planForm.dirty ? 'plan.actions.edit' : 'plan.actions.create') | translate"
+  [disableSubmit]="isUnchanged()"
+  [formGroup]="planForm"
 >
-  <form [formGroup]="planForm" class="grid grid-cols-1 gap-4">
+  <div class="grid grid-cols-1 gap-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="form-control">
         <thaca-input
@@ -64,7 +66,6 @@
           [required]="true"
           formControlName="code"
           [placeholder]="'plan.code' | translate"
-          [disabled]="!!planForm.value.id"
         ></thaca-input>
         <validation-message [control]="planForm.get('code')"></validation-message>
       </div>
@@ -98,5 +99,5 @@
       ></thaca-input>
       <validation-message [control]="planForm.get('maxUsers')"></validation-message>
     </div>
-  </form>
+  </div>
 </thaca-modal>
