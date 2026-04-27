@@ -14,6 +14,11 @@ export const mainLayoutRoute: Route[] = [
         component: HomeComponent,
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('../../pages/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+      {
         path: 'analytics',
         loadComponent: () =>
           import('../../pages/analytics/analytics.component').then((m) => m.AnalyticsComponent),

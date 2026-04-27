@@ -1,0 +1,98 @@
+<header class="app-header">
+  <div class="header-start">
+    <button
+      class="icon-btn sidebar-toggle"
+      (click)="toggleSidebar()"
+      [attr.aria-label]="'common.toggle_sidebar' | translate"
+    >
+      <i class="pi pi-bars"></i>
+    </button>
+  </div>
+
+  <div class="header-center">
+    <!-- Breadcrumbs or Search could go here -->
+  </div>
+
+  <div class="header-end">
+    <!-- Theme Toggle -->
+    <button
+      class="icon-btn theme-toggle"
+      (click)="toggleTheme()"
+      [title]="'common.toggle_theme' | translate"
+    >
+      <i
+        class="pi"
+        [class.pi-sun]="themeService.theme() === 'dark'"
+        [class.pi-moon]="themeService.theme() === 'light'"
+      ></i>
+    </button>
+
+    <!-- Enterprise Search Component -->
+    <app-header-search></app-header-search>
+
+    <div class="divider"></div>
+
+    <!-- User Profile Dropdown -->
+    <div class="user-menu-wrap" clickOutside (clickOutside)="closeUserMenu()">
+      <button class="user-trigger" (click)="toggleUserMenu()">
+        <div class="user-info text-right hidden md:block">
+          <span class="user-name">{{ currentUser()?.fullname || 'Guest' }}</span>
+          <span class="user-role">{{ currentUser()?.roles?.[0] || 'User' }}</span>
+        </div>
+        <div class="avatar-wrap">
+          @if (currentUser()?.avatarUrl) {
+            <img [src]="currentUser()?.avatarUrl" alt="Avatar" />
+          } @else {
+            <div class="avatar-placeholder">
+              {{ (currentUser()?.fullname || 'G').charAt(0).toUpperCase() }}
+            </div>
+          }
+        </div>
+      </button>
+
+      <!-- Dropdown Panel -->
+      @if (isUserMenuOpen()) {
+        <div class="user-dropdown">
+          <div class="dropdown-header md:hidden">
+            <span class="user-name">{{ currentUser()?.fullname }}</span>
+            <span class="user-role">{{ currentUser()?.roles?.[0] }}</span>
+          </div>
+
+          <button class="dropdown-item" [routerLink]="['/profile']">
+            <i class="pi pi-user"></i>
+            <span>{{ 'layout.header.profile' | translate }}</span>
+          </button>
+          <button class="dropdown-item">
+            <i class="pi pi-cog"></i>
+            <span>{{ 'layout.header.settings' | translate }}</span>
+          </button>
+
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-label">{{ 'layout.header.language' | translate }}</div>
+
+          <button class="dropdown-item" (click)="onChangeLang('vi')" [class.active]="currentLang() === 'vi'">
+            <img src="assets/media/flags/vn.webp" alt="VN" class="flag-icon" />
+            <span>Tiếng Việt</span>
+            @if (currentLang() === 'vi') {
+              <i class="pi pi-check ml-auto text-primary text-xs"></i>
+            }
+          </button>
+          <button class="dropdown-item" (click)="onChangeLang('en')" [class.active]="currentLang() === 'en'">
+            <img src="assets/media/flags/uk.webp" alt="UK" class="flag-icon" />
+            <span>English</span>
+            @if (currentLang() === 'en') {
+              <i class="pi pi-check ml-auto text-primary text-xs"></i>
+            }
+          </button>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item logout-btn" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>{{ 'layout.header.logout' | translate }}</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

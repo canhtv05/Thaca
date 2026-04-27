@@ -10,7 +10,7 @@ import { SKIP_LOADING } from '../global/http-context';
 export class I18nService {
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
-  private readonly baseFiles = ['validation', 'common', 'menu'];
+  private readonly baseFiles = ['validation', 'common', 'menu', 'layout'];
   private loaded = new Set<string>();
   private activeRouteFiles: string[] = [];
 

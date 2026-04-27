@@ -1,0 +1,83 @@
+<div class="search-container">
+  <!-- Search Trigger Button -->
+  <button class="search-trigger" (click)="toggleSearch()">
+    <i class="pi pi-search"></i>
+    <span class="search-placeholder hidden lg:block">{{ 'common.search' | translate }}</span>
+    <kbd class="hidden lg:flex">⌘K</kbd>
+  </button>
+
+  <!-- Command Palette Modal -->
+  @if (isSearchOpen()) {
+    <div class="command-palette-backdrop" (click)="closeSearch()">
+      <div class="command-palette-container" (click)="$event.stopPropagation()">
+        <!-- Search Input -->
+        <div class="search-header">
+          <i class="pi pi-search search-icon"></i>
+          <input
+            id="route-search-input"
+            type="text"
+            [placeholder]="'common.search_routes' | translate"
+            (input)="onSearchInput($event)"
+            autocomplete="off"
+          />
+          @if (searchQuery()) {
+            <button class="clear-btn" (click)="clearSearch()">
+              <i class="pi pi-times"></i>
+            </button>
+          } @else {
+            <div class="esc-hint">ESC</div>
+          }
+        </div>
+
+        <!-- Results List -->
+        <div class="search-body custom-scrollbar">
+          @if (activeList().length > 0) {
+            @for (group of groupedResults(); track group.label) {
+              <div class="result-group">
+                <div class="group-label">{{ group.label | translate }}</div>
+                @for (item of group.items; track item.label) {
+                  <div
+                    class="search-item"
+                    [class.active]="item.globalIndex === activeIndex()"
+                    (click)="navigateTo(item)"
+                    (mouseenter)="activeIndex.set(item.globalIndex)"
+                  >
+                    <div class="item-icon">
+                      <i [class]="item.icon"></i>
+                    </div>
+                    <span class="item-label">{{ item.label | translate }}</span>
+                    <i class="pi pi-arrow-right item-arrow"></i>
+                  </div>
+                }
+              </div>
+            }
+          } @else {
+            <div class="empty-state">
+              <i class="pi pi-search"></i>
+              <p>{{ 'common.no_results_found' | translate }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- Footer Hint -->
+        <div class="search-footer">
+          <div class="hint">
+            <div class="kbd-pair">
+              <kbd><i class="pi pi-arrow-up"></i></kbd>
+              <kbd><i class="pi pi-arrow-down"></i></kbd>
+            </div>
+            <span>{{ 'layout.search_hints.navigate' | translate }}</span>
+          </div>
+          <div class="hint">
+            <kbd>↵</kbd>
+            <span>{{ 'layout.search_hints.select' | translate }}</span>
+          </div>
+          <div class="hint">
+            <kbd>ESC</kbd>
+            <span>{{ 'layout.search_hints.close' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

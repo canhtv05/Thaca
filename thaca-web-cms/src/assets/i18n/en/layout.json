@@ -1,0 +1,15 @@
+{
+  "layout": {
+    "header": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "language": "Language",
+      "logout": "Logout"
+    },
+    "search_hints": {
+      "navigate": "to navigate",
+      "select": "to select",
+      "close": "to close"
+    }
+  }
+}

@@ -14,7 +14,10 @@
     "first": "First",
     "last": "Last",
     "page": "page",
+    "search": "Search...",
+    "search_routes": "Search by menu...",
     "try_changing_filters_or_search": "Try changing filters or search",
+    "no_results_found": "No results found",
     "button": {
       "create": "Create",
       "update": "Update",

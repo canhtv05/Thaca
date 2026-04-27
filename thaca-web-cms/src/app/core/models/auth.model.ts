@@ -13,6 +13,7 @@ export interface IAuthUserDTO {
   isLocked?: boolean;
   isSuperAdmin?: boolean;
   roles?: string[];
+  avatarUrl?: string;
 }
 
 export interface IAuthenticateRes {

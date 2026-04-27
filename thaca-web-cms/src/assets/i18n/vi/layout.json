@@ -1,0 +1,15 @@
+{
+  "layout": {
+    "header": {
+      "profile": "Hồ sơ cá nhân",
+      "settings": "Cài đặt",
+      "language": "Ngôn ngữ",
+      "logout": "Đăng xuất"
+    },
+    "search_hints": {
+      "navigate": "để điều hướng",
+      "select": "để chọn",
+      "close": "để đóng"
+    }
+  }
+}

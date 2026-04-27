@@ -14,7 +14,10 @@
     "first": "Trang đầu",
     "last": "Trang cuối",
     "page": "trang",
+    "search": "Tìm kiếm...",
+    "search_routes": "Tìm kiếm theo menu...",
     "try_changing_filters_or_search": "Thử thay đổi bộ lọc hoặc tìm kiếm khác",
+    "no_results_found": "Không có kết quả",
     "button": {
       "create": "Tạo",
       "update": "Cập nhật",

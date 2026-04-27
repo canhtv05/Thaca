@@ -1,0 +1,69 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="header-content">
+      <h1 class="page-title">{{ 'profile.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'profile.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-card">
+      <div class="card-left">
+        <div class="avatar-section">
+          <div class="avatar-large">
+            @if (currentUser()?.avatarUrl) {
+              <img [src]="currentUser()?.avatarUrl" alt="Avatar" />
+            } @else {
+              <div class="avatar-placeholder">
+                {{ (currentUser()?.fullname || 'U').charAt(0).toUpperCase() }}
+              </div>
+            }
+            <button class="change-avatar-btn">
+              <i class="pi pi-camera"></i>
+            </button>
+          </div>
+          <div class="user-meta">
+            <h2 class="user-display-name">{{ currentUser()?.fullname }}</h2>
+            <p class="user-handle">@{{ currentUser()?.username }}</p>
+            <div class="badges">
+              @for (role of currentUser()?.roles; track role) {
+                <span class="badge">{{ role }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-right">
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <div class="form-grid">
+            <thaca-input
+              [label]="'profile.username' | translate"
+              formControlName="username"
+              [readonly]="true"
+            ></thaca-input>
+
+            <thaca-input
+              [label]="'profile.fullname' | translate"
+              formControlName="fullname"
+              [required]="true"
+            ></thaca-input>
+
+            <thaca-input
+              [label]="'profile.email' | translate"
+              formControlName="email"
+              [required]="true"
+            ></thaca-input>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="save-btn" [disabled]="profileForm.invalid">
+              <i class="pi pi-save"></i>
+              {{ 'profile.save_changes' | translate }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
