@@ -1,0 +1,61 @@
+@if (popup.visible()) {
+  @let opts = popup.options();
+
+  <div class="popup-backdrop" (click)="popup.close()"></div>
+
+  <div class="popup-container">
+    <div class="popup-box" [ngClass]="opts?.type">
+      <!-- CLOSE X -->
+      @if (opts?.showClose) {
+        <button class="popup-x" (click)="popup.close()">✕</button>
+      }
+
+      <!-- ICON -->
+      <div class="popup-icon">
+        @switch (opts?.type) {
+          @case ('success') {
+            ✔
+          }
+          @case ('error') {
+            ✖
+          }
+          @case ('warning') {
+            ⚠
+          }
+          @default {
+            ℹ
+          }
+        }
+      </div>
+
+      <!-- TITLE -->
+      @if (opts?.title) {
+        <h3 class="popup-title">
+          {{ opts?.title | translate }}
+        </h3>
+      }
+
+      <!-- MESSAGE -->
+      @if (opts?.message) {
+        <p class="popup-message">
+          {{ opts?.message | translate }}
+        </p>
+      }
+
+      <!-- ACTIONS -->
+      <div class="popup-actions">
+        @if (opts?.showCancel) {
+          <thaca-button variant="secondary" (clicked)="popup.close()">
+            {{ opts?.cancelText || 'common.button.cancel' | translate }}
+          </thaca-button>
+        }
+
+        @if (opts?.showAccept) {
+          <thaca-button variant="primary" (clicked)="popup.accept()">
+            <span class="text-white">{{ opts?.acceptText || 'common.button.ok' | translate }}</span>
+          </thaca-button>
+        }
+      </div>
+    </div>
+  </div>
+}

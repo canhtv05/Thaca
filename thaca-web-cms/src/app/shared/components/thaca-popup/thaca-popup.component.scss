@@ -1,0 +1,145 @@
+/* ================================
+   BACKDROP
+================================ */
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  backdrop-filter: blur(4px);
+}
+
+/* ================================
+   CONTAINER
+================================ */
+.popup-container {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* ================================
+   BOX
+================================ */
+.popup-box {
+  width: 420px;
+  max-width: 100%;
+  background: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius-lg);
+  border: var(--border-b) solid var(--border);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  position: relative;
+}
+
+/* ================================
+   CLOSE BUTTON (X)
+================================ */
+.popup-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.popup-x:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* ================================
+   ICON
+================================ */
+.popup-icon {
+  font-size: 28px;
+  margin-bottom: 0.75rem;
+}
+
+/* ================================
+   TITLE
+================================ */
+.popup-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* ================================
+   MESSAGE
+================================ */
+.popup-message {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* ================================
+   ACTIONS
+================================ */
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* ================================
+   BUTTON BASE
+================================ */
+.btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Accept button */
+.btn-accept {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+}
+
+.btn-accept:hover {
+  opacity: 0.9;
+}
+
+/* ================================
+   TYPE COLORS (icon only)
+================================ */
+.popup-box.success .popup-icon {
+  color: var(--primary);
+}
+
+.popup-box.error .popup-icon {
+  color: var(--destructive);
+}
+
+.popup-box.warning .popup-icon {
+  color: oklch(0.75 0.15 80);
+}
+
+.popup-box.info .popup-icon {
+  color: var(--ring);
+}

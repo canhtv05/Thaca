@@ -20,6 +20,7 @@ import { APP_CONFIG_ICONS } from './core/configs/app-config.icon';
 import { ThemeService } from './core/theme/theme.service';
 import { authInterceptor } from './core/global/auth.interceptor';
 import { provideToastr } from 'ngx-toastr';
+import { PopupService } from './core/services/popup.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -42,7 +43,8 @@ export const appConfig: ApplicationConfig = {
       const i18n = inject(I18nService);
       const appConfig = inject(AppConfigService);
       const http = inject(HttpClient);
-      (window as any).__appGlobal = { httpClient: http };
+      const popup = inject(PopupService);
+      (window as any).__appGlobal = { httpClient: http, popup };
 
       await firstValueFrom(i18n.bootstrapLanguage());
       await appConfig.loadConfig();

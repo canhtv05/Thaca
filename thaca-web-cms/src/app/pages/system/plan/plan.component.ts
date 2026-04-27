@@ -20,6 +20,7 @@ import { AppConfigService } from '../../../core/configs/app-config.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { PlanDTO } from '../../../core/models/plan.model';
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
+import { Popup } from '../../../core/global/popup-notify';
 
 @Component({
   selector: 'app-plan',
@@ -143,12 +144,19 @@ export class PlanComponent {
       this.planForm.get('code')?.disable();
       this.originalValue = this.planForm.getRawValue();
       this.planModal.show();
-    } else if (event.key === 'delete') {
-      if (confirm(this.translate.instant('common.confirm_delete'))) {
-        this.planService.delete(event.row.id).subscribe(() => {
-          this.onSearch();
-        });
-      }
+    } else if (event.key === 'lock' || event.key === 'unlock') {
+      Popup.confirm({
+        title: 'common.confirm_delete',
+        message: this.translate.instant('common.confirm_delete'),
+        acceptText: 'common.button.delete',
+        cancelText: 'common.button.cancel',
+      }).then((result: boolean) => {
+        if (result) {
+          this.planService.delete(event.row.id).subscribe(() => {
+            this.onSearch();
+          });
+        }
+      });
     }
   }
 
