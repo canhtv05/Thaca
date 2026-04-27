@@ -1,6 +1,7 @@
 package com.thaca.auth.internal.services;
 
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.services.PlanService;
 import com.thaca.auth.services.RolePermissionService;
 import com.thaca.auth.services.SystemUserService;
 import com.thaca.auth.services.TenantService;
@@ -8,6 +9,7 @@ import com.thaca.auth.services.UserService;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.AuthUserDTO;
 import com.thaca.common.dtos.internal.PermissionDTO;
+import com.thaca.common.dtos.internal.PlanDTO;
 import com.thaca.common.dtos.internal.RoleDTO;
 import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.UserDTO;
@@ -31,6 +33,7 @@ public class InternalService {
     private final RolePermissionService rolePermissionService;
     private final TenantService tenantService;
     private final SystemUserService systemUserService;
+    private final PlanService planService;
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_ACTIVE_USER, type = ModeType.VALIDATE)
     public void validateActiveUserByUserName(VerifyEmailTokenDTO request) {

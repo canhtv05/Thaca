@@ -1,40 +1,54 @@
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
-
-<div class="card thaca-card p-0 overflow-hidden">
-  <div
-    class="flex flex-column md:flex-row md:align-items-center justify-content-between p-4 gap-3 bg-white border-bottom-1 border-gray-100"
-  >
-    <div class="flex flex-column sm:flex-row sm:align-items-center gap-3 w-full md:w-auto">
-      <thaca-input
-        [(ngModel)]="filter().code"
-        [placeholder]="'plan.code' | translate"
-        (onEnter)="onSearch()"
-        class="w-full sm:w-15rem"
-      ></thaca-input>
-      <thaca-input
-        [(ngModel)]="filter().name"
-        [placeholder]="'plan.name' | translate"
-        (onEnter)="onSearch()"
-        class="w-full sm:w-15rem"
-      ></thaca-input>
-      <thaca-dropdown
-        [(ngModel)]="filter().status"
-        [options]="statusOptions"
-        [placeholder]="'plan.status' | translate"
-        (onChange)="onSearch()"
-        class="w-full sm:w-12rem"
-      ></thaca-dropdown>
-      <thaca-button (click)="onSearch()" icon="pi pi-search"></thaca-button>
-    </div>
-
-    <div class="flex gap-2">
-      <thaca-button icon="pi pi-plus" (click)="onCreate()">{{
-        'common.button.create' | translate
-      }}</thaca-button>
-    </div>
-  </div>
-
-  <app-data-table [config]="tableConfig" (onAction)="handleAction($event)"></app-data-table>
+<div class="flex flex-col gap-4 w-full">
+  <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+  <app-data-table [config]="tableConfig" (onAction)="handleAction($event)">
+    <ng-template #searchTemplate>
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 place-content-end place-items-end"
+      >
+        <thaca-input
+          [label]="'plan.code' | translate"
+          [(ngModel)]="filter().code"
+          [placeholder]="'plan.code' | translate"
+          (onEnter)="onSearch()"
+          class="w-full"
+        ></thaca-input>
+        <thaca-input
+          [label]="'plan.name' | translate"
+          [(ngModel)]="filter().name"
+          [placeholder]="'plan.name' | translate"
+          (onEnter)="onSearch()"
+          class="w-full"
+        ></thaca-input>
+        <thaca-dropdown
+          [(ngModel)]="filter().type"
+          [label]="'plan.type' | translate"
+          [options]="planTypeOptions"
+          [placeholder]="'plan.type' | translate"
+          class="w-full"
+        ></thaca-dropdown>
+        <thaca-dropdown
+          [label]="'plan.status' | translate"
+          [(ngModel)]="filter().status"
+          [options]="statusOptions"
+          [placeholder]="'plan.status' | translate"
+          class="w-full"
+        ></thaca-dropdown>
+        <thaca-button size="md" class="w-full" variant="primary" (clicked)="onSearch()">
+          <span class="text-white">{{ 'common.button.search' | translate }}</span>
+        </thaca-button>
+      </div>
+    </ng-template>
+    <ng-template #headerActions>
+      <div class="flex justify-end items-center gap-4">
+        <thaca-button size="md" variant="secondary">
+          <span class="text-foreground"> {{ 'common.button.export' | translate }} </span>
+        </thaca-button>
+        <thaca-button (click)="onCreate()">
+          <span class="text-white">{{ 'common.button.create' | translate }}</span>
+        </thaca-button>
+      </div>
+    </ng-template>
+  </app-data-table>
 </div>
 
 <thaca-modal

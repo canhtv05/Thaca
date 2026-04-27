@@ -14,13 +14,13 @@ import ua_parser.Client;
 import ua_parser.Parser;
 
 @Service
-public class CommonService {
+public class ClientContextService {
 
     private final Parser parser = new Parser();
     private final DatabaseReader cityReader;
     private final DatabaseReader anonymousReader;
 
-    public CommonService(
+    public ClientContextService(
         @Qualifier("cityDatabaseReader") @Nullable DatabaseReader cityReader,
         @Qualifier("anonymousIpDatabaseReader") @Nullable DatabaseReader anonymousReader
     ) {

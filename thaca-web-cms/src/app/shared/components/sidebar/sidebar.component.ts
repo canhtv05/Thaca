@@ -77,7 +77,6 @@ export class Sidebar implements OnInit, OnDestroy {
         },
         { label: 'menu.system_logs', icon: 'pi pi-server', routerLink: ['/system/logs'] },
       ];
-      console.log(isSuperAdmin);
       if (isSuperAdmin) {
         systemAdminItems.unshift({
           label: 'menu.plan_management',

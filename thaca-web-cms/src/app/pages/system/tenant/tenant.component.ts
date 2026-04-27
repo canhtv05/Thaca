@@ -60,8 +60,9 @@ export class TenantComponent {
   });
 
   statusOptions: IDropdownOption[] = [
-    { label: 'common.all', value: null },
+    { label: 'common.status.all', value: null },
     { label: 'common.status.active', value: 'ACTIVE' },
+    { label: 'common.status.suspended', value: 'SUSPENDED' },
     { label: 'common.status.inactive', value: 'INACTIVE' },
   ];
 

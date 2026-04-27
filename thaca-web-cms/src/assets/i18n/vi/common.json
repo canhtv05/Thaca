@@ -35,6 +35,12 @@
     "toDate": "Đến ngày",
     "select_date_range": "Chọn từ ngày - đến ngày",
     "yes": "Có",
-    "no": "Không"
+    "no": "Không",
+    "status": {
+      "active": "Hoạt động",
+      "inactive": "Không hoạt động",
+      "all": "Tất cả",
+      "suspended": "Tạm khóa"
+    }
   }
 }

@@ -54,6 +54,7 @@ export class PlanComponent {
   filter = signal({
     code: '',
     name: '',
+    type: null,
     status: null,
   });
 
@@ -64,10 +65,11 @@ export class PlanComponent {
   ];
 
   planTypeOptions: IDropdownOption[] = [
-    { label: 'tenant.plans.FREE', value: 'FREE' },
-    { label: 'tenant.plans.BASIC', value: 'BASIC' },
-    { label: 'tenant.plans.PRO', value: 'PRO' },
-    { label: 'tenant.plans.ENTERPRISE', value: 'ENTERPRISE' },
+    { label: 'common.all', value: null },
+    { label: 'plan.plans.FREE', value: 'FREE' },
+    { label: 'plan.plans.BASIC', value: 'BASIC' },
+    { label: 'plan.plans.PRO', value: 'PRO' },
+    { label: 'plan.plans.ENTERPRISE', value: 'ENTERPRISE' },
   ];
 
   planForm = this.fb.group({
@@ -91,7 +93,7 @@ export class PlanComponent {
         field: 'type',
         header: 'plan.type',
         render: (row: PlanDTO) => {
-          return this.translate.instant(`tenant.plans.${row.type}`);
+          return this.translate.instant(`plan.plans.${row.type}`);
         },
       },
       { field: 'maxUsers', header: 'plan.max_users', sortable: true, width: '120px' },

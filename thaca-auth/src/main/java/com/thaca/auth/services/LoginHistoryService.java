@@ -28,7 +28,7 @@ public class LoginHistoryService {
     private final LoginHistoryRepository loginHistoryRepository;
     private final UserRepository userRepository;
     private final SystemUserRepository systemUserRepository;
-    private final CommonService commonService;
+    private final ClientContextService commonService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveLoginHistory(

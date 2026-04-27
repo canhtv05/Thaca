@@ -35,6 +35,12 @@
     "toDate": "To Date",
     "select_date_range": "Select date range",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "all": "All",
+      "suspended": "Suspended"
+    }
   }
 }

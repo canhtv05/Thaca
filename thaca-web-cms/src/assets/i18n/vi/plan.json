@@ -1,5 +1,5 @@
 {
-  "tenant": {
+  "plan": {
     "title": "Quản lý Gói dịch vụ (Plan)",
     "code": "Mã gói",
     "name": "Tên gói",
@@ -10,6 +10,12 @@
       "create": "Thêm gói mới",
       "edit": "Chỉnh sửa gói",
       "delete": "Xóa gói"
+    },
+    "plans": {
+      "FREE": "Miễn phí",
+      "BASIC": "Cơ bản",
+      "PRO": "Nâng cao",
+      "ENTERPRISE": "Doanh nghiệp"
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "tenant": {
+  "plan": {
     "title": "Plan Management",
     "code": "Plan Code",
     "name": "Plan Name",
@@ -10,6 +10,12 @@
       "create": "Add New Plan",
       "edit": "Edit Plan",
       "delete": "Delete Plan"
+    },
+    "plans": {
+      "FREE": "Free",
+      "BASIC": "Basic",
+      "PRO": "Pro",
+      "ENTERPRISE": "Enterprise"
     }
   }
 }
