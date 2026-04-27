@@ -114,6 +114,7 @@ export class PlanComponent {
         },
       },
     ],
+    actionFixed: true,
     actions: [
       {
         icon: 'pi pi-pencil',

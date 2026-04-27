@@ -10,6 +10,7 @@ import {
   inject,
   ChangeDetectorRef,
   NgZone,
+  AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -82,7 +83,7 @@ export interface ITableConfig<T = any> {
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })
-export class DataTableComponent {
+export class DataTableComponent implements AfterViewInit {
   private translate = inject(TranslateService);
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
@@ -115,6 +116,9 @@ export class DataTableComponent {
   data = signal<any[]>([]);
   totalRecords = signal(0);
   loading = signal(false);
+
+  private readonly DEFAULT_SORT_FIELD = 'updatedAt';
+  private readonly DEFAULT_SORT_ORDER = 'DESC';
 
   pagination = signal<IPaginationRequest>({
     page: 0,
@@ -149,10 +153,21 @@ export class DataTableComponent {
 
   first = computed(() => this.pagination().page * this.pagination().size);
 
+  ngAfterViewInit() {
+    // Manually trigger the first load with our default sort.
+    // We disabled lazyLoadOnInit to avoid PrimeNG firing before sort is set.
+    this.load(this.pagination());
+  }
+
   async load(pageReq: IPaginationRequest) {
     this.zone.run(async () => {
       this.pagination.set(pageReq);
       this.loading.set(true);
+      // Sync PrimeNG sort state before CD to prevent icon revert
+      if (this.pTable) {
+        this.pTable.sortField = pageReq.sortField;
+        this.pTable.sortOrder = pageReq.sortOrder === 'DESC' ? -1 : 1;
+      }
       this.cdr.detectChanges();
 
       const searchRequest: ISearchRequest<any> = {
@@ -180,6 +195,12 @@ export class DataTableComponent {
         }
       } finally {
         this.loading.set(false);
+        // Sync PrimeNG's internal sort state with the actual request
+        // so cdr.detectChanges() doesn't revert the sort icon
+        if (this.pTable) {
+          this.pTable.sortField = pageReq.sortField;
+          this.pTable.sortOrder = pageReq.sortOrder === 'DESC' ? -1 : 1;
+        }
         this.cdr.detectChanges();
       }
     });
@@ -189,53 +210,36 @@ export class DataTableComponent {
     if (filter !== undefined) {
       this.externalFilter = filter;
     }
-    if (this.pTable) {
-      if (this.pTable.first === 0) {
-        this.onLazyLoad({
-          first: 0,
-          rows: this.pTable.rows,
-          sortField: this.pTable.sortField,
-          sortOrder: this.pTable.sortOrder,
-        });
-      } else {
-        this.pTable.first = 0;
-      }
-    } else {
-      this.load({ ...this.pagination(), page: 0 });
-    }
+    const cur = this.pagination();
+    // Read sort from PrimeNG's internal state (source of truth for sort)
+    const sortField = (this.pTable?.sortField as string) || cur.sortField;
+    const sortOrder = this.pTable ? (this.pTable.sortOrder === 1 ? 'ASC' : 'DESC') : cur.sortOrder;
+    this.load({ ...cur, page: 0, sortField, sortOrder });
   }
 
   goToPage(page: number) {
     const cur = this.pagination();
     if (page < 0 || page >= this.totalPages() || page === cur.page) return;
-    if (this.pTable) {
-      this.pTable.first = page * cur.size; // This will trigger onLazyLoad
-    } else {
-      this.load({ ...cur, page });
-    }
+    this.load({ ...cur, page });
   }
 
   onPageSizeChange(size: number) {
     const cur = this.pagination();
     if (size === cur.size) return;
-    if (this.pTable) {
-      this.pTable.rows = size;
-      this.pTable.reset(); // Trigger onLazyLoad
-    } else {
-      this.load({ ...cur, page: 0, size });
-    }
+    this.load({ ...cur, page: 0, size });
   }
 
   onLazyLoad(event: TableLazyLoadEvent) {
-    const sortField = (event.sortField as string) || '';
-    const sortOrder = event.sortOrder === 1 ? 'ASC' : event.sortOrder === -1 ? 'DESC' : '';
     const cur = this.pagination();
-    const page = (event.first || 0) / (event.rows || cur.size);
+
+    // Only read sort from PrimeNG event — page/size come from our signal
+    // (PrimeNG's event.first/rows may be stale since we manage pagination ourselves)
+    const sortField = (event.sortField as string) || this.DEFAULT_SORT_FIELD;
+    const sortOrder = event.sortOrder === -1 ? 'DESC' : 'ASC';
 
     this.load({
       ...cur,
-      page,
-      size: event.rows || cur.size,
+      page: 0, // Reset to first page on sort change
       sortField,
       sortOrder,
     });
