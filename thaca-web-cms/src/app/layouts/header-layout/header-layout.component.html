@@ -1,8 +1,9 @@
 <header class="app-header">
   <div class="header-start">
     <button
-      class="icon-btn sidebar-toggle"
+      class="icon-btn border-none! sidebar-toggle"
       (click)="toggleSidebar()"
+      data-sidebar-toggle
       [attr.aria-label]="'common.toggle_sidebar' | translate"
     >
       <i class="pi pi-bars"></i>
@@ -70,14 +71,22 @@
           <div class="dropdown-divider"></div>
           <div class="dropdown-label">{{ 'layout.header.language' | translate }}</div>
 
-          <button class="dropdown-item" (click)="onChangeLang('vi')" [class.active]="currentLang() === 'vi'">
+          <button
+            class="dropdown-item"
+            (click)="onChangeLang('vi')"
+            [class.active]="currentLang() === 'vi'"
+          >
             <img src="assets/media/flags/vn.webp" alt="VN" class="flag-icon" />
             <span>Tiếng Việt</span>
             @if (currentLang() === 'vi') {
               <i class="pi pi-check ml-auto text-primary text-xs"></i>
             }
           </button>
-          <button class="dropdown-item" (click)="onChangeLang('en')" [class.active]="currentLang() === 'en'">
+          <button
+            class="dropdown-item"
+            (click)="onChangeLang('en')"
+            [class.active]="currentLang() === 'en'"
+          >
             <img src="assets/media/flags/uk.webp" alt="UK" class="flag-icon" />
             <span>English</span>
             @if (currentLang() === 'en') {
