@@ -10,16 +10,6 @@
   transition: none !important;
 }
 
-::ng-deep .p-datepicker-panel {
-  width: auto;
-  padding: 10px;
-  background: var(--card);
-  color: var(--foreground);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  box-shadow: none;
-}
-
 ::ng-deep .p-datepicker-panel .p-datepicker-prev-button,
 ::ng-deep .p-datepicker-panel .p-datepicker-next-button {
   background-color: transparent !important;
