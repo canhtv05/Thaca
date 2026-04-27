@@ -11,6 +11,8 @@ import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.JsonF;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -64,8 +66,8 @@ public class InternalApiClient {
     }
 
     private boolean isByteType(ParameterizedTypeReference<?> responseType) {
-        java.lang.reflect.Type type = responseType.getType();
-        if (type instanceof java.lang.reflect.ParameterizedType pt) {
+        Type type = responseType.getType();
+        if (type instanceof ParameterizedType pt) {
             return pt.getActualTypeArguments().length > 0 && pt.getActualTypeArguments()[0].equals(byte[].class);
         }
         return false;
