@@ -1,5 +1,6 @@
 import { Directive, HostListener, Input, Optional, Self, ElementRef } from '@angular/core';
 import { NgControl } from '@angular/forms';
+import { CommonUtils } from '../utils/common.utils';
 
 @Directive({
   selector: '[thacaTransform]',
@@ -26,7 +27,7 @@ export class ThacaTransformDirective {
     let result = value;
 
     if (this.noAccent) {
-      result = this.removeVietnameseTones(result);
+      result = CommonUtils.removeVietnameseTones(result);
     }
 
     if (this.noSpace) {
@@ -50,7 +51,7 @@ export class ThacaTransformDirective {
     let result = value;
 
     // Phải xử lý lại các transform khác vì giá trị có thể đã thay đổi
-    if (this.noAccent) result = this.removeVietnameseTones(result);
+    if (this.noAccent) result = CommonUtils.removeVietnameseTones(result);
     if (this.noSpace) result = result.replace(/\s+/g, '');
     if (this.lowercase) result = result.toLowerCase();
     else if (this.uppercase) result = result.toUpperCase();
@@ -67,13 +68,5 @@ export class ThacaTransformDirective {
       this.ngControl.control?.setValue(val, { emitEvent: false });
       this.ngControl.valueAccessor?.writeValue(val);
     }
-  }
-
-  private removeVietnameseTones(str: string) {
-    return str
-      .normalize('NFD')
-      .replace(/\p{Mn}/gu, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D');
   }
 }

@@ -27,10 +27,7 @@ import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,7 +90,7 @@ public class PlanService {
     @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_PLAN, type = ModeType.HANDLE)
     public void createPlan(PlanDTO request) {
         Plan plan = new Plan();
-        plan.setCode(request.getCode());
+        plan.setCode(request.getCode().toUpperCase(Locale.ROOT));
         plan.setName(request.getName());
         plan.setType(request.getType());
         plan.setMaxUsers(ObjectUtils.getIfNull(request.getMaxUsers(), 0));

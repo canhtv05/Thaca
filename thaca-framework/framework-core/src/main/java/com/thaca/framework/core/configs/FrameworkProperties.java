@@ -41,8 +41,8 @@ public class FrameworkProperties {
     public static class HttpClientConfig {
 
         private String apiKey;
-        private Integer connectTimeout = 5000;
-        private Integer readTimeout = 5000;
+        private Integer connectTimeout = 10000;
+        private Integer readTimeout = 10000;
     }
 
     @Getter
@@ -51,9 +51,5 @@ public class FrameworkProperties {
 
         private String authService;
         private String adminService;
-
-        public String authServiceInternalRoute() {
-            return this.authService + "/internal";
-        }
     }
 }

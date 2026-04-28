@@ -7,10 +7,8 @@ import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwInternalApi;
-import com.thaca.framework.core.annotations.FwInternalClient;
 import java.util.List;
 
-@FwInternalClient(service = "auth")
 public interface AuthClient {
     @FwInternalApi(path = "/cms/sign-in", name = ServiceMethod.CMS_AUTHENTICATE)
     AuthenticateRes signIn(LoginReq loginReq);

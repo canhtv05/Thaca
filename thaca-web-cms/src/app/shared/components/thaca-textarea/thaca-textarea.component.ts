@@ -7,6 +7,7 @@ import {
   FormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { CommonUtils } from '../../utils/common.utils';
 
 @Component({
   selector: 'thaca-textarea',
@@ -28,6 +29,11 @@ export class ThacaTextareaComponent implements ControlValueAccessor {
   @Input() required = false;
   @Input() rows = 3;
   @Input() id = `thaca-textarea-${Math.random().toString(36).substring(2, 9)}`;
+  @Input() noAccent = false;
+  @Input() noSpace = false;
+  @Input() trim = false;
+  @Input() lowercase = false;
+  @Input() uppercase = false;
 
   @HostBinding('class')
   get hostClass() {
@@ -69,12 +75,29 @@ export class ThacaTextareaComponent implements ControlValueAccessor {
   }
 
   onInput(event: Event): void {
-    const val = (event.target as HTMLTextAreaElement).value;
+    const input = event.target as HTMLTextAreaElement;
+    let val = input.value;
+
+    if (this.noAccent) val = CommonUtils.removeVietnameseTones(val);
+    if (this.noSpace) val = val.replace(/\s+/g, '');
+    if (this.lowercase) val = val.toLowerCase();
+    else if (this.uppercase) val = val.toUpperCase();
+
+    if (val !== input.value) {
+      input.value = val;
+    }
+
     this.value.set(val);
     this.onChange(val);
   }
 
   onBlur(): void {
+    let val = this.value();
+    if (this.trim) {
+      val = val.trim();
+      this.value.set(val);
+      this.onChange(val);
+    }
     this.onTouched();
   }
 

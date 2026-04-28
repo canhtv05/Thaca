@@ -72,6 +72,7 @@
           [required]="true"
           formControlName="code"
           [placeholder]="'tenant.code' | translate"
+          [uppercase]="true"
         ></thaca-input>
         <validation-message
           [control]="tenantForm.get('code')"

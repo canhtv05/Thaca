@@ -72,4 +72,16 @@ export class CommonUtils {
   static cleanObject(obj: any): any {
     return JSON.parse(JSON.stringify(obj));
   }
+
+  /**
+   * Loại bỏ dấu tiếng Việt
+   */
+  static removeVietnameseTones(str: string): string {
+    if (!str) return '';
+    return str
+      .normalize('NFD')
+      .replace(/\p{Mn}/gu, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
+  }
 }

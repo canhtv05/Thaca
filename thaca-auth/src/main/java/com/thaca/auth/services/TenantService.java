@@ -34,10 +34,7 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +103,7 @@ public class TenantService {
             throw new FwException(ErrorMessage.PLAN_INACTIVE_CANNOT_SAVE);
         }
         Tenant tenant = Tenant.builder()
-            .code(dto.getCode())
+            .code(dto.getCode().toUpperCase(Locale.ROOT))
             .name(dto.getName())
             .domain(dto.getDomain())
             .status(dto.getStatus())

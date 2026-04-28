@@ -19,6 +19,7 @@
     [value]="value()"
     [disabled]="disabled"
     [rows]="rows"
+    [style.text-transform]="uppercase ? 'uppercase' : lowercase ? 'lowercase' : 'none'"
     (input)="onInput($event)"
     (blur)="onBlur()"
   ></textarea>

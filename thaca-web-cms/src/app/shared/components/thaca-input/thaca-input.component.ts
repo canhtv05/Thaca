@@ -20,6 +20,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { NgIcon } from '@ng-icons/core';
 import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
+import { CommonUtils } from '../../utils/common.utils';
 
 @Component({
   selector: 'thaca-input',
@@ -43,7 +44,7 @@ export class ThacaInputComponent implements ControlValueAccessor {
   @Input() max?: number;
   @Input() noAccent = false;
   @Input() noSpace = false;
-  @Input() trim = false;
+  @Input() trim = true;
   @Input() lowercase = false;
   @Input() uppercase = false;
 
@@ -105,10 +106,14 @@ export class ThacaInputComponent implements ControlValueAccessor {
     const input = event.target as HTMLInputElement;
     let val = input.value;
 
-    if (this.noAccent) val = this.removeVietnameseTones(val);
+    if (this.noAccent) val = CommonUtils.removeVietnameseTones(val);
     if (this.noSpace) val = val.replace(/\s+/g, '');
     if (this.lowercase) val = val.toLowerCase();
     else if (this.uppercase) val = val.toUpperCase();
+
+    if (val !== input.value) {
+      input.value = val;
+    }
 
     this.value.set(val);
     this.onChange(val);
@@ -128,14 +133,6 @@ export class ThacaInputComponent implements ControlValueAccessor {
       this.onChange(val);
     }
     this.onTouched();
-  }
-
-  private removeVietnameseTones(str: string) {
-    return str
-      .normalize('NFD')
-      .replace(/\p{Mn}/gu, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D');
   }
 
   onTogglePassword() {
