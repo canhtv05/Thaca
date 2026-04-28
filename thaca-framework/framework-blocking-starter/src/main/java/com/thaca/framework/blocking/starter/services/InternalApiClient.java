@@ -36,32 +36,74 @@ public class InternalApiClient {
     private final RestTemplate restTemplate;
     private final FrameworkProperties frameworkProperties;
 
-    public <T, R> R post(String url, T requestData, ParameterizedTypeReference<ApiPayload<R>> responseType) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public <R> R post(String url, Object requestData, ParameterizedTypeReference responseType) {
         if (isByteType(responseType)) {
-            @SuppressWarnings("unchecked")
-            R result = (R) postRaw(url, requestData);
-            return result;
+            return (R) postRaw(url, requestData);
         }
+
+        HttpEntity<ApiPayload<Object>> entity = buildRequestEntity(requestData);
+
+        try {
+            ResponseEntity response = restTemplate.exchange(url, HttpMethod.POST, entity, responseType);
+            forwardCookies(response);
+            return (R) unwrapRaw(response);
+        } catch (HttpStatusCodeException ex) {
+            handleError(ex);
+            throw ex;
+        }
+    }
+
+    public <T> byte[] postRaw(String url, T requestData) {
+        HttpEntity<ApiPayload<Object>> entity = buildRequestEntity(requestData);
+
+        try {
+            ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.POST, entity, byte[].class);
+            forwardCookies(response);
+            return response.getBody();
+        } catch (HttpStatusCodeException ex) {
+            handleError(ex);
+            throw ex;
+        }
+    }
+
+    private <T> HttpEntity<ApiPayload<Object>> buildRequestEntity(T requestData) {
         ApiHeader header = FwContextHeader.get();
         if (header == null) {
             header = ApiHeader.builder().build();
         }
+
         Object safeData = (requestData != null) ? requestData : new HashMap<>();
         ApiBody<Object> body = ApiBody.builder().transId(MDC.get("transId")).status("OK").data(safeData).build();
+
         ApiPayload<Object> payload = ApiPayload.builder().header(header).body(body).build();
-        HttpHeaders httpHeaders = buildHeaders();
-        try {
-            ResponseEntity<ApiPayload<R>> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                new HttpEntity<>(payload, httpHeaders),
-                responseType
-            );
-            forwardCookies(response);
-            return unwrap(response);
-        } catch (HttpStatusCodeException ex) {
-            handleError(ex);
-            throw ex;
+
+        return new HttpEntity<>(payload, buildHeaders());
+    }
+
+    private HttpHeaders buildHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(FwHttpHeaderConstants.INTERNAL_CALL_HEADER, "true");
+        headers.set(HttpHeaders.AUTHORIZATION, "Basic " + frameworkProperties.getHttpClient().getApiKey());
+
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attr != null) {
+            HttpServletRequest req = attr.getRequest();
+            copyIfPresent(headers, HttpHeaders.COOKIE, req.getHeader(HttpHeaders.COOKIE));
+            copyIfPresent(headers, HttpHeaders.USER_AGENT, req.getHeader(HttpHeaders.USER_AGENT));
+
+            String bearer = req.getHeader(HttpHeaders.AUTHORIZATION);
+            if (StringUtils.isNotBlank(bearer) && bearer.startsWith("Bearer ")) {
+                headers.set(HttpHeaders.AUTHORIZATION, bearer);
+            }
+        }
+        return headers;
+    }
+
+    private void copyIfPresent(HttpHeaders headers, String key, String value) {
+        if (StringUtils.isNotBlank(value)) {
+            headers.add(key, value);
         }
     }
 
@@ -73,62 +115,19 @@ public class InternalApiClient {
         return false;
     }
 
-    public <T> byte[] postRaw(String url, T requestData) {
-        ApiHeader header = FwContextHeader.get();
-        if (header == null) {
-            header = ApiHeader.builder().build();
-        }
-        Object safeData = (requestData != null) ? requestData : new HashMap<>();
-        ApiBody<Object> body = ApiBody.builder().transId(MDC.get("transId")).status("OK").data(safeData).build();
-        ApiPayload<Object> payload = ApiPayload.builder().header(header).body(body).build();
-        HttpHeaders httpHeaders = buildHeaders();
-        try {
-            ResponseEntity<byte[]> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                new HttpEntity<>(payload, httpHeaders),
-                byte[].class
-            );
-            forwardCookies(response);
-            return response.getBody();
-        } catch (HttpStatusCodeException ex) {
-            handleError(ex);
-            throw ex;
-        }
-    }
-
-    private HttpHeaders buildHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(FwHttpHeaderConstants.INTERNAL_CALL_HEADER, "true");
-        headers.set(HttpHeaders.AUTHORIZATION, "Basic " + frameworkProperties.getHttpClient().getApiKey());
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attr != null) {
-            HttpServletRequest req = attr.getRequest();
-            copy(headers, HttpHeaders.COOKIE, req.getHeader(HttpHeaders.COOKIE));
-            copy(headers, HttpHeaders.USER_AGENT, req.getHeader(HttpHeaders.USER_AGENT));
-            String bearer = req.getHeader(HttpHeaders.AUTHORIZATION);
-            if (StringUtils.isNotBlank(bearer) && bearer.startsWith("Bearer ")) {
-                headers.set(HttpHeaders.AUTHORIZATION, bearer);
-            }
-        }
-        return headers;
-    }
-
-    private void copy(HttpHeaders headers, String key, String value) {
-        if (StringUtils.isNotBlank(value)) {
-            headers.add(key, value);
-        }
-    }
-
-    private <R> R unwrap(ResponseEntity<ApiPayload<R>> response) {
+    @SuppressWarnings("rawtypes")
+    private Object unwrapRaw(ResponseEntity response) {
         if (response == null || response.getBody() == null) {
             return null;
         }
-        ApiPayload<R> payload = response.getBody();
-        if (payload.getBody() == null) {
-            return null;
+        Object body = response.getBody();
+        if (body instanceof ApiPayload<?> payload) {
+            if (payload.getBody() == null) {
+                return null;
+            }
+            return payload.getBody().getData();
         }
-        return payload.getBody().getData();
+        return body;
     }
 
     private void forwardCookies(ResponseEntity<?> response) {

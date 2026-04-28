@@ -3,7 +3,6 @@ package com.thaca.common.dtos.internal;
 import com.thaca.common.dtos.BaseAuditResponse;
 import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
 import com.thaca.common.enums.TenantStatus;
-import java.time.LocalDateTime;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
