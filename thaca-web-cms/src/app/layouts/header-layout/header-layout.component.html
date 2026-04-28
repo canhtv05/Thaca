@@ -16,11 +16,7 @@
 
   <div class="header-end">
     <!-- Theme Toggle -->
-    <button
-      class="icon-btn theme-toggle"
-      (click)="toggleTheme()"
-      [title]="'common.toggle_theme' | translate"
-    >
+    <button class="icon-btn theme-toggle" (click)="toggleTheme()">
       <i
         class="pi"
         [class.pi-sun]="themeService.theme() === 'dark'"

@@ -10,6 +10,10 @@
   transition: none !important;
 }
 
+:host ::ng-deep .p-datepicker-input {
+  transition: none !important;
+}
+
 ::ng-deep .p-datepicker-panel .p-datepicker-prev-button,
 ::ng-deep .p-datepicker-panel .p-datepicker-next-button {
   background-color: transparent !important;
@@ -168,11 +172,7 @@
   visibility: hidden;
   pointer-events: none;
   z-index: 2;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease,
-    opacity 0.15s ease,
-    visibility 0.15s ease;
+  transition: none !important;
 
   &.is-visible {
     opacity: 1;

@@ -23,9 +23,7 @@
   outline: none;
   resize: vertical;
   min-height: 80px;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: none !important;
 
   &::placeholder {
     color: var(--muted-foreground);

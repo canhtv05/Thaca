@@ -24,16 +24,14 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   outline: none;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: none !important;
 
   &::placeholder {
     color: var(--muted-foreground);
     opacity: 0.9;
     font-weight: 500;
     letter-spacing: 0.01em;
-    transition: opacity 0.15s ease;
+    transition: none !important;
   }
 
   &:hover:not(:disabled) {
@@ -46,6 +44,7 @@
 
     &::placeholder {
       opacity: 0.65;
+      transition: none !important;
     }
   }
 
@@ -53,6 +52,7 @@
     opacity: 0.45;
     cursor: not-allowed;
     background: color-mix(in srgb, var(--border) 30%, transparent);
+    transition: none !important;
   }
 
   // Ẩn spinner mặc định của browser
@@ -103,7 +103,7 @@
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
-  transition: background-color 0.12s ease;
+  transition: none !important;
 
   svg {
     width: 14px;
@@ -166,7 +166,7 @@
   &--clickable {
     pointer-events: auto;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: none !important;
     &:hover {
       opacity: 0.75;
     }
@@ -207,16 +207,13 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease,
-    opacity 0.15s ease,
-    visibility 0.15s ease;
+  transition: none !important;
 
   &.is-visible {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    transition: none !important;
   }
 
   &:hover {
