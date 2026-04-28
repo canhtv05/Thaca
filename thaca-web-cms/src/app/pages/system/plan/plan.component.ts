@@ -23,7 +23,6 @@ import { ValidationMessageComponent } from '../../../shared/components/validatio
 import { Popup } from '../../../core/global/popup-notify';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { isLoading } from '../../../core/stores/app.store';
-import { ISearchRequest } from '../../../core/models/common.model';
 
 @Component({
   selector: 'app-plan',

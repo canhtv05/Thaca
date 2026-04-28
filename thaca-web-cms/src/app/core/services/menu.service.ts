@@ -42,6 +42,7 @@ export class MenuService {
         {
           label: 'menu.access_control',
           icon: 'pi pi-shield',
+          path: '/system',
           items: [
             { label: 'menu.admin_accounts', icon: 'pi pi-id-card', routerLink: ['/system/admins'] },
             {
@@ -54,6 +55,7 @@ export class MenuService {
         {
           label: 'menu.global_configuration',
           icon: 'pi pi-cog',
+          path: '/system/settings',
           items: [
             {
               label: 'menu.mail_settings',
@@ -108,6 +110,7 @@ export class MenuService {
             {
               label: 'menu.content_management',
               icon: 'pi pi-clone',
+              path: '/content',
               items: [
                 { label: 'menu.post_list', icon: 'pi pi-list', routerLink: ['/content/posts'] },
                 {
@@ -125,6 +128,7 @@ export class MenuService {
             {
               label: 'menu.report_management',
               icon: 'pi pi-flag',
+              path: '/moderation/reports',
               items: [
                 {
                   label: 'menu.user_reports',
@@ -146,6 +150,7 @@ export class MenuService {
             {
               label: 'menu.user_management',
               icon: 'pi pi-users',
+              path: '/user-management',
               items: [
                 {
                   label: 'menu.end_user_list',
@@ -162,6 +167,7 @@ export class MenuService {
             {
               label: 'menu.point_system',
               icon: 'pi pi-star',
+              path: '/engagement/points',
               items: [
                 {
                   label: 'menu.point_rules',
@@ -188,6 +194,7 @@ export class MenuService {
             {
               label: 'menu.ui_components',
               icon: 'pi pi-th-large',
+              path: '/uikit',
               items: [
                 { label: 'Form Layout', icon: 'pi pi-id-card', routerLink: ['/uikit/formlayout'] },
                 { label: 'Input', icon: 'pi pi-check-square', routerLink: ['/uikit/input'] },

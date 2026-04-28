@@ -18,7 +18,7 @@ import {
 import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thaca-modal.component';
 import { AppConfigService } from '../../../core/configs/app-config.service';
 import { TenantService } from './tenant.service';
-import { TenantDTO } from '../../../core/models/tenant.model';
+import { ITenantDTO } from '../../../core/models/tenant.model';
 import { PlanService } from '../plan/plan.service';
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { ThacaDatepickerComponent } from '../../../shared/components/thaca-datepicker/thaca-datepicker.component';
@@ -102,10 +102,12 @@ export class TenantComponent implements OnInit {
       { field: 'code', header: 'tenant.code', sortable: true, width: '150px' },
       { field: 'name', header: 'tenant.name', sortable: true },
       { field: 'domain', header: 'tenant.domain' },
+      { field: 'contactEmail', header: 'tenant.contact_email' },
+      { field: 'logoUrl', header: 'tenant.logo_url' },
       {
         field: 'plan.name',
         header: 'tenant.plan',
-        render: (row: TenantDTO) => {
+        render: (row: ITenantDTO) => {
           if (!row.plan) return '';
           return row.plan.name;
         },
@@ -113,7 +115,7 @@ export class TenantComponent implements OnInit {
       {
         field: 'expiresAt',
         header: 'tenant.expires_at',
-        render: (row: TenantDTO) => {
+        render: (row: ITenantDTO) => {
           if (!row.expiresAt) return this.translate.instant('common.infinite');
           return row.expiresAt;
         },
@@ -121,7 +123,7 @@ export class TenantComponent implements OnInit {
       {
         field: 'status',
         header: 'tenant.status',
-        render: (row: TenantDTO) => {
+        render: (row: ITenantDTO) => {
           const variant = row.status === 'ACTIVE' ? 'success' : 'warning';
           const label = this.translate.instant(`common.status.${row.status.toLowerCase()}`);
           return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
@@ -166,21 +168,30 @@ export class TenantComponent implements OnInit {
       this.tenantForm.get('code')?.disable();
       this.originalValue = this.tenantForm.getRawValue();
       this.tenantModal.show();
-    } else if (event.key === 'delete') {
+    } else if (event.key === 'lock' || event.key === 'unlock') {
       Popup.confirm({
-        title: 'tenant.popup.delete.title',
-        message: 'common.confirm_delete',
-        acceptText: 'common.button.delete',
+        title: event.key === 'lock' ? 'tenant.popup.lock.title' : 'tenant.popup.unlock.title',
+        message: event.key === 'lock' ? 'tenant.popup.lock.message' : 'tenant.popup.unlock.message',
+        acceptText: event.key === 'lock' ? 'common.button.lock' : 'common.button.unlock',
         cancelText: 'common.button.cancel',
-      }).then((result) => {
+      }).then(async (result: boolean) => {
         if (result) {
-          this.tenantService.delete(event.row.id).subscribe(() => {
-            GlobalToast.success(
-              'tenant.toast.delete.messageSuccess',
-              'tenant.toast.delete.titleSuccess',
-            );
-            this.onSearch();
-          });
+          if (event.key === 'lock' || event.key === 'unlock') {
+            const req = { ...event.row, status: event.key === 'lock' ? 'INACTIVE' : 'ACTIVE' };
+            const res = await this.tenantService.lockUnlock(req);
+            if (res.body.status === 'OK') {
+              const messageKey =
+                event.key === 'lock'
+                  ? 'tenant.toast.lock.messageSuccess'
+                  : 'tenant.toast.unlock.messageSuccess';
+              const titleKey =
+                event.key === 'lock'
+                  ? 'tenant.toast.lock.titleSuccess'
+                  : 'tenant.toast.unlock.titleSuccess';
+              GlobalToast.success(messageKey, titleKey);
+              this.onSearch();
+            }
+          }
         }
       });
     }
@@ -195,6 +206,7 @@ export class TenantComponent implements OnInit {
 
   async onSubmit() {
     if (this.isUnchanged()) return;
+    const req = this.tenantForm.getRawValue() as unknown as ITenantDTO & { isUpdate: boolean };
     const isUpdate = !!this.tenantForm.value.id;
     const confirmed = await Popup.confirm({
       title: isUpdate ? 'tenant.popup.update.title' : 'tenant.popup.create.title',
@@ -203,24 +215,20 @@ export class TenantComponent implements OnInit {
       cancelText: 'common.button.cancel',
     });
     if (!confirmed) return;
-
-    const data = this.tenantForm.getRawValue() as any;
-    this.tenantService.save(data).subscribe(() => {
+    const res = isUpdate
+      ? await this.tenantService.update(req)
+      : await this.tenantService.create(req);
+    if (res.body.status === 'OK') {
       GlobalToast.success(
         isUpdate ? 'tenant.toast.update.messageSuccess' : 'tenant.toast.create.messageSuccess',
         isUpdate ? 'tenant.toast.update.titleSuccess' : 'tenant.toast.create.titleSuccess',
       );
-      this.tenantModal.hide();
       this.onSearch();
-    });
+      this.tenantModal.hide();
+    }
   }
 
-  onSave() {
-    if (this.tenantForm.invalid) return;
-    const data = this.tenantForm.value as any;
-    this.tenantService.save(data).subscribe(() => {
-      this.tenantModal.hide();
-      this.onSearch();
-    });
+  async onExport(): Promise<void> {
+    await this.tenantService.exportData(this.table.getSearchRequest());
   }
 }

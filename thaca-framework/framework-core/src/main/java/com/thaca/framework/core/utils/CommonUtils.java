@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -108,6 +109,9 @@ public class CommonUtils {
 
     public static void writeExcelResponse(HttpServletResponse response, byte[] content, String fileName)
         throws IOException {
+        LocalDate now = LocalDate.now();
+        String formattedDate = DateUtils.localDateToString(now);
+        fileName = fileName.replace("{{date}}", formattedDate);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
         response.getOutputStream().write(content);

@@ -63,6 +63,6 @@ public class InternalPlanController {
     @PostMapping("/cms/plans/export")
     @FwRequest(name = InternalMethod.INTERNAL_CMS_EXPORT_PLAN, type = RequestType.INTERNAL)
     public void exportPlan(SearchRequest<PlanDTO> request, HttpServletResponse response) throws IOException {
-        CommonUtils.writeExcelResponse(response, fwApiProcess.process(request), "thaca-plans-export.xlsx");
+        CommonUtils.writeExcelResponse(response, fwApiProcess.process(request), "thaca-plans-export-{{date}}.xlsx");
     }
 }

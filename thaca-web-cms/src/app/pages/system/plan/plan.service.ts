@@ -48,7 +48,7 @@ export class PlanService {
 
   async exportData(req?: ISearchRequest<IPlanDTO>): Promise<void> {
     const url = `${this.config.getApiUrl()}/cms/plans/export`;
-    await this.commonService.downloadFile(url, 'thaca-plans-export.xlsx', req || {});
+    await this.commonService.downloadFile(url, 'thaca-plans-export-{{date}}.xlsx', req || {});
   }
 
   async getAll(): Promise<IApiPayload<IPlanDTO[]>> {

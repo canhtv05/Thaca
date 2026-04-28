@@ -4,6 +4,8 @@ import com.thaca.auth.domains.Plan;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.mappers.PlanMapper;
 import com.thaca.auth.repositories.PlanRepository;
+import com.thaca.auth.validators.core.Validator;
+import com.thaca.auth.validators.rules.CodeRule;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.PlanDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
@@ -46,7 +48,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class PlanService {
 
     private final PlanRepository planRepository;
-    private final String REGEX_CODE = "^[a-zA-Z0-9]+$";
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_PLANS, type = ModeType.VALIDATE)
     public void validateSearchPlans(SearchRequest<PlanDTO> request) {
@@ -77,7 +78,7 @@ public class PlanService {
         return planRepository
             .findByCode(request.getCode())
             .map(PlanMapper::fromEntity)
-            .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
+            .orElseThrow(() -> new FwException(ErrorMessage.PLAN_NOT_FOUND));
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_PLAN, type = ModeType.VALIDATE)
@@ -90,14 +91,14 @@ public class PlanService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_PLAN, type = ModeType.HANDLE)
-    public PlanDTO createPlan(PlanDTO request) {
+    public void createPlan(PlanDTO request) {
         Plan plan = new Plan();
         plan.setCode(request.getCode());
         plan.setName(request.getName());
         plan.setType(request.getType());
         plan.setMaxUsers(ObjectUtils.getIfNull(request.getMaxUsers(), 0));
         plan.setStatus(ObjectUtils.getIfNull(request.getStatus(), CommonStatus.ACTIVE));
-        return PlanMapper.fromEntity(planRepository.save(plan));
+        planRepository.save(plan);
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_PLAN, type = ModeType.VALIDATE)
@@ -110,17 +111,17 @@ public class PlanService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_PLAN, type = ModeType.HANDLE)
-    public PlanDTO updatePlan(PlanDTO request) {
+    public void updatePlan(PlanDTO request) {
         Plan plan = planRepository
             .findByCode(request.getCode())
-            .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
+            .orElseThrow(() -> new FwException(ErrorMessage.PLAN_NOT_FOUND));
         if (CommonStatus.INACTIVE.equals(plan.getStatus())) {
             throw new FwException(ErrorMessage.PLAN_INACTIVE_CANNOT_UPDATE);
         }
         plan.setName(request.getName());
         plan.setType(request.getType());
         plan.setMaxUsers(ObjectUtils.getIfNull(request.getMaxUsers(), 0));
-        return PlanMapper.fromEntity(planRepository.save(plan));
+        planRepository.save(plan);
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_PLAN, type = ModeType.VALIDATE)
@@ -135,7 +136,7 @@ public class PlanService {
     public void lockUnlockPlan(PlanDTO request) {
         Plan plan = planRepository
             .findByCode(request.getCode())
-            .orElseThrow(() -> new FwException(CommonErrorMessage.NOT_FOUND));
+            .orElseThrow(() -> new FwException(ErrorMessage.PLAN_NOT_FOUND));
         plan.setStatus(request.getStatus());
         planRepository.save(plan);
     }
@@ -180,19 +181,19 @@ public class PlanService {
         return ExcelSchema.builder()
             .sheetName(ObjectUtils.notEqual(isVietnamese, false) ? "Danh sách kế hoạch" : "Plans")
             .addColumn(
-                ExcelColumn.builder("code", ObjectUtils.notEqual(isVietnamese, false) ? "Mã" : "Code")
+                ExcelColumn.builder("code", ObjectUtils.notEqual(isVietnamese, false) ? "Mã gói" : "Plan code")
                     .required()
                     .dataType(ExcelDataType.STRING)
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("name", ObjectUtils.notEqual(isVietnamese, false) ? "Tên" : "Name")
+                ExcelColumn.builder("name", ObjectUtils.notEqual(isVietnamese, false) ? "Tên gói" : "Plan name")
                     .required()
                     .dataType(ExcelDataType.STRING)
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("type", ObjectUtils.notEqual(isVietnamese, false) ? "Loại" : "Type")
+                ExcelColumn.builder("type", ObjectUtils.notEqual(isVietnamese, false) ? "Loại gói" : "Plan type")
                     .required()
                     .dataType(ExcelDataType.STRING)
                     .build()
@@ -200,7 +201,7 @@ public class PlanService {
             .addColumn(
                 ExcelColumn.builder(
                     "maxUsers",
-                    ObjectUtils.notEqual(isVietnamese, false) ? "Số lượng người dùng tối đa" : "Max Users"
+                    ObjectUtils.notEqual(isVietnamese, false) ? "Users tối đa" : "Max Users"
                 )
                     .required()
                     .dataType(ExcelDataType.NUMBER)
@@ -272,9 +273,8 @@ public class PlanService {
         if (CommonUtils.isEmpty(request.getCode(), request.getName(), request.getType())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
-        if (!request.getCode().matches(REGEX_CODE)) {
-            throw new FwException(ErrorMessage.PLAN_CODE_INVALID);
-        }
+        Validator<String> codeValidator = new Validator<>(List.of(new CodeRule()));
+        codeValidator.validate(request.getCode());
         if (request.getType() == null) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }

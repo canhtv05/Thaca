@@ -210,12 +210,54 @@ public enum ErrorMessage implements ErrorMessageRule {
         "Plan is inactive",
         "Plan is inactive cannot update. Please unlock plan to update"
     ),
-    PLAN_CODE_INVALID(
-        "PLAN.CODE.INVALID",
-        "Mã gói không hợp lệ",
-        "Mã gói không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9",
-        "Plan code invalid",
-        "Plan code invalid. It must contain only letters A-Z, a-z, 0-9"
+    PLAN_INACTIVE_CANNOT_SAVE(
+        "PLAN.INACTIVE.CANNOT.SAVE",
+        "Plan đã bị khóa",
+        "Plan đã bị khóa không thể lưu. Vui lòng mở khóa plan để lưu",
+        "Plan is inactive",
+        "Plan is inactive cannot save. Please unlock plan to save"
+    ),
+    PLAN_NOT_FOUND(
+        "PLAN.NOT.FOUND",
+        "Plan không tồn tại",
+        "Plan không tồn tại trong hệ thống",
+        "Plan not found",
+        "Plan not found in system"
+    ),
+    PLAN_ALREADY_EXISTS(
+        "PLAN.ALREADY.EXISTS",
+        "Plan đã tồn tại",
+        "Plan đã tồn tại trong hệ thống",
+        "Plan already exists",
+        "Plan already exists in system"
+    ),
+    CODE_INVALID(
+        "CODE.INVALID",
+        "Mã không hợp lệ",
+        "Mã không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9",
+        "Code invalid",
+        "Code invalid. It must contain only letters A-Z, a-z, 0-9"
+    ),
+    TENANT_NOT_FOUND(
+        "TENANT.NOT.FOUND",
+        "Tenant không tồn tại",
+        "Tenant không tồn tại trong hệ thống",
+        "Tenant not found",
+        "Tenant not found in system"
+    ),
+    TENANT_CODE_ALREADY_EXISTS(
+        "TENANT.CODE.ALREADY.EXISTS",
+        "Mã tenant đã tồn tại",
+        "Mã tenant đã tồn tại trong hệ thống",
+        "Tenant code already exists",
+        "Tenant code already exists in system"
+    ),
+    TENANT_INACTIVE_CANNOT_UPDATE(
+        "PLAN.INACTIVE",
+        "Tenant đã bị khóa",
+        "Tenant đã bị khóa không thể cập nhật. Vui lòng mở khóa tenant để cập nhật",
+        "Tenant is inactive",
+        "Tenant is inactive cannot update. Please unlock tenant to update"
     );
 
     private final String code;

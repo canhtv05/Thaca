@@ -7,7 +7,8 @@ import java.util.function.Function;
 
 /**
  * Defines a single column in an Excel schema.
- * Uses builder pattern for fluent configuration — no annotations, no reflection.
+ * Uses builder pattern for fluent configuration — no annotations, no
+ * reflection.
  */
 public class ExcelColumn {
 
@@ -91,7 +92,7 @@ public class ExcelColumn {
      * Returns the display header with required mark (*) if applicable.
      */
     public String getDisplayHeader() {
-        return required ? header + " (*)" : header;
+        return required ? header + "*" : header;
     }
 
     public static Builder builder(String key, String header) {

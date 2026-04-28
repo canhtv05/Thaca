@@ -72,14 +72,31 @@ public class AuthClient {
         return internalApiClient.post(authBaseUrl + "/cms/tenants/get", id, new ParameterizedTypeReference<>() {});
     }
 
-    @FwMode(name = ServiceMethod.CMS_SAVE_TENANT, type = ModeType.HANDLE)
-    public TenantDTO saveTenant(TenantDTO tenant) {
-        return internalApiClient.post(authBaseUrl + "/cms/tenants/save", tenant, new ParameterizedTypeReference<>() {});
+    @FwMode(name = ServiceMethod.CMS_CREATE_TENANT, type = ModeType.HANDLE)
+    public TenantDTO createTenant(TenantDTO tenant) {
+        return internalApiClient.post(
+            authBaseUrl + "/cms/tenants/create",
+            tenant,
+            new ParameterizedTypeReference<>() {}
+        );
     }
 
-    @FwMode(name = ServiceMethod.CMS_DELETE_TENANT, type = ModeType.HANDLE)
-    public Void deleteTenant(Long id) {
-        return internalApiClient.post(authBaseUrl + "/cms/tenants/delete", id, new ParameterizedTypeReference<>() {});
+    @FwMode(name = ServiceMethod.CMS_UPDATE_TENANT, type = ModeType.HANDLE)
+    public TenantDTO updateTenant(TenantDTO tenant) {
+        return internalApiClient.post(
+            authBaseUrl + "/cms/tenants/update",
+            tenant,
+            new ParameterizedTypeReference<>() {}
+        );
+    }
+
+    @FwMode(name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT, type = ModeType.HANDLE)
+    public Void lockUnlockTenant(TenantDTO tenant) {
+        return internalApiClient.post(
+            authBaseUrl + "/cms/tenants/lock-unlock",
+            tenant,
+            new ParameterizedTypeReference<>() {}
+        );
     }
 
     @FwMode(name = ServiceMethod.CMS_SEARCH_PLANS, type = ModeType.HANDLE)

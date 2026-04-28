@@ -73,6 +73,6 @@ public class PlanController {
     @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_EXPORT_PLAN, type = RequestType.PROTECTED)
     public void export(SearchRequest<PlanDTO> request, HttpServletResponse response) throws IOException {
-        CommonUtils.writeExcelResponse(response, process.process(request), "thaca-plans-export.xlsx");
+        CommonUtils.writeExcelResponse(response, process.process(request), "thaca-plans-export-{{date}}.xlsx");
     }
 }

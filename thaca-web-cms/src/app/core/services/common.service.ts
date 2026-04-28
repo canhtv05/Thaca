@@ -10,6 +10,7 @@ export class CommonService {
   private readonly http = inject(HttpClient);
 
   async downloadFile(url: string, fileName: string, body?: any): Promise<void> {
+    fileName = fileName.replace('{{date}}', new Date().toISOString().split('T')[0]);
     const payload = {
       header: createHeader(),
       body: createBody(body || {}),

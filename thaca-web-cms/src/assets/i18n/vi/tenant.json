@@ -1,24 +1,65 @@
 {
   "tenant": {
     "title": "Quản lý Đối tác (Tenant)",
-    "code": "Mã định danh",
-    "name": "Tên đối tác",
+    "code": "Mã Tenant",
+    "name": "Tên Tenant",
     "domain": "Tên miền",
     "status": "Trạng thái",
     "plan": "Gói dịch vụ (Plan)",
     "expires_at": "Ngày hết hạn",
     "contact_email": "Email liên hệ",
-    "logo_url": "Link Logo",
+    "logo_url": "Logo URL",
     "actions": {
-      "create": "Thêm đối tác mới",
-      "edit": "Chỉnh sửa đối tác",
-      "delete": "Xóa đối tác"
+      "create": "Thêm Tenant mới",
+      "edit": "Chỉnh sửa Tenant",
+      "delete": "Xóa Tenant"
     },
-    "plans": {
-      "FREE": "Miễn phí",
-      "BASIC": "Cơ bản",
-      "PRO": "Nâng cao",
-      "ENTERPRISE": "Doanh nghiệp"
+    "validation": {
+      "codePattern": "Mã Tenant không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9"
+    },
+    "popup": {
+      "lock": {
+        "title": "Xác nhận khóa Tenant",
+        "message": "Bạn có chắc chắn muốn khóa Tenant này không?"
+      },
+      "unlock": {
+        "title": "Xác nhận mở khóa Tenant",
+        "message": "Bạn có chắc chắn muốn mở khóa Tenant này không?"
+      },
+      "update": {
+        "title": "Xác nhận cập nhật Tenant",
+        "message": "Bạn có chắc chắn muốn cập nhật Tenant này không?"
+      },
+      "create": {
+        "title": "Xác nhận tạo Tenant",
+        "message": "Bạn có chắc chắn muốn tạo Tenant này không?"
+      }
+    },
+    "toast": {
+      "lock": {
+        "titleSuccess": "Tenant đã được khóa",
+        "messageSuccess": "Tenant đã được khóa thành công",
+        "titleError": "Tenant không được khóa",
+        "messageError": "Tenant không được khóa thành công"
+      },
+      "unlock": {
+        "titleSuccess": "Tenant đã được mở khóa",
+        "messageSuccess": "Tenant đã được mở khóa thành công",
+        "titleError": "Tenant không được mở khóa",
+        "messageError": "Tenant không được mở khóa thành công"
+      },
+      "update": {
+        "titleSuccess": "Tenant đã được cập nhật",
+        "messageSuccess": "Tenant đã được cập nhật thành công",
+        "titleError": "Tenant không được cập nhật",
+        "messageError": "Tenant không được cập nhật thành công"
+      },
+      "create": {
+        "titleSuccess": "Tenant đã được tạo",
+        "messageSuccess": "Tenant đã được tạo thành công",
+        "titleError": "Tenant không được tạo",
+        "messageError": "Tenant không được tạo thành công"
+      }
     }
   }
 }

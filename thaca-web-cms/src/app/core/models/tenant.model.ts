@@ -1,4 +1,4 @@
-export interface TenantDTO {
+export interface ITenantDTO {
   id?: number;
   code: string;
   name: string;

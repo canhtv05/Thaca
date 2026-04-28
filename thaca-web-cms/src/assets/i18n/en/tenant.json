@@ -14,11 +14,52 @@
       "edit": "Edit Tenant",
       "delete": "Delete Tenant"
     },
-    "plans": {
-      "FREE": "Free",
-      "BASIC": "Basic",
-      "PRO": "Pro",
-      "ENTERPRISE": "Enterprise"
+    "validation": {
+      "codePattern": "Tenant code cannot contain special characters. Only A-Z, a-z, 0-9 are allowed."
+    },
+    "popup": {
+      "lock": {
+        "title": "Confirm Lock Tenant",
+        "message": "Are you sure you want to lock this tenant?"
+      },
+      "unlock": {
+        "title": "Confirm Unlock Tenant",
+        "message": "Are you sure you want to unlock this tenant?"
+      },
+      "update": {
+        "title": "Confirm Update Tenant",
+        "message": "Are you sure you want to update this tenant?"
+      },
+      "create": {
+        "title": "Confirm Create Tenant",
+        "message": "Are you sure you want to create this tenant?"
+      }
+    },
+    "toast": {
+      "lock": {
+        "titleSuccess": "Tenant Locked",
+        "messageSuccess": "Tenant locked successfully",
+        "titleError": "Tenant Not Locked",
+        "messageError": "Tenant not locked successfully"
+      },
+      "unlock": {
+        "titleSuccess": "Tenant Unlocked",
+        "messageSuccess": "Tenant unlocked successfully",
+        "titleError": "Tenant Not Unlocked",
+        "messageError": "Tenant not unlocked successfully"
+      },
+      "update": {
+        "titleSuccess": "Tenant Updated",
+        "messageSuccess": "Tenant updated successfully",
+        "titleError": "Tenant Not Updated",
+        "messageError": "Tenant not updated successfully"
+      },
+      "create": {
+        "titleSuccess": "Tenant Created",
+        "messageSuccess": "Tenant created successfully",
+        "titleError": "Tenant Not Created",
+        "messageError": "Tenant not created successfully"
+      }
     }
   }
 }

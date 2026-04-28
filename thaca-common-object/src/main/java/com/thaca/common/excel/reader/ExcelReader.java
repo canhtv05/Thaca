@@ -508,6 +508,6 @@ public final class ExcelReader {
      */
     private static String normalizeHeader(String header) {
         if (header == null) return "";
-        return header.toLowerCase().replace("(*)", "").replace("*", "").replaceAll("\\s+", " ").trim();
+        return header.toLowerCase().replace("*", "").replace("*", "").replaceAll("\\s+", " ").trim();
     }
 }

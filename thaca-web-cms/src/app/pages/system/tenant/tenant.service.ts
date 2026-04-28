@@ -1,29 +1,53 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { ISearchRequest, ISearchResponse } from '../../../core/models/common.model';
-import { TenantDTO } from '../../../core/models/tenant.model';
+import { IApiPayload, ISearchRequest } from '../../../core/models/common.model';
+import { ITenantDTO } from '../../../core/models/tenant.model';
+import { AppConfigService } from '../../../core/configs/app-config.service';
+import { CommonService } from '../../../core/services/common.service';
+import { createBody, createHeader } from '../../../utils/common.utils';
+import { GlobalHttp } from '../../../core/global/global-http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TenantService {
-  private http = inject(HttpClient);
-  private baseUrl = '/cms/tenants';
+  private readonly config = inject(AppConfigService);
+  private readonly commonService = inject(CommonService);
 
-  search(request: ISearchRequest<TenantDTO>): Observable<ISearchResponse<TenantDTO>> {
-    return this.http.post<ISearchResponse<TenantDTO>>(`${this.baseUrl}/search`, request);
+  async lockUnlock(req: ITenantDTO): Promise<IApiPayload<ITenantDTO>> {
+    const payload: IApiPayload<ITenantDTO> = {
+      header: createHeader(),
+      body: createBody(req),
+    };
+    return await GlobalHttp.post<IApiPayload<any>>(
+      `${this.config.getApiUrl()}/cms/tenants/lock-unlock`,
+      payload,
+    );
   }
 
-  getById(id: number): Observable<TenantDTO> {
-    return this.http.post<TenantDTO>(`${this.baseUrl}/get`, id);
+  async update(req: ITenantDTO): Promise<IApiPayload<ITenantDTO>> {
+    const payload: IApiPayload<ITenantDTO> = {
+      header: createHeader(),
+      body: createBody(req),
+    };
+    return await GlobalHttp.post<IApiPayload<any>>(
+      `${this.config.getApiUrl()}/cms/tenants/update`,
+      payload,
+    );
   }
 
-  save(dto: TenantDTO): Observable<TenantDTO> {
-    return this.http.post<TenantDTO>(`${this.baseUrl}/save`, dto);
+  async create(req: ITenantDTO): Promise<IApiPayload<ITenantDTO>> {
+    const payload: IApiPayload<ITenantDTO> = {
+      header: createHeader(),
+      body: createBody(req),
+    };
+    return await GlobalHttp.post<IApiPayload<any>>(
+      `${this.config.getApiUrl()}/cms/tenants/create`,
+      payload,
+    );
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/delete`, id);
+  async exportData(req?: ISearchRequest<ITenantDTO>): Promise<void> {
+    const url = `${this.config.getApiUrl()}/cms/tenants/export`;
+    await this.commonService.downloadFile(url, 'thaca-tenants-export-{{date}}.xlsx', req || {});
   }
 }
