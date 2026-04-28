@@ -12,7 +12,7 @@
       "delete": "Xóa gói"
     },
     "validation": {
-      "codePattern": "Mã gói không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9"
+      "codePattern": "Mã gói không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9, -, _"
     },
     "plans": {
       "FREE": "Miễn phí",

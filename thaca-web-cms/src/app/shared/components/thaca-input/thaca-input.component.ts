@@ -41,6 +41,11 @@ export class ThacaInputComponent implements ControlValueAccessor {
   @Input() step: number = 1;
   @Input() min?: number;
   @Input() max?: number;
+  @Input() noAccent = false;
+  @Input() noSpace = false;
+  @Input() trim = false;
+  @Input() lowercase = false;
+  @Input() uppercase = false;
 
   @HostBinding('class')
   get hostClass(): string {
@@ -98,8 +103,15 @@ export class ThacaInputComponent implements ControlValueAccessor {
 
   onInput(event: Event) {
     const input = event.target as HTMLInputElement;
-    this.value.set(input.value);
-    this.onChange(input.value);
+    let val = input.value;
+
+    if (this.noAccent) val = this.removeVietnameseTones(val);
+    if (this.noSpace) val = val.replace(/\s+/g, '');
+    if (this.lowercase) val = val.toLowerCase();
+    else if (this.uppercase) val = val.toUpperCase();
+
+    this.value.set(val);
+    this.onChange(val);
   }
 
   onKeyUp(event: KeyboardEvent) {
@@ -109,7 +121,21 @@ export class ThacaInputComponent implements ControlValueAccessor {
   }
 
   onBlur() {
+    let val = this.value();
+    if (this.trim) {
+      val = val.trim();
+      this.value.set(val);
+      this.onChange(val);
+    }
     this.onTouched();
+  }
+
+  private removeVietnameseTones(str: string) {
+    return str
+      .normalize('NFD')
+      .replace(/\p{Mn}/gu, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
   }
 
   onTogglePassword() {

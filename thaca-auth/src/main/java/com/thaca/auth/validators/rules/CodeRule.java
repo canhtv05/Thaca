@@ -8,8 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 
 public class CodeRule implements ValidateRule<String> {
 
-    private final String REGEX_CODE = "^[a-zA-Z0-9]+$";
-
     @Override
     public void validate(String input) {
         if (StringUtils.isEmpty(input)) {
@@ -18,6 +16,7 @@ public class CodeRule implements ValidateRule<String> {
         if (input.trim().length() > 255) {
             throw new FwException(ErrorMessage.CODE_INVALID);
         }
+        String REGEX_CODE = "^[a-zA-Z0-9_-]+$";
         if (!input.trim().matches(REGEX_CODE)) {
             throw new FwException(ErrorMessage.CODE_INVALID);
         }

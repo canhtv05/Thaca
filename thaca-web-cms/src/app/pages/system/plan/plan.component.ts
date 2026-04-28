@@ -80,7 +80,7 @@ export class PlanComponent {
   ];
 
   planForm = this.fb.group({
-    code: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+$/)]],
+    code: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9-_]+$/)]],
     name: ['', [Validators.required]],
     type: ['FREE', [Validators.required]],
     maxUsers: [0, [Validators.required, Validators.min(1)]],

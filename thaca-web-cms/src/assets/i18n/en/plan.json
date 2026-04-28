@@ -12,7 +12,7 @@
       "delete": "Delete Plan"
     },
     "validation": {
-      "codePattern": "Plan code cannot contain special characters. Only A-Z, a-z, 0-9 are allowed."
+      "codePattern": "Plan code cannot contain special characters. Only A-Z, a-z, 0-9, -, _ are allowed."
     },
     "plans": {
       "FREE": "Free",

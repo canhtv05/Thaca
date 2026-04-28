@@ -26,6 +26,7 @@ import { ThacaTextareaComponent } from '../../../shared/components/thaca-textare
 import { Popup } from '../../../core/global/popup-notify';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { isLoading } from '../../../core/stores/app.store';
+import { CommonUtils } from '../../../shared/utils/common.utils';
 
 @Component({
   selector: 'app-tenant',
@@ -56,6 +57,7 @@ export class TenantComponent implements OnInit {
   readonly isLoading = isLoading;
 
   private originalValue: any;
+  minDate = new Date();
   planOptions = signal<IDropdownOption[]>([]);
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
@@ -82,7 +84,7 @@ export class TenantComponent implements OnInit {
 
   tenantForm = this.fb.group({
     id: [null],
-    code: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+$/)]],
+    code: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9-_]+$/)]],
     name: ['', [Validators.required]],
     domain: [''],
     status: [{ value: 'ACTIVE', disabled: true }, [Validators.required]],
@@ -103,7 +105,28 @@ export class TenantComponent implements OnInit {
       { field: 'name', header: 'tenant.name', sortable: true },
       { field: 'domain', header: 'tenant.domain' },
       { field: 'contactEmail', header: 'tenant.contact_email' },
-      { field: 'logoUrl', header: 'tenant.logo_url' },
+      {
+        field: 'logoUrl',
+        header: 'Logo',
+        render: (row: ITenantDTO) => {
+          if (!row?.logoUrl) return '';
+          return `
+                <div class="flex flex-col items-center justify-center gap-1">
+                  <div class="w-10 h-10 overflow-hidden rounded border border-gray-200 bg-gray-50">
+                    <img
+                      src="${row.logoUrl}"
+                      alt="Logo"
+                      class="w-full h-full object-cover"
+                      onerror="this.style.display='none'"
+                    />
+                  </div>
+                  <span class="text-[10px] text-foreground break-all text-center min-w-[150px]">
+                    ${row.logoUrl}
+                  </span>
+                </div>
+              `;
+        },
+      },
       {
         field: 'plan.name',
         header: 'tenant.plan',
@@ -163,7 +186,7 @@ export class TenantComponent implements OnInit {
     if (event.key === 'edit') {
       this.tenantForm.patchValue({
         ...event.row,
-        expiresAt: event.row.expiresAt ? new Date(event.row.expiresAt) : null,
+        expiresAt: CommonUtils.parseBackendDate(event.row.expiresAt),
       });
       this.tenantForm.get('code')?.disable();
       this.originalValue = this.tenantForm.getRawValue();
@@ -206,7 +229,11 @@ export class TenantComponent implements OnInit {
 
   async onSubmit() {
     if (this.isUnchanged()) return;
-    const req = this.tenantForm.getRawValue() as unknown as ITenantDTO & { isUpdate: boolean };
+    const req = this.tenantForm.getRawValue() as any;
+    if (req.expiresAt) {
+      req.expiresAt = CommonUtils.formatDateTime(req.expiresAt);
+    }
+
     const isUpdate = !!this.tenantForm.value.id;
     const confirmed = await Popup.confirm({
       title: isUpdate ? 'tenant.popup.update.title' : 'tenant.popup.create.title',

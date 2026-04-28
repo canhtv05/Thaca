@@ -73,7 +73,12 @@
           formControlName="code"
           [placeholder]="'tenant.code' | translate"
         ></thaca-input>
-        <validation-message [control]="tenantForm.get('code')"></validation-message>
+        <validation-message
+          [control]="tenantForm.get('code')"
+          [customMessages]="{
+            pattern: 'tenant.validation.codePattern',
+          }"
+        ></validation-message>
       </div>
       <div class="form-control">
         <thaca-input
@@ -122,6 +127,7 @@
           formControlName="expiresAt"
           [placeholder]="'tenant.expires_at' | translate"
           appendTo="body"
+          [minDate]="minDate"
         ></thaca-datepicker>
       </div>
       <div class="form-control">

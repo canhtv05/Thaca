@@ -15,7 +15,7 @@
       "delete": "Xóa Tenant"
     },
     "validation": {
-      "codePattern": "Mã Tenant không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9"
+      "codePattern": "Mã Tenant không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9, -, _"
     },
     "popup": {
       "lock": {

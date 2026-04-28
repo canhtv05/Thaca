@@ -12,9 +12,10 @@ import {
   NgZone,
   PLATFORM_ID,
   AfterViewChecked,
+  Injector,
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
 export interface IDropdownOption {
@@ -46,6 +47,7 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
   @Input() clearable = true;
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() label?: string;
+  @Input() required = false;
   @Input() id: string = `thaca-dropdown-${Math.random().toString(36).substring(2, 15)}`;
   /**
    * 'body' → panel được move ra document.body sau khi Angular render,
@@ -60,6 +62,18 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
   private zone = inject(NgZone);
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private injector = inject(Injector);
+  private _ngControl?: NgControl | null;
+
+  get ngControl(): NgControl | null {
+    if (this._ngControl === undefined) {
+      this._ngControl = this.injector.get(NgControl, null, { self: true });
+      if (this._ngControl) {
+        this._ngControl.valueAccessor = this;
+      }
+    }
+    return this._ngControl;
+  }
 
   open = signal(false);
   value = signal<any>(null);
@@ -218,6 +232,11 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
   }
   setDisabledState(d: boolean) {
     this.disabled = d;
+  }
+
+  hasError() {
+    const control = this.ngControl?.control;
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
   ngOnDestroy() {

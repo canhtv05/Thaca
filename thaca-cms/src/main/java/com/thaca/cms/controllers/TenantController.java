@@ -40,7 +40,7 @@ public class TenantController {
         return ResponseEntity.ok(process.process(id));
     }
 
-    @PostMapping("/save")
+    @PostMapping("/create")
     @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_CREATE_TENANT, type = RequestType.PROTECTED)
     public ResponseEntity<TenantDTO> create(TenantDTO request) {

@@ -6,9 +6,15 @@
   [class.tdd--sm]="size === 'sm'"
   [class.tdd--md]="size === 'md'"
   [class.tdd--lg]="size === 'lg'"
+  [class.is-error]="hasError()"
 >
   @if (label) {
-    <label class="thaca-label" [for]="id">{{ label | translate }}</label>
+    <label class="thaca-label" [for]="id"
+      >{{ label | translate }}
+      @if (required) {
+        <span class="thaca-required">(*)</span>
+      }
+    </label>
   }
   <button type="button" class="tdd-trigger" (click)="toggle()" [disabled]="disabled" [id]="id">
     <span class="tdd-trigger-label" [class.tdd-placeholder]="!selectedLabel">

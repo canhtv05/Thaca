@@ -15,7 +15,7 @@
       "delete": "Delete Tenant"
     },
     "validation": {
-      "codePattern": "Tenant code cannot contain special characters. Only A-Z, a-z, 0-9 are allowed."
+      "codePattern": "Tenant code cannot contain special characters. Only A-Z, a-z, 0-9, -, _ are allowed."
     },
     "popup": {
       "lock": {
