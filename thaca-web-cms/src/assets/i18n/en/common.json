@@ -31,7 +31,8 @@
       "lock": "Lock",
       "unlock": "Unlock",
       "ok": "Accept",
-      "confirm": "Confirm"
+      "confirm": "Confirm",
+      "view": "View details"
     },
     "createdAt": "Created At",
     "createdBy": "Created By",

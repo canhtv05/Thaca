@@ -10,6 +10,10 @@ import {
   inject,
   NgZone,
   AfterViewInit,
+  HostListener,
+  ElementRef,
+  OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -36,6 +40,7 @@ export interface ITableColumn {
   fixed?: boolean;
   condition?: (row: any) => boolean;
   render?: (row: any) => string;
+  center?: boolean;
 }
 
 export interface ITableAction {
@@ -83,10 +88,11 @@ export interface ITableConfig<T = any> {
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })
-export class DataTableComponent implements AfterViewInit {
+export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy {
   private translate = inject(TranslateService);
   private zone = inject(NgZone);
   private sanitizer = inject(DomSanitizer);
+  private el = inject(ElementRef);
   @Input({ required: true }) config!: ITableConfig;
   @Input() externalFilter: any = {};
 
@@ -116,6 +122,56 @@ export class DataTableComponent implements AfterViewInit {
   data = signal<any[]>([]);
   totalRecords = signal(0);
   loading = signal(false);
+  activeMoreRow = signal<any | null>(null);
+  moreMenuStyles = signal<Record<string, string>>({});
+
+  private scrollListener = () => {
+    if (this.activeMoreRow()) {
+      this.zone.run(() => this.closeMoreMenu());
+    }
+  };
+
+  ngOnInit() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', this.scrollListener, true);
+      window.addEventListener('resize', this.scrollListener, true);
+    }
+  }
+
+  ngOnDestroy() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('scroll', this.scrollListener, true);
+      window.removeEventListener('resize', this.scrollListener, true);
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.el.nativeElement.contains(event.target)) {
+      this.closeMoreMenu();
+    }
+  }
+
+  closeMoreMenu() {
+    this.activeMoreRow.set(null);
+  }
+
+  toggleMore(row: any, event: Event) {
+    event.stopPropagation();
+    if (this.activeMoreRow() === row) {
+      this.closeMoreMenu();
+    } else {
+      this.activeMoreRow.set(row);
+      const target = event.currentTarget as HTMLElement;
+      const rect = target.getBoundingClientRect();
+
+      this.moreMenuStyles.set({
+        position: 'fixed',
+        bottom: `${window.innerHeight - rect.top + 8}px`,
+        left: `${rect.left + rect.width / 2}px`,
+      });
+    }
+  }
 
   private readonly DEFAULT_SORT_FIELD = 'updatedAt';
 
@@ -269,5 +325,15 @@ export class DataTableComponent implements AfterViewInit {
 
   min(a: number, b: number) {
     return Math.min(a, b);
+  }
+
+  getVisibleActions(row: any): ITableAction[] {
+    const all = (this.config.actions || []).filter((a) => !a.condition || a.condition(row));
+    return all.length > 2 ? [] : all;
+  }
+
+  getHiddenActions(row: any): ITableAction[] {
+    const all = (this.config.actions || []).filter((a) => !a.condition || a.condition(row));
+    return all.length > 2 ? all : [];
   }
 }

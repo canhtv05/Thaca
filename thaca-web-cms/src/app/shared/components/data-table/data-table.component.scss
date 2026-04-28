@@ -12,7 +12,11 @@
   font-weight: 300 !important;
 }
 
-:host ::ng-deep *:not(.tdd-trigger-icon):not(.dt-spinner):not(svg) {
+:host
+  ::ng-deep
+  *:not(.tdd-trigger-icon):not(.dt-spinner):not(svg):not(.dt-more-menu):not(
+    .dt-more-menu::after
+  ):not(.dt-more-menu::before) {
   transition: none !important;
   animation-duration: 0s !important;
   transform: none !important;
@@ -210,7 +214,7 @@
       &--fixed {
         position: sticky;
         right: 0;
-        z-index: 1;
+        z-index: 10; // Increased to stay above other fixed columns
         background: var(--card) !important;
         box-shadow: -4px 0 10px oklch(0 0 0 / 8%);
       }
@@ -313,6 +317,143 @@
           color: oklch(0.65 0.2 290);
           background: transparent !important;
           border-color: transparent !important;
+        }
+      }
+    }
+
+    // ─ Action Dropdown ────────────────────────────────────────
+    .dt-td--more-active {
+      z-index: 99999 !important;
+      overflow: visible !important;
+
+      &:not(.dt-td--fixed) {
+        position: relative !important;
+      }
+    }
+
+    .dt-act--more.dt-more-wrap {
+      position: relative;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      cursor: pointer;
+    }
+
+    .dt-more-menu {
+      position: fixed !important;
+      transform: translateX(-50%) !important;
+      z-index: 999999 !important;
+      min-width: 100px;
+      padding: 6px;
+      background: var(--card) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px -10px oklch(0 0 0 / 25%) !important;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+
+      &--active {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-top-color: var(--border);
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: calc(100% - 1px);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-top-color: var(--card);
+        z-index: 1;
+      }
+    }
+
+    .dt-more-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+
+      i {
+        font-size: 12px;
+        width: 16px;
+        text-align: center;
+        flex-shrink: 0;
+        transition: color 0.15s ease;
+      }
+
+      &:hover {
+        background-color: color-mix(in oklch, var(--muted) 40%, transparent) !important;
+        color: var(--primary) !important;
+        i {
+          color: var(--primary) !important;
+        }
+      }
+
+      // Individual color states with high specificity
+      &.dt-more-item--primary:hover {
+        background-color: color-mix(in oklch, var(--primary) 10%, transparent) !important;
+        color: var(--primary) !important;
+        i {
+          color: var(--primary) !important;
+        }
+      }
+      &.dt-more-item--success:hover {
+        background-color: color-mix(in oklch, oklch(0.58 0.17 155) 10%, transparent) !important;
+        color: oklch(0.58 0.17 155) !important;
+        i {
+          color: oklch(0.58 0.17 155) !important;
+        }
+      }
+      &.dt-more-item--danger:hover {
+        background-color: color-mix(in oklch, var(--destructive) 10%, transparent) !important;
+        color: var(--destructive) !important;
+        i {
+          color: var(--destructive) !important;
+        }
+      }
+      &.dt-more-item--warn:hover {
+        background-color: color-mix(in oklch, oklch(0.72 0.17 70) 10%, transparent) !important;
+        color: oklch(0.72 0.17 70) !important;
+        i {
+          color: oklch(0.72 0.17 70) !important;
+        }
+      }
+      &.dt-more-item--info:hover {
+        background-color: color-mix(in oklch, oklch(0.6 0.18 245) 10%, transparent) !important;
+        color: oklch(0.6 0.18 245) !important;
+        i {
+          color: oklch(0.6 0.18 245) !important;
+        }
+      }
+      &.dt-more-item--help:hover {
+        background-color: color-mix(in oklch, oklch(0.65 0.2 290) 10%, transparent) !important;
+        color: oklch(0.65 0.2 290) !important;
+        i {
+          color: oklch(0.65 0.2 290) !important;
         }
       }
     }

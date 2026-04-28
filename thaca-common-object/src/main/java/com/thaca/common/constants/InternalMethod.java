@@ -25,6 +25,5 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_UPDATE_TENANT = "internal.cmsUpdateTenant";
     public static final String INTERNAL_CMS_LOCK_UNLOCK_TENANT = "internal.cmsLockUnlockTenant";
     public static final String INTERNAL_CMS_GET_TENANT = "internal.cmsGetTenant";
-    public static final String INTERNAL_CMS_GET_ALL_TENANTS = "internal.cmsGetAllTenants";
     public static final String INTERNAL_CMS_EXPORT_TENANT = "internal.cmsExportTenant";
 }

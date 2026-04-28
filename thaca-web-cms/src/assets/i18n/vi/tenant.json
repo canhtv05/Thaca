@@ -1,6 +1,7 @@
 {
   "tenant": {
     "title": "Quản lý Đối tác (Tenant)",
+    "detail_title": "Chi tiết Tenant {{code}}",
     "code": "Mã Tenant",
     "name": "Tên Tenant",
     "domain": "Tên miền",
@@ -9,6 +10,7 @@
     "expires_at": "Ngày hết hạn",
     "contact_email": "Email liên hệ",
     "logo_url": "Logo URL",
+    "version": "Phiên bản",
     "actions": {
       "create": "Thêm Tenant mới",
       "edit": "Chỉnh sửa Tenant",
@@ -36,6 +38,8 @@
       }
     },
     "toast": {
+      "tenant_code_is_invalid": "Mã Tenant không hợp lệ",
+      "error": "Đã xảy ra lỗi",
       "lock": {
         "titleSuccess": "Tenant đã được khóa",
         "messageSuccess": "Tenant đã được khóa thành công",

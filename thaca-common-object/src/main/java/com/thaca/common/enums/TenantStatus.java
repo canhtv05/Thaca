@@ -19,16 +19,6 @@ public enum TenantStatus implements EnumRule {
         this.nameEn = nameEn;
     }
 
-    public static TenantStatus fromValue(String value) {
-        if (value == null) return null;
-        for (TenantStatus status : values()) {
-            if (status.getValue().equalsIgnoreCase(value)) {
-                return status;
-            }
-        }
-        return null;
-    }
-
     @Override
     public String getNameVi() {
         return this.nameVi;

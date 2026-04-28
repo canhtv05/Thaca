@@ -31,7 +31,8 @@
       "lock": "Khóa",
       "unlock": "Mở khóa",
       "ok": "Đồng ý",
-      "confirm": "Xác nhận"
+      "confirm": "Xác nhận",
+      "view": "Xem chi tiết"
     },
     "createdAt": "Ngày tạo",
     "createdBy": "Người tạo",

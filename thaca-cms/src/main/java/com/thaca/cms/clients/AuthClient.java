@@ -35,7 +35,7 @@ public interface AuthClient {
     SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> search);
 
     @FwInternalApi(path = "/cms/tenants/get", name = ServiceMethod.CMS_GET_TENANT)
-    TenantDTO getTenant(Long id);
+    TenantDTO getTenant(TenantDTO tenant);
 
     @FwInternalApi(path = "/cms/tenants/create", name = ServiceMethod.CMS_CREATE_TENANT)
     TenantDTO createTenant(TenantDTO tenant);

@@ -124,6 +124,14 @@ public enum CommonErrorMessage implements ErrorMessageRule {
         "Duplicate request",
         "This transaction has already been processed or is currently being processed. Please do not resubmit the " +
             "request."
+    ),
+
+    DATA_WAS_MODIFIED_BY_ANOTHER_USER(
+        "DATA.WAS.MODIFIED.BY.ANOTHER.USER",
+        "Dữ liệu đã bị thay đổi",
+        "Dữ liệu đã được chỉnh sửa bởi người khác. Vui lòng tải lại trang và thử lại.",
+        "Data was modified",
+        "This data has been modified by another user. Please reload and try again."
     );
 
     private final String code;

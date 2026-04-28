@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { IApiPayload, ISearchRequest } from '../../../core/models/common.model';
-import { IPlanDTO } from '../../../core/models/plan.model';
+import { IPlanDTO } from './plan.model';
 import { createBody, createHeader } from '../../../utils/common.utils';
 import { GlobalHttp } from '../../../core/global/global-http';
 import { AppConfigService } from '../../../core/configs/app-config.service';

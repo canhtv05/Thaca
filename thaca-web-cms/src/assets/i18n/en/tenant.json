@@ -1,6 +1,7 @@
 {
   "tenant": {
     "title": "Tenant Management",
+    "detail_title": "Tenant {{code}} Details",
     "code": "Tenant Code",
     "name": "Tenant Name",
     "domain": "Domain",
@@ -9,6 +10,7 @@
     "expires_at": "Expiration Date",
     "contact_email": "Contact Email",
     "logo_url": "Logo URL",
+    "version": "Version",
     "actions": {
       "create": "Add New Tenant",
       "edit": "Edit Tenant",
@@ -36,6 +38,8 @@
       }
     },
     "toast": {
+      "tenant_code_is_invalid": "Tenant code is invalid",
+      "error": "An error occurred",
       "lock": {
         "titleSuccess": "Tenant Locked",
         "messageSuccess": "Tenant locked successfully",

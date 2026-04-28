@@ -18,7 +18,7 @@ import {
 import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thaca-modal.component';
 import { AppConfigService } from '../../../core/configs/app-config.service';
 import { TenantService } from './tenant.service';
-import { ITenantDTO } from '../../../core/models/tenant.model';
+import { ITenantDTO } from './tenant.model';
 import { PlanService } from '../plan/plan.service';
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { ThacaDatepickerComponent } from '../../../shared/components/thaca-datepicker/thaca-datepicker.component';
@@ -27,6 +27,7 @@ import { Popup } from '../../../core/global/popup-notify';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { isLoading } from '../../../core/stores/app.store';
 import { CommonUtils } from '../../../shared/utils/common.utils';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tenant',
@@ -54,6 +55,7 @@ export class TenantComponent implements OnInit {
   private translate = inject(TranslateService);
   private fb = inject(FormBuilder);
   private planService = inject(PlanService);
+  private router = inject(Router);
   readonly isLoading = isLoading;
 
   private originalValue: any;
@@ -92,6 +94,7 @@ export class TenantComponent implements OnInit {
     expiresAt: [null],
     contactEmail: ['', [Validators.email]],
     logoUrl: [''],
+    version: [null],
   });
 
   tableConfig: ITableConfig = {
@@ -108,6 +111,7 @@ export class TenantComponent implements OnInit {
       {
         field: 'logoUrl',
         header: 'Logo',
+        center: true,
         render: (row: ITenantDTO) => {
           if (!row?.logoUrl) return '';
           return `
@@ -152,10 +156,37 @@ export class TenantComponent implements OnInit {
           return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
         },
       },
+      {
+        field: 'version',
+        header: 'tenant.version',
+      },
     ],
     actions: [
-      { icon: 'pi pi-pencil', key: 'edit', titleKey: 'tenant.actions.edit' },
-      { icon: 'pi pi-trash', key: 'delete', titleKey: 'tenant.actions.delete', color: 'danger' },
+      {
+        icon: 'pi pi-pencil',
+        key: 'update',
+        titleKey: 'common.button.update',
+        condition: (row: ITenantDTO) => row.status === 'ACTIVE',
+      },
+      {
+        icon: 'pi pi-eye',
+        key: 'view',
+        titleKey: 'common.button.view',
+      },
+      {
+        icon: 'pi pi-key',
+        key: 'lock',
+        titleKey: 'common.button.lock',
+        color: 'info',
+        condition: (row: ITenantDTO) => row.status === 'ACTIVE',
+      },
+      {
+        icon: 'pi pi-unlock',
+        key: 'unlock',
+        titleKey: 'common.button.unlock',
+        color: 'info',
+        condition: (row: ITenantDTO) => row.status === 'INACTIVE',
+      },
     ],
   };
 
@@ -217,6 +248,8 @@ export class TenantComponent implements OnInit {
           }
         }
       });
+    } else if (event.key === 'view') {
+      this.router.navigate(['/system/tenants', event.row.code]);
     }
   }
 

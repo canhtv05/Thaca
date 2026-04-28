@@ -36,8 +36,8 @@ public class TenantController {
     @PostMapping("/get")
     @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_GET_TENANT, type = RequestType.PROTECTED)
-    public ResponseEntity<TenantDTO> get(Long id) {
-        return ResponseEntity.ok(process.process(id));
+    public ResponseEntity<TenantDTO> get(TenantDTO request) {
+        return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/create")

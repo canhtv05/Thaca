@@ -54,8 +54,13 @@
               [class.dt-fixed]="col.fixed"
               [pSortableColumn]="col.sortable ? col.field : undefined"
               [style.width]="col.width"
+              [style.textAlign]="col.center ? 'center' : 'left'"
             >
-              <div class="dt-th-inner">
+              <div
+                class="dt-th-inner w-full"
+                [style.textAlign]="col.center ? 'center' : 'left'"
+                [style.display]="col.center ? 'block' : 'flex'"
+              >
                 <span>{{ col.header | translate }}</span>
                 @if (col.sortable) {
                   <p-sortIcon [field]="col.field" />
@@ -73,7 +78,7 @@
 
       <!-- BODY -->
       <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
-        <tr class="dt-row" (click)="onRowClick.emit(rowData)">
+        <tr class="dt-row" [class.dt-row--more-active]="activeMoreRow() === rowData" (click)="onRowClick.emit(rowData)">
           @if (config.showStt) {
             <td class="dt-td dt-td--stt">
               <span class="dt-stt-badge">{{ getIndex(rowIndex) }}</span>
@@ -81,32 +86,66 @@
           }
 
           @for (col of displayColumns(); track col.field) {
-            <td class="dt-td" [class.dt-fixed]="col.fixed" [style.width]="col.width">
+            <td
+              class="dt-td"
+              [class.dt-fixed]="col.fixed"
+              [style.width]="col.width"
+              [style.textAlign]="col.center ? 'center' : 'left'"
+            >
               @if (!col.condition || col.condition(rowData)) {
                 @if (col.render) {
-                  <div [innerHTML]="sanitizeHtml(col.render(rowData))"></div>
+                  <div
+                    [innerHTML]="sanitizeHtml(col.render(rowData))"
+                    [style.textAlign]="col.center ? 'center' : 'left'"
+                  ></div>
                 } @else {
-                  {{ rowData[col.field] }}
+                  <span [style.textAlign]="col.center ? 'center' : 'left'">{{
+                    rowData[col.field]
+                  }}</span>
                 }
               }
             </td>
           }
 
           @if (config.actions?.length) {
-            <td class="dt-td dt-td--action" [class.dt-td--fixed]="config.actionFixed">
+            <td
+              class="dt-td dt-td--action"
+              [class.dt-td--fixed]="config.actionFixed"
+              [class.dt-td--more-active]="activeMoreRow() === rowData"
+              [style.zIndex]="activeMoreRow() === rowData ? 99999 : ''"
+            >
               <div class="dt-action-group">
-                @for (action of config.actions; track action.key || action.titleKey) {
-                  @if (!action.condition || action.condition(rowData)) {
-                    <button
-                      type="button"
-                      class="dt-act dt-act--{{ action.color || 'default' }}"
-                      (click)="handleAction(action, rowData, $event)"
-                      [pTooltip]="action.titleKey || action.key || '' | translate"
-                      tooltipPosition="top"
-                    >
-                      <i [class]="action.icon"></i>
-                    </button>
-                  }
+                @for (action of getVisibleActions(rowData); track action.key || action.titleKey) {
+                  <button
+                    type="button"
+                    class="dt-act dt-act--{{ action.color || 'default' }}"
+                    (click)="handleAction(action, rowData, $event)"
+                    [pTooltip]="action.titleKey || action.key || '' | translate"
+                    tooltipPosition="top"
+                  >
+                    <i [class]="action.icon"></i>
+                  </button>
+                }
+
+                @if (getHiddenActions(rowData).length > 0) {
+                  <div
+                    class="dt-act dt-act--more dt-more-wrap"
+                    (click)="toggleMore(rowData, $event)"
+                    [class.dt-act--active]="activeMoreRow() === rowData"
+                  >
+                    <i class="pi pi-ellipsis-h"></i>
+                    <div class="dt-more-menu" [class.dt-more-menu--active]="activeMoreRow() === rowData" [ngStyle]="moreMenuStyles()">
+                      @for (action of getHiddenActions(rowData); track action.key || action.titleKey) {
+                        <div
+                          class="dt-more-item dt-more-item--{{ action.color || 'default' }}"
+                          (click)="handleAction(action, rowData, $event); closeMoreMenu()"
+                        >
+                          <i [class]="action.icon"></i>
+                          <span>{{ action.titleKey || action.key || '' | translate }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
                 }
               </div>
             </td>

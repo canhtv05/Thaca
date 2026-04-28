@@ -18,6 +18,7 @@ public class TenantMapper {
             .name(tenant.getName())
             .domain(tenant.getDomain())
             .status(tenant.getStatus())
+            .version(tenant.getVersion())
             .planId(tenant.getPlan() != null ? tenant.getPlan().getId() : null)
             .expiresAt(DateUtils.localDateToString(tenant.getExpiresAt()))
             .contactEmail(tenant.getContactEmail())

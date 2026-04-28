@@ -4,11 +4,13 @@ import com.thaca.common.dtos.ErrorData;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.exceptions.FwException;
+import jakarta.persistence.OptimisticLockException;
 import java.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -78,5 +80,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiPayload<ErrorData>> handleSignatureException(SignatureException ex) {
         log.error("[GlobalExceptionHandler] handleSignatureException error]:: ", ex);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiPayload.error(CommonErrorMessage.UNAUTHORIZED));
+    }
+
+    @ExceptionHandler({ ObjectOptimisticLockingFailureException.class, OptimisticLockException.class })
+    public ResponseEntity<ApiPayload<ErrorData>> handleOptimisticLock(Exception ignored) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+            ApiPayload.error(CommonErrorMessage.DATA_WAS_MODIFIED_BY_ANOTHER_USER)
+        );
     }
 }

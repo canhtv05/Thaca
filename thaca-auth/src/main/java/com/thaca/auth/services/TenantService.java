@@ -4,6 +4,7 @@ import com.thaca.auth.domains.Plan;
 import com.thaca.auth.domains.Tenant;
 import com.thaca.auth.domains.projections.PlanInfoProjection;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.mappers.PlanMapper;
 import com.thaca.auth.mappers.TenantMapper;
 import com.thaca.auth.repositories.PlanRepository;
 import com.thaca.auth.repositories.TenantRepository;
@@ -19,6 +20,7 @@ import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.CommonStatus;
+import com.thaca.common.enums.TenantStatus;
 import com.thaca.common.excel.ExcelEngine;
 import com.thaca.common.excel.schema.ExcelColumn;
 import com.thaca.common.excel.schema.ExcelDataType;
@@ -35,6 +37,9 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,26 +58,21 @@ public class TenantService {
 
     private final TenantRepository tenantRepository;
     private final PlanRepository planRepository;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Transactional(readOnly = true)
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_TENANTS, type = ModeType.HANDLE)
     public SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> request) {
         Specification<Tenant> spec = createTenantSpecification(request);
-        Page<Tenant> tenants = tenantRepository.findAll(
-            spec,
-            request.getPage().toPageable(Sort.Direction.DESC, "updatedAt")
-        );
-        Map<Long, PlanInfoProjection> planMap = planRepository
-            .findAllPlanInfo()
-            .stream()
-            .collect(Collectors.toMap(PlanInfoProjection::getId, p -> p));
+        Result result = getResult(request, spec);
         return new SearchResponse<>(
-            tenants
+            result
+                .tenants()
                 .getContent()
                 .stream()
                 .map(tenant -> {
                     TenantDTO tenantDTO = TenantMapper.fromEntity(tenant);
-                    PlanInfoProjection planInfo = planMap.getOrDefault(tenant.getPlan().getId(), null);
+                    PlanInfoProjection planInfo = result.planMap().getOrDefault(tenant.getPlan().getId(), null);
                     tenantDTO.setPlan(
                         planInfo != null
                             ? PlanInfoPrj.builder().id(planInfo.getId()).name(planInfo.getName()).build()
@@ -81,11 +81,11 @@ public class TenantService {
                     return tenantDTO;
                 })
                 .collect(Collectors.toList()),
-            PaginationResponse.of(tenants)
+            PaginationResponse.of(result.tenants())
         );
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_TENANT, type = ModeType.VALIDATE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_TENANT, type = ModeType.VALIDATE)
     public void validateCreateTenant(TenantDTO request) {
         validateTenant(request);
         if (tenantRepository.existsByCode(request.getCode())) {
@@ -115,7 +115,7 @@ public class TenantService {
         tenantRepository.save(tenant);
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_TENANT, type = ModeType.VALIDATE)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_TENANT, type = ModeType.VALIDATE)
     public void validateUpdateTenant(TenantDTO request) {
         validateTenant(request);
         if (request.getId() == null) {
@@ -143,10 +143,25 @@ public class TenantService {
         tenant.setExpiresAt(DateUtils.stringToLocalDate(dto.getExpiresAt()));
         tenant.setContactEmail(dto.getContactEmail());
         tenant.setLogoUrl(dto.getLogoUrl());
+        tenant.setVersion(dto.getVersion());
         tenantRepository.save(tenant);
     }
 
-    @Transactional
+    @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_TENANT, type = ModeType.VALIDATE)
+    public void validateLockUnlock(TenantDTO request) {
+        if (request.getStatus() == null) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        if (
+            !TenantStatus.ACTIVE.equals(request.getStatus()) &&
+            !TenantStatus.INACTIVE.equals(request.getStatus()) &&
+            !TenantStatus.SUSPENDED.equals(request.getStatus())
+        ) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_TENANT, type = ModeType.HANDLE)
     public void lockUnlockTenant(TenantDTO dto) {
         Tenant tenant = tenantRepository
@@ -156,23 +171,34 @@ public class TenantService {
         tenantRepository.save(tenant);
     }
 
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_TENANT, type = ModeType.VALIDATE)
+    public void validateGetTenant(TenantDTO request) {
+        if (request.getCode() == null) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_TENANT, type = ModeType.HANDLE)
+    public TenantDTO getTenant(TenantDTO dto) {
+        Tenant tenant = tenantRepository
+            .findByCode(dto.getCode())
+            .orElseThrow(() -> new FwException(ErrorMessage.TENANT_NOT_FOUND));
+        var result = TenantMapper.fromEntity(tenant);
+        result.setPlanInfo(PlanMapper.fromEntity(tenant.getPlan()));
+        return result;
+    }
+
     @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_TENANT, type = ModeType.HANDLE)
     public byte[] exportTenant(SearchRequest<TenantDTO> request) throws IOException {
         Specification<Tenant> spec = createTenantSpecification(request);
-        List<TenantDTO> tenants = tenantRepository
-            .findAll(spec, Sort.by(Sort.Direction.DESC, "updatedAt"))
-            .stream()
-            .map(TenantMapper::fromEntity)
-            .toList();
-        Map<Long, PlanInfoProjection> planMap = planRepository
-            .findAllPlanInfo()
-            .stream()
-            .collect(Collectors.toMap(PlanInfoProjection::getId, p -> p));
+        Result result = getResult(request, spec);
+        List<TenantDTO> tenants = result.tenants.stream().map(TenantMapper::fromEntity).toList();
         List<Map<String, Object>> rows = new ArrayList<>();
         ApiHeader header = FwContextHeader.get();
         boolean isVietnamese = "vi".equals(header.getLanguage());
         for (TenantDTO tenant : tenants) {
-            PlanInfoProjection planInfo = planMap.get(tenant.getPlanId());
+            PlanInfoProjection planInfo = result.planMap.get(tenant.getPlanId());
             String expiresAt = isVietnamese && StringUtils.isEmpty(tenant.getExpiresAt()) ? "Vô thời hạn" : "Infinity";
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("code", tenant.getCode());
@@ -182,6 +208,7 @@ public class TenantService {
             row.put("logoUrl", tenant.getLogoUrl());
             row.put("plan", planInfo != null ? planInfo.getName() : null);
             row.put("status", tenant.getStatus().getLabel(isVietnamese));
+            row.put("version", tenant.getVersion());
             row.put("expiresAt", StringUtils.defaultIfBlank(tenant.getExpiresAt(), expiresAt));
             row.put("createdAt", tenant.getCreatedAt());
             row.put("createdBy", tenant.getCreatedBy());
@@ -238,6 +265,11 @@ public class TenantService {
             .addColumn(
                 ExcelColumn.builder("status", ObjectUtils.notEqual(isVietnamese, false) ? "Trạng thái" : "Status")
                     .required()
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("version", ObjectUtils.notEqual(isVietnamese, false) ? "Phiên bản" : "Version")
                     .dataType(ExcelDataType.STRING)
                     .build()
             )
@@ -308,5 +340,22 @@ public class TenantService {
             Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<>()));
             validator.validate(UserDTO.builder().email(request.getContactEmail()).build());
         }
+    }
+
+    private record Result(Page<Tenant> tenants, Map<Long, PlanInfoProjection> planMap) {}
+
+    private Result getResult(SearchRequest<TenantDTO> request, Specification<Tenant> spec) {
+        CompletableFuture<Page<Tenant>> tenantFuture = CompletableFuture.supplyAsync(
+            () -> tenantRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt")),
+            executor
+        );
+        CompletableFuture<Map<Long, PlanInfoProjection>> planMapFuture = CompletableFuture.supplyAsync(
+            () ->
+                planRepository.findAllPlanInfo().stream().collect(Collectors.toMap(PlanInfoProjection::getId, p -> p)),
+            executor
+        );
+        return CompletableFuture.allOf(tenantFuture, planMapFuture)
+            .thenApply(v -> new Result(tenantFuture.join(), planMapFuture.join()))
+            .join();
     }
 }

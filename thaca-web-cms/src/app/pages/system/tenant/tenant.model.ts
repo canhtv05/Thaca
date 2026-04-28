@@ -1,3 +1,5 @@
+import { IPlanDTO } from '../plan/plan.model';
+
 export interface ITenantDTO {
   id?: number;
   code: string;
@@ -15,4 +17,6 @@ export interface ITenantDTO {
   updatedAt?: string;
   createdBy?: string;
   updatedBy?: string;
+  version?: number;
+  planInfo?: IPlanDTO;
 }

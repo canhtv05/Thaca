@@ -1,0 +1,99 @@
+<div class="flex flex-col gap-4 w-full">
+  <app-breadcrumb [title]="'menu.tenant_management'" [items]="breadcrumbItems"></app-breadcrumb>
+  <div class="card">
+    <div class="flex items-center mb-4">
+      <div class="w-1 h-5 bg-primary mr-2 rounded"></div>
+      <h3 class="m-0 text-sm font-bold">
+        {{ 'plan.title' | translate }}
+      </h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <thaca-input
+        [label]="'plan.code' | translate"
+        [ngModel]="tenant()?.planInfo?.code"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'plan.name' | translate"
+        [ngModel]="tenant()?.planInfo?.name"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'plan.type' | translate"
+        [ngModel]="tenant()?.planInfo?.type"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'plan.max_users' | translate"
+        [ngModel]="tenant()?.planInfo?.maxUsers"
+        [disabled]="true"
+      ></thaca-input>
+    </div>
+    <thaca-input
+      class="mt-4"
+      [label]="'plan.status' | translate"
+      [ngModel]="getStatusLabel(tenant()?.planInfo?.status || '')"
+      [disabled]="true"
+    ></thaca-input>
+  </div>
+  <div class="card space-y-4">
+    <div class="flex items-center mb-4">
+      <div class="w-1 h-5 bg-primary mr-2 rounded"></div>
+      <h3 class="m-0 text-sm font-bold">
+        {{ 'tenant.detail_title' | translate: { code: tenant()?.code || '' } }}
+      </h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <thaca-input
+        [label]="'tenant.code' | translate"
+        [ngModel]="tenant()?.code"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'tenant.name' | translate"
+        [ngModel]="tenant()?.name"
+        [disabled]="true"
+      ></thaca-input>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <thaca-input
+        [label]="'tenant.domain' | translate"
+        [ngModel]="tenant()?.domain"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'tenant.contact_email' | translate"
+        [ngModel]="tenant()?.contactEmail"
+        [disabled]="true"
+      ></thaca-input>
+    </div>
+    <thaca-input
+      [label]="'tenant.status' | translate"
+      [ngModel]="getStatusLabel(tenant()?.status || '')"
+      [disabled]="true"
+    ></thaca-input>
+    <thaca-input
+      [label]="'tenant.expires_at' | translate"
+      [ngModel]="getExpiresAtLabel(tenant()?.expiresAt || '')"
+      [disabled]="true"
+    ></thaca-input>
+    <thaca-input
+      [label]="'tenant.version' | translate"
+      [ngModel]="tenant()?.version"
+      [disabled]="true"
+    ></thaca-input>
+    @if (tenant()?.logoUrl) {
+      <thaca-textarea
+        [label]="'tenant.logo_url' | translate"
+        [ngModel]="tenant()?.logoUrl"
+        [disabled]="true"
+      ></thaca-textarea>
+      <img
+        [src]="tenant()?.logoUrl"
+        [alt]="'tenant.logo_url' | translate"
+        class="w-[100px] h-[100px] object-cover rounded-md"
+        onerror="this.src = 'assets/images/placeholders/image-placeholder.svg'"
+      />
+    }
+  </div>
+</div>
