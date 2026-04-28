@@ -214,24 +214,9 @@ NewDTO newMethod(NewRequest request);
 
 ### Thêm service mới
 
-1. Thêm route vào `FrameworkProperties.RoutesConfig`:
-
-```java
-public static class RoutesConfig {
-
-  private String authService;
-  private String cmsService; // thêm
-  // ...
-}
-```
-
-2. Thêm case vào `InternalApiProxyFactory.resolveBaseUrl()`:
-
-```java
-case "cms" -> frameworkProperties.getRoutes().getCmsService() + "/internal";
-```
-
-3. Tạo interface với `@FwInternalClient(service = "cms")`
+1. Thêm cấu hình URL vào `FrameworkProperties.RoutesConfig`.
+2. Tạo interface client với các method gắn `@FwInternalApi`.
+3. Đăng ký Bean trong `@Configuration` bằng `proxyFactory.create(Interface.class, url)`.
 
 ---
 
