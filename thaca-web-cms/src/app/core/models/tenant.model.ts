@@ -3,7 +3,7 @@ export interface ITenantDTO {
   code: string;
   name: string;
   domain?: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   plan?: {
     id: number;
     name: string;

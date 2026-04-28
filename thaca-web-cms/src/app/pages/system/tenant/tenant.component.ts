@@ -231,7 +231,7 @@ export class TenantComponent implements OnInit {
     if (this.isUnchanged()) return;
     const req = this.tenantForm.getRawValue() as any;
     if (req.expiresAt) {
-      req.expiresAt = CommonUtils.formatDateTime(req.expiresAt);
+      req.expiresAt = CommonUtils.formatDate(req.expiresAt);
     }
 
     const isUpdate = !!this.tenantForm.value.id;

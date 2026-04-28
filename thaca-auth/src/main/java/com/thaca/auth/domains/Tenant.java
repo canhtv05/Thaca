@@ -4,6 +4,7 @@ import com.thaca.common.enums.TenantStatus;
 import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,7 +43,7 @@ public class Tenant extends BaseEntityAudit {
     private Plan plan;
 
     @Column(name = "expires_at")
-    private Instant expiresAt;
+    private LocalDate expiresAt;
 
     @Column(name = "contact_email")
     private String contactEmail;

@@ -26,6 +26,7 @@ import {
   ThacaDropdownComponent,
   IDropdownOption,
 } from '../thaca-dropdown/thaca-dropdown.component';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface ITableColumn {
   field: string;
@@ -85,6 +86,7 @@ export interface ITableConfig<T = any> {
 export class DataTableComponent implements AfterViewInit {
   private translate = inject(TranslateService);
   private zone = inject(NgZone);
+  private sanitizer = inject(DomSanitizer);
   @Input({ required: true }) config!: ITableConfig;
   @Input() externalFilter: any = {};
 
@@ -116,7 +118,6 @@ export class DataTableComponent implements AfterViewInit {
   loading = signal(false);
 
   private readonly DEFAULT_SORT_FIELD = 'updatedAt';
-  private readonly DEFAULT_SORT_ORDER = 'DESC';
 
   pagination = signal<IPaginationRequest>({
     page: 0,
@@ -155,6 +156,10 @@ export class DataTableComponent implements AfterViewInit {
     // Manually trigger the first load with our default sort.
     // We disabled lazyLoadOnInit to avoid PrimeNG firing before sort is set.
     this.load(this.pagination());
+  }
+
+  sanitizeHtml(html: string): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   async load(pageReq: IPaginationRequest) {

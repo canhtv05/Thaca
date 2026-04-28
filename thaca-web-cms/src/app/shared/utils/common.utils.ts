@@ -35,33 +35,34 @@ export class CommonUtils {
   }
 
   /**
-   * Parse chuỗi 'dd-MM-yyyy HH:mm:ss' hoặc 'dd-MM-yyyy' từ backend về đối tượng Date của JS
+   * Parse chuỗi 'dd-MM-yyyy' từ backend (LocalDate) về đối tượng Date của JS
    */
-  static parseBackendDate(dateStr: string | null | undefined): Date | null {
+  static parseBackendDate(dateStr: string | Date | null | undefined): Date | null {
     if (!dateStr) return null;
+    if (dateStr instanceof Date) return dateStr;
+
     try {
-      const parts = dateStr.trim().split(' ');
-      const dateParts = parts[0].split('-');
+      const [day, month, year] = dateStr.split('-');
+      const isoString = `${year}-${month}-${day}T00:00:00`;
+      return new Date(isoString);
+    } catch {
+      return null;
+    }
+  }
 
-      const day = parseInt(dateParts[0], 10);
-      const month = parseInt(dateParts[1], 10) - 1;
-      const year = parseInt(dateParts[2], 10);
+  /**
+   * Parse chuỗi 'dd-MM-yyyy HH:mm:ss' từ backend (LocalDateTime) về đối tượng Date của JS
+   */
+  static parseBackendDateTime(dateStr: string | Date | null | undefined): Date | null {
+    if (!dateStr) return null;
+    if (dateStr instanceof Date) return dateStr;
 
-      if (parts.length > 1) {
-        const timeParts = parts[1].split(':');
-        return new Date(
-          year,
-          month,
-          day,
-          parseInt(timeParts[0] || '0', 10),
-          parseInt(timeParts[1] || '0', 10),
-          parseInt(timeParts[2] || '0', 10),
-        );
-      }
-
-      return new Date(year, month, day);
-    } catch (e) {
-      logger.error('Error parsing backend date:', dateStr, e);
+    try {
+      const [datePart, timePart] = dateStr.split(' ');
+      const [day, month, year] = datePart.split('-');
+      const isoString = `${year}-${month}-${day}T${timePart || '00:00:00'}`;
+      return new Date(isoString);
+    } catch {
       return null;
     }
   }

@@ -108,7 +108,7 @@ public class TenantService {
             .domain(dto.getDomain())
             .status(dto.getStatus())
             .plan(plan)
-            .expiresAt(DateUtils.stringToDate(dto.getExpiresAt()))
+            .expiresAt(DateUtils.stringToLocalDate(dto.getExpiresAt()))
             .contactEmail(dto.getContactEmail())
             .logoUrl(dto.getLogoUrl())
             .build();
@@ -140,7 +140,7 @@ public class TenantService {
         tenant.setDomain(dto.getDomain());
         tenant.setStatus(dto.getStatus());
         tenant.setPlan(plan);
-        tenant.setExpiresAt(DateUtils.stringToDate(dto.getExpiresAt()));
+        tenant.setExpiresAt(DateUtils.stringToLocalDate(dto.getExpiresAt()));
         tenant.setContactEmail(dto.getContactEmail());
         tenant.setLogoUrl(dto.getLogoUrl());
         tenantRepository.save(tenant);

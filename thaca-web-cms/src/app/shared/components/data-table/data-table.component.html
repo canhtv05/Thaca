@@ -84,7 +84,7 @@
             <td class="dt-td" [class.dt-fixed]="col.fixed" [style.width]="col.width">
               @if (!col.condition || col.condition(rowData)) {
                 @if (col.render) {
-                  <div [innerHTML]="col.render(rowData)"></div>
+                  <div [innerHTML]="sanitizeHtml(col.render(rowData))"></div>
                 } @else {
                   {{ rowData[col.field] }}
                 }
