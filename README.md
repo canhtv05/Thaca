@@ -1,6 +1,6 @@
 <div align="center">
   <a href="README.md"><b>README</b></a> | 
-  <a href="THACA_FRAMEWORK_GUIDE.md"><b>FRAMEWORK GUIDE</b></a>
+  <a href="thaca-framework/README.md"><b>FRAMEWORK GUIDE</b></a>
 </div>
 
 # 🌟 Thaca Project - Hệ Sinh Thái SaaS & Multi-Tenant Hiện Đại

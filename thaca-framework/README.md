@@ -321,3 +321,63 @@ Sử dụng JDK HttpClient (Java 11+) với HTTP/2:
 - HTTP/2 multiplexing (nhiều request trên 1 TCP connection)
 - Keep-alive tự động
 - Không cần thêm dependency (Apache HttpClient, OkHttp, ...)
+
+---
+
+## Quy tắc API
+
+> **100% API sử dụng POST.** Không dùng GET, kể cả tìm kiếm và lấy chi tiết, để truyền được `ApiPayload`.
+
+### Payload chuẩn gửi từ Frontend
+
+```json
+{
+  "header": {
+    "channel": "CMS",
+    "transId": "unique-uuid-123",
+    "timestamp": "2026-04-24T14:38:00Z"
+  },
+  "body": {
+    "transId": "unique-uuid-123",
+    "data": {
+      "id": "12345"
+    }
+  }
+}
+```
+
+### Truy xuất Header Context
+
+Sau khi qua Resolver, truy xuất thông tin Header ở bất kỳ tầng nào:
+
+```java
+ApiHeader header = FwContextHeader.get();
+
+String transId = header.getTransId();
+```
+
+---
+
+## Xử lý lỗi
+
+Không ném Exception thô. Luôn sử dụng `FwException` kèm mã lỗi đã định nghĩa:
+
+```java
+throw new FwException(CommonErrorMessage.USER_NOT_FOUND);
+```
+
+### Định nghĩa mã lỗi mới
+
+Triển khai interface `ErrorMessageRule`, thêm vào Enum `ErrorMessage` của Service:
+
+```java
+public enum ErrorMessage implements ErrorMessageRule {
+  USER_EXISTED("USER.EXISTED", "Lỗi", "Người dùng đã tồn tại", "Error", "User already existed"),
+}
+```
+
+---
+
+## Chống trùng lặp Request (Idempotency)
+
+Framework sử dụng `transId` trong Header để ngăn thực hiện cùng một giao dịch nhiều lần. Frontend **bắt buộc** phải sinh `transId` duy nhất cho mỗi hành động.
