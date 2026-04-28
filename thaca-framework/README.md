@@ -333,8 +333,7 @@ Sử dụng JDK HttpClient (Java 11+) với HTTP/2:
 ```json
 {
   "header": {
-    "channel": "CMS",
-    "transId": "unique-uuid-123",
+    "channel": "WEB", // WEB | MOBILE
     "timestamp": "2026-04-24T14:38:00Z"
   },
   "body": {
