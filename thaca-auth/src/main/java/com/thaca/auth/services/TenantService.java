@@ -176,7 +176,7 @@ public class TenantService {
         boolean isVietnamese = "vi".equals(header.getLanguage());
         for (TenantDTO tenant : tenants) {
             PlanInfoProjection planInfo = planMap.get(tenant.getPlanId());
-            String expiresAt = isVietnamese == true && tenant.getExpiresAt() == null ? "Không giới hạn" : "Infinity";
+            String expiresAt = isVietnamese && StringUtils.isEmpty(tenant.getExpiresAt()) ? "Vô thời hạn" : "Infinity";
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("code", tenant.getCode());
             row.put("name", tenant.getName());
@@ -235,7 +235,6 @@ public class TenantService {
                     "expiresAt",
                     ObjectUtils.notEqual(isVietnamese, false) ? "Ngày hết hạn" : "Expiration Date"
                 )
-                    .required()
                     .dataType(ExcelDataType.DATE)
                     .build()
             )
