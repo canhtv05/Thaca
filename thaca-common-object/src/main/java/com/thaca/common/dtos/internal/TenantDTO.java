@@ -20,7 +20,7 @@ public class TenantDTO extends BaseAuditResponse {
     private String domain;
     private TenantStatus status;
     private Long planId;
-    private LocalDateTime expiresAt;
+    private String expiresAt;
     private String contactEmail;
     private String logoUrl;
 

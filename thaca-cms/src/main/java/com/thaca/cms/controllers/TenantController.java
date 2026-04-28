@@ -58,8 +58,7 @@ public class TenantController {
     @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT, type = RequestType.PROTECTED)
     public ResponseEntity<Void> lockUnlock(TenantDTO request) {
-        process.process(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/export")

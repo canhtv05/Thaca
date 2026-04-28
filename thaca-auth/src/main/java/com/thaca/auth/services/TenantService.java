@@ -29,6 +29,7 @@ import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.utils.CommonUtils;
+import com.thaca.framework.core.utils.DateUtils;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -110,7 +111,7 @@ public class TenantService {
             .domain(dto.getDomain())
             .status(dto.getStatus())
             .plan(plan)
-            .expiresAt(dto.getExpiresAt())
+            .expiresAt(DateUtils.stringToDate(dto.getExpiresAt()))
             .contactEmail(dto.getContactEmail())
             .logoUrl(dto.getLogoUrl())
             .build();
@@ -142,7 +143,7 @@ public class TenantService {
         tenant.setDomain(dto.getDomain());
         tenant.setStatus(dto.getStatus());
         tenant.setPlan(plan);
-        tenant.setExpiresAt(dto.getExpiresAt());
+        tenant.setExpiresAt(DateUtils.stringToDate(dto.getExpiresAt()));
         tenant.setContactEmail(dto.getContactEmail());
         tenant.setLogoUrl(dto.getLogoUrl());
         tenantRepository.save(tenant);
@@ -165,20 +166,26 @@ public class TenantService {
             .findAll(spec, Sort.by(Sort.Direction.DESC, "updatedAt"))
             .stream()
             .map(TenantMapper::fromEntity)
-            .collect(Collectors.toList());
+            .toList();
+        Map<Long, PlanInfoProjection> planMap = planRepository
+            .findAllPlanInfo()
+            .stream()
+            .collect(Collectors.toMap(PlanInfoProjection::getId, p -> p));
         List<Map<String, Object>> rows = new ArrayList<>();
         ApiHeader header = FwContextHeader.get();
         boolean isVietnamese = "vi".equals(header.getLanguage());
         for (TenantDTO tenant : tenants) {
+            PlanInfoProjection planInfo = planMap.get(tenant.getPlanId());
+            String expiresAt = isVietnamese == true && tenant.getExpiresAt() == null ? "Không giới hạn" : "Infinity";
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("code", tenant.getCode());
             row.put("name", tenant.getName());
             row.put("domain", tenant.getDomain());
             row.put("contactEmail", tenant.getContactEmail());
             row.put("logoUrl", tenant.getLogoUrl());
-            row.put("plan", tenant.getPlan() != null ? tenant.getPlan().getName() : null);
-            row.put("expiresAt", tenant.getExpiresAt());
+            row.put("plan", planInfo != null ? planInfo.getName() : null);
             row.put("status", tenant.getStatus().getLabel(isVietnamese));
+            row.put("expiresAt", StringUtils.defaultIfBlank(tenant.getExpiresAt(), expiresAt));
             row.put("createdAt", tenant.getCreatedAt());
             row.put("createdBy", tenant.getCreatedBy());
             row.put("updatedAt", tenant.getUpdatedAt());
@@ -216,11 +223,7 @@ public class TenantService {
                     .dataType(ExcelDataType.STRING)
                     .build()
             )
-            .addColumn(
-                ExcelColumn.builder("logoUrl", ObjectUtils.notEqual(isVietnamese, false) ? "Logo URL" : "Logo URL")
-                    .dataType(ExcelDataType.STRING)
-                    .build()
-            )
+            .addColumn(ExcelColumn.builder("logoUrl", "Logo URL").dataType(ExcelDataType.STRING).build())
             .addColumn(
                 ExcelColumn.builder("plan", ObjectUtils.notEqual(isVietnamese, false) ? "Gói dịch vụ (Plan)" : "Plan")
                     .required()
@@ -275,16 +278,16 @@ public class TenantService {
         return (root, query, cb) -> {
             Predicate p = cb.conjunction();
             if (request.getFilter() != null) {
-                if (StringUtils.isNotBlank(request.getFilter().getCode())) {
-                    p = cb.and(
-                        p,
-                        cb.like(cb.lower(root.get("code")), "%" + request.getFilter().getCode().toLowerCase() + "%")
-                    );
-                }
                 if (StringUtils.isNotBlank(request.getFilter().getName())) {
                     p = cb.and(
                         p,
                         cb.like(cb.lower(root.get("name")), "%" + request.getFilter().getName().toLowerCase() + "%")
+                    );
+                }
+                if (StringUtils.isNotBlank(request.getFilter().getCode())) {
+                    p = cb.and(
+                        p,
+                        cb.like(cb.lower(root.get("code")), "%" + request.getFilter().getCode().toLowerCase() + "%")
                     );
                 }
                 if (request.getFilter().getStatus() != null) {
@@ -306,7 +309,7 @@ public class TenantService {
         Validator<String> codeValidator = new Validator<>(List.of(new CodeRule()));
         codeValidator.validate(request.getCode());
         if (StringUtils.isNotBlank(request.getContactEmail())) {
-            Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<UserDTO>()));
+            Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<>()));
             validator.validate(UserDTO.builder().email(request.getContactEmail()).build());
         }
     }

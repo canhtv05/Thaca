@@ -150,8 +150,15 @@ public class FwFilter extends OncePerRequestFilter {
             }
             long duration = System.currentTimeMillis() - startTime;
             byte[] responseArray = responseWrapper.getContentAsByteArray();
-            String responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
-            responseStr = maskSensitiveData(responseStr);
+            String responseContentType = responseWrapper.getContentType();
+            String responseStr;
+
+            if (responseContentType != null && responseContentType.contains(MediaType.APPLICATION_JSON_VALUE)) {
+                responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
+                responseStr = maskSensitiveData(responseStr);
+            } else {
+                responseStr = "[BINARY DATA (" + responseArray.length + " bytes)]";
+            }
 
             int status = responseWrapper.getStatus();
             String logMsg = "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}";

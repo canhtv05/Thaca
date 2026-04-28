@@ -142,6 +142,15 @@ public class AuthClient {
         );
     }
 
+    @FwMode(name = ServiceMethod.CMS_EXPORT_TENANT, type = ModeType.HANDLE)
+    public byte[] exportTenants(SearchRequest<TenantDTO> request) {
+        return internalApiClient.post(
+            authBaseUrl + "/cms/tenants/export",
+            request,
+            new ParameterizedTypeReference<>() {}
+        );
+    }
+
     @FwMode(name = ServiceMethod.CMS_LOCK_USER, type = ModeType.HANDLE)
     public Void lockUser(Long id) {
         return internalApiClient.post(authBaseUrl + "/cms/users/lock", id, new ParameterizedTypeReference<>() {});

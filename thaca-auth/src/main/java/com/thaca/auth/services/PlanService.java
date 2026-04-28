@@ -157,7 +157,7 @@ public class PlanService {
             .findAll(spec, Sort.by(Sort.Direction.DESC, "updatedAt"))
             .stream()
             .map(PlanMapper::fromEntity)
-            .collect(Collectors.toList());
+            .toList();
         List<Map<String, Object>> rows = new ArrayList<>();
         ApiHeader header = FwContextHeader.get();
         boolean isVietnamese = "vi".equals(header.getLanguage());

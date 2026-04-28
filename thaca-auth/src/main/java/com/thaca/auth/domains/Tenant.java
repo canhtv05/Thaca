@@ -3,7 +3,7 @@ package com.thaca.auth.domains;
 import com.thaca.common.enums.TenantStatus;
 import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,7 +42,7 @@ public class Tenant extends BaseEntityAudit {
     private Plan plan;
 
     @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 
     @Column(name = "contact_email")
     private String contactEmail;
@@ -51,7 +51,7 @@ public class Tenant extends BaseEntityAudit {
     private String logoUrl;
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    private Instant deletedAt;
 
     @Version
     private Long version;

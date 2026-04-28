@@ -50,8 +50,7 @@ public class InternalTenantController {
     @PostMapping("/cms/tenants/lock-unlock")
     @FwRequest(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_TENANT, type = RequestType.INTERNAL)
     public ResponseEntity<Void> lockUnlockTenant(TenantDTO request) {
-        fwApiProcess.process(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(fwApiProcess.process(request));
     }
 
     @PostMapping("/cms/tenants/export")
