@@ -5,6 +5,8 @@ import com.thaca.framework.core.dtos.ApiPayload;
 import java.lang.reflect.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 
 @Slf4j
@@ -52,8 +54,8 @@ public class InternalApiProxy implements InvocationHandler {
         return client.post(url, requestData, buildTypeReference(returnType));
     }
 
-    @SuppressWarnings("rawtypes")
-    private ParameterizedTypeReference buildTypeReference(Type returnType) {
+    @NullMarked
+    protected ParameterizedTypeReference<?> buildTypeReference(Type returnType) {
         Type apiPayloadType = new ParameterizedType() {
             @Override
             public Type[] getActualTypeArguments() {
@@ -65,6 +67,7 @@ public class InternalApiProxy implements InvocationHandler {
                 return ApiPayload.class;
             }
 
+            @Nullable
             @Override
             public Type getOwnerType() {
                 return null;
