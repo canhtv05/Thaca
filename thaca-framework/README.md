@@ -95,24 +95,9 @@ public ResponseEntity<TenantDTO> save(TenantDTO request) { ... }
 | `value`      | Danh sách permission codes cần kiểm tra            |
 | `allMatched` | `true` = cần tất cả quyền, `false` = cần ít nhất 1 |
 
-### `@FwInternalClient`
-
-Gắn lên **interface** để khai báo là một Internal API client. Framework tự tạo proxy implementation lúc runtime.
-
-```java
-@FwInternalClient(service = "auth")
-public interface AuthClient {
-  // methods...
-}
-```
-
-| Thuộc tính | Mô tả                                                            |
-| ---------- | ---------------------------------------------------------------- |
-| `service`  | Tên service đích, map với key trong `FrameworkProperties.routes` |
-
 ### `@FwInternalApi`
 
-Gắn lên **method trong interface** `@FwInternalClient` để khai báo endpoint.
+Gắn lên **method trong interface** để khai báo endpoint nội bộ. Framework sẽ dựa vào các method này để thực hiện gọi API và tự động đăng ký handler vào `FwModeRegistry`.
 
 ```java
 @FwInternalApi(path = "/cms/tenants/search", name = ServiceMethod.CMS_SEARCH_TENANTS)
@@ -180,7 +165,6 @@ InternalApiClient.post()
 Thay vì viết boilerplate class cho mỗi service call, chỉ cần khai báo interface:
 
 ```java
-@FwInternalClient(service = "auth")
 public interface AuthClient {
   @FwInternalApi(path = "/cms/tenants/search", name = ServiceMethod.CMS_SEARCH_TENANTS)
   SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> search);
@@ -198,21 +182,26 @@ public interface AuthClient {
 public class InternalClientConfig {
 
   private final InternalApiProxyFactory proxyFactory;
+  private final FrameworkProperties frameworkProperties;
 
   @Bean
   public AuthClient authClient() {
-    return proxyFactory.create(AuthClient.class);
+    // Truyền interface và baseUrl (đã bao gồm context path)
+    return proxyFactory.create(
+      AuthClient.class,
+      frameworkProperties.getRoutes().getAuthService() + "/internal"
+    );
   }
 }
 ```
 
 Framework tự động:
 
-- Tạo proxy implementation cho interface
-- Ghép URL: `routes.authService + "/internal" + path`
-- Resolve `ParameterizedTypeReference` từ return type
-- Route `byte[]` return sang binary download
-- Đăng ký tất cả methods vào `FwModeRegistry`
+- Tạo proxy implementation cho interface.
+- Ghép URL: `baseUrl + path`.
+- Resolve `ParameterizedTypeReference` từ return type.
+- Route `byte[]` return sang binary download.
+- Đăng ký tất cả methods vào `FwModeRegistry` để có thể gọi ngược lại qua `fwApiProcess` nếu cần.
 
 ### Thêm API mới
 
@@ -333,7 +322,7 @@ Sử dụng JDK HttpClient (Java 11+) với HTTP/2:
 ```json
 {
   "header": {
-    "channel": "WEB", // WEB | MOBILE
+    "channel": "WEB", //WEB | MOBILE
     "timestamp": "2026-04-24T14:38:00Z"
   },
   "body": {
