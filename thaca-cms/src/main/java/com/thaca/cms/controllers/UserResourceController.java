@@ -1,10 +1,7 @@
 package com.thaca.cms.controllers;
 
 import com.thaca.cms.constants.ServiceMethod;
-import com.thaca.common.dtos.internal.AuthUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
-import com.thaca.common.dtos.internal.req.LoginReq;
-import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
@@ -22,18 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserResourceController {
 
     private final FwApiProcess fwApiProcess;
-
-    @PostMapping("/sign-in")
-    @FwRequest(name = ServiceMethod.CMS_AUTHENTICATE, type = RequestType.PUBLIC)
-    public ResponseEntity<AuthenticateRes> signIn(LoginReq loginReq) {
-        return ResponseEntity.ok(fwApiProcess.process(loginReq));
-    }
-
-    @PostMapping("/profile")
-    @FwRequest(name = ServiceMethod.CMS_GET_PROFILE, type = RequestType.PROTECTED)
-    public ResponseEntity<AuthUserDTO> getProfile() {
-        return ResponseEntity.ok(fwApiProcess.process(null));
-    }
 
     @PostMapping("/users/search")
     @FwRequest(name = ServiceMethod.CMS_SEARCH_USERS, type = RequestType.PROTECTED)

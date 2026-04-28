@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SystemCredentialRepository extends JpaRepository<SystemCredential, String> {
-    @EntityGraph(attributePaths = { "roles", "roles.permissions", "systemUser" })
+    @EntityGraph(attributePaths = { "roles", "roles.permissions", "credentialPermissions.permission", "systemUser" })
     Optional<SystemCredential> findByUsername(String username);
 }

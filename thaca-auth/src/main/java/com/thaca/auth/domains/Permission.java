@@ -2,7 +2,9 @@ package com.thaca.auth.domains;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +26,7 @@ public class Permission extends BaseTenantEntity {
     private String description;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "permissions", fetch = FetchType.LAZY)
-    private Set<Role> roles;
+    @ManyToMany(mappedBy = "permissions")
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
 }

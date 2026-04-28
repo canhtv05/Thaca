@@ -2,16 +2,22 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.domains.Permission;
 import com.thaca.auth.domains.Role;
+import com.thaca.auth.domains.SystemCredential;
+import com.thaca.auth.domains.SystemCredentialPermission;
+import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.mappers.PermissionMapper;
 import com.thaca.auth.mappers.RoleMapper;
 import com.thaca.auth.repositories.PermissionRepository;
 import com.thaca.auth.repositories.RoleRepository;
+import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.common.dtos.internal.PermissionDTO;
 import com.thaca.common.dtos.internal.RoleDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
+import com.thaca.common.enums.PermissionEffect;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
+import com.thaca.framework.core.exceptions.FwException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -32,6 +38,7 @@ public class RolePermissionService {
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final SystemCredentialRepository systemCredentialRepository;
     private final RedisCacheService redisService;
     public static final String REDIS_ROLE_PERM_PREFIX = "auth:role-permissions:";
 
@@ -114,5 +121,29 @@ public class RolePermissionService {
         List<String> permissions = role.getPermissions().stream().map(Permission::getCode).collect(Collectors.toList());
         String key = REDIS_ROLE_PERM_PREFIX + role.getCode();
         redisService.put(key, permissions);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserPermissions(String username, List<String> deniedPermissionCodes) {
+        SystemCredential sc = systemCredentialRepository
+            .findByUsername(username)
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+
+        sc.getCredentialPermissions().clear();
+
+        if (deniedPermissionCodes != null && !deniedPermissionCodes.isEmpty()) {
+            for (String code : deniedPermissionCodes) {
+                Permission perm = permissionRepository.findById(code).orElse(null);
+                if (perm != null) {
+                    SystemCredentialPermission scp = new SystemCredentialPermission();
+                    scp.setId(new SystemCredentialPermission.SystemCredentialPermissionId(username, code));
+                    scp.setCredential(sc);
+                    scp.setPermission(perm);
+                    scp.setEffect(PermissionEffect.DENY);
+                    sc.getCredentialPermissions().add(scp);
+                }
+            }
+        }
+        systemCredentialRepository.save(sc);
     }
 }

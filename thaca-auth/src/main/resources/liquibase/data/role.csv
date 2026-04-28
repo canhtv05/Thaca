@@ -1,5 +1,3 @@
 code;description;tenant_id
-SUPER_ADMIN;Role cho siêu admin;1
 ADMIN;Role cho admin;1
 MANAGER;Role cho quản lý;1
-USER;Role cho user;1

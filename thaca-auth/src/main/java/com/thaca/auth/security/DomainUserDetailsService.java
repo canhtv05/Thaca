@@ -3,10 +3,12 @@ package com.thaca.auth.security;
 import com.thaca.auth.domains.Permission;
 import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.SystemCredential;
+import com.thaca.auth.domains.SystemCredentialPermission;
 import com.thaca.auth.domains.SystemUser;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.services.AuthService;
+import com.thaca.common.enums.PermissionEffect;
 // import com.thaca.auth.services.KafkaProducerService;
 // import com.thaca.common.dtos.events.VerificationEmailEvent;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
@@ -74,6 +76,14 @@ public class DomainUserDetailsService implements UserDetailsService {
             isSuperAdmin = su.getIsSuperAdmin();
 
             Set<Role> roles = sc.getRoles();
+            Set<SystemCredentialPermission> credentialPermissions = sc.getCredentialPermissions();
+
+            Set<String> deniedPermissions = credentialPermissions
+                .stream()
+                .filter(cp -> cp.getEffect() == PermissionEffect.DENY)
+                .map(cp -> cp.getPermission().getCode())
+                .collect(Collectors.toSet());
+
             if (isSuperAdmin) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 grantedAuthorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
@@ -82,8 +92,21 @@ public class DomainUserDetailsService implements UserDetailsService {
                 for (Role role : roles) {
                     grantedAuthorities.add(new SimpleGrantedAuthority(role.getCode()));
                     for (Permission perm : role.getPermissions()) {
-                        grantedAuthorities.add(new SimpleGrantedAuthority(perm.getCode()));
+                        if (!deniedPermissions.contains(perm.getCode())) {
+                            grantedAuthorities.add(new SimpleGrantedAuthority(perm.getCode()));
+                        }
                     }
+                }
+            }
+
+            for (SystemCredentialPermission cp : credentialPermissions) {
+                if (
+                    cp.getEffect() == PermissionEffect.GRANT &&
+                    !deniedPermissions.contains(cp.getPermission().getCode())
+                ) {
+                    grantedAuthorities.add(new SimpleGrantedAuthority(cp.getPermission().getCode()));
+                } else if (cp.getEffect() == PermissionEffect.DENY) {
+                    grantedAuthorities.add(new SimpleGrantedAuthority("DENY_" + cp.getPermission().getCode()));
                 }
             }
         } else {

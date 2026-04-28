@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="load-data-multi-tenant" author="CanhPC">
+        <loadData file="liquibase/data/plan.csv" separator=";" tableName="plans" schemaName="auth">
+            <column name="id" type="NUMERIC"/>
+            <column name="code" type="STRING"/>
+            <column name="name" type="STRING"/>
+            <column name="type" type="STRING"/>
+            <column name="max_users" type="NUMERIC"/>
+            <column name="status" type="STRING"/>
+            <column name="created_by" type="STRING"/>
+            <column name="created_at" type="DATE"/>
+        </loadData>
+
+        <loadData file="liquibase/data/tenant.csv" separator=";" tableName="tenants" schemaName="auth">
+            <column name="id" type="NUMERIC"/>
+            <column name="code" type="STRING"/>
+            <column name="name" type="STRING"/>
+            <column name="domain" type="STRING"/>
+            <column name="status" type="STRING"/>
+            <column name="plan_id" type="NUMERIC"/>
+            <column name="created_by" type="STRING"/>
+            <column name="created_at" type="DATE"/>
+            <column name="updated_by" type="STRING"/>
+            <column name="updated_at" type="DATE"/>
+        </loadData>
+
+        <loadData file="liquibase/data/permission.csv" separator=";" tableName="permissions" schemaName="auth">
+            <column name="code" type="string"/>
+            <column name="description" type="string"/>
+            <column name="tenant_id" type="numeric"/>
+        </loadData>
+
+        <loadData file="liquibase/data/role.csv" separator=";" tableName="roles" schemaName="auth">
+            <column name="code" type="string"/>
+            <column name="description" type="string"/>
+            <column name="tenant_id" type="numeric"/>
+        </loadData>
+
+        <loadData file="liquibase/data/user.csv" separator=";" tableName="users" schemaName="auth">
+            <column name="id" type="numeric"/>
+            <column name="username" type="string"/>
+            <column name="password" type="string"/>
+            <column name="is_activated" type="boolean"/>
+            <column name="is_locked" type="boolean"/>
+            <column name="email" type="string"/>
+            <column name="tenant_id" type="numeric"/>
+        </loadData>
+
+        <loadData file="liquibase/data/system_user.csv" separator=";" tableName="system_users" schemaName="auth">
+            <column name="id" type="numeric"/>
+            <column name="fullname" type="string"/>
+            <column name="email" type="string"/>
+            <column name="is_activated" type="boolean"/>
+            <column name="is_locked" type="boolean"/>
+            <column name="is_super_admin" type="boolean"/>
+            <column name="tenant_id" type="numeric"/>
+        </loadData>
+
+        <loadData file="liquibase/data/system_credential.csv" separator=";" tableName="system_credentials" schemaName="auth">
+            <column name="username" type="string"/>
+            <column name="password" type="string"/>
+            <column name="system_user_id" type="numeric"/>
+        </loadData>
+
+        <loadData file="liquibase/data/role_permissions.csv" separator=";" tableName="role_permissions" schemaName="auth">
+            <column name="role_code" type="string"/>
+            <column name="permission_code" type="string"/>
+        </loadData>
+
+        <loadData file="liquibase/data/system_credential_roles.csv" separator=";" tableName="system_credential_roles" schemaName="auth">
+            <column name="credential_id" type="string"/>
+            <column name="role_code" type="string"/>
+        </loadData>
+
+        <loadData file="liquibase/data/system_credential_permissions.csv" separator=";" tableName="system_credential_permissions" schemaName="auth">
+            <column name="credential_id" type="string"/>
+            <column name="permission_code" type="string"/>
+            <column name="effect" type="string"/>
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>

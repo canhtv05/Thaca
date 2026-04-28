@@ -13,13 +13,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Slf4j
 @RestController
 @RequestMapping("/cms/plans")
 @RequiredArgsConstructor
@@ -28,21 +26,18 @@ public class PlanController {
     private final FwApiProcess process;
 
     @PostMapping("/search")
-    @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_SEARCH_PLANS, type = RequestType.PROTECTED)
     public ResponseEntity<SearchResponse<PlanDTO>> search(SearchRequest<PlanDTO> request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/get")
-    @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_GET_PLAN, type = RequestType.PROTECTED)
     public ResponseEntity<PlanDTO> get(PlanDTO plan) {
         return ResponseEntity.ok(process.process(plan));
     }
 
     @PostMapping("/all")
-    @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_GET_ALL_PLANS, type = RequestType.PROTECTED)
     public ResponseEntity<List<PlanDTO>> getAll() {
         return ResponseEntity.ok(process.process(null));
@@ -70,7 +65,6 @@ public class PlanController {
     }
 
     @PostMapping("/export")
-    @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_EXPORT_PLAN, type = RequestType.PROTECTED)
     public void export(SearchRequest<PlanDTO> request, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(request), "thaca-plans-export-{{date}}.xlsx");

@@ -12,6 +12,6 @@
   <property name="uuidType" value="uuid" dbms="postgresql"/>
   <property name="datetimeType" value="datetime" dbms="postgresql"/>
 
-  <include file="/liquibase/changelog/23-01-changelog.xml"/>
-  <include file="/liquibase/changelog/26-04-multi-tenant.xml"/>
+  <include file="/liquibase/changelog/thaca-load-table.xml"/>
+  <include file="/liquibase/changelog/thaca-load-data.xml"/>
 </databaseChangeLog>

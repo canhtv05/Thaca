@@ -38,4 +38,9 @@ public class SystemCredential extends BaseTenantEntity {
     )
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "credential", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<SystemCredentialPermission> credentialPermissions = new HashSet<>();
 }
