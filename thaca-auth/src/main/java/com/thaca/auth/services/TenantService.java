@@ -15,6 +15,7 @@ import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -189,6 +190,15 @@ public class TenantService {
         return result;
     }
 
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_TENANTS, type = ModeType.HANDLE)
+    public List<TenantInfoPrj> getAllTenants() {
+        return tenantRepository
+            .findAllActiveTenants()
+            .stream()
+            .map(p -> TenantInfoPrj.builder().id(p.getId()).name(p.getName()).code(p.getCode()).build())
+            .collect(Collectors.toList());
+    }
+
     @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_TENANT, type = ModeType.HANDLE)
     public byte[] exportTenant(SearchRequest<TenantDTO> request) throws IOException {
         Specification<Tenant> spec = createTenantSpecification(request);
@@ -199,7 +209,7 @@ public class TenantService {
         boolean isVietnamese = "vi".equals(header.getLanguage());
         for (TenantDTO tenant : tenants) {
             PlanInfoProjection planInfo = result.planMap.get(tenant.getPlanId());
-            String expiresAt = isVietnamese && StringUtils.isEmpty(tenant.getExpiresAt()) ? "Vô thời hạn" : "Infinity";
+            String expiresAt = isVietnamese && StringUtils.isBlank(tenant.getExpiresAt()) ? "Vô thời hạn" : "Infinity";
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("code", tenant.getCode());
             row.put("name", tenant.getName());

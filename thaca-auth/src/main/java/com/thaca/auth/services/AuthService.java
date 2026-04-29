@@ -19,7 +19,7 @@ import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.TokenPair;
-import com.thaca.common.dtos.internal.AuthUserDTO;
+import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
@@ -114,7 +114,7 @@ public class AuthService {
                 .findByUsername(loginReq.getUsername())
                 .ifPresent(user ->
                     loginHistoryService.saveLoginHistory(
-                        AuthUserDTO.builder().id(user.getId()).build(),
+                        SystemUserDTO.builder().id(user.getId()).build(),
                         httpServletRequest,
                         LoginStatus.FAILED,
                         e.getMessage(),
@@ -201,7 +201,7 @@ public class AuthService {
                 .findByUsername(loginReq.getUsername())
                 .ifPresent(sc ->
                     loginHistoryService.saveLoginHistory(
-                        AuthUserDTO.builder().id(sc.getSystemUser().getId()).build(),
+                        SystemUserDTO.builder().id(sc.getSystemUser().getId()).build(),
                         httpServletRequest,
                         LoginStatus.FAILED,
                         e.getMessage(),
@@ -293,11 +293,11 @@ public class AuthService {
         return systemCredentialRepository.findByUsername(username).orElse(null);
     }
 
-    public AuthUserDTO getUserProfile(String username) {
+    public SystemUserDTO getUserProfile(String username) {
         return userRepository
             .findByUsername(username)
             .map(u ->
-                AuthUserDTO.builder()
+                SystemUserDTO.builder()
                     .id(u.getId())
                     .tenantId(u.getTenantId())
                     .username(u.getUsername())
@@ -367,7 +367,9 @@ public class AuthService {
             throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
         }
 
-        AuthUserDTO userInfoDTO = isCms ? systemUserService.getSystemProfile() : getUserProfile(loginReq.getUsername());
+        SystemUserDTO userInfoDTO = isCms
+            ? systemUserService.getSystemProfile()
+            : getUserProfile(loginReq.getUsername());
         loginHistoryService.saveLoginHistory(userInfoDTO, httpServletRequest, LoginStatus.SUCCESS, null, isCms);
         return new AuthenticateRes(true, userInfoDTO);
     }

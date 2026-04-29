@@ -25,5 +25,13 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_UPDATE_TENANT = "internal.cmsUpdateTenant";
     public static final String INTERNAL_CMS_LOCK_UNLOCK_TENANT = "internal.cmsLockUnlockTenant";
     public static final String INTERNAL_CMS_GET_TENANT = "internal.cmsGetTenant";
+    public static final String INTERNAL_CMS_GET_ALL_TENANTS = "internal.cmsGetAllTenants";
     public static final String INTERNAL_CMS_EXPORT_TENANT = "internal.cmsExportTenant";
+
+    public static final String INTERNAL_CMS_SEARCH_SYSTEM_USERS = "internal.cmsSearchSystemUsers";
+    public static final String INTERNAL_CMS_CREATE_SYSTEM_USER = "internal.cmsCreateSystemUser";
+    public static final String INTERNAL_CMS_UPDATE_SYSTEM_USER = "internal.cmsUpdateSystemUser";
+    public static final String INTERNAL_CMS_LOCK_UNLOCK_SYSTEM_USER = "internal.cmsLockUnlockSystemUser";
+    public static final String INTERNAL_CMS_GET_SYSTEM_USER = "internal.cmsGetSystemUser";
+    public static final String INTERNAL_CMS_EXPORT_SYSTEM_USER = "internal.cmsExportSystemUser";
 }

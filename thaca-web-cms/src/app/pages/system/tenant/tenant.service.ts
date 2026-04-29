@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { IApiPayload, ISearchRequest } from '../../../core/models/common.model';
-import { ITenantDTO } from './tenant.model';
+import { ITenantDTO, ITenantInfoPrj } from './tenant.model';
 import { AppConfigService } from '../../../core/configs/app-config.service';
 import { CommonService } from '../../../core/services/common.service';
 import { createBody, createHeader } from '../../../utils/common.utils';
@@ -12,6 +12,17 @@ import { GlobalHttp } from '../../../core/global/global-http';
 export class TenantService {
   private readonly config = inject(AppConfigService);
   private readonly commonService = inject(CommonService);
+
+  async getAll(): Promise<IApiPayload<ITenantInfoPrj[]>> {
+    const payload: IApiPayload<any> = {
+      header: createHeader(),
+      body: createBody({}),
+    };
+    return await GlobalHttp.post<IApiPayload<ITenantInfoPrj[]>>(
+      `${this.config.getApiUrl()}/cms/tenants/all`,
+      payload,
+    );
+  }
 
   async getTenant(req: Pick<ITenantDTO, 'code'>): Promise<IApiPayload<ITenantDTO>> {
     const payload: IApiPayload<Pick<ITenantDTO, 'code'>> = {

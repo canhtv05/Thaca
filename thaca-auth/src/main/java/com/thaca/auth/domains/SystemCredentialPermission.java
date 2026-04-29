@@ -1,6 +1,7 @@
 package com.thaca.auth.domains;
 
 import com.thaca.common.enums.PermissionEffect;
+import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
 import java.util.Objects;
 import lombok.*;
@@ -12,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "system_credential_permissions", schema = "auth")
-public class SystemCredentialPermission {
+public class SystemCredentialPermission extends BaseEntityAudit {
 
     @EmbeddedId
     private SystemCredentialPermissionId id;
@@ -33,19 +34,15 @@ public class SystemCredentialPermission {
     private PermissionEffect effect = PermissionEffect.DENY;
 
     @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof SystemCredentialPermission that)) return false;
-        return (
-            Objects.equals(id, that.id) &&
-            Objects.equals(credential, that.credential) &&
-            Objects.equals(permission, that.permission) &&
-            effect == that.effect
-        );
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SystemCredentialPermission that)) return false;
+        return id != null && id.equals(that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, credential, permission, effect);
+        return Objects.hash(id);
     }
 
     @Getter
@@ -63,6 +60,7 @@ public class SystemCredentialPermission {
 
         @Override
         public boolean equals(Object object) {
+            if (this == object) return true;
             if (!(object instanceof SystemCredentialPermissionId that)) return false;
             return (
                 Objects.equals(credentialId, that.credentialId) && Objects.equals(permissionCode, that.permissionCode)

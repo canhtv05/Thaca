@@ -1,0 +1,170 @@
+<div class="page-container flex flex-col gap-4">
+  <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+
+  <div class="thaca-card p-4">
+    <div class="flex flex-wrap gap-4">
+      <thaca-input
+        class="w-full sm:w-64"
+        [label]="'system_user.username' | translate"
+        [(ngModel)]="filter().username"
+        [placeholder]="'system_user.username_placeholder' | translate"
+      ></thaca-input>
+      <thaca-input
+        class="w-full sm:w-64"
+        [label]="'system_user.fullname' | translate"
+        [(ngModel)]="filter().fullname"
+        [placeholder]="'system_user.fullname_placeholder' | translate"
+      ></thaca-input>
+      <thaca-input
+        class="w-full sm:w-64"
+        [label]="'system_user.email' | translate"
+        [(ngModel)]="filter().email"
+        [placeholder]="'system_user.email_placeholder' | translate"
+      ></thaca-input>
+      <thaca-dropdown
+        class="w-full sm:w-48"
+        [label]="'system_user.is_activated' | translate"
+        [options]="activatedOptions"
+        [(ngModel)]="filter().isActivated"
+      ></thaca-dropdown>
+      <thaca-dropdown
+        class="w-full sm:w-48"
+        [label]="'system_user.is_locked' | translate"
+        [options]="lockedOptions"
+        [(ngModel)]="filter().isLocked"
+      ></thaca-dropdown>
+
+      <div class="flex items-end gap-2 ml-auto">
+        <thaca-button
+          [label]="'common.button.search' | translate"
+          icon="pi pi-search"
+          (click)="onSearch()"
+        ></thaca-button>
+        <thaca-button
+          [label]="'common.button.create' | translate"
+          variant="primary"
+          icon="pi pi-plus"
+          (click)="onCreate()"
+        ></thaca-button>
+        <thaca-button
+          [label]="'common.button.export' | translate"
+          variant="secondary"
+          icon="pi pi-file-excel"
+          (click)="onExport()"
+        ></thaca-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="thaca-card">
+    <app-data-table
+      [config]="tableConfig"
+      (onAction)="handleAction($event)"
+    ></app-data-table>
+  </div>
+</div>
+
+<thaca-modal
+  #userModal
+  [title]="(userForm.value.id ? 'system_user.modal.update_title' : 'system_user.modal.create_title') | translate"
+  [width]="'600px'"
+>
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <div class="grid grid-cols-2 gap-4">
+      <thaca-input
+        formControlName="username"
+        [label]="'system_user.username' | translate"
+        [required]="true"
+      ></thaca-input>
+      <thaca-input
+        formControlName="fullname"
+        [label]="'system_user.fullname' | translate"
+        [required]="true"
+      ></thaca-input>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <thaca-input
+        formControlName="email"
+        [label]="'system_user.email' | translate"
+        [required]="true"
+      ></thaca-input>
+      <thaca-input
+        formControlName="password"
+        [label]="'system_user.password' | translate"
+        [type]="'password'"
+        [required]="!userForm.value.id"
+      ></thaca-input>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <thaca-dropdown
+        formControlName="tenantId"
+        [label]="'system_user.tenant' | translate"
+        [options]="tenantOptions()"
+      ></thaca-dropdown>
+      <thaca-dropdown
+        formControlName="roleCodes"
+        [label]="'system_user.roles' | translate"
+        [options]="roleOptions()"
+        [multiple]="true"
+      ></thaca-dropdown>
+    </div>
+
+    <div class="flex gap-4">
+       <div class="flex items-center gap-2">
+         <input type="checkbox" formControlName="isActivated" id="isActivated">
+         <label for="isActivated">{{ 'system_user.is_activated' | translate }}</label>
+       </div>
+       <div class="flex items-center gap-2">
+         <input type="checkbox" formControlName="isLocked" id="isLocked">
+         <label for="isLocked">{{ 'system_user.is_locked' | translate }}</label>
+       </div>
+       <div class="flex items-center gap-2">
+         <input type="checkbox" formControlName="isSuperAdmin" id="isSuperAdmin">
+         <label for="isSuperAdmin">{{ 'system_user.is_super_admin' | translate }}</label>
+       </div>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-4 border-t">
+      <thaca-button
+        [label]="'common.button.cancel' | translate"
+        variant="secondary"
+        (click)="userModal.hide()"
+      ></thaca-button>
+      <thaca-button
+        [label]="(userForm.value.id ? 'common.button.update' : 'common.button.create') | translate"
+        variant="primary"
+        type="submit"
+        [disabled]="isUnchanged()"
+      ></thaca-button>
+    </div>
+  </form>
+</thaca-modal>
+
+<thaca-modal
+  #reasonModal
+  [title]="'system_user.modal.reason_title' | translate"
+  [width]="'400px'"
+>
+  <div class="flex flex-col gap-4">
+    <thaca-input
+      [(ngModel)]="lockReason"
+      [label]="'system_user.lock_reason' | translate"
+      [required]="true"
+    ></thaca-input>
+    <div class="flex justify-end gap-2 pt-4 border-t">
+      <thaca-button
+        [label]="'common.button.cancel' | translate"
+        variant="secondary"
+        (click)="reasonModal.hide()"
+      ></thaca-button>
+      <thaca-button
+        [label]="'common.button.confirm' | translate"
+        variant="primary"
+        (click)="confirmLockUnlock()"
+        [disabled]="!lockReason"
+      ></thaca-button>
+    </div>
+  </div>
+</thaca-modal>

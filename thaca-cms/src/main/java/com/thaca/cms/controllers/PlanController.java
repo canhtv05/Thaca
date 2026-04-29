@@ -2,6 +2,7 @@ package com.thaca.cms.controllers;
 
 import com.thaca.cms.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.PlanDTO;
+import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
@@ -39,7 +40,7 @@ public class PlanController {
 
     @PostMapping("/all")
     @FwRequest(name = ServiceMethod.CMS_GET_ALL_PLANS, type = RequestType.PROTECTED)
-    public ResponseEntity<List<PlanDTO>> getAll() {
+    public ResponseEntity<List<PlanInfoPrj>> getAll() {
         return ResponseEntity.ok(process.process(null));
     }
 

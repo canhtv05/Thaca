@@ -48,8 +48,8 @@ public enum ErrorMessage implements ErrorMessageRule {
         "Account not activated",
         "Account not activated"
     ),
-    USERNAME_ALREADY_EXITS(
-        "USERNAME.ALREADY.EXITS",
+    USERNAME_ALREADY_EXISTS(
+        "USERNAME.ALREADY.EXISTS",
         "Tài khoản đã tồn tại",
         "Tài khoản đã tồn tại",
         "Account already exists",

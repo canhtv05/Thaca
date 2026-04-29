@@ -11,7 +11,7 @@ public class UsernameRule<T extends UserDTO> implements ValidateRule<T> {
 
     @Override
     public void validate(T input) {
-        if (StringUtils.isEmpty(input.getUsername())) {
+        if (StringUtils.isBlank(input.getUsername())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         if (input.getUsername().trim().length() < 4 || input.getUsername().trim().length() > 50) {

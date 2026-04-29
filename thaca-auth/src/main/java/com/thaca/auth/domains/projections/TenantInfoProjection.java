@@ -1,6 +1,6 @@
 package com.thaca.auth.domains.projections;
 
-public interface PlanInfoProjection {
+public interface TenantInfoProjection {
     Long getId();
 
     String getName();

@@ -8,6 +8,7 @@ import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.CodeRule;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.PlanDTO;
+import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -139,11 +140,11 @@ public class PlanService {
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_PLANS, type = ModeType.HANDLE)
-    public List<PlanDTO> getAllPlans() {
+    public List<PlanInfoPrj> getAllPlans() {
         return planRepository
             .findAllActivePlansOrderByUpdatedAtDesc()
             .stream()
-            .map(PlanMapper::fromEntity)
+            .map(p -> PlanInfoPrj.builder().id(p.getId()).name(p.getName()).code(p.getCode()).build())
             .collect(Collectors.toList());
     }
 

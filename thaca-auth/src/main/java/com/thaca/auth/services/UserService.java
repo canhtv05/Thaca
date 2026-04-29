@@ -124,7 +124,7 @@ public class UserService {
         );
         validator.validate(request);
         if (userRepository.existsUserByUsername(request.getUsername())) {
-            throw new FwException(ErrorMessage.USERNAME_ALREADY_EXITS);
+            throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
         }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
@@ -176,7 +176,7 @@ public class UserService {
 
     @FwMode(name = ServiceMethod.AUTH_RESET_PASSWORD, type = ModeType.VALIDATE)
     public void validateResetPassword(ResetPasswordReq request) {
-        if (StringUtils.isEmpty(request.getOTP())) {
+        if (StringUtils.isBlank(request.getOTP())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<>(), new PasswordRule<>()));
@@ -207,7 +207,7 @@ public class UserService {
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.AUTH_VERIFY_OTP_FORGOT_PASSWORD, type = ModeType.VALIDATE)
     public void validateVerifyOTPForgotPassword(VerifyOTPReq request) {
-        if (StringUtils.isEmpty(request.getOTP())) {
+        if (StringUtils.isBlank(request.getOTP())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<>()));
