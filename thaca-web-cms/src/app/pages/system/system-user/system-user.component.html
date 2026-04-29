@@ -35,31 +35,39 @@
       ></thaca-dropdown>
 
       <div class="flex items-end gap-2 ml-auto">
-        <thaca-button icon="pi pi-search" (click)="onSearch()">
-          <span class="text-white"> {{ 'common.button.search' | translate }} </span>
-        </thaca-button>
-        <thaca-button variant="primary" icon="pi pi-plus" (click)="onCreate()">
-          <span class="text-white"> {{ 'common.button.create' | translate }} </span>
-        </thaca-button>
-        <thaca-button variant="secondary" icon="pi pi-file-excel" (click)="onExport()">
-          <span class="text-white"> {{ 'common.button.export' | translate }} </span>
-        </thaca-button>
+        <thaca-button
+          [label]="'common.button.search' | translate"
+          icon="pi pi-search"
+          (click)="onSearch()"
+        ></thaca-button>
+        <thaca-button
+          [label]="'common.button.create' | translate"
+          variant="primary"
+          icon="pi pi-plus"
+          (click)="onCreate()"
+        ></thaca-button>
+        <thaca-button
+          [label]="'common.button.export' | translate"
+          variant="secondary"
+          icon="pi pi-file-excel"
+          (click)="onExport()"
+        ></thaca-button>
       </div>
     </div>
   </div>
 
   <div class="thaca-card">
-    <app-data-table [config]="tableConfig" (onAction)="handleAction($event)"></app-data-table>
+    <app-data-table
+      [config]="tableConfig"
+      (onAction)="handleAction($event)"
+    ></app-data-table>
   </div>
 </div>
 
 <thaca-modal
   #userModal
-  [title]="
-    (userForm.value.id ? 'system_user.modal.update_title' : 'system_user.modal.create_title')
-      | translate
-  "
-  size="lg"
+  [title]="(userForm.value.id ? 'system_user.modal.update_title' : 'system_user.modal.create_title') | translate"
+  [width]="'600px'"
 >
   <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
     <div class="grid grid-cols-2 gap-4">
@@ -104,34 +112,41 @@
     </div>
 
     <div class="flex gap-4">
-      <div class="flex items-center gap-2">
-        <input type="checkbox" formControlName="isActivated" id="isActivated" />
-        <label for="isActivated">{{ 'system_user.is_activated' | translate }}</label>
-      </div>
-      <div class="flex items-center gap-2">
-        <input type="checkbox" formControlName="isLocked" id="isLocked" />
-        <label for="isLocked">{{ 'system_user.is_locked' | translate }}</label>
-      </div>
-      <div class="flex items-center gap-2">
-        <input type="checkbox" formControlName="isSuperAdmin" id="isSuperAdmin" />
-        <label for="isSuperAdmin">{{ 'system_user.is_super_admin' | translate }}</label>
-      </div>
+       <div class="flex items-center gap-2">
+         <input type="checkbox" formControlName="isActivated" id="isActivated">
+         <label for="isActivated">{{ 'system_user.is_activated' | translate }}</label>
+       </div>
+       <div class="flex items-center gap-2">
+         <input type="checkbox" formControlName="isLocked" id="isLocked">
+         <label for="isLocked">{{ 'system_user.is_locked' | translate }}</label>
+       </div>
+       <div class="flex items-center gap-2">
+         <input type="checkbox" formControlName="isSuperAdmin" id="isSuperAdmin">
+         <label for="isSuperAdmin">{{ 'system_user.is_super_admin' | translate }}</label>
+       </div>
     </div>
 
     <div class="flex justify-end gap-2 pt-4 border-t">
-      <thaca-button variant="secondary" (click)="userModal.hide()">
-        <span class="text-white"> {{ 'common.button.cancel' | translate }} </span>
-      </thaca-button>
-      <thaca-button variant="primary" type="submit" [disabled]="isUnchanged()">
-        <span class="text-white">
-          {{ (userForm.value.id ? 'common.button.update' : 'common.button.create') | translate }}
-        </span>
-      </thaca-button>
+      <thaca-button
+        [label]="'common.button.cancel' | translate"
+        variant="secondary"
+        (click)="userModal.hide()"
+      ></thaca-button>
+      <thaca-button
+        [label]="(userForm.value.id ? 'common.button.update' : 'common.button.create') | translate"
+        variant="primary"
+        type="submit"
+        [disabled]="isUnchanged()"
+      ></thaca-button>
     </div>
   </form>
 </thaca-modal>
 
-<thaca-modal #reasonModal [title]="'system_user.modal.reason_title' | translate" size="lg">
+<thaca-modal
+  #reasonModal
+  [title]="'system_user.modal.reason_title' | translate"
+  [width]="'400px'"
+>
   <div class="flex flex-col gap-4">
     <thaca-input
       [(ngModel)]="lockReason"
@@ -139,12 +154,17 @@
       [required]="true"
     ></thaca-input>
     <div class="flex justify-end gap-2 pt-4 border-t">
-      <thaca-button variant="secondary" (click)="reasonModal.hide()">
-        <span class="text-white"> {{ 'common.button.cancel' | translate }} </span>
-      </thaca-button>
-      <thaca-button variant="primary" (click)="confirmLockUnlock()" [disabled]="!lockReason">
-        <span class="text-white"> {{ 'common.button.confirm' | translate }} </span>
-      </thaca-button>
+      <thaca-button
+        [label]="'common.button.cancel' | translate"
+        variant="secondary"
+        (click)="reasonModal.hide()"
+      ></thaca-button>
+      <thaca-button
+        [label]="'common.button.confirm' | translate"
+        variant="primary"
+        (click)="confirmLockUnlock()"
+        [disabled]="!lockReason"
+      ></thaca-button>
     </div>
   </div>
 </thaca-modal>

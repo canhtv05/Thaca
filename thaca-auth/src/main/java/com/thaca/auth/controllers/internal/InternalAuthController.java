@@ -1,4 +1,4 @@
-package com.thaca.auth.controllers.internal;
+package com.thaca.auth.internal.controllers;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
