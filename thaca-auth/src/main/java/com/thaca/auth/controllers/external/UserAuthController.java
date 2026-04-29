@@ -1,4 +1,4 @@
-package com.thaca.auth.controller;
+package com.thaca.auth.controllers.external;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.dtos.LoginHistoryDTO;
