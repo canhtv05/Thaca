@@ -12,6 +12,7 @@
     <createSequence sequenceName="user_seq" schemaName="auth" startValue="1000" incrementBy="1"/>
     <createSequence sequenceName="system_user_seq" schemaName="auth" startValue="1000" incrementBy="1"/>
     <createSequence sequenceName="user_login_seq" schemaName="auth" startValue="1" incrementBy="1"/>
+    <createSequence sequenceName="user_lock_history_seq" schemaName="auth" startValue="1" incrementBy="1"/>
   </changeSet>
 
   <changeSet id="init-tables" author="CanhPC">
@@ -123,6 +124,21 @@
         <column name="credential_id" type="varchar(255)"><constraints nullable="false" primaryKey="true"/></column>
         <column name="permission_code" type="varchar(50)"><constraints nullable="false" primaryKey="true"/></column>
         <column name="effect" type="varchar(20)" defaultValue="DENY"><constraints nullable="false"/></column>
+        <column name="created_by" type="VARCHAR(50)"/>
+        <column name="created_at" type="TIMESTAMP"/>
+        <column name="updated_by" type="VARCHAR(50)"/>
+        <column name="updated_at" type="TIMESTAMP"/>
+    </createTable>
+
+    <createTable tableName="user_lock_history" schemaName="auth">
+        <column name="id" type="BIGINT"><constraints primaryKey="true" nullable="false"/></column>
+        <column name="target_user_id" type="BIGINT"><constraints nullable="false"/></column>
+        <column name="action" type="VARCHAR(20)"><constraints nullable="false"/></column>
+        <column name="reason" type="TEXT"/>
+        <column name="created_by" type="VARCHAR(50)"/>
+        <column name="created_at" type="TIMESTAMP"/>
+        <column name="updated_by" type="VARCHAR(50)"/>
+        <column name="updated_at" type="TIMESTAMP"/>
     </createTable>
 
     <createTable schemaName="auth" tableName="login_history">

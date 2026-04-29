@@ -18,17 +18,17 @@ public interface PlanRepository extends JpaRepository<Plan, Long>, JpaSpecificat
     @Query(
         nativeQuery = true,
         value = """
-        SELECT p.* FROM auth.plans p
+        SELECT p.id, p.name, p.code FROM auth.plans p
         WHERE p.status = 'ACTIVE'
         ORDER BY p.updated_at DESC
         """
     )
-    List<Plan> findAllActivePlansOrderByUpdatedAtDesc();
+    List<PlanInfoProjection> findAllActivePlansOrderByUpdatedAtDesc();
 
     @Query(
         nativeQuery = true,
         value = """
-        SELECT p.id, p.name FROM auth.plans p
+        SELECT p.id, p.name, p.code FROM auth.plans p
         ORDER BY p.updated_at DESC
         """
     )

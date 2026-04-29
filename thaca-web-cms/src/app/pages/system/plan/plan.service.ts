@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { IApiPayload, ISearchRequest } from '../../../core/models/common.model';
-import { IPlanDTO } from './plan.model';
+import { IPlanDTO, IPlanInfoPrj } from './plan.model';
 import { createBody, createHeader } from '../../../utils/common.utils';
 import { GlobalHttp } from '../../../core/global/global-http';
 import { AppConfigService } from '../../../core/configs/app-config.service';
@@ -51,12 +51,12 @@ export class PlanService {
     await this.commonService.downloadFile(url, 'thaca-plans-export-{{date}}.xlsx', req || {});
   }
 
-  async getAll(): Promise<IApiPayload<IPlanDTO[]>> {
+  async getAll(): Promise<IApiPayload<IPlanInfoPrj[]>> {
     const payload: IApiPayload<any> = {
       header: createHeader(),
       body: createBody({}),
     };
-    return await GlobalHttp.post<IApiPayload<IPlanDTO[]>>(
+    return await GlobalHttp.post<IApiPayload<IPlanInfoPrj[]>>(
       `${this.config.getApiUrl()}/cms/plans/all`,
       payload,
     );

@@ -11,7 +11,7 @@ public class EmailRule<T extends UserDTO> implements ValidateRule<T> {
 
     @Override
     public void validate(T input) {
-        if (StringUtils.isEmpty(input.getEmail())) {
+        if (StringUtils.isBlank(input.getEmail())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         if (input.getEmail().trim().length() > 255) {

@@ -20,3 +20,9 @@ export interface ITenantDTO {
   version?: number;
   planInfo?: IPlanDTO;
 }
+
+export interface ITenantInfoPrj {
+  id: number;
+  code: string;
+  name: string;
+}

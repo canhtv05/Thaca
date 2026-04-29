@@ -82,6 +82,10 @@
             <column name="credential_id" type="string"/>
             <column name="permission_code" type="string"/>
             <column name="effect" type="string"/>
+            <column name="created_by" type="string"/>
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_by" type="string"/>
+            <column name="updated_at" type="TIMESTAMP"/>
         </loadData>
     </changeSet>
 

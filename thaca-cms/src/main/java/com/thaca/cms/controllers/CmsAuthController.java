@@ -1,7 +1,7 @@
 package com.thaca.cms.controllers;
 
 import com.thaca.cms.constants.ServiceMethod;
-import com.thaca.common.dtos.internal.AuthUserDTO;
+import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.framework.core.annotations.FwRequest;
@@ -28,7 +28,7 @@ public class CmsAuthController {
 
     @PostMapping("/profile")
     @FwRequest(name = ServiceMethod.CMS_GET_PROFILE, type = RequestType.PROTECTED)
-    public ResponseEntity<AuthUserDTO> getProfile() {
+    public ResponseEntity<SystemUserDTO> getProfile() {
         return ResponseEntity.ok(process.process(null));
     }
 }

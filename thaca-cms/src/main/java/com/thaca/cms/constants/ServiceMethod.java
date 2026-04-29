@@ -9,10 +9,18 @@ public class ServiceMethod {
     public static final String CMS_SEARCH_ROLES = "cms.searchRoles";
     public static final String CMS_SEARCH_TENANTS = "cms.searchTenants";
     public static final String CMS_GET_TENANT = "cms.getTenant";
+    public static final String CMS_GET_ALL_TENANTS = "cms.getAllTenants";
     public static final String CMS_CREATE_TENANT = "cms.createTenant";
     public static final String CMS_UPDATE_TENANT = "cms.updateTenant";
     public static final String CMS_LOCK_UNLOCK_TENANT = "cms.lockUnlockTenant";
     public static final String CMS_EXPORT_TENANT = "cms.exportTenant";
+
+    public static final String CMS_SEARCH_SYSTEM_USERS = "cms.searchSystemUsers";
+    public static final String CMS_GET_SYSTEM_USER = "cms.getSystemUser";
+    public static final String CMS_CREATE_SYSTEM_USER = "cms.createSystemUser";
+    public static final String CMS_UPDATE_SYSTEM_USER = "cms.updateSystemUser";
+    public static final String CMS_LOCK_UNLOCK_SYSTEM_USER = "cms.lockUnlockSystemUser";
+    public static final String CMS_EXPORT_SYSTEM_USER = "cms.exportSystemUser";
 
     public static final String CMS_SEARCH_PLANS = "cms.searchPlans";
     public static final String CMS_GET_PLAN = "cms.getPlan";

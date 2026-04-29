@@ -10,3 +10,9 @@ export interface IPlanDTO {
   createdBy?: string;
   updatedBy?: string;
 }
+
+export interface IPlanInfoPrj {
+  id: number;
+  code: string;
+  name: string;
+}

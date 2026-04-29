@@ -10,7 +10,7 @@ public class CodeRule implements ValidateRule<String> {
 
     @Override
     public void validate(String input) {
-        if (StringUtils.isEmpty(input)) {
+        if (StringUtils.isBlank(input)) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         if (input.trim().length() > 255) {

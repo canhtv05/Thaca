@@ -8,7 +8,7 @@ import com.thaca.auth.enums.LoginStatus;
 import com.thaca.auth.repositories.LoginHistoryRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.auth.repositories.UserRepository;
-import com.thaca.common.dtos.internal.AuthUserDTO;
+import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.framework.core.context.FwContextBody;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ChannelType;
@@ -32,7 +32,7 @@ public class LoginHistoryService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveLoginHistory(
-        AuthUserDTO userDTO,
+        SystemUserDTO userDTO,
         HttpServletRequest request,
         LoginStatus status,
         String failureReason,

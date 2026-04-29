@@ -1,6 +1,8 @@
 package com.thaca.common.dtos.internal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AuthUserDTO {
+public class SystemUserDTO {
 
     private Long id;
     private Long tenantId;
@@ -26,4 +28,16 @@ public class AuthUserDTO {
     private Boolean isSuperAdmin;
     private String avatarUrl;
     private Set<String> roles;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<Long> tenantIds;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String lockReason;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<String> roleCodes;
 }

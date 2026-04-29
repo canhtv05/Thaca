@@ -2,6 +2,8 @@ package com.thaca.cms.clients;
 
 import com.thaca.cms.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.*;
+import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.SearchRequest;
@@ -14,7 +16,7 @@ public interface AuthClient {
     AuthenticateRes signIn(LoginReq loginReq);
 
     @FwInternalApi(path = "/cms/profile", name = ServiceMethod.CMS_GET_PROFILE)
-    AuthUserDTO getProfile();
+    SystemUserDTO getProfile();
 
     @FwInternalApi(path = "/cms/users/search", name = ServiceMethod.CMS_SEARCH_USERS)
     SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> search);
@@ -37,6 +39,9 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/tenants/get", name = ServiceMethod.CMS_GET_TENANT)
     TenantDTO getTenant(TenantDTO tenant);
 
+    @FwInternalApi(path = "/cms/tenants/all", name = ServiceMethod.CMS_GET_ALL_TENANTS)
+    List<TenantInfoPrj> getAllTenants();
+
     @FwInternalApi(path = "/cms/tenants/create", name = ServiceMethod.CMS_CREATE_TENANT)
     TenantDTO createTenant(TenantDTO tenant);
 
@@ -45,6 +50,24 @@ public interface AuthClient {
 
     @FwInternalApi(path = "/cms/tenants/lock-unlock", name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT)
     Void lockUnlockTenant(TenantDTO tenant);
+
+    @FwInternalApi(path = "/cms/system-users/search", name = ServiceMethod.CMS_SEARCH_SYSTEM_USERS)
+    SearchResponse<SystemUserDTO> searchSystemUsers(SearchRequest<SystemUserDTO> search);
+
+    @FwInternalApi(path = "/cms/system-users/get", name = ServiceMethod.CMS_GET_SYSTEM_USER)
+    SystemUserDTO getSystemUser(SystemUserDTO user);
+
+    @FwInternalApi(path = "/cms/system-users/create", name = ServiceMethod.CMS_CREATE_SYSTEM_USER)
+    SystemUserDTO createSystemUser(SystemUserDTO user);
+
+    @FwInternalApi(path = "/cms/system-users/update", name = ServiceMethod.CMS_UPDATE_SYSTEM_USER)
+    SystemUserDTO updateSystemUser(SystemUserDTO user);
+
+    @FwInternalApi(path = "/cms/system-users/lock-unlock", name = ServiceMethod.CMS_LOCK_UNLOCK_SYSTEM_USER)
+    Void lockUnlockSystemUser(SystemUserDTO user);
+
+    @FwInternalApi(path = "/cms/system-users/export", name = ServiceMethod.CMS_EXPORT_SYSTEM_USER)
+    byte[] exportSystemUsers(SearchRequest<SystemUserDTO> request);
 
     @FwInternalApi(path = "/cms/tenants/export", name = ServiceMethod.CMS_EXPORT_TENANT)
     byte[] exportTenants(SearchRequest<TenantDTO> request);
@@ -56,7 +79,7 @@ public interface AuthClient {
     PlanDTO getPlan(PlanDTO plan);
 
     @FwInternalApi(path = "/cms/plans/all", name = ServiceMethod.CMS_GET_ALL_PLANS)
-    List<PlanDTO> getAllPlans();
+    List<PlanInfoPrj> getAllPlans();
 
     @FwInternalApi(path = "/cms/plans/create", name = ServiceMethod.CMS_CREATE_PLAN)
     PlanDTO createPlan(PlanDTO plan);

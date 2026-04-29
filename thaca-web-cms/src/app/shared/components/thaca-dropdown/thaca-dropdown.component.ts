@@ -48,6 +48,7 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() label?: string;
   @Input() required = false;
+  @Input() multiple = false;
   @Input() id: string = `thaca-dropdown-${Math.random().toString(36).substring(2, 15)}`;
   /**
    * 'body' → panel được move ra document.body sau khi Angular render,
@@ -90,8 +91,15 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
   private _onTouched: () => void = () => {};
 
   get selectedLabel(): string | null {
-    const opt = this.options.find((o) => o.value === this.value());
-    return opt ? opt.label : null;
+    if (this.multiple) {
+      const vals = this.value();
+      if (!Array.isArray(vals) || vals.length === 0) return null;
+      const labels = this.options.filter((o) => vals.includes(o.value)).map((o) => o.label);
+      return labels.join(', ');
+    } else {
+      const opt = this.options.find((o) => o.value === this.value());
+      return opt ? opt.label : null;
+    }
   }
 
   // ── AfterViewChecked: move panel ra body ngay sau khi Angular render nó ──
@@ -173,11 +181,25 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
 
   select(opt: IDropdownOption) {
     if (opt.disabled || this.disabled || this.readonly) return;
-    this.value.set(opt.value);
-    this.open.set(false);
-    this.removeGlobalListeners();
-    this._onChange(opt.value);
-    this.onChange.emit(opt.value);
+    if (this.multiple) {
+      let current = this.value();
+      if (!Array.isArray(current)) current = [];
+      const index = current.indexOf(opt.value);
+      if (index > -1) {
+        current = current.filter((v: any) => v !== opt.value);
+      } else {
+        current = [...current, opt.value];
+      }
+      this.value.set(current);
+      this._onChange(current);
+      this.onChange.emit(current);
+    } else {
+      this.value.set(opt.value);
+      this.open.set(false);
+      this.removeGlobalListeners();
+      this._onChange(opt.value);
+      this.onChange.emit(opt.value);
+    }
   }
 
   close() {
@@ -189,21 +211,28 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
     event.preventDefault();
     event.stopPropagation();
     if (!this.clearable) return;
-    this.value.set(null);
-    this._onChange(null);
-    this.onChange.emit(null);
+    const val = this.multiple ? [] : null;
+    this.value.set(val);
+    this._onChange(val);
+    this.onChange.emit(val);
     this._onTouched();
-    this.close();
+    if (!this.multiple) this.close();
   }
 
   showClearButton() {
+    const val = this.value();
+    if (this.multiple) {
+      return (
+        this.clearable && !this.disabled && !this.readonly && Array.isArray(val) && val.length > 0
+      );
+    }
     return (
       this.clearable &&
       !this.disabled &&
       !this.readonly &&
-      this.value() !== null &&
-      this.value() !== undefined &&
-      this.value() !== ''
+      val !== null &&
+      val !== undefined &&
+      val !== ''
     );
   }
 
@@ -221,8 +250,20 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
     }
   }
 
+  isSelected(opt: IDropdownOption) {
+    const val = this.value();
+    if (this.multiple) {
+      return Array.isArray(val) && val.includes(opt.value);
+    }
+    return val === opt.value;
+  }
+
   writeValue(val: any) {
-    this.value.set(val);
+    if (this.multiple && !Array.isArray(val)) {
+      this.value.set(val ? [val] : []);
+    } else {
+      this.value.set(val);
+    }
   }
   registerOnChange(fn: any) {
     this._onChange = fn;
