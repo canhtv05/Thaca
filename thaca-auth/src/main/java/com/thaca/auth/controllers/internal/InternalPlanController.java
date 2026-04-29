@@ -1,4 +1,4 @@
-package com.thaca.auth.internal.controllers;
+package com.thaca.auth.controllers.internal;
 
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.PlanDTO;
