@@ -10,6 +10,7 @@ import com.thaca.auth.mappers.RoleMapper;
 import com.thaca.auth.repositories.PermissionRepository;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
+import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.PermissionDTO;
 import com.thaca.common.dtos.internal.RoleDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
@@ -17,6 +18,8 @@ import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.PermissionEffect;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
+import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -43,6 +46,7 @@ public class RolePermissionService {
     public static final String REDIS_ROLE_PERM_PREFIX = "auth:role-permissions:";
 
     @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_ROLES, type = ModeType.HANDLE)
     public SearchResponse<RoleDTO> searchRoles(SearchRequest<RoleDTO> request) {
         Specification<Role> spec = createRoleSpecification(request);
         Page<Role> roles = roleRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
@@ -53,6 +57,7 @@ public class RolePermissionService {
     }
 
     @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_PERMISSIONS, type = ModeType.HANDLE)
     public SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> request) {
         String roleCode = request.getFilter() != null ? request.getFilter().getRoleCode() : null;
         String roleDescription;
