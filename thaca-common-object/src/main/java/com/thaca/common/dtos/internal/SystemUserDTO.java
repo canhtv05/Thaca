@@ -2,21 +2,25 @@ package com.thaca.common.dtos.internal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.thaca.common.dtos.BaseAuditResponse;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Setter
 @Getter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SystemUserDTO {
+public class SystemUserDTO extends BaseAuditResponse {
+
+    private TenantInfoPrj tenantInfo;
 
     private Long id;
     private Long tenantId;

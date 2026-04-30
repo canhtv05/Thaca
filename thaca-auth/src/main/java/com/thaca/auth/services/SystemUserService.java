@@ -5,12 +5,14 @@ import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
+import com.thaca.auth.repositories.TenantRepository;
 import com.thaca.auth.repositories.UserLockHistoryRepository;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.*;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -26,6 +28,7 @@ import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
+import com.thaca.framework.core.utils.DateUtils;
 import jakarta.persistence.criteria.*;
 import java.io.IOException;
 import java.util.*;
@@ -49,6 +52,7 @@ public class SystemUserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserLockHistoryRepository userLockHistoryRepository;
+    private final TenantRepository tenantRepository;
 
     @Transactional(readOnly = true)
     @FwMode(name = InternalMethod.INTERNAL_CMS_GET_PROFILE, type = ModeType.HANDLE)
@@ -56,7 +60,7 @@ public class SystemUserService {
         String username = SecurityUtils.getCurrentUsername();
         return systemCredentialRepository
             .findByUsername(username)
-            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId()))
+            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId(), getTenantOrNull(sc.getTenantId())))
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
@@ -68,10 +72,20 @@ public class SystemUserService {
             spec,
             request.getPage().toPageable(Sort.Direction.DESC, "createdAt")
         );
+        List<Long> tenantIds = result
+            .getContent()
+            .stream()
+            .map(SystemCredential::getTenantId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+        Map<Long, Tenant> tenantMap = tenantIds.isEmpty()
+            ? Collections.emptyMap()
+            : tenantRepository.findAllById(tenantIds).stream().collect(Collectors.toMap(Tenant::getId, t -> t));
         List<SystemUserDTO> data = result
             .getContent()
             .stream()
-            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId()))
+            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId(), tenantMap.get(sc.getTenantId())))
             .collect(Collectors.toList());
         return new SearchResponse<>(data, PaginationResponse.of(result));
     }
@@ -88,7 +102,7 @@ public class SystemUserService {
         SystemCredential sc = systemCredentialRepository
             .findBySystemUser(su)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        return getSystemUserDTO(sc, su, sc.getTenantId());
+        return getSystemUserDTO(sc, su, sc.getTenantId(), getTenantOrNull(sc.getTenantId()));
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
@@ -117,7 +131,7 @@ public class SystemUserService {
             .build();
         sc.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoleCodes())));
         systemCredentialRepository.save(sc);
-        return getSystemUserDTO(sc, su, su.getTenantId());
+        return getSystemUserDTO(sc, su, su.getTenantId(), getTenantOrNull(su.getTenantId()));
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
@@ -154,7 +168,7 @@ public class SystemUserService {
         }
         systemUserRepository.save(su);
         systemCredentialRepository.save(sc);
-        return getSystemUserDTO(sc, su, sc.getTenantId());
+        return getSystemUserDTO(sc, su, sc.getTenantId(), getTenantOrNull(sc.getTenantId()));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -248,9 +262,18 @@ public class SystemUserService {
             spec,
             Sort.by(Sort.Direction.DESC, "createdAt")
         );
+        List<Long> tenantIds = result
+            .stream()
+            .map(SystemCredential::getTenantId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+        Map<Long, Tenant> tenantMap = tenantIds.isEmpty()
+            ? Collections.emptyMap()
+            : tenantRepository.findAllById(tenantIds).stream().collect(Collectors.toMap(Tenant::getId, t -> t));
         List<SystemUserDTO> data = result
             .stream()
-            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId()))
+            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId(), tenantMap.get(sc.getTenantId())))
             .collect(Collectors.toList());
 
         List<Map<String, Object>> rows = new ArrayList<>();
@@ -314,10 +337,25 @@ public class SystemUserService {
             .build();
     }
 
-    private SystemUserDTO getSystemUserDTO(SystemCredential sc, SystemUser su, Long tenantId) {
+    private Tenant getTenantOrNull(Long tenantId) {
+        if (tenantId == null) return null;
+        return tenantRepository.findById(tenantId).orElse(null);
+    }
+
+    private SystemUserDTO getSystemUserDTO(SystemCredential sc, SystemUser su, Long tenantId, Tenant tenant) {
+        TenantInfoPrj tenantInfo = null;
+        if (tenant != null) {
+            tenantInfo = TenantInfoPrj.builder()
+                .id(tenant.getId())
+                .code(tenant.getCode())
+                .name(tenant.getName())
+                .build();
+        }
+
         return SystemUserDTO.builder()
             .id(su.getId())
             .tenantId(tenantId)
+            .tenantInfo(tenantInfo)
             .username(sc.getUsername())
             .email(su.getEmail())
             .fullname(su.getFullname())
@@ -326,6 +364,10 @@ public class SystemUserService {
             .isSuperAdmin(su.getIsSuperAdmin())
             .avatarUrl(su.getAvatarUrl())
             .roles(sc.getRoles().stream().map(Role::getCode).collect(Collectors.toSet()))
+            .createdAt(DateUtils.dateToString(sc.getCreatedAt()))
+            .updatedAt(DateUtils.dateToString(sc.getUpdatedAt()))
+            .createdBy(sc.getCreatedBy())
+            .updatedBy(sc.getUpdatedBy())
             .build();
     }
 }

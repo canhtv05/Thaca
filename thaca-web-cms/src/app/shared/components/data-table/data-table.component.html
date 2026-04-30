@@ -46,7 +46,9 @@
       <ng-template pTemplate="header">
         <tr>
           @if (config.showStt) {
-            <th class="dt-th dt-th--stt">{{ 'common.stt' | translate }}</th>
+            <th class="dt-th dt-th--stt dt-fixed" style="left: 0">
+              {{ 'common.stt' | translate }}
+            </th>
           }
           @for (col of displayColumns(); track col.field) {
             <th
@@ -55,6 +57,7 @@
               [pSortableColumn]="col.sortable ? col.field : undefined"
               [style.width]="col.width"
               [style.textAlign]="col.center ? 'center' : 'left'"
+              [style.left]="col.fixed && config.showStt ? '56px' : col.fixed ? '0' : ''"
             >
               <div
                 class="dt-th-inner w-full"
@@ -78,9 +81,13 @@
 
       <!-- BODY -->
       <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
-        <tr class="dt-row" [class.dt-row--more-active]="activeMoreRow() === rowData" (click)="onRowClick.emit(rowData)">
+        <tr
+          class="dt-row"
+          [class.dt-row--more-active]="activeMoreRow() === rowData"
+          (click)="onRowClick.emit(rowData)"
+        >
           @if (config.showStt) {
-            <td class="dt-td dt-td--stt">
+            <td class="dt-td dt-td--stt dt-fixed" style="left: 0">
               <span class="dt-stt-badge">{{ getIndex(rowIndex) }}</span>
             </td>
           }
@@ -91,6 +98,7 @@
               [class.dt-fixed]="col.fixed"
               [style.width]="col.width"
               [style.textAlign]="col.center ? 'center' : 'left'"
+              [style.left]="col.fixed && config.showStt ? '56px' : col.fixed ? '0' : ''"
             >
               @if (!col.condition || col.condition(rowData)) {
                 @if (col.render) {
@@ -134,8 +142,15 @@
                     [class.dt-act--active]="activeMoreRow() === rowData"
                   >
                     <i class="pi pi-ellipsis-h"></i>
-                    <div class="dt-more-menu" [class.dt-more-menu--active]="activeMoreRow() === rowData" [ngStyle]="moreMenuStyles()">
-                      @for (action of getHiddenActions(rowData); track action.key || action.titleKey) {
+                    <div
+                      class="dt-more-menu"
+                      [class.dt-more-menu--active]="activeMoreRow() === rowData"
+                      [ngStyle]="moreMenuStyles()"
+                    >
+                      @for (
+                        action of getHiddenActions(rowData);
+                        track action.key || action.titleKey
+                      ) {
                         <div
                           class="dt-more-item dt-more-item--{{ action.color || 'default' }}"
                           (click)="handleAction(action, rowData, $event); closeMoreMenu()"

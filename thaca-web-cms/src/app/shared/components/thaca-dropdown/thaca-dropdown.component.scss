@@ -28,6 +28,24 @@
   }
 }
 
+.tdd-portal-panel {
+  &.tdd--sm {
+    --tdd-h: var(--thaca-control-sm-h);
+    --tdd-fs: var(--thaca-control-sm-fs);
+    --tdd-px: var(--thaca-control-sm-px);
+  }
+  &.tdd--md {
+    --tdd-h: var(--thaca-control-md-h);
+    --tdd-fs: var(--thaca-control-md-fs);
+    --tdd-px: var(--thaca-control-md-px);
+  }
+  &.tdd--lg {
+    --tdd-h: var(--thaca-control-lg-h);
+    --tdd-fs: var(--thaca-control-lg-fs);
+    --tdd-px: var(--thaca-control-lg-px);
+  }
+}
+
 .tdd-trigger {
   display: inline-flex;
   align-items: center;

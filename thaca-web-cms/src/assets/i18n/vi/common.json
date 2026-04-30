@@ -48,7 +48,9 @@
       "active": "Hoạt động",
       "inactive": "Không hoạt động",
       "all": "Tất cả",
-      "suspended": "Tạm khóa"
+      "suspended": "Tạm khóa",
+      "lock": "Khóa",
+      "unlock": "Mở khóa"
     },
     "infinite": "Vô thời hạn"
   }

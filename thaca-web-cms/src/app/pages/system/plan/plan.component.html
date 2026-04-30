@@ -42,8 +42,8 @@
     </ng-template>
     <ng-template #headerActions>
       <div class="flex justify-end items-center gap-4">
-        <thaca-button size="md" variant="secondary" (clicked)="onExport()">
-          <span class="text-foreground"> {{ 'common.button.export' | translate }} </span>
+        <thaca-button variant="outline" (clicked)="onExport()">
+          {{ 'common.button.export' | translate }}
         </thaca-button>
         <thaca-button (click)="onCreate()">
           <span class="text-white">{{ 'common.button.create' | translate }}</span>
