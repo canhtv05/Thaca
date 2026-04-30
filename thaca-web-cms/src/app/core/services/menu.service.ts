@@ -45,7 +45,7 @@ export class MenuService {
           path: '/system',
           items: [
             {
-              label: 'menu.admin_accounts',
+              label: 'menu.system_user_management',
               icon: 'pi pi-id-card',
               routerLink: ['/system/system-users'],
             },

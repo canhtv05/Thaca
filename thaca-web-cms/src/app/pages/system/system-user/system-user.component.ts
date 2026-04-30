@@ -67,7 +67,8 @@ export class SystemUserComponent implements OnInit {
 
   breadcrumbItems: MenuItem[] = [
     { icon: 'pi pi-cog', label: 'menu.system_administration' },
-    { icon: 'pi pi-users', label: 'menu.system_user_management' },
+    { icon: 'pi pi-shield', label: 'menu.access_control' },
+    { icon: 'pi pi-id-card', label: 'menu.system_user_management' },
   ];
 
   filter = signal({
