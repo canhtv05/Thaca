@@ -10,7 +10,14 @@
     "search_by_status": "Tìm kiếm theo trạng thái",
     "active": "Hoạt động",
     "inactive": "Không hoạt động",
-    "locked": "Đã khóa",
-    "safe": "Đã kích hoạt"
+    "locked": "Bị khóa",
+    "safe": "An toàn",
+    "username_placeholder": "Nhập tài khoản",
+    "email_placeholder": "Nhập email",
+    "status_placeholder": "Chọn trạng thái",
+    "locked_placeholder": "Chọn trạng thái khóa",
+    "modal": {
+      "create_title": "Thêm người dùng"
+    }
   }
 }

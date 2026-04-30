@@ -44,7 +44,11 @@ export class MenuService {
           icon: 'pi pi-shield',
           path: '/system',
           items: [
-            { label: 'menu.admin_accounts', icon: 'pi pi-id-card', routerLink: ['/system/admins'] },
+            {
+              label: 'menu.admin_accounts',
+              icon: 'pi pi-id-card',
+              routerLink: ['/system/system-users'],
+            },
             {
               label: 'menu.role_permission',
               icon: 'pi pi-key',

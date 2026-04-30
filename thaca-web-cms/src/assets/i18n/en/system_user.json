@@ -1,0 +1,46 @@
+{
+  "system_user": {
+    "username": "Username",
+    "username_placeholder": "Enter username",
+    "fullname": "Full name",
+    "fullname_placeholder": "Enter full name",
+    "email": "Email",
+    "email_placeholder": "Enter email",
+    "password": "Password",
+    "is_activated": "Activated",
+    "is_locked": "Locked",
+    "tenant": "Tenant",
+    "roles": "Roles",
+    "is_super_admin": "Super Admin",
+    "lock_reason": "Lock Reason",
+    "modal": {
+      "create_title": "Create System User",
+      "update_title": "Update System User",
+      "reason_title": "Lock/Unlock Reason"
+    },
+    "popup": {
+      "create": {
+        "title": "Confirm Create",
+        "message": "Are you sure you want to create this user?"
+      },
+      "update": {
+        "title": "Confirm Update",
+        "message": "Are you sure you want to update this user?"
+      }
+    },
+    "toast": {
+      "create": {
+        "titleSuccess": "Create Success",
+        "messageSuccess": "System user created successfully."
+      },
+      "update": {
+        "titleSuccess": "Update Success",
+        "messageSuccess": "System user updated successfully."
+      },
+      "lock_unlock": {
+        "titleSuccess": "Action Success",
+        "messageSuccess": "User lock status changed successfully."
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@ public class ServiceMethod {
     public static final String CMS_AUTHENTICATE = "cms.authenticate";
     public static final String CMS_SEARCH_USERS = "cms.searchUsers";
     public static final String CMS_SEARCH_ROLES = "cms.searchRoles";
+    public static final String CMS_GET_ALL_ROLES = "cms.getAllRoles";
     public static final String CMS_SEARCH_TENANTS = "cms.searchTenants";
     public static final String CMS_GET_TENANT = "cms.getTenant";
     public static final String CMS_GET_ALL_TENANTS = "cms.getAllTenants";
@@ -31,6 +32,7 @@ public class ServiceMethod {
     public static final String CMS_EXPORT_PLAN = "cms.exportPlan";
 
     public static final String CMS_SEARCH_PERMISSIONS = "cms.searchPermissions";
+    public static final String CMS_GET_ALL_PERMISSIONS = "cms.getAllPermissions";
     public static final String CMS_GET_USER_BY_ID = "cms.getUserById";
     public static final String CMS_CREATE_USER = "cms.createUser";
     public static final String CMS_UPDATE_USER = "cms.updateUser";

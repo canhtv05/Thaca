@@ -12,13 +12,13 @@
       >
         <thaca-input
           [(ngModel)]="filter().username"
-          [placeholder]="'user.search_by_username' | translate"
+          [placeholder]="'user.username_placeholder' | translate"
           (keyup.enter)="onSearch()"
           [label]="'user.username' | translate"
         />
         <thaca-input
           [(ngModel)]="filter().email"
-          [placeholder]="'user.search_by_email' | translate"
+          [placeholder]="'user.email_placeholder' | translate"
           (keyup.enter)="onSearch()"
           [label]="'user.email' | translate"
           type="email"
@@ -26,7 +26,7 @@
         <thaca-dropdown
           class="w-full"
           [(ngModel)]="filter().isActivated"
-          [placeholder]="'user.search_by_status' | translate"
+          [placeholder]="'user.status_placeholder' | translate"
           (keyup.enter)="onSearch()"
           [label]="'user.status' | translate"
           [options]="statusOptions"
@@ -34,7 +34,7 @@
         <thaca-dropdown
           class="w-full"
           [(ngModel)]="filter().isLocked"
-          [placeholder]="'user.search_by_locked' | translate"
+          [placeholder]="'user.locked_placeholder' | translate"
           (keyup.enter)="onSearch()"
           [label]="'user.locked' | translate"
           [options]="lockedOptions"
@@ -58,14 +58,10 @@
 </div>
 
 <thaca-modal #createModal title="user.modal.create_title" size="lg">
-  <div>
-    <h2>Create User</h2>
-    <p>Create a new user</p>
-    <form>
-      <div>
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" />
-      </div>
-    </form>
+  <div class="flex flex-col gap-4">
+    <thaca-input
+      [label]="'user.username' | translate"
+      [placeholder]="'user.username_placeholder' | translate"
+    ></thaca-input>
   </div>
 </thaca-modal>

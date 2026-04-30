@@ -5,6 +5,11 @@
     "name": "Tên gói",
     "type": "Loại gói",
     "max_users": "User tối đa",
+    "code_placeholder": "Nhập mã",
+    "name_placeholder": "Nhập tên",
+    "type_placeholder": "Chọn loại",
+    "status_placeholder": "Chọn trạng thái",
+    "max_users_placeholder": "Nhập số lượng user tối đa",
     "status": "Trạng thái",
     "actions": {
       "create": "Thêm gói mới",

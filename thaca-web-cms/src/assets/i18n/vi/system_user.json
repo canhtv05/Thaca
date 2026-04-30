@@ -1,0 +1,46 @@
+{
+  "system_user": {
+    "username": "Tài khoản",
+    "username_placeholder": "Nhập tài khoản",
+    "fullname": "Họ và tên",
+    "fullname_placeholder": "Nhập họ và tên",
+    "email": "Email",
+    "email_placeholder": "Nhập email",
+    "password": "Mật khẩu",
+    "is_activated": "Đã kích hoạt",
+    "is_locked": "Bị khóa",
+    "tenant": "Tenant",
+    "roles": "Vai trò",
+    "is_super_admin": "Quản trị tối cao",
+    "lock_reason": "Lý do khóa",
+    "modal": {
+      "create_title": "Thêm người dùng hệ thống",
+      "update_title": "Cập nhật người dùng",
+      "reason_title": "Lý do khóa/mở khóa"
+    },
+    "popup": {
+      "create": {
+        "title": "Xác nhận thêm mới",
+        "message": "Bạn có chắc chắn muốn thêm người dùng này?"
+      },
+      "update": {
+        "title": "Xác nhận cập nhật",
+        "message": "Bạn có chắc chắn muốn cập nhật người dùng này?"
+      }
+    },
+    "toast": {
+      "create": {
+        "titleSuccess": "Thêm thành công",
+        "messageSuccess": "Người dùng hệ thống đã được tạo."
+      },
+      "update": {
+        "titleSuccess": "Cập nhật thành công",
+        "messageSuccess": "Người dùng hệ thống đã được cập nhật."
+      },
+      "lock_unlock": {
+        "titleSuccess": "Thành công",
+        "messageSuccess": "Đã thay đổi trạng thái khóa người dùng."
+      }
+    }
+  }
+}

@@ -5,6 +5,11 @@
     "name": "Plan Name",
     "type": "Plan Type",
     "max_users": "Max Users",
+    "code_placeholder": "Enter code",
+    "name_placeholder": "Enter name",
+    "type_placeholder": "Select type",
+    "status_placeholder": "Select status",
+    "max_users_placeholder": "Enter max users",
     "status": "Status",
     "actions": {
       "create": "Add New Plan",

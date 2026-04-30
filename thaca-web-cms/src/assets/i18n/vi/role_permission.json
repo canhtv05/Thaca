@@ -3,12 +3,14 @@
     "role": {
       "code": "Mã vai trò",
       "description": "Mô tả vai trò",
-      "search_by_code": "Tìm kiếm theo mã vai trò"
+      "search_by_code": "Tìm kiếm theo mã vai trò",
+      "code_placeholder": "Nhập mã vai trò"
     },
     "permission": {
       "code": "Mã quyền",
       "description": "Mô tả quyền",
-      "search_by_code": "Tìm kiếm theo mã quyền"
+      "search_by_code": "Tìm kiếm theo mã quyền",
+      "code_placeholder": "Nhập mã quyền"
     },
     "actions": {
       "view_permission": "Xem quyền"

@@ -34,6 +34,7 @@
     "system_logs": "System Logs",
     "development_ui": "Development & UI",
     "ui_components": "UI Components",
-    "user_list": "User List"
+    "user_list": "User List",
+    "system_user_management": "System User Management"
   }
 }

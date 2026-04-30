@@ -57,6 +57,12 @@ public class RolePermissionService {
     }
 
     @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_ROLES, type = ModeType.HANDLE)
+    public List<RoleDTO> getAllRoles() {
+        return roleRepository.findAll().stream().map(RoleMapper::fromEntity).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_PERMISSIONS, type = ModeType.HANDLE)
     public SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> request) {
         String roleCode = request.getFilter() != null ? request.getFilter().getRoleCode() : null;
@@ -77,6 +83,16 @@ public class RolePermissionService {
             .map(p -> PermissionMapper.fromEntity(p, roleDescription))
             .toList();
         return new SearchResponse<>(content, PaginationResponse.of(permissions));
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_PERMISSIONS, type = ModeType.HANDLE)
+    public List<PermissionDTO> getAllPermissions() {
+        return permissionRepository
+            .findAll()
+            .stream()
+            .map(p -> PermissionMapper.fromEntity(p, null))
+            .collect(Collectors.toList());
     }
 
     private Specification<Role> createRoleSpecification(SearchRequest<RoleDTO> req) {

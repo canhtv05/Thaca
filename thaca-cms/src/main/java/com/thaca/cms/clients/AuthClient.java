@@ -12,12 +12,18 @@ import com.thaca.framework.core.annotations.FwInternalApi;
 import java.util.List;
 
 public interface AuthClient {
+    // ==========================================
+    // AUTHENTICATION & PROFILE
+    // ==========================================
     @FwInternalApi(path = "/cms/sign-in", name = ServiceMethod.CMS_AUTHENTICATE)
     AuthenticateRes signIn(LoginReq loginReq);
 
     @FwInternalApi(path = "/cms/profile", name = ServiceMethod.CMS_GET_PROFILE)
     SystemUserDTO getProfile();
 
+    // ==========================================
+    // END USER MANAGEMENT
+    // ==========================================
     @FwInternalApi(path = "/cms/users/search", name = ServiceMethod.CMS_SEARCH_USERS)
     SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> search);
 
@@ -27,30 +33,9 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/users/unlock", name = ServiceMethod.CMS_UNLOCK_USER)
     Void unlockUser(Long id);
 
-    @FwInternalApi(path = "/cms/roles/search", name = ServiceMethod.CMS_SEARCH_ROLES)
-    SearchResponse<RoleDTO> searchRoles(SearchRequest<RoleDTO> search);
-
-    @FwInternalApi(path = "/cms/permissions/search", name = ServiceMethod.CMS_SEARCH_PERMISSIONS)
-    SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> search);
-
-    @FwInternalApi(path = "/cms/tenants/search", name = ServiceMethod.CMS_SEARCH_TENANTS)
-    SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> search);
-
-    @FwInternalApi(path = "/cms/tenants/get", name = ServiceMethod.CMS_GET_TENANT)
-    TenantDTO getTenant(TenantDTO tenant);
-
-    @FwInternalApi(path = "/cms/tenants/all", name = ServiceMethod.CMS_GET_ALL_TENANTS)
-    List<TenantInfoPrj> getAllTenants();
-
-    @FwInternalApi(path = "/cms/tenants/create", name = ServiceMethod.CMS_CREATE_TENANT)
-    TenantDTO createTenant(TenantDTO tenant);
-
-    @FwInternalApi(path = "/cms/tenants/update", name = ServiceMethod.CMS_UPDATE_TENANT)
-    TenantDTO updateTenant(TenantDTO tenant);
-
-    @FwInternalApi(path = "/cms/tenants/lock-unlock", name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT)
-    Void lockUnlockTenant(TenantDTO tenant);
-
+    // ==========================================
+    // SYSTEM USER MANAGEMENT
+    // ==========================================
     @FwInternalApi(path = "/cms/system-users/search", name = ServiceMethod.CMS_SEARCH_SYSTEM_USERS)
     SearchResponse<SystemUserDTO> searchSystemUsers(SearchRequest<SystemUserDTO> search);
 
@@ -69,9 +54,51 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/system-users/export", name = ServiceMethod.CMS_EXPORT_SYSTEM_USER)
     byte[] exportSystemUsers(SearchRequest<SystemUserDTO> request);
 
+    // ==========================================
+    // ROLE MANAGEMENT
+    // ==========================================
+    @FwInternalApi(path = "/cms/roles/search", name = ServiceMethod.CMS_SEARCH_ROLES)
+    SearchResponse<RoleDTO> searchRoles(SearchRequest<RoleDTO> search);
+
+    @FwInternalApi(path = "/cms/roles/all", name = ServiceMethod.CMS_GET_ALL_ROLES)
+    List<RoleDTO> getAllRoles();
+
+    // ==========================================
+    // PERMISSION MANAGEMENT
+    // ==========================================
+    @FwInternalApi(path = "/cms/permissions/search", name = ServiceMethod.CMS_SEARCH_PERMISSIONS)
+    SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> search);
+
+    @FwInternalApi(path = "/cms/permissions/all", name = ServiceMethod.CMS_GET_ALL_PERMISSIONS)
+    List<PermissionDTO> getAllPermissions();
+
+    // ==========================================
+    // TENANT MANAGEMENT
+    // ==========================================
+    @FwInternalApi(path = "/cms/tenants/search", name = ServiceMethod.CMS_SEARCH_TENANTS)
+    SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> search);
+
+    @FwInternalApi(path = "/cms/tenants/get", name = ServiceMethod.CMS_GET_TENANT)
+    TenantDTO getTenant(TenantDTO tenant);
+
+    @FwInternalApi(path = "/cms/tenants/all", name = ServiceMethod.CMS_GET_ALL_TENANTS)
+    List<TenantInfoPrj> getAllTenants();
+
+    @FwInternalApi(path = "/cms/tenants/create", name = ServiceMethod.CMS_CREATE_TENANT)
+    TenantDTO createTenant(TenantDTO tenant);
+
+    @FwInternalApi(path = "/cms/tenants/update", name = ServiceMethod.CMS_UPDATE_TENANT)
+    TenantDTO updateTenant(TenantDTO tenant);
+
+    @FwInternalApi(path = "/cms/tenants/lock-unlock", name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT)
+    Void lockUnlockTenant(TenantDTO tenant);
+
     @FwInternalApi(path = "/cms/tenants/export", name = ServiceMethod.CMS_EXPORT_TENANT)
     byte[] exportTenants(SearchRequest<TenantDTO> request);
 
+    // ==========================================
+    // PLAN MANAGEMENT
+    // ==========================================
     @FwInternalApi(path = "/cms/plans/search", name = ServiceMethod.CMS_SEARCH_PLANS)
     SearchResponse<PlanDTO> searchPlans(SearchRequest<PlanDTO> search);
 

@@ -3,22 +3,22 @@ import { IApiPayload } from '../../../core/models/common.model';
 import { AppConfigService } from '../../../core/configs/app-config.service';
 import { GlobalHttp } from '../../../core/global/global-http';
 import { createBody, createHeader } from '../../../utils/common.utils';
-import { IRoleDTO } from './role.model';
+import { IPermissionDTO } from './permission.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class RoleService {
+export class PermissionService {
   private readonly config = inject(AppConfigService);
 
-  async getAllRoles(): Promise<IApiPayload<IRoleDTO[]>> {
+  async getAllPermissions(): Promise<IApiPayload<IPermissionDTO[]>> {
     const payload: IApiPayload<any> = {
       header: createHeader(),
       body: createBody({}),
     };
 
-    return await GlobalHttp.post<IApiPayload<IRoleDTO[]>>(
-      `${this.config.getApiUrl()}/cms/roles/all`,
+    return await GlobalHttp.post<IApiPayload<IPermissionDTO[]>>(
+      `${this.config.getApiUrl()}/cms/permissions/all`,
       payload,
     );
   }
