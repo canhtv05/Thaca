@@ -1,3 +1,5 @@
+import { ITenantInfoPrj } from '../tenant/tenant.model';
+
 export interface ISystemUserDTO {
   id?: number;
   tenantId?: number;
@@ -15,4 +17,5 @@ export interface ISystemUserDTO {
   lockReason?: string;
   createdAt?: string;
   updatedAt?: string;
+  tenantInfo?: ITenantInfoPrj;
 }

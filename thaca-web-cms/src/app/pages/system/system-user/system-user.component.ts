@@ -116,6 +116,16 @@ export class SystemUserComponent implements OnInit {
       { field: 'fullname', header: 'system_user.fullname', sortable: true },
       { field: 'email', header: 'system_user.email', sortable: true },
       {
+        field: 'tenantInfo',
+        header: 'system_user.tenant',
+        center: true,
+        render: (row: ISystemUserDTO) => {
+          return row.tenantInfo
+            ? `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${row.tenantInfo.code} - ${row.tenantInfo.name}</span>`
+            : '';
+        },
+      },
+      {
         field: 'isActivated',
         header: 'system_user.is_activated',
         render: (row: ISystemUserDTO) => {

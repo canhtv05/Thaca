@@ -11,8 +11,8 @@ import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.*;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
+import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.UserDTO;
-import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -24,7 +24,6 @@ import com.thaca.common.excel.schema.ExcelDataType;
 import com.thaca.common.excel.schema.ExcelSchema;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.context.FwContextHeader;
-import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
@@ -68,6 +67,17 @@ public class SystemUserService {
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_SYSTEM_USERS, type = ModeType.HANDLE)
     public SearchResponse<SystemUserDTO> searchSystemUsers(SearchRequest<SystemUserDTO> request) {
         Specification<SystemCredential> spec = createSpecification(request);
+
+        if (
+            request.getPage() != null &&
+            org.apache.commons.lang3.StringUtils.isNotBlank(request.getPage().getSortField())
+        ) {
+            String sf = request.getPage().getSortField();
+            if (Set.of("email", "fullname", "isActivated", "isLocked").contains(sf)) {
+                request.getPage().setSortField("systemUser." + sf);
+            }
+        }
+
         Page<SystemCredential> result = systemCredentialRepository.findAll(
             spec,
             request.getPage().toPageable(Sort.Direction.DESC, "createdAt")
@@ -257,11 +267,21 @@ public class SystemUserService {
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_SYSTEM_USER, type = ModeType.HANDLE)
     public byte[] exportSystemUsers(SearchRequest<SystemUserDTO> request) throws IOException {
+        boolean isVietnamese = "vi".equalsIgnoreCase(FwContextHeader.get().getLanguage());
         Specification<SystemCredential> spec = createSpecification(request);
-        List<SystemCredential> result = systemCredentialRepository.findAll(
-            spec,
-            Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        if (request.getPage() != null) {
+            if (StringUtils.isNotBlank(request.getPage().getSortField())) {
+                String sf = request.getPage().getSortField();
+                if (Set.of("email", "fullname", "isActivated", "isLocked").contains(sf)) {
+                    request.getPage().setSortField("systemUser." + sf);
+                }
+            }
+            sort = request.getPage().toPageable(Sort.Direction.DESC, "createdAt").getSort();
+        }
+
+        List<SystemCredential> result = systemCredentialRepository.findAll(spec, sort);
         List<Long> tenantIds = result
             .stream()
             .map(SystemCredential::getTenantId)
@@ -277,9 +297,6 @@ public class SystemUserService {
             .collect(Collectors.toList());
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        ApiHeader header = FwContextHeader.get();
-        boolean isVietnamese = "vi".equals(header.getLanguage());
-
         for (SystemUserDTO user : data) {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("username", user.getUsername());
@@ -343,12 +360,16 @@ public class SystemUserService {
     }
 
     private SystemUserDTO getSystemUserDTO(SystemCredential sc, SystemUser su, Long tenantId, Tenant tenant) {
-        TenantInfoPrj tenantInfo = null;
+        TenantDTO tenantInfo = null;
         if (tenant != null) {
-            tenantInfo = TenantInfoPrj.builder()
+            tenantInfo = TenantDTO.builder()
                 .id(tenant.getId())
                 .code(tenant.getCode())
                 .name(tenant.getName())
+                .domain(tenant.getDomain())
+                .status(tenant.getStatus())
+                .contactEmail(tenant.getContactEmail())
+                .logoUrl(tenant.getLogoUrl())
                 .build();
         }
 

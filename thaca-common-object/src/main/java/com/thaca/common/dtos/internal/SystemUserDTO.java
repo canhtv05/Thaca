@@ -3,7 +3,6 @@ package com.thaca.common.dtos.internal;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.thaca.common.dtos.BaseAuditResponse;
-import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -20,8 +19,6 @@ import lombok.experimental.SuperBuilder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SystemUserDTO extends BaseAuditResponse {
 
-    private TenantInfoPrj tenantInfo;
-
     private Long id;
     private Long tenantId;
     private String username;
@@ -32,6 +29,7 @@ public class SystemUserDTO extends BaseAuditResponse {
     private Boolean isSuperAdmin;
     private String avatarUrl;
     private Set<String> roles;
+    private TenantDTO tenantInfo;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
