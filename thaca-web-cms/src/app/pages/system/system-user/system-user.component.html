@@ -1,5 +1,8 @@
 <div class="page-container flex flex-col gap-4">
-  <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+  <app-breadcrumb
+    [title]="'menu.system_user_management'"
+    [items]="breadcrumbItems"
+  ></app-breadcrumb>
   <app-data-table [config]="tableConfig" (onAction)="handleAction($event)">
     <ng-template #searchTemplate>
       <div
