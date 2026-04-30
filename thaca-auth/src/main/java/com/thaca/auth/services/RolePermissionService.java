@@ -13,6 +13,7 @@ import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.PermissionDTO;
 import com.thaca.common.dtos.internal.RoleDTO;
+import com.thaca.common.dtos.internal.req.RoleCodesReq;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -80,7 +81,7 @@ public class RolePermissionService {
         List<PermissionDTO> content = permissions
             .getContent()
             .stream()
-            .map(p -> PermissionMapper.fromEntity(p, roleDescription))
+            .map(p -> PermissionMapper.fromEntity(p, roleCode, roleDescription))
             .toList();
         return new SearchResponse<>(content, PaginationResponse.of(permissions));
     }
@@ -91,8 +92,26 @@ public class RolePermissionService {
         return permissionRepository
             .findAll()
             .stream()
-            .map(p -> PermissionMapper.fromEntity(p, null))
+            .map(p -> PermissionMapper.fromEntity(p, null, null))
             .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_PERMISSIONS_BY_ROLES, type = ModeType.HANDLE)
+    public List<PermissionDTO> getPermissionsByRoles(RoleCodesReq request) {
+        if (request == null || request.getRoleCodes() == null || request.getRoleCodes().isEmpty()) {
+            return new ArrayList<>();
+        }
+        return roleRepository
+            .findAllById(request.getRoleCodes())
+            .stream()
+            .flatMap(r ->
+                r
+                    .getPermissions()
+                    .stream()
+                    .map(p -> PermissionMapper.fromEntity(p, r.getCode(), r.getDescription()))
+            )
+            .toList();
     }
 
     private Specification<Role> createRoleSpecification(SearchRequest<RoleDTO> req) {

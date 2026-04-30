@@ -2,6 +2,7 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.domains.*;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.repositories.PermissionRepository;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
@@ -18,6 +19,7 @@ import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.AccountStatus;
 import com.thaca.common.enums.CommonErrorMessage;
+import com.thaca.common.enums.PermissionEffect;
 import com.thaca.common.excel.ExcelEngine;
 import com.thaca.common.excel.schema.ExcelColumn;
 import com.thaca.common.excel.schema.ExcelDataType;
@@ -49,6 +51,7 @@ public class SystemUserService {
     private final SystemCredentialRepository systemCredentialRepository;
     private final SystemUserRepository systemUserRepository;
     private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserLockHistoryRepository userLockHistoryRepository;
     private final TenantRepository tenantRepository;
@@ -78,6 +81,7 @@ public class SystemUserService {
             }
         }
 
+        assert request.getPage() != null;
         Page<SystemCredential> result = systemCredentialRepository.findAll(
             spec,
             request.getPage().toPageable(Sort.Direction.DESC, "createdAt")
@@ -88,7 +92,7 @@ public class SystemUserService {
             .map(SystemCredential::getTenantId)
             .filter(Objects::nonNull)
             .distinct()
-            .collect(Collectors.toList());
+            .toList();
         Map<Long, Tenant> tenantMap = tenantIds.isEmpty()
             ? Collections.emptyMap()
             : tenantRepository.findAllById(tenantIds).stream().collect(Collectors.toMap(Tenant::getId, t -> t));
@@ -96,7 +100,7 @@ public class SystemUserService {
             .getContent()
             .stream()
             .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId(), tenantMap.get(sc.getTenantId())))
-            .collect(Collectors.toList());
+            .toList();
         return new SearchResponse<>(data, PaginationResponse.of(result));
     }
 
@@ -140,7 +144,21 @@ public class SystemUserService {
             .password(passwordEncoder.encode(request.getPassword()))
             .build();
         sc.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoleCodes())));
+        if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
+            grantPermission(request, sc);
+        }
         systemCredentialRepository.save(sc);
+
+        if (Boolean.TRUE.equals(su.getIsLocked())) {
+            userLockHistoryRepository.save(
+                UserLockHistory.builder()
+                    .targetUserId(su.getId())
+                    .action(AccountStatus.LOCK)
+                    .reason(StringUtils.defaultIfBlank(request.getLockReason(), "Initial lock"))
+                    .build()
+            );
+        }
+
         return getSystemUserDTO(sc, su, su.getTenantId(), getTenantOrNull(su.getTenantId()));
     }
 
@@ -176,8 +194,35 @@ public class SystemUserService {
         if (isSuperAdmin && !CollectionUtils.isEmpty(request.getRoleCodes())) {
             sc.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoleCodes())));
         }
+        if (isSuperAdmin && request.getPermissions() != null) {
+            sc.getCredentialPermissions().clear();
+            grantPermission(request, sc);
+        }
+
+        boolean oldLocked = Boolean.TRUE.equals(su.getIsLocked());
+        boolean newLocked = Boolean.TRUE.equals(request.getIsLocked());
+
         systemUserRepository.save(su);
         systemCredentialRepository.save(sc);
+
+        if (isSuperAdmin && !oldLocked && newLocked) {
+            userLockHistoryRepository.save(
+                UserLockHistory.builder()
+                    .targetUserId(su.getId())
+                    .action(AccountStatus.LOCK)
+                    .reason(request.getLockReason())
+                    .build()
+            );
+        } else if (isSuperAdmin && oldLocked && !newLocked) {
+            userLockHistoryRepository.save(
+                UserLockHistory.builder()
+                    .targetUserId(su.getId())
+                    .action(AccountStatus.UNLOCK)
+                    .reason(request.getLockReason())
+                    .build()
+            );
+        }
+
         return getSystemUserDTO(sc, su, sc.getTenantId(), getTenantOrNull(sc.getTenantId()));
     }
 
@@ -287,14 +332,14 @@ public class SystemUserService {
             .map(SystemCredential::getTenantId)
             .filter(Objects::nonNull)
             .distinct()
-            .collect(Collectors.toList());
+            .toList();
         Map<Long, Tenant> tenantMap = tenantIds.isEmpty()
             ? Collections.emptyMap()
             : tenantRepository.findAllById(tenantIds).stream().collect(Collectors.toMap(Tenant::getId, t -> t));
         List<SystemUserDTO> data = result
             .stream()
             .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId(), tenantMap.get(sc.getTenantId())))
-            .collect(Collectors.toList());
+            .toList();
 
         List<Map<String, Object>> rows = new ArrayList<>();
         for (SystemUserDTO user : data) {
@@ -385,10 +430,43 @@ public class SystemUserService {
             .isSuperAdmin(su.getIsSuperAdmin())
             .avatarUrl(su.getAvatarUrl())
             .roles(sc.getRoles().stream().map(Role::getCode).collect(Collectors.toSet()))
+            .permissions(
+                sc
+                    .getCredentialPermissions()
+                    .stream()
+                    .collect(
+                        Collectors.toMap(
+                            scp -> scp.getPermission().getCode(),
+                            scp -> scp.getEffect() == PermissionEffect.GRANT
+                        )
+                    )
+            )
             .createdAt(DateUtils.dateToString(sc.getCreatedAt()))
             .updatedAt(DateUtils.dateToString(sc.getUpdatedAt()))
             .createdBy(sc.getCreatedBy())
             .updatedBy(sc.getUpdatedBy())
             .build();
+    }
+
+    private void grantPermission(SystemUserDTO request, SystemCredential sc) {
+        Set<String> permissionCodes = request.getPermissions().keySet();
+        Map<String, Permission> permissionMap = permissionRepository
+            .findAllById(permissionCodes)
+            .stream()
+            .collect(Collectors.toMap(Permission::getCode, p -> p));
+
+        for (Map.Entry<String, Boolean> entry : request.getPermissions().entrySet()) {
+            Permission perm = permissionMap.get(entry.getKey());
+            if (perm != null) {
+                SystemCredentialPermission scp = new SystemCredentialPermission();
+                scp.setId(
+                    new SystemCredentialPermission.SystemCredentialPermissionId(sc.getUsername(), entry.getKey())
+                );
+                scp.setCredential(sc);
+                scp.setPermission(perm);
+                scp.setEffect(Boolean.TRUE.equals(entry.getValue()) ? PermissionEffect.GRANT : PermissionEffect.DENY);
+                sc.getCredentialPermissions().add(scp);
+            }
+        }
     }
 }

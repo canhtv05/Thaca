@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -27,6 +27,7 @@ import { GlobalToast } from '../../../core/global/global-toast';
 import { isLoading } from '../../../core/stores/app.store';
 import { IRoleDTO } from '../role/role.model';
 import { ITenantInfoPrj } from '../tenant/tenant.model';
+import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
 
 @Component({
   selector: 'app-system-user',
@@ -43,6 +44,7 @@ import { ITenantInfoPrj } from '../tenant/tenant.model';
     ThacaDropdownComponent,
     ThacaModalComponent,
     ValidationMessageComponent,
+    ThacaTextareaComponent,
   ],
   templateUrl: './system-user.component.html',
 })
@@ -58,8 +60,29 @@ export class SystemUserComponent implements OnInit {
   private originalValue: any;
   roleOptions = signal<IDropdownOption[]>([]);
   tenantOptions = signal<IDropdownOption[]>([]);
+  availablePermissions = signal<any[]>([]);
+  grantedPermissions = signal<Set<string>>(new Set());
   lockReason = '';
   private selectedRow: any;
+  private editingPermissions: { [key: string]: boolean } | null = null;
+
+  groupedPermissions = computed(() => {
+    const perms = this.availablePermissions();
+    const uniqueMap = new Map<string, any>();
+
+    perms.forEach((p) => {
+      if (!uniqueMap.has(p.code)) {
+        uniqueMap.set(p.code, { ...p, roles: [p.roleCode] });
+      } else {
+        const existing = uniqueMap.get(p.code);
+        if (p.roleCode && !existing.roles.includes(p.roleCode)) {
+          existing.roles.push(p.roleCode);
+        }
+      }
+    });
+
+    return Array.from(uniqueMap.values());
+  });
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
   @ViewChild('userModal') userModal!: ThacaModalComponent;
@@ -102,7 +125,9 @@ export class SystemUserComponent implements OnInit {
     isActivated: [true],
     isLocked: [false],
     isSuperAdmin: [false],
+    avatarUrl: [''],
     roleCodes: [[] as string[]],
+    lockReason: [''],
   });
 
   tableConfig: ITableConfig = {
@@ -122,6 +147,21 @@ export class SystemUserComponent implements OnInit {
         render: (row: ISystemUserDTO) => {
           return row.tenantInfo
             ? `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${row.tenantInfo.code} - ${row.tenantInfo.name}</span>`
+            : '';
+        },
+      },
+      {
+        field: 'roles',
+        header: 'system_user.roles',
+        center: true,
+        render: (row: ISystemUserDTO) => {
+          return row.roles
+            ? `<div class="flex flex-wrap gap-2">${row.roles
+                .map(
+                  (role: string) =>
+                    `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${role}</span>`,
+                )
+                .join(' ')}</div>`
             : '';
         },
       },
@@ -173,6 +213,57 @@ export class SystemUserComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     Promise.all([this.loadRoles(), this.loadTenants()]);
+
+    this.userForm.get('roleCodes')?.valueChanges.subscribe(async (roles) => {
+      if (roles && roles.length > 0) {
+        const res = await this.roleService.getPermissionsByRoles(roles);
+        if (res.body.status === 'OK' && res.body.data) {
+          const perms = res.body.data;
+          this.availablePermissions.set(perms);
+
+          const granted = new Set<string>();
+          if (this.editingPermissions) {
+            perms.forEach((p: any) => {
+              if (this.editingPermissions![p.code] !== false) {
+                granted.add(p.code);
+              }
+            });
+            this.editingPermissions = null;
+          } else {
+            perms.forEach((p: any) => granted.add(p.code));
+          }
+          this.grantedPermissions.set(granted);
+        }
+      } else {
+        this.availablePermissions.set([]);
+        this.grantedPermissions.set(new Set());
+      }
+    });
+
+    this.userForm.get('isLocked')?.valueChanges.subscribe((locked) => {
+      const reasonCtrl = this.userForm.get('lockReason');
+      if (locked) {
+        reasonCtrl?.setValidators([Validators.required]);
+      } else {
+        reasonCtrl?.clearValidators();
+      }
+      reasonCtrl?.updateValueAndValidity();
+    });
+  }
+
+  isPermissionGranted(code: string): boolean {
+    return this.grantedPermissions().has(code);
+  }
+
+  togglePermission(code: string, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const current = new Set(this.grantedPermissions());
+    if (checked) {
+      current.add(code);
+    } else {
+      current.delete(code);
+    }
+    this.grantedPermissions.set(current);
   }
 
   async loadRoles() {
@@ -204,7 +295,13 @@ export class SystemUserComponent implements OnInit {
   }
 
   onCreate() {
-    this.userForm.reset({ isActivated: true, isLocked: false, isSuperAdmin: false, roleCodes: [] });
+    this.userForm.reset({
+      isActivated: true,
+      isLocked: false,
+      isSuperAdmin: false,
+      roleCodes: [],
+      avatarUrl: '',
+    });
     this.userForm.get('username')?.enable();
     this.userForm.get('password')?.setValidators([Validators.required]);
     this.userForm.get('password')?.updateValueAndValidity();
@@ -214,6 +311,7 @@ export class SystemUserComponent implements OnInit {
 
   handleAction(event: ITableActionEvent) {
     if (event.key === 'edit') {
+      this.editingPermissions = event.row.permissions || {};
       this.userForm.patchValue({
         ...event.row,
         roleCodes: event.row.roles || [],
@@ -255,6 +353,12 @@ export class SystemUserComponent implements OnInit {
   async onSubmit() {
     if (this.isUnchanged()) return;
     const req = this.userForm.getRawValue() as any;
+
+    req.permissions = {};
+    this.availablePermissions().forEach((p) => {
+      req.permissions[p.code] = this.grantedPermissions().has(p.code);
+    });
+
     const isUpdate = !!this.userForm.value.id;
 
     const confirmed = await Popup.confirm({

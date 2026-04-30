@@ -5,6 +5,7 @@ import com.thaca.common.dtos.internal.*;
 import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
 import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.internal.req.LoginReq;
+import com.thaca.common.dtos.internal.req.RoleCodesReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -71,6 +72,9 @@ public interface AuthClient {
 
     @FwInternalApi(path = "/cms/permissions/all", name = ServiceMethod.CMS_GET_ALL_PERMISSIONS)
     List<PermissionDTO> getAllPermissions();
+
+    @FwInternalApi(path = "/cms/permissions/by-roles", name = ServiceMethod.CMS_GET_PERMISSIONS_BY_ROLES)
+    List<PermissionDTO> getPermissionsByRoles(RoleCodesReq request);
 
     // ==========================================
     // TENANT MANAGEMENT

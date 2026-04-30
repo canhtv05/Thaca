@@ -3,6 +3,7 @@ package com.thaca.auth.controllers.internal;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.PermissionDTO;
 import com.thaca.common.dtos.internal.RoleDTO;
+import com.thaca.common.dtos.internal.req.RoleCodesReq;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
@@ -44,5 +45,11 @@ public class InternalRolePermissionController {
     @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_ALL_PERMISSIONS, type = RequestType.INTERNAL)
     public ResponseEntity<List<PermissionDTO>> getAllPermissions() {
         return ResponseEntity.ok(process.process(null));
+    }
+
+    @PostMapping("/cms/permissions/by-roles")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_PERMISSIONS_BY_ROLES, type = RequestType.INTERNAL)
+    public ResponseEntity<List<PermissionDTO>> getPermissionsByRoles(RoleCodesReq request) {
+        return ResponseEntity.ok(process.process(request));
     }
 }
