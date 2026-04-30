@@ -53,6 +53,7 @@ export class PermissionComponent implements OnInit {
   });
 
   breadcrumbItems: MenuItem[] = [
+    { icon: 'pi pi-cog', label: 'menu.system_administration' },
     { icon: 'pi pi-shield', label: 'menu.access_control' },
     { icon: 'pi pi-key', label: 'menu.role_permission', routerLink: '/system/role-permission' },
     { icon: 'pi pi-check-circle', label: 'menu.permission' },

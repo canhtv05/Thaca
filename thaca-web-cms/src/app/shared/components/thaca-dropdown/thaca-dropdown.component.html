@@ -50,7 +50,11 @@
   }
 
   @if (open() && appendTo === 'body') {
-    <div class="tdd-panel tdd-portal-panel" [ngStyle]="panelStyle()">
+    <div class="tdd-panel tdd-portal-panel" [ngStyle]="panelStyle()"
+      [class.tdd--sm]="size === 'sm'"
+      [class.tdd--md]="size === 'md'"
+      [class.tdd--lg]="size === 'lg'"
+    >
       <ng-container *ngTemplateOutlet="optionList" />
     </div>
   }

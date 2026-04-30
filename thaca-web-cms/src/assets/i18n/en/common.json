@@ -48,7 +48,9 @@
       "active": "Active",
       "inactive": "Inactive",
       "all": "All",
-      "suspended": "Suspended"
+      "suspended": "Suspended",
+      "lock": "Lock",
+      "unlock": "Unlock"
     },
     "infinite": "Infinite"
   }

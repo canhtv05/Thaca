@@ -67,7 +67,8 @@ export class SystemUserComponent implements OnInit {
 
   breadcrumbItems: MenuItem[] = [
     { icon: 'pi pi-cog', label: 'menu.system_administration' },
-    { icon: 'pi pi-users', label: 'menu.system_user_management' },
+    { icon: 'pi pi-shield', label: 'menu.access_control' },
+    { icon: 'pi pi-id-card', label: 'menu.system_user_management' },
   ];
 
   filter = signal({
@@ -80,14 +81,15 @@ export class SystemUserComponent implements OnInit {
 
   activatedOptions: IDropdownOption[] = [
     { label: 'common.status.all', value: null },
-    { label: 'common.status.activated', value: true },
-    { label: 'common.status.not_activated', value: false },
+    { label: 'common.status.active', value: 'ACTIVE' },
+    { label: 'common.status.inactive', value: 'NOT_ACTIVATED' },
   ];
 
   lockedOptions: IDropdownOption[] = [
     { label: 'common.status.all', value: null },
-    { label: 'common.status.locked', value: true },
-    { label: 'common.status.unlocked', value: false },
+    { label: 'common.status.lock', value: 'LOCK' },
+    { label: 'common.status.unlock', value: 'UNLOCK' },
+    { label: 'common.status.suspended', value: 'SUSPENDED' },
   ];
 
   userForm = this.fb.group({
@@ -114,14 +116,24 @@ export class SystemUserComponent implements OnInit {
       { field: 'fullname', header: 'system_user.fullname', sortable: true },
       { field: 'email', header: 'system_user.email', sortable: true },
       {
+        field: 'tenantInfo',
+        header: 'system_user.tenant',
+        center: true,
+        render: (row: ISystemUserDTO) => {
+          return row.tenantInfo
+            ? `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${row.tenantInfo.code} - ${row.tenantInfo.name}</span>`
+            : '';
+        },
+      },
+      {
         field: 'isActivated',
         header: 'system_user.is_activated',
         render: (row: ISystemUserDTO) => {
           const variant = row.isActivated ? 'success' : 'danger';
           const label = this.translate.instant(
-            row.isActivated ? 'common.status.activated' : 'common.status.not_activated',
+            row.isActivated ? 'common.status.active' : 'common.status.inactive',
           );
-          return `<span class="thaca-badge thaca-badge-${variant}">${label}</span>`;
+          return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
         },
       },
       {
@@ -130,14 +142,15 @@ export class SystemUserComponent implements OnInit {
         render: (row: ISystemUserDTO) => {
           const variant = row.isLocked ? 'danger' : 'success';
           const label = this.translate.instant(
-            row.isLocked ? 'common.status.locked' : 'common.status.unlocked',
+            row.isLocked ? 'common.status.lock' : 'common.status.unlock',
           );
-          return `<span class="thaca-badge thaca-badge-${variant}">${label}</span>`;
+          return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
         },
       },
       {
         field: 'isSuperAdmin',
         header: 'system_user.is_super_admin',
+        center: true,
         render: (row: ISystemUserDTO) => {
           return row.isSuperAdmin ? `<i class="pi pi-check-circle text-primary"></i>` : '';
         },
@@ -159,8 +172,7 @@ export class SystemUserComponent implements OnInit {
   };
 
   async ngOnInit(): Promise<void> {
-    this.loadRoles();
-    this.loadTenants();
+    Promise.all([this.loadRoles(), this.loadTenants()]);
   }
 
   async loadRoles() {

@@ -37,6 +37,7 @@ export class RoleComponent {
   @ViewChild(DataTableComponent) table!: DataTableComponent;
 
   breadcrumbItems: MenuItem[] = [
+    { icon: 'pi pi-cog', label: 'menu.system_administration' },
     { icon: 'pi pi-shield', label: 'menu.access_control' },
     { icon: 'pi pi-key', label: 'menu.role_permission' },
   ];
