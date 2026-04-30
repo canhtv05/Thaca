@@ -59,9 +59,10 @@
     (userForm.value.id ? 'system_user.modal.update_title' : 'system_user.modal.create_title')
       | translate
   "
+  [formGroup]="userForm"
   size="lg"
 >
-  <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+  <div class="flex flex-col gap-4">
     <div class="grid grid-cols-2 gap-4">
       <thaca-input
         formControlName="username"
@@ -128,7 +129,7 @@
         </span>
       </thaca-button>
     </div>
-  </form>
+  </div>
 </thaca-modal>
 
 <thaca-modal #reasonModal [title]="'system_user.modal.reason_title' | translate" size="lg">

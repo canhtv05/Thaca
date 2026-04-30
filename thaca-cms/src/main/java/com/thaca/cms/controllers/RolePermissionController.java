@@ -8,6 +8,7 @@ import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,9 +28,21 @@ public class RolePermissionController {
         return ResponseEntity.ok(fwApiProcess.process(search));
     }
 
+    @PostMapping("/roles/all")
+    @FwRequest(name = ServiceMethod.CMS_GET_ALL_ROLES, type = RequestType.PROTECTED)
+    public ResponseEntity<List<RoleDTO>> getAllRoles() {
+        return ResponseEntity.ok(fwApiProcess.process(null));
+    }
+
     @PostMapping("/permissions/search")
     @FwRequest(name = ServiceMethod.CMS_SEARCH_PERMISSIONS, type = RequestType.PROTECTED)
     public ResponseEntity<SearchResponse<PermissionDTO>> searchPermissions(SearchRequest<PermissionDTO> loginReq) {
         return ResponseEntity.ok(fwApiProcess.process(loginReq));
+    }
+
+    @PostMapping("/permissions/all")
+    @FwRequest(name = ServiceMethod.CMS_GET_ALL_PERMISSIONS, type = RequestType.PROTECTED)
+    public ResponseEntity<List<PermissionDTO>> getAllPermissions() {
+        return ResponseEntity.ok(fwApiProcess.process(null));
     }
 }

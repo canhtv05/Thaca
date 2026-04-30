@@ -4,6 +4,7 @@ import { I18nResolver } from '../../core/i18n/i18n.resolver';
 import { RoleComponent } from './role/role.component';
 import { PermissionComponent } from './permission/permission.component';
 import { tenantRoutes } from './tenant/tenant.route';
+import { SystemUserComponent } from './system-user/system-user.component';
 
 export const systemRoutes: Routes = [
   ...tenantRoutes,
@@ -37,10 +38,10 @@ export const systemRoutes: Routes = [
     data: { i18n: ['common'] },
   },
   {
-    path: 'admins',
-    component: SystemSettingsComponent,
+    path: 'system-users',
+    component: SystemUserComponent,
     resolve: { i18n: I18nResolver },
-    data: { i18n: ['common'] },
+    data: { i18n: ['system_user'] },
   },
   {
     path: 'role-permission',

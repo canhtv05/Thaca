@@ -214,7 +214,7 @@ export class TenantComponent implements OnInit {
   }
 
   handleAction(event: ITableActionEvent) {
-    if (event.key === 'edit') {
+    if (event.key === 'update') {
       this.tenantForm.patchValue({
         ...event.row,
         expiresAt: CommonUtils.parseBackendDate(event.row.expiresAt),

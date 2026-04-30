@@ -14,6 +14,7 @@ import com.thaca.auth.validators.rules.EmailRule;
 import com.thaca.auth.validators.rules.FullnameRule;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
+import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.VerifyEmailTokenDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
@@ -59,6 +60,7 @@ public class UserService {
     private final SessionStore sessionStore;
 
     @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_USERS, type = ModeType.HANDLE)
     public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> request) {
         Specification<User> spec = createUserSpecification(request);
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
@@ -73,6 +75,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_USER_BY_ID, type = ModeType.HANDLE)
     public UserDTO findById(Long id) {
         return userRepository
             .findById(id)

@@ -7,14 +7,14 @@
       >
         <thaca-input
           [(ngModel)]="filter().code"
-          [placeholder]="'tenant.code' | translate"
+          [placeholder]="'tenant.code_placeholder' | translate"
           (onEnter)="onSearch()"
           class="w-full"
           [label]="'tenant.code' | translate"
         ></thaca-input>
         <thaca-input
           [(ngModel)]="filter().name"
-          [placeholder]="'tenant.name' | translate"
+          [placeholder]="'tenant.name_placeholder' | translate"
           (onEnter)="onSearch()"
           class="w-full"
           [label]="'tenant.name' | translate"
@@ -22,7 +22,7 @@
         <thaca-dropdown
           [(ngModel)]="filter().planId"
           [options]="planOptions()"
-          [placeholder]="'tenant.plan' | translate"
+          [placeholder]="'tenant.plan_placeholder' | translate"
           (onChange)="onSearch()"
           class="w-full"
           [label]="'tenant.plan' | translate"
@@ -30,7 +30,7 @@
         <thaca-dropdown
           [(ngModel)]="filter().status"
           [options]="statusOptions"
-          [placeholder]="'tenant.status' | translate"
+          [placeholder]="'tenant.status_placeholder' | translate"
           (onChange)="onSearch()"
           class="w-full"
           [label]="'tenant.status' | translate"
@@ -71,7 +71,7 @@
           [label]="'tenant.code' | translate"
           [required]="true"
           formControlName="code"
-          [placeholder]="'tenant.code' | translate"
+          [placeholder]="'tenant.code_placeholder' | translate"
           [uppercase]="true"
         ></thaca-input>
         <validation-message
@@ -86,7 +86,7 @@
           [label]="'tenant.name' | translate"
           [required]="true"
           formControlName="name"
-          [placeholder]="'tenant.name' | translate"
+          [placeholder]="'tenant.name_placeholder' | translate"
         ></thaca-input>
         <validation-message [control]="tenantForm.get('name')"></validation-message>
       </div>
@@ -97,14 +97,14 @@
         <thaca-input
           [label]="'tenant.domain' | translate"
           formControlName="domain"
-          [placeholder]="'tenant.domain' | translate"
+          [placeholder]="'tenant.domain_placeholder' | translate"
         ></thaca-input>
       </div>
       <div class="form-control">
         <thaca-input
           [label]="'tenant.contact_email' | translate"
           formControlName="contactEmail"
-          [placeholder]="'tenant.contact_email' | translate"
+          [placeholder]="'tenant.contact_email_placeholder' | translate"
         ></thaca-input>
         <validation-message [control]="tenantForm.get('contactEmail')"></validation-message>
       </div>
@@ -117,7 +117,7 @@
           [required]="true"
           formControlName="planId"
           [options]="planOptions()"
-          [placeholder]="'tenant.plan' | translate"
+          [placeholder]="'tenant.plan_placeholder' | translate"
           appendTo="body"
         ></thaca-dropdown>
         <validation-message [control]="tenantForm.get('planId')"></validation-message>
@@ -126,7 +126,7 @@
         <thaca-datepicker
           [label]="'tenant.expires_at' | translate"
           formControlName="expiresAt"
-          [placeholder]="'tenant.expires_at' | translate"
+          [placeholder]="'tenant.expires_at_placeholder' | translate"
           appendTo="body"
           [minDate]="minDate"
         ></thaca-datepicker>
@@ -137,7 +137,7 @@
           [required]="true"
           formControlName="status"
           [options]="statusOptions.slice(1)"
-          [placeholder]="'tenant.status' | translate"
+          [placeholder]="'tenant.status_placeholder' | translate"
           appendTo="body"
         ></thaca-dropdown>
         <validation-message [control]="tenantForm.get('status')"></validation-message>
@@ -148,7 +148,7 @@
       <thaca-textarea
         [label]="'tenant.logo_url' | translate"
         formControlName="logoUrl"
-        [placeholder]="'tenant.logo_url' | translate"
+        [placeholder]="'tenant.logo_url_placeholder' | translate"
         [rows]="2"
       ></thaca-textarea>
     </div>

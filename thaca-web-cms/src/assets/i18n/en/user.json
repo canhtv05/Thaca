@@ -11,6 +11,10 @@
     "active": "Active",
     "inactive": "Inactive",
     "locked": "Locked",
-    "safe": "Activated"
+    "safe": "Activated",
+    "username_placeholder": "Enter username",
+    "email_placeholder": "Enter email",
+    "status_placeholder": "Select status",
+    "locked_placeholder": "Select lock status"
   }
 }

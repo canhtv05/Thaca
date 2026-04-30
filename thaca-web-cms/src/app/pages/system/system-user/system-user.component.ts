@@ -25,6 +25,8 @@ import { ValidationMessageComponent } from '../../../shared/components/validatio
 import { Popup } from '../../../core/global/popup-notify';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { isLoading } from '../../../core/stores/app.store';
+import { IRoleDTO } from '../role/role.model';
+import { ITenantInfoPrj } from '../tenant/tenant.model';
 
 @Component({
   selector: 'app-system-user',
@@ -162,10 +164,10 @@ export class SystemUserComponent implements OnInit {
   }
 
   async loadRoles() {
-    const res = await this.roleService.searchRoles({ page: { pageNumber: 0, pageSize: 100 } });
+    const res = await this.roleService.getAllRoles();
     if (res.body.status === 'OK') {
       this.roleOptions.set(
-        res.body.data.content.map((role: any) => ({
+        res.body.data.map((role: IRoleDTO) => ({
           label: role.code,
           value: role.code,
         })),
@@ -177,7 +179,7 @@ export class SystemUserComponent implements OnInit {
     const res = await this.tenantService.getAll();
     if (res.body.status === 'OK') {
       this.tenantOptions.set(
-        res.body.data.map((tenant: any) => ({
+        res.body.data.map((tenant: ITenantInfoPrj) => ({
           label: tenant.name,
           value: tenant.id,
         })),

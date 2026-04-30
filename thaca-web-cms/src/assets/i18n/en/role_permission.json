@@ -2,13 +2,15 @@
   "role_permission": {
     "role": {
       "code": "Role code",
-      "description": "Role description",
-      "search_by_code": "Search by role code"
+      "description": "Role Description",
+      "search_by_code": "Search by role code",
+      "code_placeholder": "Enter role code"
     },
     "permission": {
       "code": "Permission code",
-      "description": "Permission description",
-      "search_by_code": "Search by permission code"
+      "description": "Permission Description",
+      "search_by_code": "Search by permission code",
+      "code_placeholder": "Enter permission code"
     },
     "actions": {
       "view_permission": "View permission"

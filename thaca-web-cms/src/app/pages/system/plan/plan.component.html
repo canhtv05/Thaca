@@ -8,14 +8,14 @@
         <thaca-input
           [label]="'plan.code' | translate"
           [(ngModel)]="filter().code"
-          [placeholder]="'plan.code' | translate"
+          [placeholder]="'plan.code_placeholder' | translate"
           (onEnter)="onSearch()"
           class="w-full"
         ></thaca-input>
         <thaca-input
           [label]="'plan.name' | translate"
           [(ngModel)]="filter().name"
-          [placeholder]="'plan.name' | translate"
+          [placeholder]="'plan.name_placeholder' | translate"
           (onEnter)="onSearch()"
           class="w-full"
         ></thaca-input>
@@ -23,7 +23,7 @@
           [(ngModel)]="filter().type"
           [label]="'plan.type' | translate"
           [options]="planTypeOptions"
-          [placeholder]="'plan.type' | translate"
+          [placeholder]="'plan.type_placeholder' | translate"
           class="w-full"
           (onChange)="onSearch()"
         ></thaca-dropdown>
@@ -31,7 +31,7 @@
           [label]="'plan.status' | translate"
           [(ngModel)]="filter().status"
           [options]="statusOptions"
-          [placeholder]="'plan.status' | translate"
+          [placeholder]="'plan.status_placeholder' | translate"
           class="w-full"
           (onChange)="onSearch()"
         ></thaca-dropdown>
@@ -71,7 +71,7 @@
           [label]="'plan.code' | translate"
           [required]="true"
           formControlName="code"
-          [placeholder]="'plan.code' | translate"
+          [placeholder]="'plan.code_placeholder' | translate"
         ></thaca-input>
         <validation-message
           [control]="planForm.get('code')"
@@ -85,7 +85,7 @@
           [label]="'plan.name' | translate"
           [required]="true"
           formControlName="name"
-          [placeholder]="'plan.name' | translate"
+          [placeholder]="'plan.name_placeholder' | translate"
         ></thaca-input>
         <validation-message [control]="planForm.get('name')"></validation-message>
       </div>
@@ -97,6 +97,7 @@
         formControlName="type"
         [options]="planTypeOptions.slice(1)"
         [clearable]="false"
+        [placeholder]="'plan.type_placeholder' | translate"
         appendTo="body"
       ></thaca-dropdown>
       <validation-message [control]="planForm.get('type')"></validation-message>
@@ -107,6 +108,7 @@
         [required]="true"
         type="number"
         formControlName="maxUsers"
+        [placeholder]="'plan.max_users_placeholder' | translate"
       ></thaca-input>
       <validation-message [control]="planForm.get('maxUsers')"></validation-message>
     </div>
