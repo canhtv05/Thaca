@@ -14,6 +14,7 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_GET_ALL_ROLES = "internal.cmsGetAllRoles";
     public static final String INTERNAL_CMS_SEARCH_PERMISSIONS = "internal.cmsSearchPermissions";
     public static final String INTERNAL_CMS_GET_ALL_PERMISSIONS = "internal.cmsGetAllPermissions";
+    public static final String INTERNAL_CMS_GET_PERMISSIONS_BY_ROLES = "internal.cmsGetPermissionsByRoles";
 
     public static final String INTERNAL_CMS_SEARCH_PLANS = "internal.cmsSearchPlans";
     public static final String INTERNAL_CMS_GET_PLAN = "internal.cmsGetPlan";

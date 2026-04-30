@@ -22,4 +22,16 @@ export class RoleService {
       payload,
     );
   }
+
+  async getPermissionsByRoles(roleCodes: string[]): Promise<IApiPayload<any[]>> {
+    const payload: IApiPayload<any> = {
+      header: createHeader(),
+      body: createBody({ roleCodes }),
+    };
+
+    return await GlobalHttp.post<IApiPayload<any[]>>(
+      `${this.config.getApiUrl()}/cms/permissions/by-roles`,
+      payload,
+    );
+  }
 }

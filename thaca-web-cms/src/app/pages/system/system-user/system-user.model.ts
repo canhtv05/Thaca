@@ -18,4 +18,5 @@ export interface ISystemUserDTO {
   createdAt?: string;
   updatedAt?: string;
   tenantInfo?: ITenantInfoPrj;
+  permissions?: { [key: string]: boolean };
 }

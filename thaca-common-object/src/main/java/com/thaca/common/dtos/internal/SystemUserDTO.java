@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.thaca.common.dtos.BaseAuditResponse;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +31,7 @@ public class SystemUserDTO extends BaseAuditResponse {
     private String avatarUrl;
     private Set<String> roles;
     private TenantDTO tenantInfo;
+    private Map<String, Boolean> permissions;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
