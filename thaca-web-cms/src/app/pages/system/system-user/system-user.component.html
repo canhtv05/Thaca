@@ -70,7 +70,7 @@
   (onSubmit)="onSubmit()"
 >
   <div class="grid grid-cols-1 gap-4">
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
       <div class="form-control">
         <thaca-input
           formControlName="fullname"
@@ -91,7 +91,7 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
       <div class="form-control">
         <thaca-input
           formControlName="username"
@@ -188,7 +188,7 @@
     @if (availablePermissions().length > 0) {
       <div class="form-control">
         <span class="thaca-label mb-2 block">{{ 'system_user.permissions' | translate }}</span>
-        <div class="grid grid-cols-2 gap-4 max-h-64 overflow-y-auto pr-2">
+        <div class="grid md:grid-cols-2 grid-cols-1 gap-4 max-h-64 overflow-y-auto pr-2">
           @for (perm of groupedPermissions(); track perm.code) {
             <div
               class="flex cursor-pointer items-center gap-3 p-3 rounded-md transition-colors hover:bg-accent border border-border bg-card"
