@@ -85,7 +85,11 @@
           formControlName="email"
           [label]="'system_user.email' | translate"
           [placeholder]="'system_user.email_placeholder' | translate"
+          [lowercase]="true"
           [required]="true"
+          [noSpace]="true"
+          [trim]="true"
+          [noAccent]="true"
         ></thaca-input>
         <validation-message [control]="userForm.get('email')"></validation-message>
       </div>

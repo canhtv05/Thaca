@@ -104,15 +104,14 @@ export class SystemUserComponent implements OnInit {
 
   activatedOptions: IDropdownOption[] = [
     { label: 'common.status.all', value: null },
-    { label: 'common.status.active', value: 'ACTIVE' },
-    { label: 'common.status.inactive', value: 'NOT_ACTIVATED' },
+    { label: 'common.status.active', value: true },
+    { label: 'common.status.inactive', value: false },
   ];
 
   lockedOptions: IDropdownOption[] = [
     { label: 'common.status.all', value: null },
-    { label: 'common.status.lock', value: 'LOCK' },
-    { label: 'common.status.unlock', value: 'UNLOCK' },
-    { label: 'common.status.suspended', value: 'SUSPENDED' },
+    { label: 'common.status.lock', value: true },
+    { label: 'common.status.unlock', value: false },
   ];
 
   userForm = this.fb.group({
