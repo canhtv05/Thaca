@@ -127,13 +127,14 @@ public class SystemUserService {
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO create(SystemUserDTO request) {
+        boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
         SystemUser su = SystemUser.builder()
             .tenantId(request.getTenantId())
             .fullname(request.getFullname())
             .email(request.getEmail())
-            .isActivated(true)
-            .isLocked(false)
-            .isSuperAdmin(false)
+            .isActivated(isSuperAdmin ? Boolean.TRUE.equals(request.getIsActivated()) : true)
+            .isLocked(isSuperAdmin ? Boolean.TRUE.equals(request.getIsLocked()) : false)
+            .isSuperAdmin(isSuperAdmin ? Boolean.TRUE.equals(request.getIsSuperAdmin()) : false)
             .avatarUrl(request.getAvatarUrl())
             .build();
         su = systemUserRepository.save(su);
@@ -187,6 +188,7 @@ public class SystemUserService {
         if (isSuperAdmin) {
             if (request.getIsActivated() != null) su.setIsActivated(request.getIsActivated());
             if (request.getIsLocked() != null) su.setIsLocked(request.getIsLocked());
+            if (request.getIsSuperAdmin() != null) su.setIsSuperAdmin(request.getIsSuperAdmin());
         }
         if (StringUtils.isNotBlank(request.getPassword())) {
             sc.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -290,11 +292,11 @@ public class SystemUserService {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         if (isCreate) {
-            if (
-                systemCredentialRepository.existsById(request.getUsername()) ||
-                systemUserRepository.existsByEmail(request.getEmail())
-            ) {
-                throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+            if (systemCredentialRepository.existsById(request.getUsername())) {
+                throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
+            }
+            if (systemUserRepository.existsByEmail(request.getEmail())) {
+                throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
             }
         }
         Validator<UserDTO> validator = new Validator<>(
