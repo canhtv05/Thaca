@@ -1,11 +1,10 @@
 package com.thaca.common.dtos.internal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.thaca.common.dtos.BaseAuditResponse;
+import com.thaca.common.enums.PermissionEffect;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,19 +28,10 @@ public class SystemUserDTO extends BaseAuditResponse {
     private Boolean isLocked;
     private Boolean isSuperAdmin;
     private String avatarUrl;
-    private Set<String> roles;
     private TenantDTO tenantInfo;
-    private Map<String, Boolean> permissions;
+    private Map<String, Map<String, PermissionEffect>> roles;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Long> tenantIds;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String lockReason;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<String> roleCodes;
 }

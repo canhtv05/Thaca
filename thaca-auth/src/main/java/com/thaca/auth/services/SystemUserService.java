@@ -2,7 +2,6 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.domains.*;
 import com.thaca.auth.enums.ErrorMessage;
-import com.thaca.auth.repositories.PermissionRepository;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
@@ -51,7 +50,6 @@ public class SystemUserService {
     private final SystemCredentialRepository systemCredentialRepository;
     private final SystemUserRepository systemUserRepository;
     private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserLockHistoryRepository userLockHistoryRepository;
     private final TenantRepository tenantRepository;
@@ -132,9 +130,9 @@ public class SystemUserService {
             .tenantId(request.getTenantId())
             .fullname(request.getFullname())
             .email(request.getEmail())
-            .isActivated(isSuperAdmin ? Boolean.TRUE.equals(request.getIsActivated()) : true)
-            .isLocked(isSuperAdmin ? Boolean.TRUE.equals(request.getIsLocked()) : false)
-            .isSuperAdmin(isSuperAdmin ? Boolean.TRUE.equals(request.getIsSuperAdmin()) : false)
+            .isActivated(!isSuperAdmin || Boolean.TRUE.equals(request.getIsActivated()))
+            .isLocked(isSuperAdmin && Boolean.TRUE.equals(request.getIsLocked()))
+            .isSuperAdmin(isSuperAdmin && Boolean.TRUE.equals(request.getIsSuperAdmin()))
             .avatarUrl(request.getAvatarUrl())
             .build();
         su = systemUserRepository.save(su);
@@ -144,8 +142,8 @@ public class SystemUserService {
             .tenantId(request.getTenantId())
             .password(passwordEncoder.encode(request.getPassword()))
             .build();
-        sc.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoleCodes())));
-        if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            sc.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoles().keySet())));
             grantPermission(request, sc);
         }
         systemCredentialRepository.save(sc);
@@ -193,10 +191,8 @@ public class SystemUserService {
         if (StringUtils.isNotBlank(request.getPassword())) {
             sc.setPassword(passwordEncoder.encode(request.getPassword()));
         }
-        if (isSuperAdmin && !CollectionUtils.isEmpty(request.getRoleCodes())) {
-            sc.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoleCodes())));
-        }
-        if (isSuperAdmin && request.getPermissions() != null) {
+        if (isSuperAdmin && request.getRoles() != null) {
+            sc.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoles().keySet())));
             sc.getCredentialPermissions().clear();
             grantPermission(request, sc);
         }
@@ -268,48 +264,13 @@ public class SystemUserService {
                     cb.equal(userJoin.get("isActivated"), f.getIsActivated())
                 );
                 if (f.getIsLocked() != null) predicates.add(cb.equal(userJoin.get("isLocked"), f.getIsLocked()));
-                if (!CollectionUtils.isEmpty(f.getRoleCodes())) {
+                if (f.getRoles() != null && !f.getRoles().isEmpty()) {
                     Join<SystemCredential, Role> roleJoin = root.join("roles");
-                    predicates.add(roleJoin.get("code").in(f.getRoleCodes()));
+                    predicates.add(roleJoin.get("code").in(f.getRoles().keySet()));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-    }
-
-    @SuppressWarnings("null")
-    private void validateRequest(SystemUserDTO request, boolean isCreate) {
-        boolean invalid =
-            request == null ||
-            StringUtils.isBlank(request.getUsername()) ||
-            StringUtils.isBlank(request.getEmail()) ||
-            StringUtils.isBlank(request.getFullname()) ||
-            request.getTenantId() == null ||
-            CollectionUtils.isEmpty(request.getRoleCodes()) ||
-            (isCreate && StringUtils.isBlank(request.getPassword()));
-
-        if (invalid) {
-            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
-        }
-        if (isCreate) {
-            if (systemCredentialRepository.existsById(request.getUsername())) {
-                throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
-            }
-            if (systemUserRepository.existsByEmail(request.getEmail())) {
-                throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
-            }
-        }
-        Validator<UserDTO> validator = new Validator<>(
-            List.of(new PasswordRule<>(), new UsernameRule<>(), new EmailRule<>(), new FullnameRule<>())
-        );
-        validator.validate(
-            UserDTO.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(request.getPassword())
-                .fullname(request.getFullname())
-                .build()
-        );
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_SYSTEM_USER, type = ModeType.HANDLE)
@@ -350,7 +311,7 @@ public class SystemUserService {
             row.put("fullname", user.getFullname());
             row.put("email", user.getEmail());
             row.put("tenantId", user.getTenantId());
-            row.put("roles", user.getRoles() != null ? String.join(", ", user.getRoles()) : "");
+            row.put("roles", user.getRoles() != null ? String.join(", ", user.getRoles().keySet()) : "");
             row.put(
                 "isActivated",
                 Boolean.TRUE.equals(user.getIsActivated())
@@ -401,6 +362,44 @@ public class SystemUserService {
             .build();
     }
 
+    @SuppressWarnings("null")
+    private void validateRequest(SystemUserDTO request, boolean isCreate) {
+        boolean invalid =
+            request == null ||
+            StringUtils.isBlank(request.getUsername()) ||
+            StringUtils.isBlank(request.getEmail()) ||
+            StringUtils.isBlank(request.getFullname()) ||
+            request.getTenantId() == null ||
+            CollectionUtils.isEmpty(request.getRoles()) ||
+            (isCreate && StringUtils.isBlank(request.getPassword()));
+
+        if (invalid) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        if (isCreate) {
+            if (systemCredentialRepository.existsById(request.getUsername())) {
+                throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
+            }
+            if (systemUserRepository.existsByEmail(request.getEmail())) {
+                throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
+            }
+        }
+        Validator<UserDTO> validator = new Validator<>(
+            new ArrayList<>(List.of(new UsernameRule<>(), new EmailRule<>(), new FullnameRule<>()))
+        );
+        if (isCreate || StringUtils.isNotBlank(request.getPassword())) {
+            validator.add(new PasswordRule<>());
+        }
+        validator.validate(
+            UserDTO.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .fullname(request.getFullname())
+                .build()
+        );
+    }
+
     private Tenant getTenantOrNull(Long tenantId) {
         if (tenantId == null) return null;
         return tenantRepository.findById(tenantId).orElse(null);
@@ -420,6 +419,18 @@ public class SystemUserService {
                 .build();
         }
 
+        // Key: "roleCode:permissionCode" -> Effect
+        Map<String, PermissionEffect> overrides = sc
+            .getCredentialPermissions()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    scp -> scp.getId().getRoleCode() + ":" + scp.getPermission().getCode(),
+                    SystemCredentialPermission::getEffect,
+                    (e1, e2) -> e1
+                )
+            );
+
         return SystemUserDTO.builder()
             .id(su.getId())
             .tenantId(tenantId)
@@ -431,15 +442,20 @@ public class SystemUserService {
             .isLocked(su.getIsLocked())
             .isSuperAdmin(su.getIsSuperAdmin())
             .avatarUrl(su.getAvatarUrl())
-            .roles(sc.getRoles().stream().map(Role::getCode).collect(Collectors.toSet()))
-            .permissions(
+            .roles(
                 sc
-                    .getCredentialPermissions()
+                    .getRoles()
                     .stream()
                     .collect(
-                        Collectors.toMap(
-                            scp -> scp.getPermission().getCode(),
-                            scp -> scp.getEffect() == PermissionEffect.GRANT
+                        Collectors.toMap(Role::getCode, r ->
+                            r
+                                .getPermissions()
+                                .stream()
+                                .collect(
+                                    Collectors.toMap(Permission::getCode, p ->
+                                        overrides.getOrDefault(r.getCode() + ":" + p.getCode(), PermissionEffect.GRANT)
+                                    )
+                                )
                         )
                     )
             )
@@ -451,22 +467,33 @@ public class SystemUserService {
     }
 
     private void grantPermission(SystemUserDTO request, SystemCredential sc) {
-        Set<String> permissionCodes = request.getPermissions().keySet();
-        Map<String, Permission> permissionMap = permissionRepository
-            .findAllById(permissionCodes)
-            .stream()
-            .collect(Collectors.toMap(Permission::getCode, p -> p));
+        if (request.getRoles() == null || request.getRoles().isEmpty()) {
+            return;
+        }
+        for (Role role : sc.getRoles()) {
+            Map<String, PermissionEffect> rolePerms = request
+                .getRoles()
+                .getOrDefault(role.getCode(), Collections.emptyMap());
+            Set<String> grantedSet = rolePerms
+                .entrySet()
+                .stream()
+                .filter(e -> PermissionEffect.GRANT.equals(e.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
 
-        for (Map.Entry<String, Boolean> entry : request.getPermissions().entrySet()) {
-            Permission perm = permissionMap.get(entry.getKey());
-            if (perm != null) {
+            for (Permission p : role.getPermissions()) {
                 SystemCredentialPermission scp = new SystemCredentialPermission();
                 scp.setId(
-                    new SystemCredentialPermission.SystemCredentialPermissionId(sc.getUsername(), entry.getKey())
+                    new SystemCredentialPermission.SystemCredentialPermissionId(
+                        sc.getUsername(),
+                        role.getCode(),
+                        p.getCode()
+                    )
                 );
                 scp.setCredential(sc);
-                scp.setPermission(perm);
-                scp.setEffect(Boolean.TRUE.equals(entry.getValue()) ? PermissionEffect.GRANT : PermissionEffect.DENY);
+                scp.setRole(role);
+                scp.setPermission(p);
+                scp.setEffect(grantedSet.contains(p.getCode()) ? PermissionEffect.GRANT : PermissionEffect.DENY);
                 sc.getCredentialPermissions().add(scp);
             }
         }

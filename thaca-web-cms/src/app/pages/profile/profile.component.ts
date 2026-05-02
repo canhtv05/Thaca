@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, KeyValuePipe } from '@angular/common';
 import { currentUser } from '../../core/stores/app.store';
 import { TranslateModule } from '@ngx-translate/core';
 import { ThacaInputComponent } from '../../shared/components/thaca-input/thaca-input.component';
@@ -8,7 +8,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, TranslateModule, ThacaInputComponent, ReactiveFormsModule],
+  imports: [CommonModule, TranslateModule, ThacaInputComponent, ReactiveFormsModule, KeyValuePipe],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })

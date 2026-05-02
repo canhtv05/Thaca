@@ -31,11 +31,10 @@ public class TenantFilterAspect {
             return;
         }
 
+        Session session = entityManager.unwrap(Session.class);
         if (tenantId != null) {
-            Session session = entityManager.unwrap(Session.class);
             session.enableFilter("tenantFilter").setParameter("tenantId", tenantId);
         } else {
-            Session session = entityManager.unwrap(Session.class);
             session.disableFilter("tenantFilter");
         }
     }

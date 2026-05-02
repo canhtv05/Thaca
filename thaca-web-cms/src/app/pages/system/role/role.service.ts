@@ -4,6 +4,7 @@ import { AppConfigService } from '../../../core/configs/app-config.service';
 import { GlobalHttp } from '../../../core/global/global-http';
 import { createBody, createHeader } from '../../../utils/common.utils';
 import { IRoleDTO } from './role.model';
+import { IPermissionDTO } from '../permission/permission.model';
 
 @Injectable({
   providedIn: 'root',
@@ -23,13 +24,13 @@ export class RoleService {
     );
   }
 
-  async getPermissionsByRoles(roleCodes: string[]): Promise<IApiPayload<any[]>> {
+  async getPermissionsByRoles(roleCodes: string[]): Promise<IApiPayload<IPermissionDTO[]>> {
     const payload: IApiPayload<any> = {
       header: createHeader(),
       body: createBody({ roleCodes }),
     };
 
-    return await GlobalHttp.post<IApiPayload<any[]>>(
+    return await GlobalHttp.post<IApiPayload<IPermissionDTO[]>>(
       `${this.config.getApiUrl()}/cms/permissions/by-roles`,
       payload,
     );

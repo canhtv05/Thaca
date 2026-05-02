@@ -15,4 +15,8 @@ public class Validator<T> {
             rule.validate(t);
         }
     }
+
+    public void add(ValidateRule<T> rule) {
+        rules.add(rule);
+    }
 }

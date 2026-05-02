@@ -3,4 +3,5 @@ export interface IPermissionDTO {
   description: string;
   roleDescription?: string;
   roleCode?: string;
+  effect?: 'GRANT' | 'DENY';
 }

@@ -22,6 +22,7 @@
     "permission_deny": "Từ chối",
     "lock_reason_placeholder": "Nhập lý do khóa người dùng",
     "lock_reason": "Lý do khóa",
+    "is_super_admin_description": "(*)Lưu ý: Quản trị tối cao có thể thực hiện tất cả các hành động trong hệ thống.",
     "modal": {
       "create_title": "Thêm người dùng hệ thống",
       "update_title": "Cập nhật người dùng",
