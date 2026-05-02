@@ -24,6 +24,11 @@ public class SystemCredentialPermission extends BaseEntityAudit {
     private SystemCredential credential;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("roleCode")
+    @JoinColumn(name = "role_code")
+    private Role role;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("permissionCode")
     @JoinColumn(name = "permission_code")
     private Permission permission;
@@ -55,6 +60,9 @@ public class SystemCredentialPermission extends BaseEntityAudit {
         @Column(name = "credential_id")
         private String credentialId;
 
+        @Column(name = "role_code")
+        private String roleCode;
+
         @Column(name = "permission_code")
         private String permissionCode;
 
@@ -63,13 +71,15 @@ public class SystemCredentialPermission extends BaseEntityAudit {
             if (this == object) return true;
             if (!(object instanceof SystemCredentialPermissionId that)) return false;
             return (
-                Objects.equals(credentialId, that.credentialId) && Objects.equals(permissionCode, that.permissionCode)
+                Objects.equals(credentialId, that.credentialId) &&
+                Objects.equals(roleCode, that.roleCode) &&
+                Objects.equals(permissionCode, that.permissionCode)
             );
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(credentialId, permissionCode);
+            return Objects.hash(credentialId, roleCode, permissionCode);
         }
     }
 }

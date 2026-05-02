@@ -22,6 +22,7 @@
     "permission_deny": "Deny",
     "lock_reason": "Lock Reason",
     "lock_reason_placeholder": "Enter user lock reason",
+    "is_super_admin_description": "(*)Note: Super admin can perform all actions in the system.",
     "modal": {
       "create_title": "Create System User",
       "update_title": "Update System User",

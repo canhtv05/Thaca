@@ -3,6 +3,7 @@ package com.thaca.framework.blocking.starter.filter;
 import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
+import com.thaca.framework.core.context.TenantContext;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -44,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     io.jsonwebtoken.Claims claims = jwtUtils.parseToken(jwt);
                     Long tenantId = claims.get("tenantId", Long.class);
                     if (tenantId != null) {
-                        com.thaca.framework.core.context.TenantContext.set(tenantId);
+                        TenantContext.set(tenantId);
                     }
                 } else {
                     log.debug("[JwtFilter] token validation failed: {}", status);
@@ -58,7 +59,7 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            com.thaca.framework.core.context.TenantContext.clear();
+            TenantContext.clear();
         }
     }
 

@@ -90,6 +90,7 @@
           [noSpace]="true"
           [trim]="true"
           [noAccent]="true"
+          [lowercase]="true"
         ></thaca-input>
         <validation-message [control]="userForm.get('email')"></validation-message>
       </div>
@@ -102,6 +103,10 @@
           [label]="'system_user.username' | translate"
           [placeholder]="'system_user.username_placeholder' | translate"
           [required]="true"
+          [noSpace]="true"
+          [trim]="true"
+          [noAccent]="true"
+          [lowercase]="true"
         ></thaca-input>
         <validation-message [control]="userForm.get('username')"></validation-message>
       </div>
@@ -131,6 +136,7 @@
         [placeholder]="'system_user.tenant_placeholder'"
         [options]="tenantOptions()"
         [appendTo]="'body'"
+        [required]="true"
       ></thaca-dropdown>
       <validation-message [control]="userForm.get('tenantId')"></validation-message>
     </div>
@@ -143,38 +149,44 @@
         [options]="roleOptions()"
         [multiple]="true"
         [appendTo]="'body'"
+        [required]="true"
       ></thaca-dropdown>
       <validation-message [control]="userForm.get('roleCodes')"></validation-message>
     </div>
-    <div class="flex flex-wrap gap-x-12 gap-y-4">
-      <div class="flex items-center gap-3">
-        <input
-          type="checkbox"
-          class="thaca-checkbox"
-          formControlName="isActivated"
-          id="isActivated"
-        />
-        <label for="isActivated" class="cursor-pointer font-semibold text-sm">{{
-          'system_user.is_activated' | translate
-        }}</label>
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-wrap gap-4">
+        <div class="flex items-center gap-3">
+          <input
+            type="checkbox"
+            class="thaca-checkbox"
+            formControlName="isActivated"
+            id="isActivated"
+          />
+          <label for="isActivated" class="cursor-pointer font-semibold text-sm">{{
+            'system_user.is_activated' | translate
+          }}</label>
+        </div>
+        <div class="flex items-center gap-3">
+          <input type="checkbox" class="thaca-checkbox" formControlName="isLocked" id="isLocked" />
+          <label for="isLocked" class="cursor-pointer font-semibold text-sm">{{
+            'system_user.is_locked' | translate
+          }}</label>
+        </div>
+        <div class="flex items-center gap-3">
+          <input
+            type="checkbox"
+            class="thaca-checkbox"
+            formControlName="isSuperAdmin"
+            id="isSuperAdmin"
+          />
+          <label for="isSuperAdmin" class="cursor-pointer font-semibold text-sm">{{
+            'system_user.is_super_admin' | translate
+          }}</label>
+        </div>
       </div>
-      <div class="flex items-center gap-3">
-        <input type="checkbox" class="thaca-checkbox" formControlName="isLocked" id="isLocked" />
-        <label for="isLocked" class="cursor-pointer font-semibold text-sm">{{
-          'system_user.is_locked' | translate
-        }}</label>
-      </div>
-      <div class="flex items-center gap-3">
-        <input
-          type="checkbox"
-          class="thaca-checkbox"
-          formControlName="isSuperAdmin"
-          id="isSuperAdmin"
-        />
-        <label for="isSuperAdmin" class="cursor-pointer font-semibold text-sm">{{
-          'system_user.is_super_admin' | translate
-        }}</label>
-      </div>
+      <span class="text-xs text-red-500 block">{{
+        'system_user.is_super_admin_description' | translate
+      }}</span>
     </div>
 
     @if (userForm.get('isLocked')?.value) {
@@ -192,50 +204,56 @@
     @if (availablePermissions().length > 0) {
       <div class="form-control">
         <span class="thaca-label mb-2 block">{{ 'system_user.permissions' | translate }}</span>
-        <div class="grid md:grid-cols-2 grid-cols-1 gap-4 max-h-64 overflow-y-auto pr-2">
-          @for (perm of groupedPermissions(); track perm.code) {
+        <div class="grid md:grid-cols-3 grid-cols-1 gap-4 max-h-64 overflow-y-auto pr-2">
+          @for (entry of grantedPermissions() | keyvalue; track entry.key) {
             <div
               class="flex cursor-pointer items-center gap-3 p-3 rounded-md transition-colors hover:bg-accent border border-border bg-card"
             >
-              <input
-                type="checkbox"
-                class="thaca-checkbox"
-                [id]="'perm_' + perm.code"
-                [checked]="isPermissionGranted(perm.code)"
-                (change)="togglePermission(perm.code, $event)"
-              />
               <div class="flex flex-col flex-1">
                 <label
-                  [for]="'perm_' + perm.code"
+                  [for]="'role_' + entry.key"
                   class="cursor-pointer font-bold text-[0.85rem] text-primary"
                 >
-                  {{ perm.code }}
+                  {{ entry.key }}
                 </label>
-                <div class="flex flex-wrap gap-1 mt-1">
-                  @for (role of perm.roles; track role) {
-                    <span
-                      class="text-[0.65rem] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-semibold uppercase"
-                    >
-                      {{ role }}
-                    </span>
+                <div class="flex flex-col gap-1 mt-1">
+                  @for (perm of getPermissionsForRole(entry.key); track perm.code) {
+                    <div class="flex items-center gap-2 justify-between">
+                      <div class="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          class="thaca-checkbox"
+                          [id]="'perm_' + entry.key + '_' + perm.code"
+                          [attr.aria-labelledby]="'perm_' + entry.key + '_' + perm.code"
+                          [checked]="isPermissionGranted(entry.key, perm.code)"
+                          (change)="togglePermission(entry.key, perm.code, $event)"
+                        />
+                        <label
+                          [for]="'perm_' + entry.key + '_' + perm.code"
+                          class="text-[0.65rem] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-semibold uppercase cursor-pointer"
+                        >
+                          {{ perm.code }}
+                        </label>
+                      </div>
+                      <span
+                        class="text-[0.7rem] font-bold px-2 py-1 rounded-md"
+                        [ngClass]="
+                          isPermissionGranted(entry.key, perm.code)
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-rose-100 text-rose-700'
+                        "
+                      >
+                        {{
+                          (isPermissionGranted(entry.key, perm.code)
+                            ? 'system_user.permission_grant'
+                            : 'system_user.permission_deny'
+                          ) | translate
+                        }}
+                      </span>
+                    </div>
                   }
                 </div>
               </div>
-              <span
-                class="text-[0.7rem] font-bold px-2 py-1 rounded-md"
-                [ngClass]="
-                  isPermissionGranted(perm.code)
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-rose-100 text-rose-700'
-                "
-              >
-                {{
-                  (isPermissionGranted(perm.code)
-                    ? 'system_user.permission_grant'
-                    : 'system_user.permission_deny'
-                  ) | translate
-                }}
-              </span>
             </div>
           }
         </div>
@@ -244,20 +262,24 @@
   </div>
 </thaca-modal>
 
-<thaca-modal #reasonModal [title]="'system_user.modal.reason_title' | translate" size="lg">
+<thaca-modal
+  #reasonModal
+  [formGroup]="lockReasonForm"
+  [title]="'system_user.modal.reason_title' | translate"
+  size="lg"
+  (onSubmit)="confirmLockUnlock()"
+  [disableSubmit]="!lockReasonForm.get('lockReason')?.value"
+  [loading]="isLoading()"
+>
   <div class="flex flex-col gap-4">
-    <thaca-input
-      [(ngModel)]="lockReason"
-      [label]="'system_user.lock_reason' | translate"
-      [required]="true"
-    ></thaca-input>
-    <div class="flex justify-end gap-2 pt-4 border-t">
-      <thaca-button variant="secondary" (click)="reasonModal.hide()">
-        <span class="text-white"> {{ 'common.button.cancel' | translate }} </span>
-      </thaca-button>
-      <thaca-button variant="primary" (click)="confirmLockUnlock()" [disabled]="!lockReason">
-        <span class="text-white"> {{ 'common.button.confirm' | translate }} </span>
-      </thaca-button>
+    <div class="form-control">
+      <thaca-textarea
+        formControlName="lockReason"
+        [label]="'system_user.lock_reason' | translate"
+        [placeholder]="'system_user.lock_reason_placeholder' | translate"
+        [required]="true"
+      ></thaca-textarea>
+      <validation-message [control]="lockReasonForm.get('lockReason')"></validation-message>
     </div>
   </div>
 </thaca-modal>

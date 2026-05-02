@@ -28,6 +28,7 @@ import { isLoading } from '../../../core/stores/app.store';
 import { IRoleDTO } from '../role/role.model';
 import { ITenantInfoPrj } from '../tenant/tenant.model';
 import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
+import { IPermissionDTO } from '../permission/permission.model';
 
 @Component({
   selector: 'app-system-user',
@@ -61,28 +62,10 @@ export class SystemUserComponent implements OnInit {
   roleOptions = signal<IDropdownOption[]>([]);
   tenantOptions = signal<IDropdownOption[]>([]);
   availablePermissions = signal<any[]>([]);
-  grantedPermissions = signal<Set<string>>(new Set());
+  grantedPermissions = signal<Map<string, Set<string>>>(new Map());
   lockReason = '';
   private selectedRow: any;
-  private editingPermissions: { [key: string]: boolean } | null = null;
-
-  groupedPermissions = computed(() => {
-    const perms = this.availablePermissions();
-    const uniqueMap = new Map<string, any>();
-
-    perms.forEach((p) => {
-      if (!uniqueMap.has(p.code)) {
-        uniqueMap.set(p.code, { ...p, roles: [p.roleCode] });
-      } else {
-        const existing = uniqueMap.get(p.code);
-        if (p.roleCode && !existing.roles.includes(p.roleCode)) {
-          existing.roles.push(p.roleCode);
-        }
-      }
-    });
-
-    return Array.from(uniqueMap.values());
-  });
+  private editingPermissions: Map<string, Set<string>> | null = null;
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
   @ViewChild('userModal') userModal!: ThacaModalComponent;
@@ -120,13 +103,17 @@ export class SystemUserComponent implements OnInit {
     email: ['', [Validators.required, Validators.email]],
     fullname: ['', [Validators.required]],
     password: [''],
-    tenantId: [null],
+    tenantId: [null, [Validators.required]],
     isActivated: [true],
     isLocked: [false],
     isSuperAdmin: [false],
     avatarUrl: [''],
-    roleCodes: [[] as string[]],
+    roleCodes: [[] as string[], [Validators.required, Validators.minLength(1)]],
     lockReason: [''],
+  });
+
+  lockReasonForm = this.fb.group({
+    lockReason: ['', [Validators.required]],
   });
 
   tableConfig: ITableConfig = {
@@ -152,16 +139,42 @@ export class SystemUserComponent implements OnInit {
       {
         field: 'roles',
         header: 'system_user.roles',
-        center: true,
         render: (row: ISystemUserDTO) => {
-          return row.roles
-            ? `<div class="flex flex-wrap gap-2">${row.roles
-                .map(
-                  (role: string) =>
-                    `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${role}</span>`,
-                )
-                .join(' ')}</div>`
-            : '';
+          if (!row.roles || Object.keys(row.roles).length === 0) return '';
+
+          return `<div class="flex flex-col gap-2 py-1">
+            ${Object.entries(row.roles)
+              .map(([role, perms]) => {
+                const permissionTags = Object.entries(perms as { [key: string]: string })
+                  .map(([p, effect]) => {
+                    const isGrant = effect === 'GRANT';
+                    const colorClass = isGrant
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
+                      : 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800';
+
+                    return `<div class="flex items-center gap-1.5 px-1.5 py-0.5 rounded-sm border ${colorClass}">
+                        <span class="text-[9px] font-bold tracking-tight uppercase">${p}</span>
+                        <span class="text-[8px] opacity-70 uppercase">[${effect}]</span>
+                      </div>`;
+                  })
+                  .join('');
+
+                return `
+                  <div class="flex flex-col gap-1.5 rounded-lg card p-2!">
+                    <div class="flex items-center gap-2">
+                      <span class="thaca-badge thaca-badge-primary thb-sm thb-square">
+                        <span class="thb-dot"></span>
+                        ${role}
+                      </span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 ml-2">
+                      ${permissionTags}
+                    </div>
+                  </div>
+                `;
+              })
+              .join('')}
+          </div>`;
         },
       },
       {
@@ -211,7 +224,7 @@ export class SystemUserComponent implements OnInit {
   };
 
   async ngOnInit(): Promise<void> {
-    Promise.all([this.loadRoles(), this.loadTenants()]);
+    await Promise.all([this.loadRoles(), this.loadTenants()]);
 
     this.userForm.get('roleCodes')?.valueChanges.subscribe(async (roles) => {
       if (roles && roles.length > 0) {
@@ -220,22 +233,26 @@ export class SystemUserComponent implements OnInit {
           const perms = res.body.data;
           this.availablePermissions.set(perms);
 
-          const granted = new Set<string>();
-          if (this.editingPermissions) {
-            perms.forEach((p: any) => {
-              if (this.editingPermissions![p.code] !== false) {
-                granted.add(p.code);
-              }
-            });
-            this.editingPermissions = null;
-          } else {
-            perms.forEach((p: any) => granted.add(p.code));
-          }
-          this.grantedPermissions.set(granted);
+          const newMap = new Map<string, Set<string>>();
+          roles.forEach((role: string) => {
+            let granted: Set<string>;
+            if (this.editingPermissions && this.editingPermissions.has(role)) {
+              granted = this.editingPermissions.get(role)!;
+            } else {
+              granted = new Set<string>(
+                perms
+                  .filter((p: IPermissionDTO) => p.roleCode === role)
+                  .map((p: IPermissionDTO) => p.code),
+              );
+            }
+            newMap.set(role, granted);
+          });
+          this.grantedPermissions.set(newMap);
+          this.editingPermissions = null;
         }
       } else {
         this.availablePermissions.set([]);
-        this.grantedPermissions.set(new Set());
+        this.grantedPermissions.set(new Map());
       }
     });
 
@@ -250,19 +267,25 @@ export class SystemUserComponent implements OnInit {
     });
   }
 
-  isPermissionGranted(code: string): boolean {
-    return this.grantedPermissions().has(code);
+  isPermissionGranted(role: string, perm: string): boolean {
+    return this.grantedPermissions().get(role)?.has(perm) ?? false;
   }
 
-  togglePermission(code: string, event: Event): void {
+  getPermissionsForRole(roleCode: string): IPermissionDTO[] {
+    return this.availablePermissions().filter((p: IPermissionDTO) => p.roleCode === roleCode);
+  }
+
+  togglePermission(role: string, perm: string, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
-    const current = new Set(this.grantedPermissions());
+    const map = new Map(this.grantedPermissions());
+    const perms = new Set(map.get(role) ?? []);
     if (checked) {
-      current.add(code);
+      perms.add(perm);
     } else {
-      current.delete(code);
+      perms.delete(perm);
     }
-    this.grantedPermissions.set(current);
+    map.set(role, perms);
+    this.grantedPermissions.set(map);
   }
 
   async loadRoles() {
@@ -305,20 +328,37 @@ export class SystemUserComponent implements OnInit {
     this.userForm.get('password')?.setValidators([Validators.required]);
     this.userForm.get('password')?.updateValueAndValidity();
     this.originalValue = this.userForm.getRawValue();
+
+    this.userForm.patchValue({
+      username: 'test',
+      email: 'test@gmail.com',
+      fullname: 'test',
+      tenantId: 1 as any,
+      password: 'Thaca@2026',
+    });
     this.userModal.show();
   }
 
   handleAction(event: ITableActionEvent) {
     if (event.key === 'edit') {
-      this.editingPermissions = event.row.permissions || {};
-      this.userForm.patchValue({
-        ...event.row,
-        roleCodes: event.row.roles || [],
-      });
+      const savedPermissions = new Map<string, Set<string>>();
+      if (event.row.roles) {
+        Object.entries(event.row.roles).forEach(([role, perms]) => {
+          const granted = new Set<string>();
+          Object.entries(perms as { [key: string]: string }).forEach(([p, effect]) => {
+            if (effect === 'GRANT') granted.add(p);
+          });
+          savedPermissions.set(role, granted);
+        });
+      }
+      this.editingPermissions = savedPermissions;
       this.userForm.get('username')?.disable();
       this.userForm.get('password')?.setValidators([]);
       this.userForm.get('password')?.updateValueAndValidity();
-      this.originalValue = this.userForm.getRawValue();
+      this.userForm.patchValue({
+        ...event.row,
+        roleCodes: Object.keys(event.row.roles || {}),
+      });
       this.userModal.show();
     } else if (event.key === 'lock-unlock') {
       this.selectedRow = event.row;
@@ -351,14 +391,20 @@ export class SystemUserComponent implements OnInit {
 
   async onSubmit() {
     if (this.isUnchanged()) return;
-    const req = this.userForm.getRawValue() as any;
+    const { roleCodes, ...req } = this.userForm.getRawValue() as any;
 
-    req.permissions = {};
-    this.availablePermissions().forEach((p) => {
-      req.permissions[p.code] = this.grantedPermissions().has(p.code);
+    const roles: { [key: string]: { [key: string]: string } } = {};
+    this.grantedPermissions().forEach((perms, role) => {
+      const permsMap: { [key: string]: string } = {};
+      const allPossiblePerms = this.getPermissionsForRole(role);
+      allPossiblePerms.forEach((p) => {
+        permsMap[p.code] = perms.has(p.code) ? 'GRANT' : 'DENY';
+      });
+      roles[role] = permsMap;
     });
+    req.roles = roles;
 
-    const isUpdate = !!this.userForm.value.id;
+    const isUpdate = !!req.id;
 
     const confirmed = await Popup.confirm({
       title: isUpdate ? 'system_user.popup.update.title' : 'system_user.popup.create.title',

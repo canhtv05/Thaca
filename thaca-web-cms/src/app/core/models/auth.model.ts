@@ -12,7 +12,7 @@ export interface IAuthUserDTO {
   isActivated?: boolean;
   isLocked?: boolean;
   isSuperAdmin?: boolean;
-  roles?: string[];
+  roles?: { [key: string]: { [key: string]: string } };
   avatarUrl?: string;
 }
 

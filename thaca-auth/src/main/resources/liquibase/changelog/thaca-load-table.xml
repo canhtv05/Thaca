@@ -122,6 +122,7 @@
 
     <createTable tableName="system_credential_permissions" schemaName="auth">
         <column name="credential_id" type="varchar(255)"><constraints nullable="false" primaryKey="true"/></column>
+        <column name="role_code" type="varchar(50)"><constraints nullable="false" primaryKey="true"/></column>
         <column name="permission_code" type="varchar(50)"><constraints nullable="false" primaryKey="true"/></column>
         <column name="effect" type="varchar(20)" defaultValue="DENY"><constraints nullable="false"/></column>
         <column name="created_by" type="VARCHAR(50)"/>
@@ -199,6 +200,7 @@
     <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_roles" baseTableSchemaName="auth" constraintName="fk_syscrerol_on_system_credential" referencedColumnNames="username" referencedTableName="system_credentials" referencedTableSchemaName="auth"/>
 
     <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_credential" referencedColumnNames="username" referencedTableName="system_credentials" referencedTableSchemaName="auth"/>
+    <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_role" referencedColumnNames="code" referencedTableName="roles" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="permission_code" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_permission" referencedColumnNames="code" referencedTableName="permissions" referencedTableSchemaName="auth"/>
   </changeSet>
 

@@ -26,8 +26,8 @@
             <h2 class="user-display-name">{{ currentUser()?.fullname }}</h2>
             <p class="user-handle">@{{ currentUser()?.username }}</p>
             <div class="badges">
-              @for (role of currentUser()?.roles; track role) {
-                <span class="badge">{{ role }}</span>
+              @for (role of (currentUser()?.roles | keyvalue) || []; track role.key) {
+                <span class="badge">{{ role.key }}</span>
               }
             </div>
           </div>

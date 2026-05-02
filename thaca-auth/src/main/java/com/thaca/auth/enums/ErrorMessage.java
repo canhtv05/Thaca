@@ -175,6 +175,13 @@ public enum ErrorMessage implements ErrorMessageRule {
         "Role invalid",
         "Role list is invalid"
     ),
+    PERMISSION_NOT_FOUND(
+        "PERMISSION.NOT_FOUND",
+        "Quyền không tồn tại",
+        "Một hoặc nhiều quyền không tồn tại trong hệ thống",
+        "Permission not found",
+        "One or more permissions do not exist"
+    ),
     PASSWORD_TOO_WEAK(
         "PASSWORD.TOO.WEAK",
         "Mật khẩu quá yếu",

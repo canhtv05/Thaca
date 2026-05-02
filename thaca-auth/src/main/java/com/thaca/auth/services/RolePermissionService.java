@@ -26,7 +26,9 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -172,15 +174,24 @@ public class RolePermissionService {
         sc.getCredentialPermissions().clear();
 
         if (deniedPermissionCodes != null && !deniedPermissionCodes.isEmpty()) {
-            for (String code : deniedPermissionCodes) {
-                Permission perm = permissionRepository.findById(code).orElse(null);
-                if (perm != null) {
-                    SystemCredentialPermission scp = new SystemCredentialPermission();
-                    scp.setId(new SystemCredentialPermission.SystemCredentialPermissionId(username, code));
-                    scp.setCredential(sc);
-                    scp.setPermission(perm);
-                    scp.setEffect(PermissionEffect.DENY);
-                    sc.getCredentialPermissions().add(scp);
+            Set<String> deniedSet = new HashSet<>(deniedPermissionCodes);
+            for (Role role : sc.getRoles()) {
+                for (Permission perm : role.getPermissions()) {
+                    if (deniedSet.contains(perm.getCode())) {
+                        SystemCredentialPermission scp = new SystemCredentialPermission();
+                        scp.setId(
+                            new SystemCredentialPermission.SystemCredentialPermissionId(
+                                username,
+                                role.getCode(),
+                                perm.getCode()
+                            )
+                        );
+                        scp.setCredential(sc);
+                        scp.setRole(role);
+                        scp.setPermission(perm);
+                        scp.setEffect(PermissionEffect.DENY);
+                        sc.getCredentialPermissions().add(scp);
+                    }
                 }
             }
         }
