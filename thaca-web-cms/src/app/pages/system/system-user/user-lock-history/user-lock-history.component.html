@@ -1,0 +1,34 @@
+<div class="page-container flex flex-col gap-4">
+  <app-breadcrumb
+    [title]="'menu.system_user_management'"
+    [items]="breadcrumbItems"
+  ></app-breadcrumb>
+  <app-data-table [config]="tableConfig" [externalFilter]="filter()">
+    <ng-template #searchTemplate>
+      <div class="flex justify-end items-end gap-4 leading-none">
+        <thaca-dropdown
+          class="w-full"
+          [label]="'system_user.action' | translate"
+          [options]="lockedOptions"
+          [(ngModel)]="filter().action"
+        ></thaca-dropdown>
+        <thaca-input
+          class="w-full"
+          [label]="'system_user.reason' | translate"
+          [(ngModel)]="filter().reason"
+          [placeholder]="'system_user.reason_placeholder' | translate"
+        ></thaca-input>
+        <thaca-button class="w-full" (click)="onSearch()">
+          <span class="text-white"> {{ 'common.button.search' | translate }} </span>
+        </thaca-button>
+      </div>
+    </ng-template>
+    <ng-template #headerActions>
+      <div class="flex justify-end items-center gap-4">
+        <thaca-button variant="outline" (click)="onExport()">
+          {{ 'common.button.export' | translate }}
+        </thaca-button>
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>

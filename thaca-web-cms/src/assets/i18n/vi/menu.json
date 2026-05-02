@@ -34,6 +34,7 @@
     "development_ui": "Phát triển & UI",
     "ui_components": "Thành phần giao diện",
     "user_list": "Danh sách người dùng",
-    "system_user_management": "Quản lý người dùng hệ thống"
+    "system_user_management": "Quản lý người dùng hệ thống",
+    "system_user_lock_history": "Lịch sử khóa người dùng"
   }
 }

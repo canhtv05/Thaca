@@ -188,14 +188,14 @@
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="system_users" baseTableSchemaName="auth" constraintName="fk_sys_users_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="system_credentials" baseTableSchemaName="auth" constraintName="fk_sys_cred_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="fk_login_hist_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
-    
+
     <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="FK_LOGIN_HISTORY_ON_USER" referencedColumnNames="id" referencedTableName="users" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="system_user_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="FK_LOGIN_HISTORY_ON_SYSTEM_USER" referencedColumnNames="id" referencedTableName="system_users" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="system_user_id" baseTableName="system_credentials" baseTableSchemaName="auth" constraintName="FK_SYSTEM_CREDENTIALS_ON_SYSTEM_USER" referencedColumnNames="id" referencedTableName="system_users" referencedTableSchemaName="auth"/>
-    
+
     <addForeignKeyConstraint baseColumnNames="permission_code" baseTableName="role_permissions" baseTableSchemaName="auth" constraintName="fk_rolper_on_permission" referencedColumnNames="code" referencedTableName="permissions" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="role_permissions" baseTableSchemaName="auth" constraintName="fk_rolper_on_role" referencedColumnNames="code" referencedTableName="roles" referencedTableSchemaName="auth"/>
-    
+
     <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="system_credential_roles" baseTableSchemaName="auth" constraintName="fk_syscrerol_on_role" referencedColumnNames="code" referencedTableName="roles" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_roles" baseTableSchemaName="auth" constraintName="fk_syscrerol_on_system_credential" referencedColumnNames="username" referencedTableName="system_credentials" referencedTableSchemaName="auth"/>
 
