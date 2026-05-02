@@ -40,6 +40,9 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/system-users/search", name = ServiceMethod.CMS_SEARCH_SYSTEM_USERS)
     SearchResponse<SystemUserDTO> searchSystemUsers(SearchRequest<SystemUserDTO> search);
 
+    @FwInternalApi(path = "/cms/system-users/search-lock-histories", name = ServiceMethod.CMS_SEARCH_USER_LOCK_HISTORY)
+    SearchResponse<UserLockHistoryDTO> searchUserLockHistories(SearchRequest<UserLockHistoryDTO> search);
+
     @FwInternalApi(path = "/cms/system-users/get", name = ServiceMethod.CMS_GET_SYSTEM_USER)
     SystemUserDTO getSystemUser(SystemUserDTO user);
 

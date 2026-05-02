@@ -29,6 +29,7 @@ import { IRoleDTO } from '../role/role.model';
 import { ITenantInfoPrj } from '../tenant/tenant.model';
 import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
 import { IPermissionDTO } from '../permission/permission.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-system-user',
@@ -57,13 +58,13 @@ export class SystemUserComponent implements OnInit {
   private translate = inject(TranslateService);
   private fb = inject(FormBuilder);
   readonly isLoading = isLoading;
+  private router = inject(Router);
 
   private originalValue: any;
   roleOptions = signal<IDropdownOption[]>([]);
   tenantOptions = signal<IDropdownOption[]>([]);
   availablePermissions = signal<any[]>([]);
   grantedPermissions = signal<Map<string, Set<string>>>(new Map());
-  lockReason = '';
   private selectedRow: any;
   private editingPermissions: Map<string, Set<string>> | null = null;
 
@@ -216,9 +217,23 @@ export class SystemUserComponent implements OnInit {
       },
       {
         icon: 'pi pi-key',
-        key: 'lock-unlock',
-        titleKey: 'common.button.lock_unlock',
-        color: 'info',
+        key: 'lock',
+        titleKey: 'common.button.lock',
+        color: 'danger',
+        condition: (row: ISystemUserDTO) => !row.isLocked,
+      },
+      {
+        icon: 'pi pi-unlock',
+        key: 'unlock',
+        titleKey: 'common.button.unlock',
+        color: 'success',
+        condition: (row: ISystemUserDTO) => row.isLocked ?? false,
+      },
+      {
+        icon: 'pi pi-history',
+        key: 'view_lock_reason',
+        titleKey: 'menu.system_user_lock_history',
+        color: 'primary',
       },
     ],
   };
@@ -360,17 +375,19 @@ export class SystemUserComponent implements OnInit {
         roleCodes: Object.keys(event.row.roles || {}),
       });
       this.userModal.show();
-    } else if (event.key === 'lock-unlock') {
+    } else if (event.key === 'lock' || event.key === 'unlock') {
       this.selectedRow = event.row;
-      this.lockReason = '';
+      this.lockReasonForm.reset();
       this.reasonModal.show();
+    } else if (event.key === 'view_lock_reason') {
+      this.router.navigate(['/system/system-users', event.row.id, 'lock-history']);
     }
   }
 
   async confirmLockUnlock() {
     const res = await this.systemUserService.lockUnlock({
       ...this.selectedRow,
-      lockReason: this.lockReason,
+      lockReason: this.lockReasonForm.get('lockReason')?.value,
     });
     if (res.body.status === 'OK') {
       GlobalToast.success(

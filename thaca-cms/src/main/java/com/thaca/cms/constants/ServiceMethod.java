@@ -17,6 +17,7 @@ public class ServiceMethod {
     public static final String CMS_EXPORT_TENANT = "cms.exportTenant";
 
     public static final String CMS_SEARCH_SYSTEM_USERS = "cms.searchSystemUsers";
+    public static final String CMS_SEARCH_USER_LOCK_HISTORY = "cms.searchUserLockHistory";
     public static final String CMS_GET_SYSTEM_USER = "cms.getSystemUser";
     public static final String CMS_CREATE_SYSTEM_USER = "cms.createSystemUser";
     public static final String CMS_UPDATE_SYSTEM_USER = "cms.updateSystemUser";

@@ -2,6 +2,7 @@ package com.thaca.auth.controllers.internal;
 
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
+import com.thaca.common.dtos.internal.UserLockHistoryDTO;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
@@ -27,6 +28,14 @@ public class InternalSystemUserController {
     @PostMapping("/cms/system-users/search")
     @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_SYSTEM_USERS, type = RequestType.INTERNAL)
     public ResponseEntity<SearchResponse<SystemUserDTO>> searchSystemUsers(SearchRequest<SystemUserDTO> request) {
+        return ResponseEntity.ok(process.process(request));
+    }
+
+    @PostMapping("/cms/system-users/search-lock-histories")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_USER_LOCK_HISTORY, type = RequestType.INTERNAL)
+    public ResponseEntity<SearchResponse<UserLockHistoryDTO>> searchUserLockHistories(
+        SearchRequest<UserLockHistoryDTO> request
+    ) {
         return ResponseEntity.ok(process.process(request));
     }
 

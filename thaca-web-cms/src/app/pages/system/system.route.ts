@@ -4,10 +4,11 @@ import { I18nResolver } from '../../core/i18n/i18n.resolver';
 import { RoleComponent } from './role/role.component';
 import { PermissionComponent } from './permission/permission.component';
 import { tenantRoutes } from './tenant/tenant.route';
-import { SystemUserComponent } from './system-user/system-user.component';
+import { systemUserRoutes } from './system-user/system-user.route';
 
 export const systemRoutes: Routes = [
   ...tenantRoutes,
+  ...systemUserRoutes,
   {
     path: 'settings',
     children: [
@@ -36,12 +37,6 @@ export const systemRoutes: Routes = [
     component: SystemSettingsComponent,
     resolve: { i18n: I18nResolver },
     data: { i18n: ['common'] },
-  },
-  {
-    path: 'system-users',
-    component: SystemUserComponent,
-    resolve: { i18n: I18nResolver },
-    data: { i18n: ['system_user'] },
   },
   {
     path: 'role-permission',

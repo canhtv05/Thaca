@@ -34,6 +34,7 @@
     "development_ui": "Development & UI",
     "ui_components": "UI Components",
     "user_list": "User List",
-    "system_user_management": "System User Management"
+    "system_user_management": "System User Management",
+    "system_user_lock_history": "System User Lock History"
   }
 }
