@@ -16,6 +16,7 @@
             label="{{ 'auth.usernameLabel' | translate }}"
             [required]="true"
             formControlName="username"
+            size="lg"
           />
           <validation-message
             [control]="form.get('username')"
@@ -31,6 +32,7 @@
             [required]="true"
             type="password"
             formControlName="password"
+            size="lg"
           />
           <validation-message
             [control]="form.get('password')"
@@ -47,7 +49,7 @@
           >{{ 'auth.forgotPassword' | translate }}</a
         >
       </div>
-      <thaca-button class="w-full rounded-full!" type="submit" variant="primary" size="md">
+      <thaca-button class="w-full rounded-full!" type="submit" variant="primary" size="lg">
         <span class="text-white"> {{ 'auth.login' | translate }}</span>
       </thaca-button>
     </form>

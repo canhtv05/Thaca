@@ -21,7 +21,6 @@
     "permission_grant": "Grant",
     "permission_deny": "Deny",
     "lock_reason": "Lock Reason",
-    "lock_reason_placeholder": "Enter user lock reason",
     "is_super_admin_description": "(*)Note: Super admin can perform all actions in the system.",
     "action": "Action",
     "reason": "Reason",

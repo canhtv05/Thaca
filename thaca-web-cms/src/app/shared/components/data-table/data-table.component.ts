@@ -31,6 +31,7 @@ import {
   IDropdownOption,
 } from '../thaca-dropdown/thaca-dropdown.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
 
 export interface ITableColumn {
   field: string;
@@ -215,7 +216,11 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   sanitizeHtml(html: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(html);
+    const clean = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['div', 'span', 'img', 'p', 'b', 'i', 'strong', 'em', 'br', 'ul', 'li', 'a'],
+      ALLOWED_ATTR: ['class', 'style', 'src', 'alt', 'href', 'target', 'rel'],
+    });
+    return this.sanitizer.bypassSecurityTrustHtml(clean);
   }
 
   async load(pageReq: IPaginationRequest) {

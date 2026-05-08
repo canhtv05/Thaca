@@ -1,0 +1,11 @@
+{
+  "plan": {
+    "group": {
+      "security": "Bảo mật & Ổn định",
+      "testing": "Kiểm thử & CI/CD",
+      "features": "Mở rộng tính năng",
+      "production": "Sẵn sàng Production",
+      "optimize": "Mở rộng & Tối ưu"
+    }
+  }
+}

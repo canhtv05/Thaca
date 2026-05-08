@@ -60,6 +60,13 @@ export const systemRoutes: Routes = [
     data: { i18n: ['common', 'plan'] },
   },
   {
+    path: 'project-plan',
+    loadComponent: () =>
+      import('./project-plan/project-plan.component').then((m) => m.ProjectPlanComponent),
+    resolve: { i18n: I18nResolver },
+    data: { i18n: ['common', 'project_plan'] },
+  },
+  {
     path: 'excel-test',
     loadComponent: () =>
       import('./excel-test/excel-test.component').then((m) => m.ExcelTestComponent),

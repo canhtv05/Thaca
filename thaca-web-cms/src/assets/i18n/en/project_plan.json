@@ -1,0 +1,11 @@
+{
+  "plan": {
+    "group": {
+      "security": "Security & Stability",
+      "testing": "Testing & CI/CD",
+      "features": "Feature Expansion",
+      "production": "Production Readiness",
+      "optimize": "Scale & Optimize"
+    }
+  }
+}

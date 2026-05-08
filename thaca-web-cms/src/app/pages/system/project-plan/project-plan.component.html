@@ -1,0 +1,62 @@
+<div class="flex flex-col gap-4 w-full">
+  <app-breadcrumb [title]="'menu.project_plan'" [items]="breadcrumbItems"></app-breadcrumb>
+
+  @for (group of groups; track group.title) {
+    <div class="plan-group">
+      <div class="plan-group-header">
+        <div class="plan-group-icon" [style.background-color]="group.color">
+          <i [class]="group.icon"></i>
+        </div>
+        <div class="plan-group-title">
+          <h2>{{ group.title }}</h2>
+          <span class="plan-group-count">{{ getDoneCount(group) }}/{{ group.features.length }} hoàn thành</span>
+        </div>
+      </div>
+
+      <div class="plan-features">
+        @for (feature of group.features; track feature.name) {
+          <div class="plan-feature" [class.plan-feature--expanded]="expandedFeature() === feature.name" [class.plan-feature--done]="feature.status === 'done'">
+            <div class="plan-feature-header" (click)="toggleFeature(feature.name)">
+              <i [class]="feature.icon" class="plan-feature-icon"></i>
+              <div class="plan-feature-info">
+                <span class="plan-feature-name">{{ feature.name }}</span>
+                <span class="plan-feature-desc">{{ feature.description }}</span>
+              </div>
+              <div class="plan-feature-meta">
+                <span class="plan-priority" [ngClass]="getPriorityClass(feature.priority)">{{ feature.priority }}</span>
+                <i class="pi pi-chevron-down plan-chevron" [class.rotated]="expandedFeature() === feature.name"></i>
+              </div>
+            </div>
+
+            @if (expandedFeature() === feature.name) {
+              <div class="plan-feature-body">
+                <div class="plan-flow">
+                  @for (step of feature.flows; track step.label; let i = $index) {
+                    <div class="plan-flow-step" [class.plan-flow-step--done]="step.done">
+                      <div class="plan-flow-marker">
+                        <div class="plan-flow-dot">
+                          @if (step.done) {
+                            <i class="pi pi-check"></i>
+                          } @else {
+                            <span>{{ i + 1 }}</span>
+                          }
+                        </div>
+                        @if (i < feature.flows.length - 1) {
+                          <div class="plan-flow-line"></div>
+                        }
+                      </div>
+                      <div class="plan-flow-content">
+                        <span class="plan-flow-label">{{ step.label }}</span>
+                        <span class="plan-flow-detail">{{ step.detail }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

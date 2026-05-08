@@ -194,7 +194,7 @@
         <thaca-textarea
           formControlName="lockReason"
           [label]="'system_user.lock_reason' | translate"
-          [placeholder]="'system_user.lock_reason_placeholder' | translate"
+          [placeholder]="'system_user.reason_placeholder' | translate"
           [required]="true"
         ></thaca-textarea>
         <validation-message [control]="userForm.get('lockReason')"></validation-message>
@@ -271,15 +271,12 @@
   [disableSubmit]="!lockReasonForm.get('lockReason')?.value"
   [loading]="isLoading()"
 >
-  <div class="flex flex-col gap-4">
-    <div class="form-control">
-      <thaca-textarea
-        formControlName="lockReason"
-        [label]="'system_user.lock_reason' | translate"
-        [placeholder]="'system_user.lock_reason_placeholder' | translate"
-        [required]="true"
-      ></thaca-textarea>
-      <validation-message [control]="lockReasonForm.get('lockReason')"></validation-message>
-    </div>
+  <div class="form-control">
+    <thaca-textarea
+      formControlName="lockReason"
+      [placeholder]="'system_user.reason_placeholder' | translate"
+      [required]="true"
+    ></thaca-textarea>
+    <validation-message [control]="lockReasonForm.get('lockReason')"></validation-message>
   </div>
 </thaca-modal>

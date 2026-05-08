@@ -1,7 +1,7 @@
 <main class="flex flex-col lg:flex-row items-center justify-center h-screen">
   <div class="fixed top-4 right-4" clickOutside (clickOutside)="showDropdown = false">
     <div
-      class="rounded-md px-2 relative py-1.5 min-w-[110px] bg-background border border-border flex items-center justify-start gap-2 cursor-pointer"
+      class="rounded-md px-2 relative py-1.5 min-w-[110px] bg-card border border-border flex items-center justify-start gap-2 cursor-pointer"
       (click)="onShowDropdown()"
     >
       <ng-icon [name]="APP_CONFIG_ICONS['solarGlobalBoldDuotone'].name" size="16" />
@@ -46,13 +46,13 @@
     }
   </div>
   <div class="order-1 lg:w-auto w-full flex justify-center items-center">
-    <ng-content></ng-content>
+    <div class="w-full card rounded-xl p-0"><ng-content></ng-content></div>
   </div>
-  <div class="hidden lg:block flex-1 order-1 lg:order-2">
+  <!-- <div class="hidden lg:block flex-1 order-1 lg:order-2">
     <img
       src="assets/media/imgs/bg-login.png"
       alt="Login background"
       class="w-[calc(100%-20px)] rounded-md h-[95vh] object-cover"
     />
-  </div>
+  </div> -->
 </main>

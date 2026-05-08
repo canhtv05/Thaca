@@ -26,6 +26,7 @@ import com.thaca.common.excel.ExcelEngine;
 import com.thaca.common.excel.schema.ExcelColumn;
 import com.thaca.common.excel.schema.ExcelDataType;
 import com.thaca.common.excel.schema.ExcelSchema;
+import com.thaca.framework.blocking.starter.configs.TaskExecutor;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.dtos.ApiHeader;
@@ -39,8 +40,6 @@ import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +58,7 @@ public class TenantService {
 
     private final TenantRepository tenantRepository;
     private final PlanRepository planRepository;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final TaskExecutor taskExecutor;
 
     @Transactional(readOnly = true)
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_TENANTS, type = ModeType.HANDLE)
@@ -357,12 +356,12 @@ public class TenantService {
     private Result getResult(SearchRequest<TenantDTO> request, Specification<Tenant> spec) {
         CompletableFuture<Page<Tenant>> tenantFuture = CompletableFuture.supplyAsync(
             () -> tenantRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt")),
-            executor
+            taskExecutor
         );
         CompletableFuture<Map<Long, PlanInfoProjection>> planMapFuture = CompletableFuture.supplyAsync(
             () ->
                 planRepository.findAllPlanInfo().stream().collect(Collectors.toMap(PlanInfoProjection::getId, p -> p)),
-            executor
+            taskExecutor
         );
         return CompletableFuture.allOf(tenantFuture, planMapFuture)
             .thenApply(v -> new Result(tenantFuture.join(), planMapFuture.join()))
