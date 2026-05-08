@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { AuthLayoutComponent } from '../../layouts/auth-layout/auth-layout.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -34,7 +34,7 @@ import { ThacaButtonComponent } from '../../shared/components/thaca-button/thaca
   ],
   templateUrl: './login.component.html',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -60,14 +60,42 @@ export class LoginComponent {
         Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&._-]).+$/),
       ],
     ],
+    captcha: ['', [Validators.required]],
   });
+
+  captchaImage = signal<string>('');
+  captchaId = signal<string>('');
+  captchaInputId = `thaca-input-captcha-${Math.random().toString(36).substring(2, 15)}`;
+
+  async ngOnInit(): Promise<void> {
+    this.generateCaptcha();
+  }
+
+  async generateCaptcha(): Promise<void> {
+    const captcha = await this.authService.generateCaptcha();
+    if (captcha.body.status === 'OK') {
+      this.captchaImage.set(captcha.body.data.image);
+      this.captchaId.set(captcha.body.data.captchaId);
+    }
+  }
+
+  async onReloadCaptcha(): Promise<void> {
+    this.generateCaptcha();
+    this.form.get('captcha')?.setValue('');
+    this.form.get('captcha')?.markAsTouched();
+    this.form.get('captcha')?.updateValueAndValidity();
+  }
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    const res = await this.authService.login(this.form.value as ILoginReq);
+    const loginReq: ILoginReq = {
+      ...(this.form.getRawValue() as unknown as ILoginReq),
+      captchaId: this.captchaId(),
+    };
+    const res = await this.authService.login(loginReq);
     const returnUrl =
       this.route.snapshot.queryParamMap.get('returnUrl') ||
       this.route.snapshot.queryParamMap.get('returnByUrl');
@@ -78,6 +106,11 @@ export class LoginComponent {
           this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : '/home');
         }
       });
+    } else {
+      this.generateCaptcha();
+      this.form.get('captcha')?.setValue('');
+      this.form.get('captcha')?.markAsTouched();
+      this.form.get('captcha')?.updateValueAndValidity();
     }
   }
 }

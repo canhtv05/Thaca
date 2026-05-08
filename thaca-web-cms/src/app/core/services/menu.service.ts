@@ -80,6 +80,11 @@ export class MenuService {
         },
         { label: 'menu.system_logs', icon: 'pi pi-server', routerLink: ['/system/logs'] },
         {
+          label: 'menu.project_plan',
+          icon: 'pi pi-map',
+          routerLink: ['/system/project-plan'],
+        },
+        {
           label: 'Excel Engine Test',
           icon: 'pi pi-file-excel',
           routerLink: ['/system/excel-test'],

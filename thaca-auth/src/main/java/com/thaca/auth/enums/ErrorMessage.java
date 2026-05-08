@@ -5,6 +5,27 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorMessage implements ErrorMessageRule {
+    CAPTCHA_GENERATION_FAILED(
+        "CAPTCHA.GENERATION.FAILED",
+        "Lỗi tạo captcha",
+        "Vui lòng thử lại",
+        "Captcha generation failed",
+        "Please try again"
+    ),
+    CAPTCHA_INVALID(
+        "CAPTCHA.INVALID",
+        "Mã captcha không chính xác",
+        "Vui lòng nhập đúng mã captcha",
+        "Captcha is incorrect",
+        "Please enter the correct captcha"
+    ),
+    CAPTCHA_EXPIRED(
+        "CAPTCHA.EXPIRED",
+        "Mã captcha đã hết hạn",
+        "Vui lòng tải lại captcha mới",
+        "Captcha has expired",
+        "Please reload a new captcha"
+    ),
     REFRESH_TOKEN_INVALID(
         "REFRESH.TOKEN.INVALID",
         "Refresh token không hợp lệ",

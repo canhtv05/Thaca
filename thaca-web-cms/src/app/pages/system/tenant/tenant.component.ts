@@ -121,7 +121,6 @@ export class TenantComponent implements OnInit {
                       src="${row.logoUrl}"
                       alt="Logo"
                       class="w-full h-full object-cover"
-                      onerror="this.style.display='none'"
                     />
                   </div>
                   <span class="text-[10px] text-foreground break-all text-center min-w-[150px]">

@@ -1,6 +1,9 @@
 import { HttpClient, HttpHeaders, HttpContext } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { SKIP_LOADING } from '../global/http-context';
+import { createHeader } from '../../utils/common.utils';
+import { IApiHeader } from '../models/common.model';
 
 export interface IRequestOptions {
   headers?: Record<string, string>;
@@ -40,12 +43,33 @@ export class GlobalHttp {
       const context = new HttpContext().set(SKIP_LOADING, !!options.skipLoading);
 
       return await firstValueFrom(
-        client.request<T>(method, url, {
-          body,
-          headers: httpHeaders,
-          context,
-          withCredentials: true,
-        }),
+        client
+          .request<T>(method, url, {
+            body,
+            headers: httpHeaders,
+            context,
+            withCredentials: true,
+          })
+          .pipe(
+            catchError((error) => {
+              const errorBody = error?.error;
+              if (errorBody && typeof errorBody === 'object') {
+                return of(errorBody as T);
+              }
+              return of({
+                header: createHeader() as IApiHeader,
+                body: {
+                  status: 'FAILED',
+                  data: {
+                    titleVi: 'Lỗi hệ thống',
+                    titleEn: 'System error',
+                    messageVi: error?.message || 'Đã xảy ra lỗi không xác định',
+                    messageEn: error?.message || 'Unknown error',
+                  },
+                },
+              } as T);
+            }),
+          ),
       );
     }
     const isFormData = body instanceof FormData;
@@ -60,11 +84,7 @@ export class GlobalHttp {
     });
     const data = await this.parseResponse(response);
     if (!response.ok) {
-      throw {
-        status: response.status,
-        message: data?.message || 'Request failed',
-        data,
-      };
+      return data as T;
     }
     return data as T;
   }

@@ -2,6 +2,7 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
+import com.thaca.auth.dtos.CaptchaDTO;
 import com.thaca.auth.dtos.LoginHistoryDTO;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.dtos.res.VerifyTokenRes;
@@ -14,6 +15,7 @@ import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.security.jwt.TokenProvider;
+import com.thaca.auth.utils.CaptchaUtils;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
@@ -30,6 +32,8 @@ import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
+import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
+import com.thaca.framework.blocking.starter.services.SessionStore;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
@@ -40,6 +44,7 @@ import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.CookieUtils;
+import com.thaca.framework.core.utils.FwUtils;
 import com.thaca.framework.core.utils.JsonF;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -50,6 +55,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -85,11 +91,31 @@ public class AuthService {
     private final LoginHistoryRepository loginHistoryRepository;
     private final SystemUserService systemUserService;
     private final LoginHistoryService loginHistoryService;
+    private final RedisCacheService redisCacheService;
+    private final SessionStore sessionStore;
+
+    @FwMode(name = ServiceMethod.AUTH_GENERATE_CAPTCHA, type = ModeType.HANDLE)
+    public CaptchaDTO generateCaptcha() {
+        try {
+            CaptchaDTO captcha = CaptchaUtils.generate(CaptchaDTO.Mode.AUTO);
+            String captchaId = UUID.randomUUID().toString().replace("-", "");
+            String key = sessionStore.getKeyCaptcha(captchaId);
+            String hashedAnswer = FwUtils.hexString(captcha.getAnswer().trim().toLowerCase());
+            redisCacheService.put(key, hashedAnswer, 1, TimeUnit.MINUTES);
+            return CaptchaDTO.builder().captchaId(captchaId).image(captcha.getImage()).build();
+        } catch (Exception e) {
+            throw new FwException(ErrorMessage.CAPTCHA_GENERATION_FAILED);
+        }
+    }
 
     @FwMode(name = ServiceMethod.AUTH_AUTHENTICATE, type = ModeType.VALIDATE)
     public void validateAuthenticate(LoginReq loginReq) {
         Validator<UserDTO> validator = new Validator<>(List.of(new UsernameRule<>(), new PasswordRule<>()));
         validator.validate(UserDTO.builder().username(loginReq.getUsername()).password(loginReq.getPassword()).build());
+        if (StringUtils.isAnyBlank(loginReq.getCaptchaId(), loginReq.getCaptcha())) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        verifyCaptcha(loginReq);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -446,5 +472,21 @@ public class AuthService {
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    private void verifyCaptcha(LoginReq loginReq) {
+        if (StringUtils.isBlank(loginReq.getCaptcha()) || StringUtils.isBlank(loginReq.getCaptchaId())) {
+            throw new FwException(ErrorMessage.CAPTCHA_INVALID);
+        }
+        String key = sessionStore.getKeyCaptcha(loginReq.getCaptchaId());
+        String expectedHash = redisCacheService.get(key, String.class);
+        if (expectedHash == null) {
+            throw new FwException(ErrorMessage.CAPTCHA_EXPIRED);
+        }
+        redisCacheService.evict(key);
+        String inputHash = FwUtils.hexString(loginReq.getCaptcha().trim().toLowerCase());
+        if (!expectedHash.equals(inputHash)) {
+            throw new FwException(ErrorMessage.CAPTCHA_INVALID);
+        }
     }
 }

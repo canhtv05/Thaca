@@ -1,6 +1,7 @@
 package com.thaca.auth.controllers.external;
 
 import com.thaca.auth.constants.ServiceMethod;
+import com.thaca.auth.dtos.CaptchaDTO;
 import com.thaca.auth.dtos.LoginHistoryDTO;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
@@ -26,6 +27,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserAuthController {
 
     private final FwApiProcess fwApiProcess;
+
+    @PostMapping("/generate-captcha")
+    @FwRequest(name = ServiceMethod.AUTH_GENERATE_CAPTCHA, type = RequestType.PUBLIC)
+    public ResponseEntity<CaptchaDTO> generateCaptcha() {
+        return ResponseEntity.ok(fwApiProcess.process(null));
+    }
 
     @PostMapping("/sign-in")
     @FwRequest(name = ServiceMethod.AUTH_AUTHENTICATE, type = RequestType.PUBLIC)

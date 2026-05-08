@@ -1,0 +1,242 @@
+/* ── Group Card ── */
+.plan-group {
+  background: var(--surface-card, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--surface-border, #e5e7eb);
+  overflow: hidden;
+}
+
+.plan-group-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--surface-border, #e5e7eb);
+}
+
+.plan-group-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.plan-group-title {
+  flex: 1;
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color, #1f2937);
+  }
+}
+
+.plan-group-count {
+  font-size: 12px;
+  color: var(--text-color-secondary, #6b7280);
+}
+
+.plan-features {
+  padding: 8px;
+}
+
+/* ── Feature Row ── */
+.plan-feature {
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--surface-hover, #f9fafb);
+  }
+
+  &--expanded {
+    background: var(--surface-ground, #f9fafb);
+  }
+
+  &--done .plan-feature-name {
+    text-decoration: line-through;
+    opacity: 0.55;
+  }
+}
+
+.plan-feature-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.plan-feature-icon {
+  font-size: 18px;
+  color: var(--primary-color, #3b82f6);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.plan-feature-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-feature-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color, #1f2937);
+  margin-bottom: 4px;
+}
+
+.plan-feature-desc {
+  display: block;
+  font-size: 13px;
+  color: var(--text-color-secondary, #6b7280);
+  line-height: 1.5;
+}
+
+.plan-feature-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.plan-priority {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  &.priority-high {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+  &.priority-medium {
+    background: #fffbeb;
+    color: #d97706;
+  }
+  &.priority-low {
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+}
+
+.plan-chevron {
+  font-size: 12px;
+  color: var(--text-color-secondary, #9ca3af);
+  transition: transform 0.2s ease;
+
+  &.rotated {
+    transform: rotate(180deg);
+  }
+}
+
+/* ── Feature Body (Flow) ── */
+.plan-feature-body {
+  padding: 0 16px 20px 16px;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plan-flow {
+  padding-left: 8px;
+}
+
+/* ── Flow Step ── */
+.plan-flow-step {
+  display: flex;
+  gap: 14px;
+  position: relative;
+
+  &--done .plan-flow-dot {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: #fff;
+  }
+
+  &--done .plan-flow-dot span {
+    display: none;
+  }
+
+  &--done .plan-flow-dot i {
+    display: block;
+    font-size: 10px;
+  }
+
+  &--done .plan-flow-label {
+    color: #22c55e;
+  }
+}
+
+.plan-flow-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.plan-flow-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--surface-border, #d1d5db);
+  background: var(--surface-card, #fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-color-secondary, #6b7280);
+  z-index: 1;
+
+  i {
+    display: none;
+  }
+}
+
+.plan-flow-line {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  background: var(--surface-border, #e5e7eb);
+}
+
+.plan-flow-content {
+  padding-bottom: 20px;
+  min-width: 0;
+}
+
+.plan-flow-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-color, #1f2937);
+  margin-bottom: 4px;
+}
+
+.plan-flow-detail {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-color-secondary, #6b7280);
+  line-height: 1.6;
+  white-space: pre-line;
+}
