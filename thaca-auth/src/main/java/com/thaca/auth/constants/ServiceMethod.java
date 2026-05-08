@@ -4,6 +4,7 @@ public class ServiceMethod {
 
     public static final String AUTH_FORGOT_PASSWORD_REQUEST = "auth.forgotPasswordRequest";
     public static final String AUTH_AUTHENTICATE = "auth.authenticate";
+    public static final String AUTH_GENERATE_CAPTCHA = "auth.generateCaptcha";
     public static final String AUTH_REFRESH_TOKEN = "auth.refreshToken";
     public static final String AUTH_VERIFY_TOKEN = "auth.verifyToken";
     public static final String AUTH_CREATE_USER = "auth.createUser";

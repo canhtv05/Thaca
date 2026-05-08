@@ -12,8 +12,6 @@ import { currentUser, isInitialAuthChecked } from '../stores/app.store';
 export class AuthService {
   private readonly config = inject(AppConfigService);
 
-  private profileRequest: Promise<any> | null = null;
-
   readonly user = computed(() => currentUser());
   readonly isAuthenticated = computed(() => !!currentUser());
 
@@ -39,30 +37,32 @@ export class AuthService {
     if (isInitialAuthChecked() && !force) {
       return { body: { status: 'FAILED' } } as any;
     }
-    if (this.profileRequest && !force) {
-      return this.profileRequest;
-    }
-    this.profileRequest = GlobalHttp.post<IApiPayload<IAuthUserDTO>>(
+    const profile = await GlobalHttp.post<IApiPayload<IAuthUserDTO>>(
       `${this.config.getApiUrl()}/cms/profile`,
       {
         header: createHeader(),
         body: createBody({}),
       },
-    )
-      .then((profile) => {
-        currentUser.set(profile.body?.data);
-        return profile;
-      })
-      .finally(() => {
-        this.profileRequest = null;
-        isInitialAuthChecked.set(true);
-      });
-    return this.profileRequest;
+    );
+    if (profile.body.status === 'OK') {
+      currentUser.set(profile.body.data);
+    }
+    return profile;
+  }
+
+  async generateCaptcha(): Promise<IApiPayload<{ image: string; captchaId: string }>> {
+    const payload: IApiPayload<any> = {
+      header: createHeader(),
+      body: createBody({}),
+    };
+    return await GlobalHttp.post<IApiPayload<{ image: string; captchaId: string }>>(
+      `${this.config.getApiUrl()}/auth/generate-captcha`,
+      payload,
+    );
   }
 
   logout() {
     currentUser.set(null);
     isInitialAuthChecked.set(false);
-    this.profileRequest = null;
   }
 }

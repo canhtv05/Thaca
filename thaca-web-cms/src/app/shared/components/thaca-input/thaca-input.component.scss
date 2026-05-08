@@ -154,7 +154,8 @@
   color: var(--foreground);
   opacity: 0.4;
   font-size: clamp(13px, calc(var(--thaca-control-fs, 0.78rem) * 1.15), 18px);
-  pointer-events: none;
+  // pointer-events: none;
+  cursor: pointer;
 
   &--left {
     left: var(--thaca-control-px, 12px);

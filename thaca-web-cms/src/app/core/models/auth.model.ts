@@ -1,6 +1,8 @@
 export interface ILoginReq {
   username: string;
   password: string;
+  captcha: string;
+  captchaId: string;
 }
 
 export interface IAuthUserDTO {

@@ -30,4 +30,9 @@ public class SessionStore {
         String envRunning = environment.getActiveProfiles()[0];
         return String.format("%s:forgot:password:%s", envRunning, token);
     }
+
+    public String getKeyCaptcha(String captchaId) {
+        String envRunning = environment.getActiveProfiles()[0];
+        return String.format("%s:captcha:%s", envRunning, captchaId);
+    }
 }

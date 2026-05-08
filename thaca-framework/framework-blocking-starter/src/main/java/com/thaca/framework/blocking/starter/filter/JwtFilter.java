@@ -5,6 +5,7 @@ import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
 import com.thaca.framework.core.context.TenantContext;
 import com.thaca.framework.core.utils.CommonUtils;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     Authentication authentication = jwtUtils.getBasicAuthentication(jwt);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    io.jsonwebtoken.Claims claims = jwtUtils.parseToken(jwt);
+                    Claims claims = jwtUtils.parseToken(jwt);
                     Long tenantId = claims.get("tenantId", Long.class);
                     if (tenantId != null) {
                         TenantContext.set(tenantId);

@@ -7,7 +7,7 @@
   --thaca-control-md-fs: 0.78rem;
   --thaca-control-md-px: 12px;
 
-  --thaca-control-lg-h: 40px;
+  --thaca-control-lg-h: 44px;
   --thaca-control-lg-fs: 0.85rem;
   --thaca-control-lg-px: 14px;
 
@@ -71,7 +71,7 @@ thaca-input.thi--lg .thaca-input {
 }
 
 .thaca-required {
-  color: #e24b4a;
+  color: var(--color-red-500);
   margin-left: 2px;
 }
 

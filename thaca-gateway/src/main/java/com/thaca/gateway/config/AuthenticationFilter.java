@@ -69,19 +69,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 if (status.equals(TokenStatus.EXPIRED) && StringUtils.hasText(refreshToken)) {
                     return refreshAndContinue(exchange, chain, refreshToken);
                 }
-                log.warn(
-                    "[AuthenticationFilter] Invalid token detected, rejecting request to: {}",
-                    exchange.getRequest().getPath()
-                );
-                return unauthenticated(exchange.getResponse());
+                return chain.filter(exchange);
             })
             .onErrorResume(e -> {
-                log.error(
-                    "[AuthenticationFilter] Token validation error, rejecting request to: {}",
-                    exchange.getRequest().getPath(),
-                    e
-                );
-                return unauthenticated(exchange.getResponse());
+                return chain.filter(exchange);
             });
     }
 
