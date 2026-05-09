@@ -1,4 +1,4 @@
-import { Component, inject, signal, HostListener } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LayoutService } from '../../shared/components/sidebar/sidebar.service';
 import { ThemeService } from '../../core/theme/theme.service';
@@ -9,6 +9,7 @@ import { ClickOutsideDirective } from '../../shared/directives/click-outside.dir
 import { HeaderSearchComponent } from './header-search/header-search.component';
 import { APP_CONFIG_ICONS } from '../../core/configs/app-config.icon';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-header-layout',
@@ -29,6 +30,7 @@ export class HeaderLayoutComponent {
   translateService = inject(TranslateService);
   i18nService = inject(I18nService);
   router = inject(Router);
+  authService = inject(AuthService);
 
   currentUser = currentUser;
   APP_CONFIG_ICONS = APP_CONFIG_ICONS;
@@ -68,8 +70,8 @@ export class HeaderLayoutComponent {
     this.closeUserMenu();
   }
 
-  logout() {
-    localStorage.removeItem('token');
+  async logout() {
+    await this.authService.logoutAsync();
     this.router.navigate(['/login']);
   }
 }

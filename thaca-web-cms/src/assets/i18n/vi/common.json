@@ -52,6 +52,7 @@
       "lock": "Khóa",
       "unlock": "Mở khóa"
     },
-    "infinite": "Vô thời hạn"
+    "infinite": "Vô thời hạn",
+    "audit": "Thông tin nhật ký"
   }
 }

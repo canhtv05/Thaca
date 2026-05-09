@@ -38,6 +38,12 @@ public class InternalAuthController {
         return ResponseEntity.ok(process.process(loginReq));
     }
 
+    @PostMapping("/cms/sign-out")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_LOGOUT, type = RequestType.INTERNAL)
+    public ResponseEntity<Void> signOut() {
+        return ResponseEntity.ok(process.process(null));
+    }
+
     @PostMapping("/cms/profile")
     @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_PROFILE, type = RequestType.INTERNAL)
     public ResponseEntity<SystemUserDTO> getProfile() {

@@ -301,13 +301,15 @@ public class AuthService {
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_LOGOUT, type = ModeType.HANDLE)
     public void logout() {
-        HttpServletResponse response = (
-            (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
-        ).getResponse();
         String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : ChannelType.WEB.name();
-        tokenProvider.revokeToken(ChannelType.valueOf(channel));
-        cookieUtils.deleteCookie(response);
-        SecurityUtils.clear();
+        logoutWithChannel(channel);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_LOGOUT, type = ModeType.HANDLE)
+    public void logoutCms() {
+        String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : ChannelType.CMS.name();
+        logoutWithChannel(channel);
     }
 
     @Transactional(readOnly = true)
@@ -488,5 +490,14 @@ public class AuthService {
         if (!expectedHash.equals(inputHash)) {
             throw new FwException(ErrorMessage.CAPTCHA_INVALID);
         }
+    }
+
+    private void logoutWithChannel(String channel) {
+        HttpServletResponse response = (
+            (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
+        ).getResponse();
+        tokenProvider.revokeToken(ChannelType.valueOf(channel));
+        cookieUtils.deleteCookie(response);
+        SecurityUtils.clear();
     }
 }

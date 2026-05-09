@@ -25,6 +25,15 @@
     "action": "Action",
     "reason": "Reason",
     "reason_placeholder": "Enter reason",
+    "detail_title": "User: {{username}}",
+    "detail": {
+      "user_info": "User Information",
+      "roles_permissions": "Roles & Permissions",
+      "roles_count": "roles",
+      "permissions_count": "permissions",
+      "permissions": "permissions",
+      "no_roles": "No roles assigned"
+    },
     "modal": {
       "create_title": "Create System User",
       "update_title": "Update System User",
@@ -52,7 +61,10 @@
       "lock_unlock": {
         "titleSuccess": "Action Success",
         "messageSuccess": "User lock status changed successfully."
-      }
+      },
+      "error": "Error",
+      "user_id_is_invalid": "User ID is invalid",
+      "user_not_found": "User not found"
     }
   }
 }

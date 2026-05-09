@@ -101,11 +101,7 @@ export class LoginComponent implements OnInit {
       this.route.snapshot.queryParamMap.get('returnByUrl');
 
     if (res.body.status === 'OK') {
-      this.authService.getUserProfile().then((res) => {
-        if (res.body.status === 'OK') {
-          this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : '/home');
-        }
-      });
+      this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : '/home');
     } else {
       this.generateCaptcha();
       this.form.get('captcha')?.setValue('');

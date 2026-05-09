@@ -19,6 +19,9 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/sign-in", name = ServiceMethod.CMS_AUTHENTICATE)
     AuthenticateRes signIn(LoginReq loginReq);
 
+    @FwInternalApi(path = "/cms/sign-out", name = ServiceMethod.CMS_LOGOUT)
+    Void signOut();
+
     @FwInternalApi(path = "/cms/profile", name = ServiceMethod.CMS_GET_PROFILE)
     SystemUserDTO getProfile();
 

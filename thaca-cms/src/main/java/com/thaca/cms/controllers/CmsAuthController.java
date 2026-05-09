@@ -26,6 +26,12 @@ public class CmsAuthController {
         return ResponseEntity.ok(process.process(loginReq));
     }
 
+    @PostMapping("/sign-out")
+    @FwRequest(name = ServiceMethod.CMS_LOGOUT, type = RequestType.PROTECTED)
+    public ResponseEntity<Void> signOut() {
+        return ResponseEntity.ok(process.process(null));
+    }
+
     @PostMapping("/profile")
     @FwRequest(name = ServiceMethod.CMS_GET_PROFILE, type = RequestType.PROTECTED)
     public ResponseEntity<SystemUserDTO> getProfile() {

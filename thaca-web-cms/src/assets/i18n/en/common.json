@@ -52,6 +52,7 @@
       "lock": "Lock",
       "unlock": "Unlock"
     },
-    "infinite": "Infinite"
+    "infinite": "Infinite",
+    "audit": "Audit Information"
   }
 }
