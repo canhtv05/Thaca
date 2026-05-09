@@ -23,6 +23,7 @@ import org.slf4j.MDC;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -65,6 +66,58 @@ public class InternalApiClient {
             handleError(ex);
             throw ex;
         }
+    }
+
+    public <T> T postMultipart(
+        String url,
+        MultiValueMap<String, Object> parts,
+        ParameterizedTypeReference<ApiPayload<T>> responseType
+    ) {
+        HttpHeaders headers = buildMultipartHeaders();
+        if (!parts.containsKey("header")) {
+            ApiHeader header = FwContextHeader.get();
+            if (header == null) {
+                header = ApiHeader.builder().build();
+            }
+            parts.add("header", JsonF.toJson(header));
+        }
+        if (!parts.containsKey("body")) {
+            ApiBody<?> body = ApiBody.builder().build();
+            parts.add("body", JsonF.toJson(body));
+        }
+        HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(parts, headers);
+        try {
+            ResponseEntity<ApiPayload<T>> response = restTemplate.exchange(url, HttpMethod.POST, entity, responseType);
+            forwardCookies(response);
+            ApiPayload<T> payload = response.getBody();
+            if (payload == null || payload.getBody() == null) {
+                return null;
+            }
+            return payload.getBody().getData();
+        } catch (HttpStatusCodeException ex) {
+            handleError(ex);
+            throw ex;
+        }
+    }
+
+    private HttpHeaders buildMultipartHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.set(FwHttpHeaderConstants.INTERNAL_CALL_HEADER, "true");
+        headers.set(HttpHeaders.AUTHORIZATION, "Basic " + frameworkProperties.getHttpClient().getApiKey());
+
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attr != null) {
+            HttpServletRequest req = attr.getRequest();
+            copyIfPresent(headers, HttpHeaders.COOKIE, req.getHeader(HttpHeaders.COOKIE));
+            copyIfPresent(headers, HttpHeaders.USER_AGENT, req.getHeader(HttpHeaders.USER_AGENT));
+
+            String bearer = req.getHeader(HttpHeaders.AUTHORIZATION);
+            if (StringUtils.isNotBlank(bearer) && bearer.startsWith("Bearer ")) {
+                headers.set(HttpHeaders.AUTHORIZATION, bearer);
+            }
+        }
+        return headers;
     }
 
     private <T> HttpEntity<ApiPayload<Object>> buildRequestEntity(T requestData) {

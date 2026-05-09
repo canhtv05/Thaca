@@ -18,6 +18,24 @@
     "locked_placeholder": "Chọn trạng thái khóa",
     "modal": {
       "create_title": "Thêm người dùng"
+    },
+    "import": {
+      "success": "Nhập thành công {{count}} người dùng",
+      "success_title": "Nhập dữ liệu thành công",
+      "partial_success": "Nhập dữ liệu có lỗi",
+      "has_errors": "Có {{errorCount}} lỗi, {{successCount}} bản ghi hợp lệ",
+      "error_unknown": "Đã xảy ra lỗi khi nhập dữ liệu",
+      "total_rows": "Tổng số dòng",
+      "success_count": "Thành công",
+      "error_count": "Lỗi",
+      "error_row": "Dòng",
+      "error_column": "Cột",
+      "error_column_key": "Khóa cột",
+      "error_value": "Giá trị",
+      "error_message": "Lỗi",
+      "download_export_error": "Tải file lỗi (Excel)",
+      "export_error_done": "Đã tải file xuất lỗi",
+      "export_error_failed": "Không tải được file xuất lỗi"
     }
   }
 }

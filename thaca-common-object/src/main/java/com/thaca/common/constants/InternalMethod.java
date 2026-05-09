@@ -5,11 +5,13 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_ACTIVE_USER = "internal.activeUserByUserName";
     public static final String INTERNAL_CMS_AUTHENTICATE = "internal.cmsAuthenticate";
     public static final String INTERNAL_CMS_LOGOUT = "internal.cmsLogout";
-    public static final String INTERNAL_CMS_SEARCH_USERS = "internal.cmsSearchUsers";
     public static final String INTERNAL_CMS_GET_USER_BY_ID = "internal.cmsGetUserById";
     public static final String INTERNAL_CMS_LOCK_USER = "internal.cmsLockUser";
     public static final String INTERNAL_CMS_UNLOCK_USER = "internal.cmsUnlockUser";
     public static final String INTERNAL_CMS_GET_PROFILE = "internal.cmsGetProfile";
+
+    public static final String INTERNAL_CMS_SEARCH_USERS = "internal.cmsSearchUsers";
+    public static final String INTERNAL_CMS_DOWNLOAD_USER_TEMPLATE = "internal.cmsDownloadUserTemplate";
 
     public static final String INTERNAL_CMS_SEARCH_ROLES = "internal.cmsSearchRoles";
     public static final String INTERNAL_CMS_GET_ALL_ROLES = "internal.cmsGetAllRoles";
@@ -43,4 +45,6 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_EXPORT_ROLES = "internal.cmsExportRoles";
     public static final String INTERNAL_CMS_EXPORT_PERMISSIONS = "internal.cmsExportPermissions";
     public static final String INTERNAL_CMS_SEARCH_USER_LOCK_HISTORY = "internal.searchUserLockHistory";
+    public static final String INTERNAL_CMS_IMPORT_USERS = "internal.cmsImportUsers";
+    public static final String INTERNAL_CMS_EXPORT_USER_IMPORT_ERROR = "internal.cmsExportUserImportError";
 }

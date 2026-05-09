@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import lombok.Getter;
 
 /**
  * Defines a single column in an Excel schema.
  * Uses builder pattern for fluent configuration — no annotations, no
  * reflection.
  */
+@Getter
 public class ExcelColumn {
 
     private final String key;
@@ -38,54 +40,6 @@ public class ExcelColumn {
         this.customValidator = builder.customValidator;
         this.comment = builder.comment;
         this.dateFormat = builder.dateFormat;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public String getHeader() {
-        return header;
-    }
-
-    public boolean isRequired() {
-        return required;
-    }
-
-    public ExcelDataType getDataType() {
-        return dataType;
-    }
-
-    public Integer getMaxLength() {
-        return maxLength;
-    }
-
-    public Double getMinValue() {
-        return minValue;
-    }
-
-    public Double getMaxValue() {
-        return maxValue;
-    }
-
-    public List<String> getAllowedValues() {
-        return allowedValues;
-    }
-
-    public Function<String, Object> getValueMapper() {
-        return valueMapper;
-    }
-
-    public BiFunction<Object, RowContext, String> getCustomValidator() {
-        return customValidator;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public String getDateFormat() {
-        return dateFormat;
     }
 
     /**

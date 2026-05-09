@@ -13,4 +13,6 @@ public @interface FwRequest {
     String name() default "";
 
     RequestType type() default RequestType.PUBLIC;
+
+    boolean isSuperAdmin() default false;
 }

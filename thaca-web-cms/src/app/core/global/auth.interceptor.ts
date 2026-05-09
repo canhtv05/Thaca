@@ -7,8 +7,8 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
-import { catchError, finalize } from 'rxjs/operators';
+import { from, Observable, throwError } from 'rxjs';
+import { catchError, finalize, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { currentLang, isLoading } from '../stores/app.store';
@@ -34,46 +34,50 @@ export const authInterceptor: HttpInterceptorFn = (
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      const lang = currentLang() || 'vi';
-      let title = lang === 'vi' ? 'Lỗi hệ thống' : 'System error';
-      let message =
-        lang === 'vi' ? 'Đã xảy ra lỗi không xác định' : 'Unknown internal server error';
+      return from(extractBackendError(error)).pipe(
+        switchMap((backendError) => {
+          const lang = currentLang() || 'vi';
+          let title = lang === 'vi' ? 'Lỗi hệ thống' : 'System error';
+          let message =
+            lang === 'vi' ? 'Đã xảy ra lỗi không xác định' : 'Unknown internal server error';
 
-      const backendError = error?.error?.body?.data;
-      if (backendError) {
-        if (lang === 'vi') {
-          title = backendError.titleVi || title;
-          message = backendError.messageVi || message;
-        } else {
-          title = backendError.titleEn || title;
-          message = backendError.messageEn || message;
-        }
-      }
-
-      switch (error.status) {
-        case 401:
-          authService.logout();
-          router.navigate(['/login'], { queryParams: { returnUrl: router.url } });
-          toastrService.error(message, title);
-          return throwError(() => error);
-        case 403:
-          router.navigate(['/403']);
-          toastrService.warning(message, title);
-          break;
-        case 0:
-          title = lang === 'vi' ? 'Lỗi mạng' : 'Network error';
-          message = lang === 'vi' ? 'Không thể kết nối đến máy chủ' : 'Cannot connect to server';
-          toastrService.error(message, title);
-          break;
-        default:
-          if (error.status >= 500) {
-            toastrService.error(message, title);
-          } else {
-            toastrService.warning(message, title);
+          if (backendError) {
+            if (lang === 'vi') {
+              title = backendError.titleVi || title;
+              message = backendError.messageVi || message;
+            } else {
+              title = backendError.titleEn || title;
+              message = backendError.messageEn || message;
+            }
           }
-          break;
-      }
-      return throwError(() => error);
+
+          switch (error.status) {
+            case 401:
+              authService.logout();
+              router.navigate(['/login'], { queryParams: { returnUrl: router.url } });
+              toastrService.error(message, title);
+              break;
+            case 403:
+              router.navigate(['/403']);
+              toastrService.warning(message, title);
+              break;
+            case 0:
+              title = lang === 'vi' ? 'Lỗi mạng' : 'Network error';
+              message =
+                lang === 'vi' ? 'Không thể kết nối đến máy chủ' : 'Cannot connect to server';
+              toastrService.error(message, title);
+              break;
+            default:
+              if (error.status >= 500) {
+                toastrService.error(message, title);
+              } else {
+                toastrService.warning(message, title);
+              }
+              break;
+          }
+          return throwError(() => error);
+        }),
+      );
     }),
     finalize(() => {
       if (!skipLoading) {
@@ -82,3 +86,23 @@ export const authInterceptor: HttpInterceptorFn = (
     }),
   );
 };
+
+async function extractBackendError(error: HttpErrorResponse): Promise<any> {
+  const raw = error?.error;
+
+  if (raw instanceof Blob && raw.type?.includes('json')) {
+    try {
+      const text = await raw.text();
+      const json = JSON.parse(text);
+      return json?.body?.data || null;
+    } catch {
+      return null;
+    }
+  }
+
+  if (raw && typeof raw === 'object') {
+    return raw?.body?.data || null;
+  }
+
+  return null;
+}

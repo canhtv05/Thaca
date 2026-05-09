@@ -33,6 +33,24 @@ export class GlobalToast {
     }
   }
 
+  static errorPlain(message: string, title?: string) {
+    if (this.toastr) {
+      this.toastr.error(message, title);
+    }
+  }
+
+  static warnPlain(message: string, title?: string) {
+    if (this.toastr) {
+      this.toastr.warning(message, title);
+    }
+  }
+
+  static successPlain(message: string, title?: string) {
+    if (this.toastr) {
+      this.toastr.success(message, title);
+    }
+  }
+
   static warn(messageKey: string, titleKey?: string) {
     if (this.toastr) {
       this.toastr.warning(

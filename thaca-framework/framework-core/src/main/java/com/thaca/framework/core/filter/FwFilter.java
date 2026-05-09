@@ -47,17 +47,43 @@ public class FwFilter extends OncePerRequestFilter {
         FilterChain filterChain
     ) throws ServletException, IOException {
         String contentType = request.getContentType();
-        if (contentType == null || !contentType.toLowerCase().contains(MediaType.APPLICATION_JSON_VALUE)) {
+        boolean isMultipart =
+            contentType != null && contentType.toLowerCase().contains(MediaType.MULTIPART_FORM_DATA_VALUE);
+
+        if (
+            contentType == null ||
+            (!contentType.toLowerCase().contains(MediaType.APPLICATION_JSON_VALUE) && !isMultipart)
+        ) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        CachedBodyRequestWrapper requestWrapper = new CachedBodyRequestWrapper(request);
+        HttpServletRequest requestWrapper;
+        ApiPayload<?> apiPayload = null;
+        byte[] requestBody = new byte[0];
+        if (isMultipart) {
+            MultipartRequestWrapper multipartWrapper = new MultipartRequestWrapper(request);
+            requestWrapper = multipartWrapper;
+            apiPayload = multipartWrapper.extractEnvelope();
+            if (apiPayload != null) {
+                try {
+                    FwContextHeader.set(buildContextHeader(apiPayload));
+                    FwContextBody.set(buildContextBody(apiPayload));
+                } catch (Exception e) {
+                    log.warn("Cannot set FwContext for multipart request: {}", e.getMessage());
+                }
+            }
+        } else {
+            CachedBodyRequestWrapper cachedWrapper = new CachedBodyRequestWrapper(request);
+            requestWrapper = cachedWrapper;
+            requestBody = cachedWrapper.getCachedBody();
+        }
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
 
-        byte[] requestBody = requestWrapper.getCachedBody();
-        ApiPayload<?> envelope = JsonF.jsonToObject(requestBody, ApiPayload.class);
-        String transId = resolveTransId(envelope);
+        if (!isMultipart) {
+            apiPayload = JsonF.jsonToObject(requestBody, ApiPayload.class);
+        }
+        String transId = resolveTransId(apiPayload);
         String traceId = resolveTraceId(request);
         String spanId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
         MDC.put("transId", transId);
@@ -65,8 +91,8 @@ public class FwFilter extends OncePerRequestFilter {
         MDC.put("spanId", spanId);
 
         try {
-            FwContextHeader.set(buildContextHeader(envelope));
-            FwContextBody.set(buildContextBody(envelope));
+            FwContextHeader.set(buildContextHeader(apiPayload));
+            FwContextBody.set(buildContextBody(apiPayload));
         } catch (Exception e) {
             log.warn("Cannot set FwContext: {}", e.getMessage());
         }
@@ -85,18 +111,18 @@ public class FwFilter extends OncePerRequestFilter {
         response.setHeader(FwHttpHeaderConstants.SPAN_ID_HEADER, spanId);
 
         if (
-            envelope == null ||
-            envelope.getHeader() == null ||
-            envelope.getBody() == null ||
-            envelope.getBody().getData() == null
+            apiPayload == null ||
+            apiPayload.getHeader() == null ||
+            apiPayload.getHeader().getLanguage() == null ||
+            apiPayload.getBody() == null
         ) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
             ApiPayload<?> errorRes = ApiPayload.error(CommonErrorMessage.REQUEST_INVALID_PARAMS);
-            if (envelope != null && envelope.getHeader() != null) {
-                errorRes.setHeader(envelope.getHeader());
+            if (apiPayload != null && apiPayload.getHeader() != null) {
+                errorRes.setHeader(apiPayload.getHeader());
             }
             this.processLog(response, errorRes, startTime, method, uri, username);
             return;
@@ -104,16 +130,16 @@ public class FwFilter extends OncePerRequestFilter {
 
         if (
             requestBody.length > 0 &&
-            !ChannelType.WEB.name().equals(envelope.getHeader().getChannel()) &&
-            !ChannelType.MOBILE.name().equals(envelope.getHeader().getChannel()) &&
-            !ChannelType.CMS.name().equals(envelope.getHeader().getChannel())
+            !ChannelType.WEB.name().equals(apiPayload.getHeader().getChannel()) &&
+            !ChannelType.MOBILE.name().equals(apiPayload.getHeader().getChannel()) &&
+            !ChannelType.CMS.name().equals(apiPayload.getHeader().getChannel())
         ) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
             ApiPayload<?> channelError = ApiPayload.error(CommonErrorMessage.CHANNEL_INVALID);
-            channelError.setHeader(envelope.getHeader());
+            channelError.setHeader(apiPayload.getHeader());
 
             this.processLog(response, channelError, startTime, method, uri, username);
             return;
@@ -138,7 +164,7 @@ public class FwFilter extends OncePerRequestFilter {
                     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
                     ApiPayload<?> dupError = ApiPayload.error(CommonErrorMessage.DUPLICATE_TRANS_ID);
-                    dupError.setHeader(envelope.getHeader());
+                    dupError.setHeader(apiPayload.getHeader());
 
                     this.processLog(response, dupError, startTime, method, uri, username);
                     return;

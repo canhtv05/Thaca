@@ -1,13 +1,15 @@
 package com.thaca.common.excel.schema;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import lombok.Getter;
 
 /**
  * Defines the complete schema for an Excel import/export operation.
- * This is the central configuration object — everything is driven by this schema.
+ * This is the central configuration object — everything is driven by this
+ * schema.
  */
+@Getter
 public class ExcelSchema {
 
     private final String sheetName;
@@ -25,35 +27,7 @@ public class ExcelSchema {
         this.strictHeader = builder.strictHeader;
         this.failFast = builder.failFast;
         this.maxRows = builder.maxRows;
-        this.columns = Collections.unmodifiableList(new ArrayList<>(builder.columns));
-    }
-
-    public String getSheetName() {
-        return sheetName;
-    }
-
-    public int getHeaderRowIndex() {
-        return headerRowIndex;
-    }
-
-    public int getDataStartRowIndex() {
-        return dataStartRowIndex;
-    }
-
-    public boolean isStrictHeader() {
-        return strictHeader;
-    }
-
-    public boolean isFailFast() {
-        return failFast;
-    }
-
-    public int getMaxRows() {
-        return maxRows;
-    }
-
-    public List<ExcelColumn> getColumns() {
-        return columns;
+        this.columns = List.copyOf(builder.columns);
     }
 
     /**

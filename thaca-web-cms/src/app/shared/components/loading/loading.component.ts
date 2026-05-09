@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect } from '@angular/core';
+import { Component } from '@angular/core';
 import { isLoading } from '../../../core/stores/app.store';
 import { TranslateModule } from '@ngx-translate/core';
 

@@ -28,6 +28,8 @@
       "back": "Quay lại",
       "search": "Tìm kiếm",
       "export": "Xuất bảng",
+      "download_template": "Tải template",
+      "import": "Nhập dữ liệu",
       "lock": "Khóa",
       "unlock": "Mở khóa",
       "ok": "Đồng ý",
@@ -53,6 +55,8 @@
       "unlock": "Mở khóa"
     },
     "infinite": "Vô thời hạn",
-    "audit": "Thông tin nhật ký"
+    "audit": "Thông tin nhật ký",
+    "error": "Lỗi",
+    "success": "Thành công"
   }
 }

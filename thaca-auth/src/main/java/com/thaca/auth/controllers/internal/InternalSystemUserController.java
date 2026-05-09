@@ -6,7 +6,6 @@ import com.thaca.common.dtos.internal.UserLockHistoryDTO;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
-import com.thaca.framework.core.annotations.FwSecurity;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
 import com.thaca.framework.core.utils.CommonUtils;
@@ -58,15 +57,17 @@ public class InternalSystemUserController {
     }
 
     @PostMapping("/cms/system-users/lock-unlock")
-    @FwSecurity(isSuperAdmin = true)
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_SYSTEM_USER, type = RequestType.INTERNAL)
+    @FwRequest(
+        name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_SYSTEM_USER,
+        type = RequestType.INTERNAL,
+        isSuperAdmin = true
+    )
     public ResponseEntity<Void> lockUnlockSystemUser(SystemUserDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/cms/system-users/export")
-    @FwSecurity(isSuperAdmin = true)
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_EXPORT_SYSTEM_USER, type = RequestType.INTERNAL)
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_EXPORT_SYSTEM_USER, type = RequestType.INTERNAL, isSuperAdmin = true)
     public void exportSystemUsers(SearchRequest<SystemUserDTO> request, HttpServletResponse response)
         throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(request), "thaca-system-user-export-{{date}}.xlsx");
