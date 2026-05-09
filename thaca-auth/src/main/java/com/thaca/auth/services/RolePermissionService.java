@@ -18,17 +18,20 @@ import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.PermissionEffect;
+import com.thaca.common.excel.ExcelEngine;
+import com.thaca.common.excel.schema.ExcelColumn;
+import com.thaca.common.excel.schema.ExcelDataType;
+import com.thaca.common.excel.schema.ExcelSchema;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -196,5 +199,94 @@ public class RolePermissionService {
             }
         }
         systemCredentialRepository.save(sc);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Export Excel
+    // ═══════════════════════════════════════════════════════════════
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_ROLES, type = ModeType.HANDLE)
+    public byte[] exportRoles(SearchRequest<RoleDTO> request) throws IOException {
+        boolean isVietnamese = "vi".equalsIgnoreCase(FwContextHeader.get().getLanguage());
+        Specification<Role> spec = createRoleSpecification(request);
+
+        Sort sort =
+            request.getPage() != null && StringUtils.isNotBlank(request.getPage().getSortField())
+                ? request.getPage().toPageable(Sort.Direction.DESC, "updatedAt").getSort()
+                : Sort.by(Sort.Direction.DESC, "updatedAt");
+
+        List<Role> roles = roleRepository.findAll(spec, sort);
+        List<RoleDTO> data = roles.stream().map(RoleMapper::fromEntity).toList();
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (RoleDTO role : data) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("code", role.getCode());
+            row.put("description", role.getDescription() != null ? role.getDescription() : "");
+            rows.add(row);
+        }
+        return ExcelEngine.exportData(buildRoleSchema(isVietnamese), rows);
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_PERMISSIONS, type = ModeType.HANDLE)
+    public byte[] exportPermissions(SearchRequest<PermissionDTO> request) throws IOException {
+        boolean isVietnamese = "vi".equalsIgnoreCase(FwContextHeader.get().getLanguage());
+
+        Specification<Permission> spec = createPermissionSpecification(request);
+        Sort sort =
+            request.getPage() != null && StringUtils.isNotBlank(request.getPage().getSortField())
+                ? request.getPage().toPageable(Sort.Direction.DESC, "updatedAt").getSort()
+                : Sort.by(Sort.Direction.DESC, "updatedAt");
+
+        List<Permission> permissions = permissionRepository.findAll(spec, sort);
+        List<PermissionDTO> data = permissions
+            .stream()
+            .map(p -> PermissionMapper.fromEntity(p, null, null))
+            .toList();
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (PermissionDTO perm : data) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("code", perm.getCode());
+            row.put("description", perm.getDescription() != null ? perm.getDescription() : "");
+            rows.add(row);
+        }
+        return ExcelEngine.exportData(buildPermissionSchema(isVietnamese), rows);
+    }
+
+    private ExcelSchema buildRoleSchema(boolean isVietnamese) {
+        return ExcelSchema.builder()
+            .sheetName(isVietnamese ? "Danh sách vai trò" : "Roles")
+            .addColumn(
+                ExcelColumn.builder("code", isVietnamese ? "Mã vai trò" : "Role Code")
+                    .required()
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("description", isVietnamese ? "Mô tả" : "Description")
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .build();
+    }
+
+    private ExcelSchema buildPermissionSchema(boolean isVietnamese) {
+        return ExcelSchema.builder()
+            .sheetName(isVietnamese ? "Danh sách quyền" : "Permissions")
+            .addColumn(
+                ExcelColumn.builder("code", isVietnamese ? "Mã quyền" : "Permission Code")
+                    .required()
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("description", isVietnamese ? "Mô tả" : "Description")
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .build();
     }
 }

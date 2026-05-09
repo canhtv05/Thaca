@@ -24,7 +24,7 @@ export class ThacaButtonComponent {
 
   @Input() class = '';
   @Input() variant: ButtonVariant = 'primary';
-  @Input() size: ButtonSize = 'md';
+  @Input() size: ButtonSize = 'lg';
   @Input() loading = false;
   @Input() disabled = false;
   @Input() type: 'button' | 'submit' | 'reset' = 'button';

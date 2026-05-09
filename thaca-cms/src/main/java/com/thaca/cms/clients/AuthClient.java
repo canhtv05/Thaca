@@ -67,6 +67,9 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/roles/all", name = ServiceMethod.CMS_GET_ALL_ROLES)
     List<RoleDTO> getAllRoles();
 
+    @FwInternalApi(path = "/cms/roles/export", name = ServiceMethod.CMS_EXPORT_ROLES)
+    byte[] exportRoles(SearchRequest<RoleDTO> request);
+
     // ==========================================
     // PERMISSION MANAGEMENT
     // ==========================================
@@ -78,6 +81,9 @@ public interface AuthClient {
 
     @FwInternalApi(path = "/cms/permissions/by-roles", name = ServiceMethod.CMS_GET_PERMISSIONS_BY_ROLES)
     List<PermissionDTO> getPermissionsByRoles(RoleCodesReq request);
+
+    @FwInternalApi(path = "/cms/permissions/export", name = ServiceMethod.CMS_EXPORT_PERMISSIONS)
+    byte[] exportPermissions(SearchRequest<PermissionDTO> request);
 
     // ==========================================
     // TENANT MANAGEMENT

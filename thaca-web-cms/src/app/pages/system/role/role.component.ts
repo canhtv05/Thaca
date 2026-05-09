@@ -14,6 +14,7 @@ import { ThacaButtonComponent } from '../../../shared/components/thaca-button/th
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
+import { RoleService } from './role.service';
 
 @Component({
   selector: 'app-role',
@@ -33,6 +34,7 @@ import { ThacaInputComponent } from '../../../shared/components/thaca-input/thac
 export class RoleComponent {
   private configService = inject(AppConfigService);
   private router = inject(Router);
+  private roleService = inject(RoleService);
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
 
@@ -74,5 +76,9 @@ export class RoleComponent {
 
   onSearch() {
     this.table.refresh(this.filter());
+  }
+
+  async onExport(): Promise<void> {
+    await this.roleService.exportRoles(this.table.getSearchRequest());
   }
 }

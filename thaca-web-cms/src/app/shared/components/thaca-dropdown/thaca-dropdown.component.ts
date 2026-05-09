@@ -45,7 +45,7 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
   @Input() disabled = false;
   @Input() readonly = false;
   @Input() clearable = true;
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() size: 'sm' | 'md' | 'lg' = 'lg';
   @Input() label?: string;
   @Input() required = false;
   @Input() multiple = false;

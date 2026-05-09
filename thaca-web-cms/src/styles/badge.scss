@@ -89,13 +89,13 @@
 }
 
 .thaca-badge-primary {
-  background: color-mix(in srgb, var(--primary) 13%, transparent);
-  color: oklch(0.65 0.22 264);
-  border-color: color-mix(in srgb, var(--primary) 26%, transparent);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
 .thaca-badge-primary .thb-icon {
-  background: color-mix(in srgb, var(--primary) 22%, transparent);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 .thaca-badge-primary .thb-dot {
@@ -104,95 +104,95 @@
 
 .thaca-badge-success {
   line-height: 0;
-  background: color-mix(in srgb, #22c55e 13%, transparent);
-  color: #4ade80;
-  border-color: color-mix(in srgb, #22c55e 26%, transparent);
+  background: oklch(0.95 0.04 145);
+  color: oklch(0.45 0.14 150);
+  border-color: oklch(0.85 0.06 145);
 }
 
 .thaca-badge-success .thb-icon {
-  background: color-mix(in srgb, #22c55e 22%, transparent);
+  background: oklch(0.88 0.08 145);
 }
 
 .thaca-badge-success .thb-dot {
-  background: #22c55e;
+  background: oklch(0.55 0.16 145);
 }
 
 .thaca-badge-warning {
   line-height: 0;
-  background: color-mix(in srgb, #f59e0b 13%, transparent);
-  color: #fbbf24;
-  border-color: color-mix(in srgb, #f59e0b 26%, transparent);
+  background: oklch(0.95 0.05 80);
+  color: oklch(0.5 0.14 75);
+  border-color: oklch(0.85 0.07 80);
 }
 
 .thaca-badge-warning .thb-icon {
-  background: color-mix(in srgb, #f59e0b 22%, transparent);
+  background: oklch(0.88 0.08 80);
 }
 
 .thaca-badge-warning .thb-dot {
-  background: #f59e0b;
+  background: oklch(0.65 0.18 75);
 }
 
 .thaca-badge-danger,
 .thaca-badge-error {
   line-height: 0;
-  background: color-mix(in srgb, #e24b4a 13%, transparent);
-  color: #f87171;
-  border-color: color-mix(in srgb, #e24b4a 26%, transparent);
+  background: oklch(0.95 0.04 25);
+  color: oklch(0.52 0.18 25);
+  border-color: oklch(0.85 0.06 25);
 }
 
 .thaca-badge-danger .thb-icon,
 .thaca-badge-error .thb-icon {
-  background: color-mix(in srgb, #e24b4a 22%, transparent);
+  background: oklch(0.88 0.08 25);
 }
 
 .thaca-badge-danger .thb-dot,
 .thaca-badge-error .thb-dot {
-  background: #e24b4a;
+  background: oklch(0.6 0.22 25);
 }
 
 .thaca-badge-info {
   line-height: 0;
-  background: color-mix(in srgb, #3b82f6 13%, transparent);
-  color: #60a5fa;
-  border-color: color-mix(in srgb, #3b82f6 26%, transparent);
+  background: oklch(0.95 0.03 264);
+  color: oklch(0.5 0.14 264);
+  border-color: oklch(0.85 0.05 264);
 }
 
 .thaca-badge-info .thb-icon {
-  background: color-mix(in srgb, #3b82f6 22%, transparent);
+  background: oklch(0.88 0.07 264);
 }
 
 .thaca-badge-info .thb-dot {
-  background: #3b82f6;
+  background: oklch(0.6 0.16 264);
 }
 
 .thaca-badge-purple {
   line-height: 0;
-  background: color-mix(in srgb, #a855f7 13%, transparent);
-  color: #c084fc;
-  border-color: color-mix(in srgb, #a855f7 26%, transparent);
+  background: oklch(0.95 0.04 304);
+  color: oklch(0.5 0.16 304);
+  border-color: oklch(0.85 0.06 304);
 }
 
 .thaca-badge-purple .thb-icon {
-  background: color-mix(in srgb, #a855f7 22%, transparent);
+  background: oklch(0.88 0.08 304);
 }
 
 .thaca-badge-purple .thb-dot {
-  background: #a855f7;
+  background: oklch(0.6 0.18 304);
 }
 
 .thaca-badge-pink {
   line-height: 0;
-  background: color-mix(in srgb, #ec4899 13%, transparent);
-  color: #f472b6;
-  border-color: color-mix(in srgb, #ec4899 26%, transparent);
+  background: oklch(0.95 0.04 350);
+  color: oklch(0.52 0.16 350);
+  border-color: oklch(0.85 0.06 350);
 }
 
 .thaca-badge-pink .thb-icon {
-  background: color-mix(in srgb, #ec4899 22%, transparent);
+  background: oklch(0.88 0.08 350);
 }
 
 .thaca-badge-pink .thb-dot {
-  background: #ec4899;
+  background: oklch(0.6 0.18 350);
 }
 
 .thaca-badge-neutral {
@@ -208,4 +208,67 @@
   .thb-dot {
     background: var(--muted-foreground);
   }
+}
+
+/* ── Dark mode badge overrides ─────────────────────── */
+.dark .thaca-badge-success {
+  background: oklch(0.25 0.06 145);
+  color: oklch(0.78 0.12 145);
+  border-color: oklch(0.32 0.06 145);
+}
+
+.dark .thaca-badge-success .thb-icon {
+  background: oklch(0.3 0.08 145);
+}
+
+.dark .thaca-badge-warning {
+  background: oklch(0.25 0.06 80);
+  color: oklch(0.8 0.12 75);
+  border-color: oklch(0.32 0.06 80);
+}
+
+.dark .thaca-badge-warning .thb-icon {
+  background: oklch(0.3 0.08 80);
+}
+
+.dark .thaca-badge-danger,
+.dark .thaca-badge-error {
+  background: oklch(0.25 0.06 25);
+  color: oklch(0.75 0.14 25);
+  border-color: oklch(0.32 0.06 25);
+}
+
+.dark .thaca-badge-danger .thb-icon,
+.dark .thaca-badge-error .thb-icon {
+  background: oklch(0.3 0.08 25);
+}
+
+.dark .thaca-badge-info {
+  background: oklch(0.25 0.05 264);
+  color: oklch(0.78 0.12 264);
+  border-color: oklch(0.32 0.05 264);
+}
+
+.dark .thaca-badge-info .thb-icon {
+  background: oklch(0.3 0.07 264);
+}
+
+.dark .thaca-badge-purple {
+  background: oklch(0.25 0.06 304);
+  color: oklch(0.78 0.13 304);
+  border-color: oklch(0.32 0.06 304);
+}
+
+.dark .thaca-badge-purple .thb-icon {
+  background: oklch(0.3 0.08 304);
+}
+
+.dark .thaca-badge-pink {
+  background: oklch(0.25 0.06 350);
+  color: oklch(0.78 0.13 350);
+  border-color: oklch(0.32 0.06 350);
+}
+
+.dark .thaca-badge-pink .thb-icon {
+  background: oklch(0.3 0.08 350);
 }

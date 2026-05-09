@@ -38,5 +38,8 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_LOCK_UNLOCK_SYSTEM_USER = "internal.cmsLockUnlockSystemUser";
     public static final String INTERNAL_CMS_GET_SYSTEM_USER = "internal.cmsGetSystemUser";
     public static final String INTERNAL_CMS_EXPORT_SYSTEM_USER = "internal.cmsExportSystemUser";
+
+    public static final String INTERNAL_CMS_EXPORT_ROLES = "internal.cmsExportRoles";
+    public static final String INTERNAL_CMS_EXPORT_PERMISSIONS = "internal.cmsExportPermissions";
     public static final String INTERNAL_CMS_SEARCH_USER_LOCK_HISTORY = "internal.searchUserLockHistory";
 }

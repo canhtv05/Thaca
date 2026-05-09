@@ -39,17 +39,17 @@
           [label]="'user.locked' | translate"
           [options]="lockedOptions"
         />
-        <thaca-button size="md" class="w-full" variant="primary" (clicked)="onSearch()">
+        <thaca-button class="w-full" variant="primary" (clicked)="onSearch()">
           <span class="text-white"> {{ 'common.button.search' | translate }} </span>
         </thaca-button>
       </div>
     </ng-template>
     <ng-template #headerActions>
       <div class="flex justify-end items-center gap-4">
-        <thaca-button size="md" variant="secondary">
-          <span class="text-foreground"> {{ 'common.button.export' | translate }} </span>
+        <thaca-button variant="outline">
+          <span class="text-primary"> {{ 'common.button.export' | translate }} </span>
         </thaca-button>
-        <thaca-button size="md" variant="primary" (click)="onCreate()">
+        <thaca-button variant="primary" (click)="onCreate()">
           <span class="text-white"> {{ 'common.button.create' | translate }} </span>
         </thaca-button>
       </div>
