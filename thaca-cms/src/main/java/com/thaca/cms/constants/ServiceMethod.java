@@ -6,7 +6,6 @@ public class ServiceMethod {
 
     public static final String CMS_AUTHENTICATE = "cms.authenticate";
     public static final String CMS_LOGOUT = "cms.logout";
-    public static final String CMS_SEARCH_USERS = "cms.searchUsers";
     public static final String CMS_SEARCH_ROLES = "cms.searchRoles";
     public static final String CMS_GET_ALL_ROLES = "cms.getAllRoles";
     public static final String CMS_EXPORT_ROLES = "cms.exportRoles";
@@ -18,6 +17,11 @@ public class ServiceMethod {
     public static final String CMS_UPDATE_TENANT = "cms.updateTenant";
     public static final String CMS_LOCK_UNLOCK_TENANT = "cms.lockUnlockTenant";
     public static final String CMS_EXPORT_TENANT = "cms.exportTenant";
+
+    public static final String CMS_SEARCH_USERS = "cms.searchUsers";
+    public static final String CMS_DOWNLOAD_USER_TEMPLATE = "cms.downloadUserTemplate";
+    public static final String CMS_IMPORT_USERS = "cms.importUsers";
+    public static final String CMS_EXPORT_USER_IMPORT_ERROR = "cms.exportUserImportError";
 
     public static final String CMS_SEARCH_SYSTEM_USERS = "cms.searchSystemUsers";
     public static final String CMS_SEARCH_USER_LOCK_HISTORY = "cms.searchUserLockHistory";

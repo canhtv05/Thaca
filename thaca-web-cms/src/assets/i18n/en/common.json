@@ -28,6 +28,8 @@
       "back": "Back",
       "search": "Search",
       "export": "Export",
+      "download_template": "Download Template",
+      "import": "Import",
       "lock": "Lock",
       "unlock": "Unlock",
       "ok": "Accept",
@@ -53,6 +55,8 @@
       "unlock": "Unlock"
     },
     "infinite": "Infinite",
-    "audit": "Audit Information"
+    "audit": "Audit Information",
+    "error": "Error",
+    "success": "Success"
   }
 }

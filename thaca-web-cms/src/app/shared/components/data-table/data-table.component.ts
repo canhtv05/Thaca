@@ -14,6 +14,8 @@ import {
   ElementRef,
   OnInit,
   OnDestroy,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -59,7 +61,7 @@ export interface ITableActionEvent<T = any> {
 }
 
 export interface ITableConfig<T = any> {
-  url: string;
+  url?: string;
   columns: ITableColumn[];
   actions?: ITableAction[];
   defaultFilter?: T;
@@ -89,12 +91,13 @@ export interface ITableConfig<T = any> {
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })
-export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy {
+export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy, OnChanges {
   private translate = inject(TranslateService);
   private zone = inject(NgZone);
   private sanitizer = inject(DomSanitizer);
   private el = inject(ElementRef);
   @Input({ required: true }) config!: ITableConfig;
+  @Input() staticRows?: any[];
   @Input() externalFilter: any = {};
 
   @Output() onRowClick = new EventEmitter<any>();
@@ -210,9 +213,36 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy {
   first = computed(() => this.pagination().page * this.pagination().size);
 
   ngAfterViewInit() {
-    // Manually trigger the first load with our default sort.
-    // We disabled lazyLoadOnInit to avoid PrimeNG firing before sort is set.
-    this.load(this.pagination());
+    if (this.isStaticMode()) {
+      this.applyStaticLoad(this.pagination());
+    } else if (this.config.url) {
+      this.load(this.pagination());
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['staticRows'] && this.isStaticMode() && !changes['staticRows'].firstChange) {
+      this.applyStaticLoad({ ...this.pagination(), page: 0 });
+    }
+  }
+
+  private isStaticMode(): boolean {
+    return this.staticRows !== undefined;
+  }
+
+  private applyStaticLoad(pageReq: IPaginationRequest) {
+    this.zone.run(() => {
+      this.pagination.set(pageReq);
+      const all = [...(this.staticRows ?? [])];
+      const start = pageReq.page * pageReq.size;
+      this.data.set(all.slice(start, start + pageReq.size));
+      this.totalRecords.set(all.length);
+      this.loading.set(false);
+      if (this.pTable) {
+        this.pTable.sortField = pageReq.sortField;
+        this.pTable.sortOrder = pageReq.sortOrder === 'DESC' ? -1 : 1;
+      }
+    });
   }
 
   sanitizeHtml(html: string): SafeHtml {
@@ -227,7 +257,6 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy {
     this.zone.run(async () => {
       this.pagination.set(pageReq);
       this.loading.set(true);
-      // Sync PrimeNG sort state to prevent icon revert
       if (this.pTable) {
         this.pTable.sortField = pageReq.sortField;
         this.pTable.sortOrder = pageReq.sortOrder === 'DESC' ? -1 : 1;
@@ -248,17 +277,19 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy {
       };
 
       try {
+        if (!this.config.url) {
+          return;
+        }
         const res = await GlobalHttp.post<IApiPayload<any>>(this.config.url, payload, {
           skipLoading: true,
         });
-        if (res.body.status === 'OK') {
+        if (res?.body?.status === 'OK') {
           this.data.set(res.body.data.data);
           this.totalRecords.set(res.body.data.pagination.total);
           this.onDataLoaded.emit(res.body.data.data);
         }
       } finally {
         this.loading.set(false);
-        // Sync PrimeNG sort state after data load
         if (this.pTable) {
           this.pTable.sortField = pageReq.sortField;
           this.pTable.sortOrder = pageReq.sortOrder === 'DESC' ? -1 : 1;
@@ -272,35 +303,48 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy {
       this.externalFilter = filter;
     }
     const cur = this.pagination();
-    // Read sort from PrimeNG's internal state (source of truth for sort)
     const sortField = (this.pTable?.sortField as string) || cur.sortField;
     const sortOrder = this.pTable ? (this.pTable.sortOrder === 1 ? 'ASC' : 'DESC') : cur.sortOrder;
-    this.load({ ...cur, page: 0, sortField, sortOrder });
+    const next = { ...cur, page: 0, sortField, sortOrder };
+    if (this.isStaticMode()) {
+      this.applyStaticLoad(next);
+    } else {
+      this.load(next);
+    }
   }
 
   goToPage(page: number) {
     const cur = this.pagination();
     if (page < 0 || page >= this.totalPages() || page === cur.page) return;
+    if (this.isStaticMode()) {
+      this.applyStaticLoad({ ...cur, page });
+      return;
+    }
     this.load({ ...cur, page });
   }
 
   onPageSizeChange(size: number) {
     const cur = this.pagination();
     if (size === cur.size) return;
+    if (this.isStaticMode()) {
+      this.applyStaticLoad({ ...cur, page: 0, size });
+      return;
+    }
     this.load({ ...cur, page: 0, size });
   }
 
   onLazyLoad(event: TableLazyLoadEvent) {
+    if (this.isStaticMode()) {
+      return;
+    }
     const cur = this.pagination();
 
-    // Only read sort from PrimeNG event — page/size come from our signal
-    // (PrimeNG's event.first/rows may be stale since we manage pagination ourselves)
     const sortField = (event.sortField as string) || this.DEFAULT_SORT_FIELD;
     const sortOrder = event.sortOrder === -1 ? 'DESC' : 'ASC';
 
     this.load({
       ...cur,
-      page: 0, // Reset to first page on sort change
+      page: 0,
       sortField,
       sortOrder,
     });

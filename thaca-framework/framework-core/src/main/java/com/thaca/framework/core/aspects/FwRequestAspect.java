@@ -46,41 +46,52 @@ public class FwRequestAspect {
             FwServiceContext.set(requestMode.name());
         }
         try {
-            if (SecurityUtils.isSuperAdmin()) {
-                return joinPoint.proceed();
-            }
-            if (Objects.nonNull(requestMode) && RequestType.PUBLIC.equals(requestMode.type())) {
-                return joinPoint.proceed();
-            }
-            if (Objects.nonNull(requestMode) && RequestType.PROTECTED.equals(requestMode.type())) {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-                    throw new FwException(CommonErrorMessage.UNAUTHORIZED);
-                }
-                return joinPoint.proceed();
-            }
-            if (Objects.nonNull(requestMode) && RequestType.INTERNAL.equals(requestMode.type())) {
-                String expectedApiKey = frameworkProperties.getHttpClient().getApiKey();
+            boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
 
-                ApiHeader contextHeader = FwContextHeader.get();
-                if (contextHeader != null && StringUtils.hasText(contextHeader.getApiKey())) {
-                    if (Objects.equals(contextHeader.getApiKey(), expectedApiKey)) {
-                        return joinPoint.proceed();
-                    }
+            if (isSuperAdmin) {
+                return joinPoint.proceed();
+            }
+
+            if (Objects.nonNull(requestMode)) {
+                if (requestMode.isSuperAdmin()) {
+                    throw new FwException(CommonErrorMessage.FORBIDDEN);
                 }
-                ServletRequestAttributes attributes =
-                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-                if (attributes != null) {
-                    HttpServletRequest request = attributes.getRequest();
-                    String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-                    if (StringUtils.hasText(authHeader) && authHeader.startsWith("Basic ")) {
-                        String apiKey = authHeader.substring(6);
-                        if (Objects.equals(apiKey, expectedApiKey)) {
+
+                if (RequestType.PUBLIC.equals(requestMode.type())) {
+                    return joinPoint.proceed();
+                }
+
+                if (RequestType.PROTECTED.equals(requestMode.type())) {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+                        throw new FwException(CommonErrorMessage.UNAUTHORIZED);
+                    }
+                    return joinPoint.proceed();
+                }
+
+                if (RequestType.INTERNAL.equals(requestMode.type())) {
+                    String expectedApiKey = frameworkProperties.getHttpClient().getApiKey();
+
+                    ApiHeader contextHeader = FwContextHeader.get();
+                    if (contextHeader != null && StringUtils.hasText(contextHeader.getApiKey())) {
+                        if (Objects.equals(contextHeader.getApiKey(), expectedApiKey)) {
                             return joinPoint.proceed();
                         }
                     }
+                    ServletRequestAttributes attributes =
+                        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                    if (attributes != null) {
+                        HttpServletRequest request = attributes.getRequest();
+                        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+                        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Basic ")) {
+                            String apiKey = authHeader.substring(6);
+                            if (Objects.equals(apiKey, expectedApiKey)) {
+                                return joinPoint.proceed();
+                            }
+                        }
+                    }
+                    throw new FwException(CommonErrorMessage.UNAUTHORIZED);
                 }
-                throw new FwException(CommonErrorMessage.UNAUTHORIZED);
             }
             return joinPoint.proceed();
         } finally {

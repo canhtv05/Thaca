@@ -2,6 +2,7 @@
   <app-breadcrumb [title]="'menu.user_list'" [items]="breadcrumbItems" />
 
   <app-data-table
+    #mainTable
     [config]="tableConfig"
     [externalFilter]="filter()"
     (onAction)="handleAction($event)"
@@ -45,9 +46,22 @@
       </div>
     </ng-template>
     <ng-template #headerActions>
-      <div class="flex justify-end items-center gap-4">
+      <div class="flex justify-end items-center flex-wrap gap-4">
         <thaca-button variant="outline">
           <span class="text-primary"> {{ 'common.button.export' | translate }} </span>
+        </thaca-button>
+        <thaca-button variant="outline" (click)="downloadTemplate()">
+          <span class="text-primary"> {{ 'common.button.download_template' | translate }} </span>
+        </thaca-button>
+        <input
+          #fileInput
+          type="file"
+          accept=".xlsx,.xls"
+          class="hidden"
+          (change)="onFileSelected($event)"
+        />
+        <thaca-button variant="outline" (click)="onImportClick(fileInput)">
+          <span class="text-primary"> {{ 'common.button.import' | translate }} </span>
         </thaca-button>
         <thaca-button variant="primary" (click)="onCreate()">
           <span class="text-white"> {{ 'common.button.create' | translate }} </span>
@@ -64,4 +78,28 @@
       [placeholder]="'user.username_placeholder' | translate"
     ></thaca-input>
   </div>
+</thaca-modal>
+
+<thaca-modal
+  #importResultModal
+  [title]="importResult()?.hasErrors ? 'user.import.partial_success' : 'user.import.success_title'"
+  size="xl"
+  [showFooter]="false"
+>
+  @if (importResult(); as result) {
+    <div class="flex flex-col gap-4">
+      @if (result.hasErrors) {
+        <div class="flex flex-col gap-3 min-h-[200px] max-h-[55vh]">
+          <div class="flex justify-end">
+            <thaca-button variant="outline" (clicked)="downloadImportErrorExcel()">
+              <span class="text-primary">{{
+                'user.import.download_export_error' | translate
+              }}</span>
+            </thaca-button>
+          </div>
+          <app-data-table [config]="importErrorTableConfig" [staticRows]="importErrorRows()" />
+        </div>
+      }
+    </div>
+  }
 </thaca-modal>

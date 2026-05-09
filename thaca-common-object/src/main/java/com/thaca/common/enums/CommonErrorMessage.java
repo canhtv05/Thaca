@@ -132,6 +132,13 @@ public enum CommonErrorMessage implements ErrorMessageRule {
         "Dữ liệu đã được chỉnh sửa bởi người khác. Vui lòng tải lại trang và thử lại.",
         "Data was modified",
         "This data has been modified by another user. Please reload and try again."
+    ),
+    EXCEL_INVALID(
+        "EXCEL.INVALID",
+        "File Excel không hợp lệ",
+        "File Excel không hợp lệ",
+        "Excel invalid",
+        "Excel invalid"
     );
 
     private final String code;

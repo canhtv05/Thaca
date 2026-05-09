@@ -24,14 +24,15 @@ import org.springframework.web.multipart.MultipartFile;
  * All operations are schema-driven — no annotations, no reflection.
  *
  * <h3>Usage Example:</h3>
+ *
  * <pre>{@code
  * ExcelSchema schema = ExcelSchema.builder()
- *     .sheetName("Users")
- *     .addColumn(ExcelColumn.builder("username", "Username").required().maxLength(50).build())
- *     .addColumn(ExcelColumn.builder("email", "Email").required().maxLength(100).build())
- *     .addColumn(ExcelColumn.builder("age", "Age").dataType(ExcelDataType.NUMBER).range(1, 150).build())
- *     .addColumn(ExcelColumn.builder("role", "Role").allowedValues("ADMIN", "USER", "MANAGER").build())
- *     .build();
+ *         .sheetName("Users")
+ *         .addColumn(ExcelColumn.builder("username", "Username").required().maxLength(50).build())
+ *         .addColumn(ExcelColumn.builder("email", "Email").required().maxLength(100).build())
+ *         .addColumn(ExcelColumn.builder("age", "Age").dataType(ExcelDataType.NUMBER).range(1, 150).build())
+ *         .addColumn(ExcelColumn.builder("role", "Role").allowedValues("ADMIN", "USER", "MANAGER").build())
+ *         .build();
  *
  * // Generate template
  * byte[] template = ExcelEngine.generateTemplate(schema);
@@ -48,7 +49,7 @@ public final class ExcelEngine {
     private ExcelEngine() {}
 
     // ═══════════════════════════════════════════════════════════
-    //  TEMPLATE
+    // TEMPLATE
     // ═══════════════════════════════════════════════════════════
 
     /**
@@ -66,15 +67,23 @@ public final class ExcelEngine {
     }
 
     // ═══════════════════════════════════════════════════════════
-    //  IMPORT
+    // IMPORT
     // ═══════════════════════════════════════════════════════════
 
     /**
      * Imports from a MultipartFile with full security + validation.
      *
-     * @throws com.thaca.common.excel.exception.ExcelSecurityException   if file fails security checks
-     * @throws com.thaca.common.excel.exception.ExcelFormatException     if file structure is invalid
-     * @throws com.thaca.common.excel.exception.ExcelValidationException if failFast is true and validation fails
+     * @throws com.thaca.common.excel.exception.ExcelSecurityException   if file
+     *                                                                   fails
+     *                                                                   security
+     *                                                                   checks
+     * @throws com.thaca.common.excel.exception.ExcelFormatException     if file
+     *                                                                   structure
+     *                                                                   is invalid
+     * @throws com.thaca.common.excel.exception.ExcelValidationException if failFast
+     *                                                                   is true and
+     *                                                                   validation
+     *                                                                   fails
      */
     public static ImportResult<Map<String, Object>> importFile(MultipartFile file, ExcelSchema schema) {
         return ExcelReader.read(file, schema);
@@ -100,7 +109,7 @@ public final class ExcelEngine {
     }
 
     // ═══════════════════════════════════════════════════════════
-    //  EXPORT
+    // EXPORT
     // ═══════════════════════════════════════════════════════════
 
     /**

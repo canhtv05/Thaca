@@ -49,7 +49,7 @@ export class ThacaModalComponent {
   @Input() closable: boolean = true;
   @Input() dismissableMask: boolean = true;
   @Input() appendTo: any = 'body';
-  @Input() formGroup?: FormGroup;
+  @Input() formGroup: FormGroup = new FormGroup({});
   @Input() loading: boolean = isLoading();
   @Input() showFooter: boolean = true;
   @Input() headerIcon: string = '';
@@ -59,16 +59,10 @@ export class ThacaModalComponent {
   @Input() disableSubmit: boolean = false;
   @Input() transitionOptions: string = '180ms ease';
 
-  /** Internal visible state — bound one-way to p-dialog [visible] */
   _visible = false;
 
   private readonly cdr = inject(ChangeDetectorRef);
 
-  /**
-   * PrimeNG fires (onHide) spuriously on component init (when visible=false).
-   * This flag acts as a gate: only allow handleHide() after PrimeNG confirms
-   * the dialog is truly open via its own (onShow) event.
-   */
   private _canHide = false;
 
   @Output() onSubmit = new EventEmitter<void>();
@@ -79,7 +73,6 @@ export class ThacaModalComponent {
 
   @ContentChild('customFooter') customFooterTemplate?: TemplateRef<any>;
 
-  /** Call via @ViewChild: myModal.show() */
   show() {
     if (this._visible) return;
     this._canHide = false;
@@ -87,32 +80,22 @@ export class ThacaModalComponent {
     this.visibleChange.emit(true);
   }
 
-  /** Call via @ViewChild: myModal.hide() */
   hide() {
     if (!this._visible) return;
     this.escapeStack.unregister(this._escapeHandler);
     this._canHide = false;
     this._visible = false;
-    this.cdr.detectChanges(); // Ép cập nhật UI ngay lập tức
+    this.cdr.detectChanges();
     this.visibleChange.emit(false);
     this.onHide.emit();
   }
 
-  /**
-   * Called when PrimeNG dialog fully opens and fires its own (onShow).
-   * This is the moment we open the gate for handleHide() to work.
-   */
   pDialogOnShow() {
     this._canHide = true;
     this.escapeStack.register(this._escapeHandler);
-    this.onShow.emit(); // ✅ chuyển vào đây
+    this.onShow.emit();
   }
 
-  /**
-   * Called by PrimeNG's (onHide).
-   * Only runs if _canHide is true, meaning the dialog was truly shown first.
-   * This blocks the spurious (onHide) PrimeNG fires during initialization.
-   */
   handleHide() {
     if (!this._canHide || !this._visible) return;
     this.escapeStack.unregister(this._escapeHandler);

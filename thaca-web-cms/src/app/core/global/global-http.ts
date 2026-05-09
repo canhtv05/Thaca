@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpContext } from '@angular/common/http';
 import { firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { SKIP_LOADING } from '../global/http-context';
-import { createHeader } from '../../utils/common.utils';
+import { createBody, createHeader } from '../../utils/common.utils';
 import { IApiHeader } from '../models/common.model';
 
 export interface IRequestOptions {
@@ -41,11 +41,18 @@ export class GlobalHttp {
     if (client) {
       const httpHeaders = new HttpHeaders(options.headers || {});
       const context = new HttpContext().set(SKIP_LOADING, !!options.skipLoading);
+      let requestBody = body;
+      if (body instanceof FormData) {
+        const fd = body as FormData;
+        fd.append('header', JSON.stringify(createHeader()));
+        fd.append('body', JSON.stringify(createBody({})));
+        requestBody = fd;
+      }
 
       return await firstValueFrom(
         client
           .request<T>(method, url, {
-            body,
+            body: requestBody,
             headers: httpHeaders,
             context,
             withCredentials: true,
@@ -72,15 +79,26 @@ export class GlobalHttp {
           ),
       );
     }
-    const isFormData = body instanceof FormData;
+    const headersWithApi = { ...options.headers };
+    let requestBody = body;
+    if (body instanceof FormData) {
+      const fd = body as FormData;
+      fd.append('header', JSON.stringify(createHeader()));
+      fd.append('body', JSON.stringify(createBody({})));
+      requestBody = fd;
+      console.log(requestBody, fd);
+    }
+
     const response = await fetch(url, {
       method,
       credentials: 'include',
-      headers: {
-        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-        ...options.headers,
-      },
-      body: isFormData ? body : body ? JSON.stringify(body) : undefined,
+      headers: headersWithApi,
+      body:
+        requestBody instanceof FormData
+          ? requestBody
+          : requestBody
+            ? JSON.stringify(requestBody)
+            : undefined,
     });
     const data = await this.parseResponse(response);
     if (!response.ok) {

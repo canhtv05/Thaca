@@ -1,6 +1,8 @@
 package com.thaca.auth.repositories;
 
 import com.thaca.auth.domains.User;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +21,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     Optional<User> findByUsername(String username);
 
     Optional<User> findByEmail(String email);
+
+    List<User> findAllByUsernameIn(Collection<String> usernames);
+
+    List<User> findAllByEmailIn(Collection<String> emails);
 }

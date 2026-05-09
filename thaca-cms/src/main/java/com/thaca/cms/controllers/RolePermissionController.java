@@ -7,7 +7,6 @@ import com.thaca.common.dtos.internal.req.RoleCodesReq;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
-import com.thaca.framework.core.annotations.FwSecurity;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
 import com.thaca.framework.core.utils.CommonUtils;
@@ -58,15 +57,13 @@ public class RolePermissionController {
     }
 
     @PostMapping("/roles/export")
-    @FwSecurity(isSuperAdmin = true)
-    @FwRequest(name = ServiceMethod.CMS_EXPORT_ROLES, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_ROLES, type = RequestType.PROTECTED, isSuperAdmin = true)
     public void exportRoles(SearchRequest<RoleDTO> request, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, fwApiProcess.process(request), "thaca-roles-export-{{date}}.xlsx");
     }
 
     @PostMapping("/permissions/export")
-    @FwSecurity(isSuperAdmin = true)
-    @FwRequest(name = ServiceMethod.CMS_EXPORT_PERMISSIONS, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_PERMISSIONS, type = RequestType.PROTECTED, isSuperAdmin = true)
     public void exportPermissions(SearchRequest<PermissionDTO> request, HttpServletResponse response)
         throws IOException {
         CommonUtils.writeExcelResponse(

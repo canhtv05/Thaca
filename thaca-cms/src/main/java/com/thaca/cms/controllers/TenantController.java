@@ -6,7 +6,6 @@ import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
-import com.thaca.framework.core.annotations.FwSecurity;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
 import com.thaca.framework.core.utils.CommonUtils;
@@ -45,22 +44,19 @@ public class TenantController {
     }
 
     @PostMapping("/create")
-    @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_CREATE_TENANT, type = RequestType.PROTECTED)
     public ResponseEntity<TenantDTO> create(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/update")
-    @FwSecurity(isSuperAdmin = true)
     @FwRequest(name = ServiceMethod.CMS_UPDATE_TENANT, type = RequestType.PROTECTED)
     public ResponseEntity<TenantDTO> update(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/lock-unlock")
-    @FwSecurity(isSuperAdmin = true)
-    @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
     public ResponseEntity<Void> lockUnlock(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }

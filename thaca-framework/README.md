@@ -72,12 +72,18 @@ public void validateSearchTenants(SearchRequest<TenantDTO> request) {
 | `name`     | Tên service method, phải khớp với `@FwRequest.name`            |
 | `type`     | `HANDLE` — xử lý chính, `VALIDATE` — validate trước khi handle |
 
-### `@FwSecurity`
+### `@FwRequest`
 
-Gắn lên Controller method để kiểm tra quyền đặc biệt.
+Gắn lên Controller method để kiểm tra request type.
+
+| Thuộc tính     | Mô tả                                                            |
+| -------------- | ---------------------------------------------------------------- |
+| `name`         | Tên service method, phải khớp với `@FwMode.name`                 |
+| `type`         | `PUBLIC`, `PROTECTED`, `INTERNAL`                                |
+| `isSuperAdmin` | `false` (default) — nếu `true` chỉ super admin mới được truy cập |
 
 ```java
-@FwSecurity(isSuperAdmin = true)
+@FwRequest(name = ServiceMethod.CMS_CREATE_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
 public ResponseEntity<TenantDTO> create(TenantDTO request) { ... }
 ```
 

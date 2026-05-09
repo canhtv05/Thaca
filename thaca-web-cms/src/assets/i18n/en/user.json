@@ -15,6 +15,27 @@
     "username_placeholder": "Enter username",
     "email_placeholder": "Enter email",
     "status_placeholder": "Select status",
-    "locked_placeholder": "Select lock status"
+    "locked_placeholder": "Select lock status",
+    "modal": {
+      "create_title": "Create User"
+    },
+    "import": {
+      "success": "Successfully imported {{count}} users",
+      "success_title": "Import Successful",
+      "partial_success": "Import With Errors",
+      "has_errors": "{{errorCount}} errors, {{successCount}} valid rows",
+      "error_unknown": "An error occurred during import",
+      "total_rows": "Total Rows",
+      "success_count": "Success",
+      "error_count": "Errors",
+      "error_row": "Row",
+      "error_column": "Column",
+      "error_column_key": "Column key",
+      "error_value": "Value",
+      "error_message": "Error",
+      "download_export_error": "Download error file (Excel)",
+      "export_error_done": "Error export file downloaded",
+      "export_error_failed": "Could not download error export file"
+    }
   }
 }

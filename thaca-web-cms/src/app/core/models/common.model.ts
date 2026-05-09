@@ -59,3 +59,20 @@ export interface IErrorData {
   messageVi: string;
   messageEn: string;
 }
+
+export interface IImportError {
+  row: number;
+  column: string;
+  columnKey: string;
+  message: string;
+  value: string;
+}
+
+export interface IImportResult {
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  hasErrors: boolean;
+  errors?: IImportError[];
+  preview?: any[];
+}

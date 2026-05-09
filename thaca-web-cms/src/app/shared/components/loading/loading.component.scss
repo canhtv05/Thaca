@@ -1,7 +1,12 @@
+:host {
+  --color-primary: var(--primary);
+  --color-foreground: var(--foreground);
+}
+
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
@@ -24,8 +29,8 @@
 .spinner {
   width: 32px;
   height: 32px;
-  border: 2.5px solid #e0e3ec;
-  border-top-color: var(--color-sky-400);
+  border: 2.5px solid transparent;
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -39,5 +44,5 @@
 .loading-text {
   margin: 0;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-foreground);
 }

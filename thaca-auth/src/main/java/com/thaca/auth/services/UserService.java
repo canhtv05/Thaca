@@ -2,12 +2,14 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.User;
+import com.thaca.auth.domains.projections.TenantInfoProjection;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
 import com.thaca.auth.dtos.req.ResetPasswordReq;
 import com.thaca.auth.dtos.req.VerifyOTPReq;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.mappers.UserMapper;
+import com.thaca.auth.repositories.TenantRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.EmailRule;
@@ -15,24 +17,37 @@ import com.thaca.auth.validators.rules.FullnameRule;
 import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
 import com.thaca.common.constants.InternalMethod;
+import com.thaca.common.dtos.internal.ImportResponseDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.VerifyEmailTokenDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.CommonErrorMessage;
+import com.thaca.common.excel.ExcelEngine;
+import com.thaca.common.excel.ImportErrorExcelExport;
+import com.thaca.common.excel.result.ImportResult;
+import com.thaca.common.excel.result.RowError;
+import com.thaca.common.excel.schema.ExcelColumn;
+import com.thaca.common.excel.schema.ExcelDataType;
+import com.thaca.common.excel.schema.ExcelSchema;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
 import com.thaca.framework.core.annotations.FwMode;
+import com.thaca.framework.core.context.FwContextHeader;
+import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +60,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +74,7 @@ public class UserService {
     // private final KafkaProducerService kafkaProducerService;
     private final RedisCacheService redisService;
     private final SessionStore sessionStore;
+    private final TenantRepository tenantRepository;
 
     @Transactional(readOnly = true)
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_USERS, type = ModeType.HANDLE)
@@ -72,6 +89,198 @@ public class UserService {
                 .collect(Collectors.toList()),
             PaginationResponse.of(users)
         );
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_DOWNLOAD_USER_TEMPLATE, type = ModeType.HANDLE)
+    public byte[] downloadTemplate() throws IOException {
+        ApiHeader header = FwContextHeader.get();
+        boolean isVietnamese = "vi".equals(header.getLanguage());
+        return ExcelEngine.generateTemplate(this.buildImportSchema(isVietnamese));
+    }
+
+    @FwMode(name = InternalMethod.INTERNAL_CMS_IMPORT_USERS, type = ModeType.HANDLE)
+    public ImportResponseDTO importUsers(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        ApiHeader header = FwContextHeader.get();
+        boolean isVietnamese = "vi".equals(header.getLanguage());
+        ExcelSchema schema = this.buildImportSchema(isVietnamese);
+
+        ImportResult<Map<String, Object>> result;
+        try {
+            result = ExcelEngine.importFile(file, schema);
+        } catch (Exception e) {
+            throw new FwException(CommonErrorMessage.EXCEL_INVALID);
+        }
+        if (result.hasErrors()) {
+            return toImportResponse(result);
+        }
+        List<Map<String, Object>> successRows = result.getSuccessRows();
+        Set<String> importUsernames = successRows
+            .stream()
+            .map(row -> String.valueOf(row.get("username")).trim().toLowerCase())
+            .collect(Collectors.toSet());
+        Set<String> importEmails = successRows
+            .stream()
+            .map(row -> String.valueOf(row.get("email")).trim().toLowerCase())
+            .collect(Collectors.toSet());
+
+        Set<String> existingUsernames = userRepository
+            .findAllByUsernameIn(importUsernames)
+            .stream()
+            .map(u -> u.getUsername().toLowerCase())
+            .collect(Collectors.toSet());
+        Set<String> existingEmails = userRepository
+            .findAllByEmailIn(importEmails)
+            .stream()
+            .map(u -> u.getEmail().toLowerCase())
+            .collect(Collectors.toSet());
+
+        Map<String, Long> tenantCodeToId = tenantRepository
+            .findAllActiveTenants()
+            .stream()
+            .collect(Collectors.toMap(TenantInfoProjection::getCode, TenantInfoProjection::getId, (a, b) -> a));
+
+        List<User> usersToSave = new ArrayList<>();
+        List<RowError> businessErrors = new ArrayList<>();
+
+        for (int i = 0; i < successRows.size(); i++) {
+            Map<String, Object> row = successRows.get(i);
+            int excelRowIndex = result.getTotalRows() > 0 ? i + 1 : i;
+            String username = String.valueOf(row.get("username")).trim().toLowerCase();
+            String email = String.valueOf(row.get("email")).trim().toLowerCase();
+            String password = row.get("password") != null ? String.valueOf(row.get("password")) : null;
+            boolean hasError = false;
+            if (existingUsernames.contains(username)) {
+                businessErrors.add(
+                    new RowError(
+                        excelRowIndex,
+                        "username",
+                        isVietnamese ? "Tên đăng nhập" : "Username",
+                        isVietnamese ? "Tên đăng nhập đã tồn tại trong hệ thống" : "Username already exists",
+                        username
+                    )
+                );
+                hasError = true;
+            }
+            if (existingEmails.contains(email)) {
+                businessErrors.add(
+                    new RowError(
+                        excelRowIndex,
+                        "email",
+                        "Email",
+                        isVietnamese ? "Email đã tồn tại trong hệ thống" : "Email already exists",
+                        email
+                    )
+                );
+                hasError = true;
+            }
+            Long tenantId = null;
+            Object tenantRaw = row.get("tenantId");
+            if (tenantRaw != null) {
+                String tenantStr = String.valueOf(tenantRaw);
+                String tenantCode = tenantStr.contains(" - ") ? tenantStr.split(" - ")[0].trim() : tenantStr.trim();
+                tenantId = tenantCodeToId.get(tenantCode);
+                if (tenantId == null) {
+                    businessErrors.add(
+                        new RowError(
+                            excelRowIndex,
+                            "tenantId",
+                            isVietnamese ? "Mã Tenant" : "Tenant ID",
+                            isVietnamese ? "Tenant không tồn tại" : "Tenant does not exist",
+                            tenantStr
+                        )
+                    );
+                    hasError = true;
+                }
+            }
+            if (hasError) {
+                continue;
+            }
+            Boolean isActivated =
+                row.get("isActivated") != null && Boolean.parseBoolean(String.valueOf(row.get("isActivated")));
+
+            User user = User.builder()
+                .username(username)
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .isActivated(isActivated)
+                .isLocked(false)
+                .tenantId(tenantId)
+                .build();
+            usersToSave.add(user);
+            existingUsernames.add(username);
+            existingEmails.add(email);
+        }
+
+        if (!businessErrors.isEmpty()) {
+            List<RowError> allErrors = new ArrayList<>(businessErrors);
+            ImportResult<Map<String, Object>> errorResult = ImportResult.<Map<String, Object>>builder()
+                .addErrors(allErrors)
+                .totalRows(result.getTotalRows())
+                .build();
+            return toImportResponse(errorResult);
+        }
+        userRepository.saveAll(usersToSave);
+        ImportResponseDTO response = ImportResponseDTO.builder()
+            .totalRows(result.getTotalRows())
+            .successCount(usersToSave.size())
+            .errorCount(0)
+            .hasErrors(false)
+            .build();
+        if (!usersToSave.isEmpty()) {
+            List<Map<String, Object>> preview = usersToSave
+                .stream()
+                .limit(5)
+                .map(u -> {
+                    Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    map.put("username", u.getUsername());
+                    map.put("email", u.getEmail());
+                    map.put("isActivated", u.getIsActivated());
+                    map.put("tenantId", u.getTenantId());
+                    return map;
+                })
+                .toList();
+            response.setPreview(preview);
+        }
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_USER_IMPORT_ERROR, type = ModeType.HANDLE)
+    public byte[] exportUserImportError(ImportResponseDTO importResult) throws IOException {
+        if (importResult == null || importResult.getErrors() == null || importResult.getErrors().isEmpty()) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        ApiHeader header = FwContextHeader.get();
+        boolean isVietnamese = "vi".equals(header.getLanguage());
+        return ImportErrorExcelExport.export(importResult, isVietnamese);
+    }
+
+    private ImportResponseDTO toImportResponse(ImportResult<Map<String, Object>> result) {
+        List<ImportResponseDTO.ImportErrorDTO> errorDTOs = result
+            .getErrors()
+            .stream()
+            .map(e ->
+                ImportResponseDTO.ImportErrorDTO.builder()
+                    .row(e.getRowIndex() + 1)
+                    .column(e.getColumnHeader())
+                    .columnKey(e.getColumnKey())
+                    .message(e.getErrorMessage())
+                    .value(e.getValue() != null ? e.getValue().toString() : null)
+                    .build()
+            )
+            .toList();
+
+        return ImportResponseDTO.builder()
+            .totalRows(result.getTotalRows())
+            .successCount(result.getSuccessCount())
+            .errorCount(result.getErrorCount())
+            .hasErrors(result.hasErrors())
+            .errors(errorDTOs)
+            .build();
     }
 
     @Transactional(readOnly = true)
@@ -321,6 +530,100 @@ public class UserService {
     private boolean hasOTP(String username) {
         String keyForgotPassword = sessionStore.getKeyForgotPassword(username);
         return StringUtils.isNotEmpty(redisService.get(keyForgotPassword, String.class));
+    }
+
+    private ExcelSchema buildImportSchema(boolean isVietnamese) {
+        List<String> tenantIds = tenantRepository
+            .findAllActiveTenants()
+            .stream()
+            .map(t -> t.getCode() + " - " + t.getName())
+            .toList();
+
+        return ExcelSchema.builder()
+            .sheetName(isVietnamese ? "Nhập người dùng" : "Import Users")
+            .headerRowIndex(0)
+            .dataStartRowIndex(1)
+            .maxRows(500)
+            .strictHeader(true)
+            .failFast(false)
+            .addColumn(
+                ExcelColumn.builder("username", isVietnamese ? "Tên đăng nhập" : "Username")
+                    .required()
+                    .maxLength(50)
+                    .dataType(ExcelDataType.STRING)
+                    .comment(
+                        isVietnamese
+                            ? "Chỉ cho phép chữ thường, số, dấu chấm (.), gạch dưới (_), gạch ngang (-)"
+                            : "Only lowercase letters, numbers, dot (.), underscore (_), hyphen (-)"
+                    )
+                    .customValidator((val, ctx) -> {
+                        Validator<UserDTO> validator = new Validator<>(List.of(new UsernameRule<>()));
+                        validator.validate(UserDTO.builder().username(String.valueOf(val)).build());
+                        return null;
+                    })
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("fullname", isVietnamese ? "Họ và tên" : "Fullname")
+                    .required()
+                    .maxLength(100)
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Họ và tên đầy đủ" : "Full name")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("email", "Email")
+                    .required()
+                    .maxLength(100)
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Địa chỉ email hợp lệ" : "Valid email address")
+                    .customValidator((val, ctx) -> {
+                        Validator<UserDTO> validator = new Validator<>(List.of(new EmailRule<>()));
+                        validator.validate(UserDTO.builder().email(String.valueOf(val)).build());
+                        return null;
+                    })
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("password", isVietnamese ? "Mật khẩu" : "Password")
+                    .required()
+                    .maxLength(100)
+                    .dataType(ExcelDataType.STRING)
+                    .comment(
+                        isVietnamese
+                            ? "Tối thiểu 6 ký tự, gồm ít nhất 1 chữ cái, 1 số và 1 ký tự đặc biệt (@$!%*#?&._-)"
+                            : "Min 6 chars, at least 1 letter, 1 number, and 1 special char (@$!%*#?&._-)"
+                    )
+                    .customValidator((val, ctx) -> {
+                        Validator<UserDTO> validator = new Validator<>(List.of(new PasswordRule<>()));
+                        validator.validate(UserDTO.builder().password(String.valueOf(val)).build());
+                        return null;
+                    })
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("tenantId", isVietnamese ? "Mã Tenant" : "Tenant ID")
+                    .required()
+                    .dataType(ExcelDataType.STRING)
+                    .allowedValues(tenantIds)
+                    .comment(
+                        isVietnamese
+                            ? "Chọn Tenant từ danh sách thả xuống. Hệ thống sẽ tự động ánh xạ từ mã (CODE)."
+                            : "Select Tenant from dropdown. System will auto-map from code (CODE)."
+                    )
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("isActivated", isVietnamese ? "Kích hoạt" : "Activated")
+                    .dataType(ExcelDataType.BOOLEAN)
+                    .comment(
+                        isVietnamese
+                            ? "TRUE = đã kích hoạt, FALSE = chưa kích hoạt. Mặc định: FALSE"
+                            : "TRUE = activated, FALSE = not activated. Default: FALSE"
+                    )
+                    .build()
+            )
+            .build();
     }
 
     // private void publishUserEvent(UserDTO request, User user, boolean isAdmin) {
