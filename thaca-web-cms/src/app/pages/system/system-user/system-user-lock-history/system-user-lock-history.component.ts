@@ -6,7 +6,6 @@ import { MenuItem } from 'primeng/api';
 import { AppConfigService } from '../../../../core/configs/app-config.service';
 import {
   DataTableComponent,
-  ITableActionEvent,
   ITableConfig,
 } from '../../../../shared/components/data-table/data-table.component';
 import {
@@ -18,10 +17,10 @@ import { ThacaInputComponent } from '../../../../shared/components/thaca-input/t
 import { ThacaButtonComponent } from '../../../../shared/components/thaca-button/thaca-button.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GlobalToast } from '../../../../core/global/global-toast';
-import { IUserLockHistoryDTO } from './user-lock-history.model';
+import { IUserLockHistoryDTO } from './system-user-lock-history.model';
 
 @Component({
-  selector: 'app-user-lock-history',
+  selector: 'app-system-user-lock-history',
   standalone: true,
   imports: [
     CommonModule,
@@ -34,9 +33,9 @@ import { IUserLockHistoryDTO } from './user-lock-history.model';
     ThacaDropdownComponent,
     ThacaInputComponent,
   ],
-  templateUrl: './user-lock-history.component.html',
+  templateUrl: './system-user-lock-history.component.html',
 })
-export class UserLockHistory implements OnInit {
+export class SystemUserLockHistoryComponent implements OnInit {
   private configService = inject(AppConfigService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);

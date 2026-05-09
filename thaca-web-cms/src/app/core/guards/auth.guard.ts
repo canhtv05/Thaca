@@ -1,24 +1,16 @@
 import { inject } from '@angular/core';
-import { CanActivateChildFn, Router } from '@angular/router';
-import { currentUser, isInitialAuthChecked } from '../stores/app.store';
+import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const AuthGuard: CanActivateChildFn = async (_, state) => {
-  const router = inject(Router);
+export const AuthGuard: CanActivateFn = async (_, state) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
 
-  if (!isInitialAuthChecked()) {
-    try {
-      await authService.getUserProfile();
-    } catch (e) {
-      isInitialAuthChecked.set(true);
-    }
+  const ok = await authService.ensureAuthenticated();
+
+  if (!ok) {
+    return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
   }
 
-  if (!currentUser()) {
-    void router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-    void authService.logout();
-    return false;
-  }
   return true;
 };

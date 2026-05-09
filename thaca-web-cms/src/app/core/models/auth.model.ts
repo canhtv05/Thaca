@@ -19,6 +19,6 @@ export interface IAuthUserDTO {
 }
 
 export interface IAuthenticateRes {
-  authenticate: boolean;
+  isAuthenticate: boolean;
   info: IAuthUserDTO;
 }

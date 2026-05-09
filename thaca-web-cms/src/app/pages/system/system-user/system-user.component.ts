@@ -138,47 +138,6 @@ export class SystemUserComponent implements OnInit {
         },
       },
       {
-        field: 'roles',
-        header: 'system_user.roles',
-        render: (row: ISystemUserDTO) => {
-          if (!row.roles || Object.keys(row.roles).length === 0) return '';
-
-          return `<div class="flex flex-col gap-2 py-1">
-            ${Object.entries(row.roles)
-              .map(([role, perms]) => {
-                const permissionTags = Object.entries(perms as { [key: string]: string })
-                  .map(([p, effect]) => {
-                    const isGrant = effect === 'GRANT';
-                    const colorClass = isGrant
-                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
-                      : 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800';
-
-                    return `<div class="flex items-center gap-1.5 px-1.5 py-0.5 rounded-sm border ${colorClass}">
-                        <span class="text-[9px] font-bold tracking-tight uppercase">${p}</span>
-                        <span class="text-[8px] opacity-70 uppercase">[${effect}]</span>
-                      </div>`;
-                  })
-                  .join('');
-
-                return `
-                  <div class="flex flex-col gap-1.5 rounded-lg card p-2!">
-                    <div class="flex items-center gap-2">
-                      <span class="thaca-badge thaca-badge-primary thb-sm thb-square">
-                        <span class="thb-dot"></span>
-                        ${role}
-                      </span>
-                    </div>
-                    <div class="flex flex-wrap gap-1 ml-2">
-                      ${permissionTags}
-                    </div>
-                  </div>
-                `;
-              })
-              .join('')}
-          </div>`;
-        },
-      },
-      {
         field: 'isActivated',
         header: 'system_user.is_activated',
         render: (row: ISystemUserDTO) => {
@@ -210,6 +169,12 @@ export class SystemUserComponent implements OnInit {
       },
     ],
     actions: [
+      {
+        icon: 'pi pi-eye',
+        key: 'view',
+        titleKey: 'common.button.view',
+        color: 'primary',
+      },
       {
         icon: 'pi pi-pencil',
         key: 'edit',
@@ -355,7 +320,9 @@ export class SystemUserComponent implements OnInit {
   }
 
   handleAction(event: ITableActionEvent) {
-    if (event.key === 'edit') {
+    if (event.key === 'view') {
+      this.router.navigate(['/system/system-users', event.row.id]);
+    } else if (event.key === 'edit') {
       const savedPermissions = new Map<string, Set<string>>();
       if (event.row.roles) {
         Object.entries(event.row.roles).forEach(([role, perms]) => {

@@ -1,0 +1,201 @@
+<div class="flex flex-col gap-4 w-full">
+  <app-breadcrumb
+    [title]="'menu.system_user_management'"
+    [items]="breadcrumbItems"
+  ></app-breadcrumb>
+
+  <div class="card">
+    <div class="flex items-center mb-4">
+      <div class="w-1 h-5 bg-primary mr-2 rounded"></div>
+      <h3 class="m-0 text-sm font-bold">
+        {{ 'system_user.detail.user_info' | translate }}
+      </h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <thaca-input
+        [label]="'system_user.username' | translate"
+        [ngModel]="user()?.username"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'system_user.fullname' | translate"
+        [ngModel]="user()?.fullname"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'system_user.email' | translate"
+        [ngModel]="user()?.email"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'system_user.tenant' | translate"
+        [ngModel]="
+          user()?.tenantInfo ? user()?.tenantInfo?.code + ' - ' + user()?.tenantInfo?.name : ''
+        "
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'system_user.is_activated' | translate"
+        [ngModel]="
+          user()?.isActivated
+            ? ('common.status.active' | translate)
+            : ('common.status.inactive' | translate)
+        "
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'system_user.is_locked' | translate"
+        [ngModel]="
+          user()?.isLocked
+            ? ('common.status.lock' | translate)
+            : ('common.status.unlock' | translate)
+        "
+        [disabled]="true"
+      ></thaca-input>
+    </div>
+    @if (user()?.isSuperAdmin) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <thaca-input
+          [label]="'system_user.is_super_admin' | translate"
+          [ngModel]="'common.yes' | translate"
+          [disabled]="true"
+        ></thaca-input>
+      </div>
+    }
+    @if (user()?.avatarUrl) {
+      <thaca-textarea
+        class="mt-4"
+        [label]="'system_user.avatar_url' | translate"
+        [ngModel]="user()?.avatarUrl"
+        [disabled]="true"
+      ></thaca-textarea>
+    }
+    @if (user()?.isLocked && user()?.lockReason) {
+      <thaca-textarea
+        class="mt-4"
+        [label]="'system_user.lock_reason' | translate"
+        [ngModel]="user()?.lockReason"
+        [disabled]="true"
+      ></thaca-textarea>
+    }
+  </div>
+
+  <div class="card">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center">
+        <div class="w-1 h-5 bg-primary mr-2 rounded"></div>
+        <h3 class="m-0 text-sm font-bold">
+          {{ 'system_user.detail.roles_permissions' | translate }}
+        </h3>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-muted-foreground">
+          {{ getRoleCount() }} {{ 'system_user.detail.roles_count' | translate }}
+          &middot;
+          {{ getPermCount() }} {{ 'system_user.detail.permissions_count' | translate }}
+        </span>
+      </div>
+    </div>
+
+    @if (roleEntries().length === 0) {
+      <div class="flex flex-col items-center justify-center py-12 gap-2">
+        <i class="pi pi-shield text-3xl text-muted-foreground/40"></i>
+        <span class="text-sm text-muted-foreground">
+          {{ 'system_user.detail.no_roles' | translate }}
+        </span>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-5">
+        @for (entry of roleEntries(); track entry.roleCode; let i = $index) {
+          <div class="rounded-xl border border-border overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 bg-muted/50">
+              <div class="flex items-center gap-3">
+                <div class="flex flex-col">
+                  <span class="text-sm font-bold text-foreground tracking-wide uppercase">
+                    {{ entry.roleCode }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                >
+                  {{ countGrant(entry) }} {{ 'system_user.permission_grant' | translate }}
+                </span>
+                @if (countDeny(entry) > 0) {
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400"
+                  >
+                    {{ countDeny(entry) }} {{ 'system_user.permission_deny' | translate }}
+                  </span>
+                }
+              </div>
+            </div>
+            <div class="divide-y divide-border/40">
+              @for (perm of entry.permissions; track perm.code; let last = $last) {
+                <div
+                  class="flex items-center justify-between px-4 py-2.5 hover:bg-muted/30"
+                  [ngClass]="
+                    perm.effect === 'GRANT'
+                      ? 'bg-emerald-50/40 dark:bg-emerald-950/10'
+                      : 'bg-rose-50/40 dark:bg-rose-950/10'
+                  "
+                >
+                  <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold tracking-wide uppercase text-foreground/80">
+                      {{ perm.code }}
+                    </span>
+                  </div>
+                  @if (perm.effect === 'GRANT') {
+                    <span
+                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500 text-white dark:bg-emerald-600"
+                    >
+                      {{ 'system_user.permission_grant' | translate }}
+                    </span>
+                  } @else {
+                    <span
+                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-500 text-white dark:bg-rose-600"
+                    >
+                      {{ 'system_user.permission_deny' | translate }}
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="card">
+    <div class="flex items-center mb-4">
+      <div class="w-1 h-5 bg-primary mr-2 rounded"></div>
+      <h3 class="m-0 text-sm font-bold">
+        {{ 'common.audit' | translate }}
+      </h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <thaca-input
+        [label]="'common.createdBy' | translate"
+        [ngModel]="user()?.createdBy"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'common.createdAt' | translate"
+        [ngModel]="user()?.createdAt"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'common.updatedBy' | translate"
+        [ngModel]="user()?.updatedBy"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'common.updatedAt' | translate"
+        [ngModel]="user()?.updatedAt"
+        [disabled]="true"
+      ></thaca-input>
+    </div>
+  </div>
+</div>

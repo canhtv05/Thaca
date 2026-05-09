@@ -10,11 +10,13 @@ export interface ISystemUserDTO {
   isLocked?: boolean;
   isSuperAdmin?: boolean;
   avatarUrl?: string;
-  roles?: { [key: string]: { [key: string]: string } };
   tenantIds?: number[];
   password?: string;
   lockReason?: string;
   createdAt?: string;
   updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
   tenantInfo?: ITenantInfoPrj;
+  roles?: { [roleCode: string]: { [permCode: string]: 'GRANT' | 'DENY' } };
 }

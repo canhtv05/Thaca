@@ -2,6 +2,7 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.domains.*;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.mappers.SystemUserMapper;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
@@ -11,7 +12,6 @@ import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.*;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
-import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
@@ -28,7 +28,6 @@ import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
-import com.thaca.framework.core.utils.DateUtils;
 import jakarta.persistence.criteria.*;
 import java.io.IOException;
 import java.util.*;
@@ -60,7 +59,7 @@ public class SystemUserService {
         String username = SecurityUtils.getCurrentUsername();
         return systemCredentialRepository
             .findByUsername(username)
-            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId(), getTenantOrNull(sc.getTenantId())))
+            .map(sc -> SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), getTenantOrNull(sc.getTenantId())))
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
@@ -97,7 +96,7 @@ public class SystemUserService {
         List<SystemUserDTO> data = result
             .getContent()
             .stream()
-            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId(), tenantMap.get(sc.getTenantId())))
+            .map(sc -> SystemUserMapper.toSearchDTO(sc, sc.getSystemUser(), tenantMap.get(sc.getTenantId())))
             .toList();
         return new SearchResponse<>(data, PaginationResponse.of(result));
     }
@@ -114,7 +113,7 @@ public class SystemUserService {
         SystemCredential sc = systemCredentialRepository
             .findBySystemUser(su)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        return getSystemUserDTO(sc, su, sc.getTenantId(), getTenantOrNull(sc.getTenantId()));
+        return SystemUserMapper.toFullDTO(sc, su, getTenantOrNull(sc.getTenantId()));
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
@@ -158,7 +157,7 @@ public class SystemUserService {
             );
         }
 
-        return getSystemUserDTO(sc, su, su.getTenantId(), getTenantOrNull(su.getTenantId()));
+        return SystemUserMapper.toFullDTO(sc, su, getTenantOrNull(su.getTenantId()));
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
@@ -221,7 +220,7 @@ public class SystemUserService {
             );
         }
 
-        return getSystemUserDTO(sc, su, sc.getTenantId(), getTenantOrNull(sc.getTenantId()));
+        return SystemUserMapper.toFullDTO(sc, su, getTenantOrNull(sc.getTenantId()));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -301,7 +300,7 @@ public class SystemUserService {
             : tenantRepository.findAllById(tenantIds).stream().collect(Collectors.toMap(Tenant::getId, t -> t));
         List<SystemUserDTO> data = result
             .stream()
-            .map(sc -> getSystemUserDTO(sc, sc.getSystemUser(), sc.getTenantId(), tenantMap.get(sc.getTenantId())))
+            .map(sc -> SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), tenantMap.get(sc.getTenantId())))
             .toList();
 
         List<Map<String, Object>> rows = new ArrayList<>();
@@ -310,7 +309,7 @@ public class SystemUserService {
             row.put("username", user.getUsername());
             row.put("fullname", user.getFullname());
             row.put("email", user.getEmail());
-            row.put("tenantId", user.getTenantId());
+            row.put("tenantName", user.getTenantInfo() != null ? user.getTenantInfo().getName() : "");
             row.put("roles", user.getRoles() != null ? String.join(", ", user.getRoles().keySet()) : "");
             row.put(
                 "isActivated",
@@ -345,7 +344,11 @@ public class SystemUserService {
                     .build()
             )
             .addColumn(ExcelColumn.builder("email", "Email").required().dataType(ExcelDataType.STRING).build())
-            .addColumn(ExcelColumn.builder("tenantId", "Tenant ID").dataType(ExcelDataType.NUMBER).build())
+            .addColumn(
+                ExcelColumn.builder("tenantName", isVietnamese ? "Tenant" : "Tenant")
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
             .addColumn(
                 ExcelColumn.builder("roles", isVietnamese ? "Vai trò" : "Roles").dataType(ExcelDataType.STRING).build()
             )
@@ -403,67 +406,6 @@ public class SystemUserService {
     private Tenant getTenantOrNull(Long tenantId) {
         if (tenantId == null) return null;
         return tenantRepository.findById(tenantId).orElse(null);
-    }
-
-    private SystemUserDTO getSystemUserDTO(SystemCredential sc, SystemUser su, Long tenantId, Tenant tenant) {
-        TenantDTO tenantInfo = null;
-        if (tenant != null) {
-            tenantInfo = TenantDTO.builder()
-                .id(tenant.getId())
-                .code(tenant.getCode())
-                .name(tenant.getName())
-                .domain(tenant.getDomain())
-                .status(tenant.getStatus())
-                .contactEmail(tenant.getContactEmail())
-                .logoUrl(tenant.getLogoUrl())
-                .build();
-        }
-
-        // Key: "roleCode:permissionCode" -> Effect
-        Map<String, PermissionEffect> overrides = sc
-            .getCredentialPermissions()
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    scp -> scp.getId().getRoleCode() + ":" + scp.getPermission().getCode(),
-                    SystemCredentialPermission::getEffect,
-                    (e1, e2) -> e1
-                )
-            );
-
-        return SystemUserDTO.builder()
-            .id(su.getId())
-            .tenantId(tenantId)
-            .tenantInfo(tenantInfo)
-            .username(sc.getUsername())
-            .email(su.getEmail())
-            .fullname(su.getFullname())
-            .isActivated(su.getIsActivated())
-            .isLocked(su.getIsLocked())
-            .isSuperAdmin(su.getIsSuperAdmin())
-            .avatarUrl(su.getAvatarUrl())
-            .roles(
-                sc
-                    .getRoles()
-                    .stream()
-                    .collect(
-                        Collectors.toMap(Role::getCode, r ->
-                            r
-                                .getPermissions()
-                                .stream()
-                                .collect(
-                                    Collectors.toMap(Permission::getCode, p ->
-                                        overrides.getOrDefault(r.getCode() + ":" + p.getCode(), PermissionEffect.GRANT)
-                                    )
-                                )
-                        )
-                    )
-            )
-            .createdAt(DateUtils.dateToString(sc.getCreatedAt()))
-            .updatedAt(DateUtils.dateToString(sc.getUpdatedAt()))
-            .createdBy(sc.getCreatedBy())
-            .updatedBy(sc.getUpdatedBy())
-            .build();
     }
 
     private void grantPermission(SystemUserDTO request, SystemCredential sc) {

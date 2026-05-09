@@ -5,6 +5,7 @@ public class ServiceMethod {
     public static final String INTERNAL_ACTIVE_USER = "internal.activeUserByUserName";
 
     public static final String CMS_AUTHENTICATE = "cms.authenticate";
+    public static final String CMS_LOGOUT = "cms.logout";
     public static final String CMS_SEARCH_USERS = "cms.searchUsers";
     public static final String CMS_SEARCH_ROLES = "cms.searchRoles";
     public static final String CMS_GET_ALL_ROLES = "cms.getAllRoles";

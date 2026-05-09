@@ -4,6 +4,7 @@ public class InternalMethod {
 
     public static final String INTERNAL_CMS_ACTIVE_USER = "internal.activeUserByUserName";
     public static final String INTERNAL_CMS_AUTHENTICATE = "internal.cmsAuthenticate";
+    public static final String INTERNAL_CMS_LOGOUT = "internal.cmsLogout";
     public static final String INTERNAL_CMS_SEARCH_USERS = "internal.cmsSearchUsers";
     public static final String INTERNAL_CMS_GET_USER_BY_ID = "internal.cmsGetUserById";
     public static final String INTERNAL_CMS_LOCK_USER = "internal.cmsLockUser";

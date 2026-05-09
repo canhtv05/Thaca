@@ -25,6 +25,15 @@
     "action": "Hành động",
     "reason": "Lý do",
     "reason_placeholder": "Nhập lý do",
+    "detail_title": "Người dùng: {{username}}",
+    "detail": {
+      "user_info": "Thông tin người dùng",
+      "roles_permissions": "Vai trò & Quyền hạn",
+      "roles_count": "vai trò",
+      "permissions_count": "quyền",
+      "permissions": "quyền",
+      "no_roles": "Chưa được gán vai trò"
+    },
     "modal": {
       "create_title": "Thêm người dùng hệ thống",
       "update_title": "Cập nhật người dùng",
@@ -52,7 +61,10 @@
       "lock_unlock": {
         "titleSuccess": "Thành công",
         "messageSuccess": "Đã thay đổi trạng thái khóa người dùng."
-      }
+      },
+      "error": "Lỗi",
+      "user_id_is_invalid": "ID người dùng không hợp lệ",
+      "user_not_found": "Không tìm thấy người dùng"
     }
   }
 }
