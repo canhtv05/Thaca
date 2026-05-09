@@ -37,7 +37,7 @@ import { CommonUtils } from '../../utils/common.utils';
   ],
 })
 export class ThacaInputComponent implements ControlValueAccessor {
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() size: 'sm' | 'md' | 'lg' = 'lg';
   @Input() readonly = false;
   @Input() step: number = 1;
   @Input() min?: number;

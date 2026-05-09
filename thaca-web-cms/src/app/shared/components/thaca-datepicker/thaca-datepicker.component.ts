@@ -214,7 +214,7 @@ const LOCALE_MAP: Record<string, any> = {
 export class ThacaDatepickerComponent implements ControlValueAccessor {
   private primeng = inject(PrimeNG);
   // ── Layout ─────────────────────────────────────────────────────────
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() size: 'sm' | 'md' | 'lg' = 'lg';
 
   @HostBinding('class')
   get hostClass(): string {

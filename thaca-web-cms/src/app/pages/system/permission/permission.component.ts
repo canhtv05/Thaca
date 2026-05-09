@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { TranslateService } from '@ngx-translate/core';
+import { PermissionService } from './permission.service';
 
 @Component({
   selector: 'app-permission',
@@ -36,6 +37,7 @@ export class PermissionComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private translateService = inject(TranslateService);
+  private permissionService = inject(PermissionService);
   table = viewChild(DataTableComponent);
   roleDescription = computed(() => {
     const data = this.table()?.data();
@@ -89,5 +91,9 @@ export class PermissionComponent implements OnInit {
 
   onSearch() {
     this.table()?.refresh(this.filter());
+  }
+
+  async onExport(): Promise<void> {
+    await this.permissionService.exportPermissions(this.table()?.getSearchRequest());
   }
 }

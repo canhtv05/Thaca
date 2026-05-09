@@ -41,7 +41,7 @@ export class ThacaModalComponent {
   @Input() description: string = '';
   @Input() cancelText: string = 'common.button.cancel';
   @Input() submitText: string = 'common.button.save';
-  @Input() size: ModalSize = 'md';
+  @Input() size: ModalSize = 'lg';
   @Input() styleClass: string = '';
   @Input() draggable: boolean = false;
   @Input() resizable: boolean = false;

@@ -37,18 +37,21 @@
   border: var(--border-b) solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
+  box-shadow:
+    0 1px 3px oklch(0 0 0 / 4%),
+    0 1px 2px oklch(0 0 0 / 3%);
 }
 
 // ── Header ───────────────────────────────────────────────────
 .dt-header {
-  padding: 10px;
-  min-height: 56px;
+  padding: 12px 14px;
+  min-height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   border-bottom: var(--border-b) solid var(--border);
-  background: color-mix(in oklch, var(--muted) 55%);
+  background: var(--muted);
 }
 
 // ── Table Shell ──────────────────────────────────────────────
@@ -117,14 +120,14 @@
 
     // Header cells
     .dt-th {
-      background: color-mix(in oklch, var(--muted) 65%, var(--card)) !important;
+      background: var(--muted) !important;
       color: var(--muted-foreground) !important;
       font-size: 0.68rem !important;
       font-weight: 700 !important;
       text-transform: uppercase;
       letter-spacing: 0.07em;
       padding: 10px 14px !important;
-      border-bottom: var(--border-b) solid var(--border) !important;
+      border-bottom: 1px solid var(--border) !important;
       border-top: none !important;
       border-right: none !important;
       border-left: none !important;
@@ -185,10 +188,10 @@
 
     // Body cells
     .dt-td {
-      padding: 10px 14px !important;
+      padding: 11px 14px !important;
       font-size: 0.83rem;
       color: var(--foreground);
-      border-bottom: var(--border-b) solid var(--border) !important;
+      border-bottom: 1px solid var(--border) !important;
       border-right: none !important;
       border-left: none !important;
       background: var(--card) !important;
@@ -524,8 +527,8 @@
   justify-content: space-between;
   gap: 12px;
   padding: 0 16px;
-  border-top: var(--border-b) solid var(--border);
-  background: color-mix(in oklch, var(--muted) 40%);
+  border-top: 1px solid var(--border);
+  background: var(--muted);
   flex-shrink: 0;
 }
 

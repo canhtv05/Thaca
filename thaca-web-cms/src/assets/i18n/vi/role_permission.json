@@ -2,13 +2,13 @@
   "role_permission": {
     "role": {
       "code": "Mã vai trò",
-      "description": "Mô tả vai trò",
+      "description": "Mô tả",
       "search_by_code": "Tìm kiếm theo mã vai trò",
       "code_placeholder": "Nhập mã vai trò"
     },
     "permission": {
       "code": "Mã quyền",
-      "description": "Mô tả quyền",
+      "description": "Mô tả",
       "search_by_code": "Tìm kiếm theo mã quyền",
       "code_placeholder": "Nhập mã quyền"
     },

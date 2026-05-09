@@ -8,6 +8,8 @@ public class ServiceMethod {
     public static final String CMS_SEARCH_USERS = "cms.searchUsers";
     public static final String CMS_SEARCH_ROLES = "cms.searchRoles";
     public static final String CMS_GET_ALL_ROLES = "cms.getAllRoles";
+    public static final String CMS_EXPORT_ROLES = "cms.exportRoles";
+    public static final String CMS_EXPORT_PERMISSIONS = "cms.exportPermissions";
     public static final String CMS_SEARCH_TENANTS = "cms.searchTenants";
     public static final String CMS_GET_TENANT = "cms.getTenant";
     public static final String CMS_GET_ALL_TENANTS = "cms.getAllTenants";
