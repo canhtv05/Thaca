@@ -12,3 +12,6 @@ build/
 *.ear
 *.log
 spring-boot-*.log
+
+.cursor
+.shared

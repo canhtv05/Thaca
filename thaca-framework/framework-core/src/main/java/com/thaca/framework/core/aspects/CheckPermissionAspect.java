@@ -49,19 +49,27 @@ public class CheckPermissionAspect {
                 if (auth == null || !auth.isAuthenticated()) {
                     throw new FwException(CommonErrorMessage.UNAUTHORIZED);
                 }
-                Set<String> userRoles = auth
+                Set<String> authorities = auth
                     .getAuthorities()
                     .stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toSet());
-
+                Set<String> deniedPermissions = authorities
+                    .stream()
+                    .filter(authority -> authority.startsWith("DENY_"))
+                    .map(authority -> authority.substring(5))
+                    .collect(Collectors.toSet());
                 Set<String> userPermissions = new HashSet<>();
-                for (String role : userRoles) {
-                    userPermissions.addAll(permissionProvider.getPermissions(role));
-                    if (role.startsWith("ROLE_")) {
-                        userPermissions.addAll(permissionProvider.getPermissions(role.substring(5)));
+                for (String authority : authorities) {
+                    if (authority.startsWith("DENY_")) {
+                        continue;
+                    }
+                    userPermissions.addAll(permissionProvider.getPermissions(authority));
+                    if (authority.startsWith("ROLE_")) {
+                        userPermissions.addAll(permissionProvider.getPermissions(authority.substring(5)));
                     }
                 }
+                userPermissions.removeAll(deniedPermissions);
                 boolean isAllowed;
                 if (annotation.allMatched()) {
                     isAllowed = Arrays.stream(requiredPermissions).allMatch(userPermissions::contains);

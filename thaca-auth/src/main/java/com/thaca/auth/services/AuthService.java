@@ -208,6 +208,8 @@ public class AuthService {
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
             } else {
                 rolesString = getRoleString(sc, authorities);
+                List<String> deniedPermissions = systemCredentialRepository.findDeniedPermissionCodes(sc.getUsername());
+                deniedPermissions.forEach(p -> authorities.add(new SimpleGrantedAuthority("DENY_" + p)));
             }
             CustomUserDetails userDetails = new CustomUserDetails(
                 sc.getUsername(),

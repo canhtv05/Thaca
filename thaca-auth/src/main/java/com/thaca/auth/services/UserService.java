@@ -40,6 +40,7 @@ import com.thaca.common.excel.schema.ExcelSchema;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
+import com.thaca.framework.core.annotations.CheckPermission;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.dtos.ApiHeader;
@@ -82,6 +83,7 @@ public class UserService {
     private final UserLockHistoryRepository userLockHistoryRepository;
 
     @Transactional(readOnly = true)
+    @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_USERS, type = ModeType.HANDLE)
     public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> request) {
         Specification<User> spec = createUserSpecification(request);

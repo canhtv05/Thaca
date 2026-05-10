@@ -12,6 +12,7 @@ import com.thaca.auth.services.AuthService;
 import com.thaca.common.dtos.UserSession;
 import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
+import com.thaca.common.enums.PermissionEffect;
 import com.thaca.common.enums.WsType;
 import com.thaca.common.socket.WsMessage;
 import com.thaca.common.socket.WsSessionRevokedMessage;
@@ -39,6 +40,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -200,7 +202,14 @@ public class TokenProvider {
         return Jwts.builder()
             .id(sessionId)
             .subject(authentication.getName())
-            .claim(ROLE_KEY, userDetails.getRole())
+            .claim(
+                ROLE_KEY,
+                authentication
+                    .getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.joining(","))
+            )
             .claim(CommonConstants.CHANNEL_KEY, channel)
             .claim("c", userDetails.isCmsUser() ? 1 : 0)
             .claim("tenantId", userDetails.getTenantId())
@@ -306,6 +315,12 @@ public class TokenProvider {
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
             } else {
                 rolesString = AuthService.getRoleString(sc, authorities);
+                sc
+                    .getCredentialPermissions()
+                    .stream()
+                    .filter(cp -> PermissionEffect.DENY.equals(cp.getEffect()))
+                    .map(cp -> cp.getPermission().getCode())
+                    .forEach(code -> authorities.add(new SimpleGrantedAuthority("DENY_" + code)));
             }
         } else {
             throw new FwException(ErrorMessage.USER_NOT_FOUND);
