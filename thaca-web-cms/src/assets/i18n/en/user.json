@@ -1,9 +1,10 @@
 {
   "user": {
+    "detail_title": "User: {{username}}",
     "username": "Username",
     "email": "Email",
     "status": "Status",
-    "isActivated": "Activated",
+    "activated": "Activated",
     "action": "Action",
     "search_by_username": "Search by username",
     "search_by_email": "Search by email",
@@ -13,6 +14,7 @@
     "locked": "Locked",
     "safe": "Activated",
     "username_placeholder": "Enter username",
+    "tenant_placeholder": "Select Tenant",
     "email_placeholder": "Enter email",
     "status_placeholder": "Select status",
     "locked_placeholder": "Select lock status",

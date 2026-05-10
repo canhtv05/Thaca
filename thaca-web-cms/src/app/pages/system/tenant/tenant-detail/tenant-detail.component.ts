@@ -11,6 +11,7 @@ import { TenantService } from '../tenant.service';
 import { isLoading } from '../../../../core/stores/app.store';
 import { ITenantDTO } from '../tenant.model';
 import { GlobalToast } from '../../../../core/global/global-toast';
+import { AuditDetailComponent } from '../../../../shared/components/audit-detail/audit-detail.component';
 
 @Component({
   selector: 'app-tenant-detail',
@@ -23,6 +24,7 @@ import { GlobalToast } from '../../../../core/global/global-toast';
     BreadcrumbComponent,
     ThacaInputComponent,
     ThacaTextareaComponent,
+    AuditDetailComponent,
   ],
   templateUrl: './tenant-detail.component.html',
 })

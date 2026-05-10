@@ -1,9 +1,10 @@
 {
   "user": {
+    "detail_title": "Chi tiết người dùng {{username}}",
     "username": "Tên người dùng",
     "email": "Email",
     "status": "Trạng thái",
-    "isActivated": "Kích hoạt",
+    "activated": "Kích hoạt",
     "action": "Hành động",
     "search_by_username": "Tìm kiếm theo tên người dùng",
     "search_by_email": "Tìm kiếm theo email",
@@ -13,6 +14,7 @@
     "locked": "Bị khóa",
     "safe": "An toàn",
     "username_placeholder": "Nhập tài khoản",
+    "tenant_placeholder": "Chọn Tenant",
     "email_placeholder": "Nhập email",
     "status_placeholder": "Chọn trạng thái",
     "locked_placeholder": "Chọn trạng thái khóa",

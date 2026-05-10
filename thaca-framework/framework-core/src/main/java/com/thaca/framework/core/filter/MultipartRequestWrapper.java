@@ -7,7 +7,6 @@ import com.thaca.framework.core.utils.JsonF;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.springframework.http.MediaType;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 public class MultipartRequestWrapper extends HttpServletRequestWrapper {
 

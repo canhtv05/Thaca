@@ -19,9 +19,10 @@ public class ServiceMethod {
     public static final String CMS_EXPORT_TENANT = "cms.exportTenant";
 
     public static final String CMS_SEARCH_USERS = "cms.searchUsers";
+    public static final String CMS_DETAIL_USER = "cms.detailUser";
     public static final String CMS_DOWNLOAD_USER_TEMPLATE = "cms.downloadUserTemplate";
     public static final String CMS_IMPORT_USERS = "cms.importUsers";
-    public static final String CMS_EXPORT_USER_IMPORT_ERROR = "cms.exportUserImportError";
+    public static final String CMS_EXPORT_USER_FILE_ERROR = "cms.exportUserFileError";
 
     public static final String CMS_SEARCH_SYSTEM_USERS = "cms.searchSystemUsers";
     public static final String CMS_SEARCH_USER_LOCK_HISTORY = "cms.searchUserLockHistory";

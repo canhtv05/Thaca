@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { BreadcrumbComponent } from '../../../shared/components/breadcrumb/breadcrumb.component';
 import {
   DataTableComponent,
@@ -19,9 +19,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ThacaModalComponent } from '../../../shared/components/thaca-modal/thaca-modal.component';
 import { MenuItem } from 'primeng/api';
 import { UserService } from '../user.service';
-import { IErrorData, IImportResult } from '../../../core/models/common.model';
+import { IImportResult } from '../../../core/models/common.model';
 import { GlobalToast } from '../../../core/global/global-toast';
-import { currentLang } from '../../../core/stores/app.store';
+import { TenantService } from '../../system/tenant/tenant.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-list',
@@ -39,18 +40,20 @@ import { currentLang } from '../../../core/stores/app.store';
   ],
   templateUrl: './user-list.component.html',
 })
-export class UserListComponent {
+export class UserListComponent implements OnInit {
   private configService = inject(AppConfigService);
   private translate = inject(TranslateService);
   private userService = inject(UserService);
+  private tenantService = inject(TenantService);
+  private router = inject(Router);
 
   @ViewChild('mainTable') table!: DataTableComponent;
   @ViewChild('createModal') createModal!: ThacaModalComponent;
   @ViewChild('importResultModal') importResultModal!: ThacaModalComponent;
 
   breadcrumbItems: MenuItem[] = [
-    { label: 'menu.user_management', routerLink: '/user-management/list' },
-    { label: 'menu.user_list' },
+    { icon: 'pi pi-user', label: 'menu.user_management', routerLink: '/user-management/list' },
+    { icon: 'pi pi-list', label: 'menu.user_list' },
   ];
 
   filter = signal({
@@ -58,6 +61,7 @@ export class UserListComponent {
     email: '',
     isActivated: null,
     isLocked: null,
+    tenantId: null,
   });
 
   importResult = signal<IImportResult | null>(null);
@@ -87,7 +91,7 @@ export class UserListComponent {
     { label: 'user.active', value: true },
     { label: 'user.inactive', value: false },
   ];
-
+  tenantOptions = signal<IDropdownOption[]>([]);
   lockedOptions: IDropdownOption[] = [
     { label: 'common.all', value: null },
     { label: 'user.safe', value: false },
@@ -104,6 +108,14 @@ export class UserListComponent {
       { field: 'username', header: 'user.username', sortable: true, width: '150px' },
       { field: 'email', header: 'user.email', sortable: true },
       {
+        field: 'tenant',
+        header: 'Tenant',
+        center: true,
+        render: (row: IUserDTO) => {
+          return `<div class='inline-block min-w-[150px]'>${row?.tenant?.code} - ${row?.tenant?.name}</div>`;
+        },
+      },
+      {
         field: 'isActivated',
         header: 'user.status',
         render: (row: IUserDTO) => {
@@ -116,7 +128,7 @@ export class UserListComponent {
       },
       {
         field: 'isLocked',
-        header: 'user.isActivated',
+        header: 'user.locked',
         render: (row: IUserDTO) => {
           const label = this.translate.instant(row.isLocked ? 'user.locked' : 'user.safe');
           const variant = row.isLocked ? 'danger' : 'info';
@@ -138,8 +150,32 @@ export class UserListComponent {
         color: 'danger',
         condition: (row) => !row.isActivated,
       },
+      {
+        icon: 'pi pi-eye',
+        titleKey: 'common.button.view',
+        key: 'view',
+        color: 'primary',
+      },
+      {
+        icon: 'pi pi-clock',
+        titleKey: 'menu.login_history',
+        key: 'view_login_history',
+        color: 'primary',
+      },
     ],
   };
+
+  async ngOnInit(): Promise<void> {
+    const tenants = await this.tenantService.getAll();
+    if (tenants.body.status === 'OK') {
+      this.tenantOptions.set(
+        tenants.body.data.map((t) => ({
+          label: `${t.code} - ${t.name}`,
+          value: t.id,
+        })),
+      );
+    }
+  }
 
   onSearch() {
     this.table.refresh(this.filter());
@@ -149,14 +185,12 @@ export class UserListComponent {
     const { key } = event;
 
     switch (key) {
-      case 'Edit':
-        console.log('Editing user:', event.row);
+      case 'view':
+        this.router.navigate(['/user-management/users', event.row?.username]);
         break;
-      case 'Delete':
-        console.log('Deleting user:', event.row);
+      case 'view_login_history':
+        this.router.navigate(['/user-management/users', event.row?.username, 'login-history']);
         break;
-      default:
-        console.warn('Unknown action:', key);
     }
   }
 
@@ -205,7 +239,7 @@ export class UserListComponent {
     const data = this.importResult();
     if (!data?.errors?.length) return;
     try {
-      await this.userService.downloadExportError(data);
+      await this.userService.downloadFileError(data);
       GlobalToast.successPlain(
         this.translate.instant('user.import.export_error_done'),
         this.translate.instant('common.success'),

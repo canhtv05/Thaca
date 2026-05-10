@@ -200,6 +200,12 @@ export class SystemUserComponent implements OnInit {
         titleKey: 'menu.system_user_lock_history',
         color: 'primary',
       },
+      {
+        icon: 'pi pi-clock',
+        key: 'view_login_history',
+        titleKey: 'menu.login_history',
+        color: 'primary',
+      },
     ],
   };
 
@@ -322,6 +328,8 @@ export class SystemUserComponent implements OnInit {
   handleAction(event: ITableActionEvent) {
     if (event.key === 'view') {
       this.router.navigate(['/system/system-users', event.row.id]);
+    } else if (event.key === 'view_login_history') {
+      this.router.navigate(['/system/system-users', event.row?.username, 'login-history']);
     } else if (event.key === 'edit') {
       const savedPermissions = new Map<string, Set<string>>();
       if (event.row.roles) {

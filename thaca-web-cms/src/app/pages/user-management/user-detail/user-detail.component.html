@@ -1,0 +1,67 @@
+<div class="flex flex-col gap-4 w-full">
+  <app-breadcrumb
+    [title]="'user.detail_title' | translate: { username: user()?.username || '' }"
+    [items]="breadcrumbItems"
+  ></app-breadcrumb>
+  <div class="card">
+    <div class="flex items-center mb-4">
+      <div class="w-1 h-5 bg-primary mr-2 rounded"></div>
+      <h3 class="m-0 text-sm font-bold">
+        {{ 'Tenant' | translate }}
+      </h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <thaca-input
+        [label]="'tenant.code' | translate"
+        [ngModel]="user()?.tenant?.code"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'tenant.name' | translate"
+        [ngModel]="user()?.tenant?.name"
+        [disabled]="true"
+      ></thaca-input>
+    </div>
+  </div>
+  <div class="card space-y-4">
+    <div class="flex items-center mb-4">
+      <div class="w-1 h-5 bg-primary mr-2 rounded"></div>
+      <h3 class="m-0 text-sm font-bold">
+        {{ 'user.detail_title' | translate: { username: user()?.username || '' } }}
+      </h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <thaca-input
+        [label]="'user.username' | translate"
+        [ngModel]="user()?.username"
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'user.email' | translate"
+        [ngModel]="user()?.email"
+        [disabled]="true"
+      ></thaca-input>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <thaca-input
+        [label]="'user.locked' | translate"
+        [ngModel]="
+          user()?.isLocked
+            ? ('common.status.locked' | translate)
+            : ('common.status.unlock' | translate)
+        "
+        [disabled]="true"
+      ></thaca-input>
+      <thaca-input
+        [label]="'user.activated' | translate"
+        [ngModel]="
+          user()?.isActivated
+            ? ('common.status.active' | translate)
+            : ('common.status.inactive' | translate)
+        "
+        [disabled]="true"
+      ></thaca-input>
+    </div>
+  </div>
+  <app-audit-detail [audit]="user() ?? {}"></app-audit-detail>
+</div>

@@ -18,6 +18,18 @@ export const systemUserRoutes: Routes = [
     data: { i18n: ['system_user'] },
   },
   {
+    path: 'system-users/:targetUserId/login-history',
+    loadComponent: () =>
+      import('../../overview/login-history/login-history.component').then(
+        (m) => m.LoginHistoryComponent,
+      ),
+    resolve: { i18n: I18nResolver },
+    data: {
+      i18n: ['user', 'auth'],
+      viewMode: 'system-user',
+    },
+  },
+  {
     path: 'system-users/:targetUserId',
     loadComponent: () =>
       import('./system-user-detail/system-user-detail.component').then(

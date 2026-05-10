@@ -31,11 +31,14 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/users/search", name = ServiceMethod.CMS_SEARCH_USERS)
     SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> search);
 
+    @FwInternalApi(path = "/cms/users/detail", name = ServiceMethod.CMS_DETAIL_USER)
+    UserDTO detailUser(UserDTO request);
+
     @FwInternalApi(path = "/cms/users/download-template", name = ServiceMethod.CMS_DOWNLOAD_USER_TEMPLATE)
     byte[] downloadUserTemplate();
 
-    @FwInternalApi(path = "/cms/users/export-error", name = ServiceMethod.CMS_EXPORT_USER_IMPORT_ERROR)
-    byte[] exportUserImportError(ImportResponseDTO importResult);
+    @FwInternalApi(path = "/cms/users/file-error", name = ServiceMethod.CMS_EXPORT_USER_FILE_ERROR)
+    byte[] exportUserFileError(ImportResponseDTO importResult);
 
     @FwInternalApi(path = "/cms/users/lock", name = ServiceMethod.CMS_LOCK_USER)
     Void lockUser(Long id);

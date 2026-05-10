@@ -9,7 +9,7 @@
   >
     <ng-template #searchTemplate>
       <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 place-content-end place-items-end"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 place-content-end place-items-end"
       >
         <thaca-input
           [(ngModel)]="filter().username"
@@ -28,7 +28,7 @@
           class="w-full"
           [(ngModel)]="filter().isActivated"
           [placeholder]="'user.status_placeholder' | translate"
-          (keyup.enter)="onSearch()"
+          (onChange)="onSearch()"
           [label]="'user.status' | translate"
           [options]="statusOptions"
         />
@@ -36,9 +36,17 @@
           class="w-full"
           [(ngModel)]="filter().isLocked"
           [placeholder]="'user.locked_placeholder' | translate"
-          (keyup.enter)="onSearch()"
+          (onChange)="onSearch()"
           [label]="'user.locked' | translate"
           [options]="lockedOptions"
+        />
+        <thaca-dropdown
+          class="w-full"
+          [(ngModel)]="filter().tenantId"
+          [placeholder]="'user.tenant_placeholder' | translate"
+          (onChange)="onSearch()"
+          [label]="'Tenant' | translate"
+          [options]="tenantOptions()"
         />
         <thaca-button class="w-full" variant="primary" (clicked)="onSearch()">
           <span class="text-white"> {{ 'common.button.search' | translate }} </span>

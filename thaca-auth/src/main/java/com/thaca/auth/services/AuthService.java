@@ -414,6 +414,9 @@ public class AuthService {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             String currentUsername = SecurityUtils.getCurrentUsername();
+            if (StringUtils.isNotBlank(req.getFilter().getUsername())) {
+                currentUsername = req.getFilter().getUsername();
+            }
             LoginHistoryDTO filter = req.getFilter();
             boolean hasExplicitUserFilter =
                 filter != null && (filter.getUserId() != null || filter.getSystemUserId() != null);

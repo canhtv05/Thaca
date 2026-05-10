@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, HostListener } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { MenuService } from '../../../core/services/menu.service';
+import { MenuService } from '../../../shared/components/menu-item/menu-item.service';
 
 @Component({
   selector: 'app-header-search',
