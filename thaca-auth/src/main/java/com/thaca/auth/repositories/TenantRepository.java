@@ -2,6 +2,7 @@ package com.thaca.auth.repositories;
 
 import com.thaca.auth.domains.Tenant;
 import com.thaca.auth.domains.projections.TenantInfoProjection;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -26,4 +27,7 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
         """
     )
     List<TenantInfoProjection> findAllActiveTenants();
+
+    @EntityGraph(attributePaths = { "plan" })
+    List<Tenant> findAllByIdIn(Collection<Long> ids);
 }

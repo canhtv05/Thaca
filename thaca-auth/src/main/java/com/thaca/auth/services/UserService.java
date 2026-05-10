@@ -1,6 +1,7 @@
 package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
+import com.thaca.auth.domains.Tenant;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.domains.projections.TenantInfoProjection;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
@@ -43,11 +44,7 @@ import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -138,13 +135,14 @@ public class UserService {
             .map(u -> u.getEmail().toLowerCase())
             .collect(Collectors.toSet());
 
-        Map<String, Long> tenantCodeToId = tenantRepository
+        Map<String, TenantInfoProjection> tenantCodeToId = tenantRepository
             .findAllActiveTenants()
             .stream()
-            .collect(Collectors.toMap(TenantInfoProjection::getCode, TenantInfoProjection::getId, (a, b) -> a));
+            .collect(Collectors.toMap(TenantInfoProjection::getCode, a -> a));
 
         List<User> usersToSave = new ArrayList<>();
         List<RowError> businessErrors = new ArrayList<>();
+        Map<Long, List<User>> usersByTenant = new HashMap<>();
 
         for (int i = 0; i < successRows.size(); i++) {
             Map<String, Object> row = successRows.get(i);
@@ -182,7 +180,7 @@ public class UserService {
             if (tenantRaw != null) {
                 String tenantStr = String.valueOf(tenantRaw);
                 String tenantCode = tenantStr.contains(" - ") ? tenantStr.split(" - ")[0].trim() : tenantStr.trim();
-                tenantId = tenantCodeToId.get(tenantCode);
+                tenantId = tenantCodeToId.get(tenantCode).getId();
                 if (tenantId == null) {
                     businessErrors.add(
                         new RowError(
@@ -216,14 +214,69 @@ public class UserService {
         }
 
         if (!businessErrors.isEmpty()) {
-            List<RowError> allErrors = new ArrayList<>(businessErrors);
-            ImportResult<Map<String, Object>> errorResult = ImportResult.<Map<String, Object>>builder()
-                .addErrors(allErrors)
-                .totalRows(result.getTotalRows())
-                .build();
-            return toImportResponse(errorResult);
+            return getImportResponseDTO(businessErrors, result);
         }
-        userRepository.saveAll(usersToSave);
+        if (!usersToSave.isEmpty()) {
+            usersByTenant = usersToSave
+                .stream()
+                .filter(u -> u.getTenantId() != null)
+                .collect(Collectors.groupingBy(User::getTenantId));
+            Set<Long> tenantIds = usersByTenant.keySet();
+            Map<Long, Long> existingCounts = new HashMap<>();
+            for (Map<String, Object> row : userRepository.countByTenantIds(tenantIds)) {
+                Long id = ((Number) row.get("tenantId")).longValue();
+                Long cnt = ((Number) row.get("count")).longValue();
+                existingCounts.put(id, cnt);
+            }
+            Map<Long, Tenant> tenantMap = new HashMap<>();
+            for (Tenant t : tenantRepository.findAllByIdIn(tenantIds)) {
+                tenantMap.put(t.getId(), t);
+            }
+            for (Map.Entry<Long, List<User>> entry : usersByTenant.entrySet()) {
+                Long tenantId = entry.getKey();
+                int newCount = entry.getValue().size();
+                long existing = existingCounts.getOrDefault(tenantId, 0L);
+                Tenant tenant = tenantMap.get(tenantId);
+                if (tenant != null && tenant.getPlan() != null && tenant.getPlan().getMaxUsers() > 0) {
+                    int max = tenant.getPlan().getMaxUsers();
+                    if (existing + newCount > max) {
+                        String detailVi = String.format(
+                            "Số người dùng hiện tại: %d, mới: %d, giới hạn: %d, gói: %s",
+                            existing,
+                            newCount,
+                            max,
+                            tenant.getPlan().getName()
+                        );
+                        String detailEn = String.format(
+                            "Current users: %d, new: %d, limit: %d, plan: %s",
+                            existing,
+                            newCount,
+                            max,
+                            tenant.getPlan().getName()
+                        );
+                        businessErrors.add(
+                            new RowError(
+                                0,
+                                "plan",
+                                isVietnamese ? "Giới hạn gói" : "Plan limit",
+                                isVietnamese ? detailVi : detailEn,
+                                null
+                            )
+                        );
+                        entry.getValue().clear();
+                    }
+                }
+            }
+        }
+        if (!businessErrors.isEmpty()) {
+            return getImportResponseDTO(businessErrors, result);
+        }
+        List<User> finalUsersToSave = usersByTenant
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+        userRepository.saveAll(finalUsersToSave);
         ImportResponseDTO response = ImportResponseDTO.builder()
             .totalRows(result.getTotalRows())
             .successCount(usersToSave.size())
@@ -235,11 +288,11 @@ public class UserService {
                 .stream()
                 .limit(5)
                 .map(u -> {
-                    Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    Map<String, Object> map = new LinkedHashMap<>();
                     map.put("username", u.getUsername());
                     map.put("email", u.getEmail());
-                    map.put("isActivated", u.getIsActivated());
                     map.put("tenantId", u.getTenantId());
+                    map.put("isActivated", u.getIsActivated());
                     return map;
                 })
                 .toList();
@@ -564,14 +617,6 @@ public class UserService {
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("fullname", isVietnamese ? "Họ và tên" : "Fullname")
-                    .required()
-                    .maxLength(100)
-                    .dataType(ExcelDataType.STRING)
-                    .comment(isVietnamese ? "Họ và tên đầy đủ" : "Full name")
-                    .build()
-            )
-            .addColumn(
                 ExcelColumn.builder("email", "Email")
                     .required()
                     .maxLength(100)
@@ -624,6 +669,18 @@ public class UserService {
                     .build()
             )
             .build();
+    }
+
+    private ImportResponseDTO getImportResponseDTO(
+        List<RowError> businessErrors,
+        ImportResult<Map<String, Object>> result
+    ) {
+        List<RowError> allErrors = new ArrayList<>(businessErrors);
+        ImportResult<Map<String, Object>> errorResult = ImportResult.<Map<String, Object>>builder()
+            .addErrors(allErrors)
+            .totalRows(result.getTotalRows())
+            .build();
+        return toImportResponse(errorResult);
     }
 
     // private void publishUserEvent(UserDTO request, User user, boolean isAdmin) {
