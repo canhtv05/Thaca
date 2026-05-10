@@ -1,3 +1,3 @@
 code;description;tenant_id
-CMS_VIEWER;Quyền xem CMS;1
-CMS_MAKER;Quyền sửa CMS;1
+USER_VIEWER;Quyền xem danh sách User social;1
+USER_MAKER;Quyền sửa User social;1

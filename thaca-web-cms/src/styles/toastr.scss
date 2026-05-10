@@ -3,6 +3,7 @@
 ================================= */
 
 .ngx-toastr {
+  z-index: 9999;
   // Reset layout ngx-toastr mặc định
   background-image: none !important;
   padding: 13px 15px 13px 46px !important; // chừa chỗ cho icon giả ở trái

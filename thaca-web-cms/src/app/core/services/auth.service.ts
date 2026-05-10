@@ -60,8 +60,8 @@ export class AuthService {
         body: createBody({}),
       },
     );
-    if (profile.body?.status === 'OK' && profile.body?.data) {
-      currentUser.set(profile.body.data);
+    if (profile?.body?.status === 'OK' && profile?.body?.data) {
+      currentUser.set(profile?.body?.data);
       return true;
     }
     return false;

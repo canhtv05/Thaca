@@ -124,7 +124,9 @@ export class UserListComponent implements OnInit {
         header: 'Tenant',
         center: true,
         render: (row: IUserDTO) => {
-          return `<div class='inline-block min-w-[150px]'>${row?.tenant?.code} - ${row?.tenant?.name}</div>`;
+          return row.tenant
+            ? `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${row.tenant.code} - ${row.tenant.name}</span>`
+            : '';
         },
       },
       {
