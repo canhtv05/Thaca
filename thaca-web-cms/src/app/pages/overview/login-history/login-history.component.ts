@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -18,6 +18,7 @@ import { ThacaButtonComponent } from '../../../shared/components/thaca-button/th
 import { ILoginHistoryDTO } from '../../../core/models/login-history.model';
 import { ThacaDatepickerComponent } from '../../../shared/components/thaca-datepicker/thaca-datepicker.component';
 import { MenuItem } from 'primeng/api';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login-history',
@@ -36,9 +37,10 @@ import { MenuItem } from 'primeng/api';
   ],
   templateUrl: './login-history.component.html',
 })
-export class LoginHistoryComponent {
+export class LoginHistoryComponent implements OnInit {
   private configService = inject(AppConfigService);
   private translate = inject(TranslateService);
+  private route = inject(ActivatedRoute);
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;
 
@@ -53,6 +55,7 @@ export class LoginHistoryComponent {
     browser: '',
     fromDate: null as string | null,
     toDate: null as string | null,
+    username: null as string | null,
   });
 
   statusOptions: IDropdownOption[] = [
@@ -152,6 +155,35 @@ export class LoginHistoryComponent {
       { field: 'failureReason', header: 'auth.failureReason' },
     ],
   };
+
+  async ngOnInit(): Promise<void> {
+    const viewMode = this.route.snapshot.data['viewMode'];
+    const username = this.route.snapshot.paramMap.get('targetUserId');
+    if (username) {
+      this.filter.set({ ...this.filter(), username: username });
+    }
+    if (viewMode === 'system-user') {
+      this.breadcrumbItems = [
+        { icon: 'pi pi-cog', label: 'menu.system_administration' },
+        { icon: 'pi pi-shield', label: 'menu.access_control' },
+        {
+          icon: 'pi pi-id-card',
+          label: 'menu.system_user_management',
+          routerLink: ['/system/system-users'],
+        },
+        { icon: 'pi pi-clock', label: 'menu.login_history' },
+      ];
+    } else if (viewMode === 'user') {
+      this.breadcrumbItems = [
+        {
+          icon: 'pi pi-user',
+          label: 'menu.user_management',
+          routerLink: ['/user-management/users'],
+        },
+        { icon: 'pi pi-clock', label: 'menu.login_history' },
+      ];
+    }
+  }
 
   onSearch() {
     if (

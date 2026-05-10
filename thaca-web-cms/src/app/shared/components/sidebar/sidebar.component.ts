@@ -1,12 +1,4 @@
-import {
-  Component,
-  inject,
-  OnInit,
-  OnDestroy,
-  ElementRef,
-  HostListener,
-  effect,
-} from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -14,7 +6,7 @@ import { AppMenuitem } from '../menu-item/menu-item.component';
 import { LayoutService } from './sidebar.service';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
-import { MenuService } from '../../../core/services/menu.service';
+import { MenuService } from '../menu-item/menu-item.service';
 
 @Component({
   selector: 'app-sidebar',

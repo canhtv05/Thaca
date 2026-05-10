@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/cms")
 @RequiredArgsConstructor
-public class UserResourceController {
+public class UserController {
 
     private final FwApiProcess process;
 
@@ -32,9 +32,15 @@ public class UserResourceController {
         return ResponseEntity.ok(process.process(criteria));
     }
 
+    @PostMapping("/users/detail")
+    @FwRequest(name = ServiceMethod.CMS_DETAIL_USER, type = RequestType.PUBLIC)
+    public ResponseEntity<UserDTO> detailUser(UserDTO request) {
+        return ResponseEntity.ok(process.process(request));
+    }
+
     @PostMapping("/users/download-template")
-    @FwRequest(name = ServiceMethod.CMS_DOWNLOAD_USER_TEMPLATE, type = RequestType.INTERNAL, isSuperAdmin = true)
-    public void downloadTemplate(HttpServletResponse response) throws IOException {
+    @FwRequest(name = ServiceMethod.CMS_DOWNLOAD_USER_TEMPLATE, type = RequestType.PROTECTED, isSuperAdmin = true)
+    public void downloadUserTemplate(HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(null), "thaca-users-template-{{date}}.xlsx");
     }
 
@@ -44,14 +50,10 @@ public class UserResourceController {
         return ResponseEntity.ok(process.process(file));
     }
 
-    @PostMapping("/users/export-error")
-    @FwRequest(name = ServiceMethod.CMS_EXPORT_USER_IMPORT_ERROR, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public void exportUserImportError(ImportResponseDTO importResult, HttpServletResponse response) throws IOException {
-        CommonUtils.writeExcelResponse(
-            response,
-            process.process(importResult),
-            "thaca-users-export-error-{{date}}.xlsx"
-        );
+    @PostMapping("/users/file-error")
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_USER_FILE_ERROR, type = RequestType.PROTECTED, isSuperAdmin = true)
+    public void exportUserFileError(ImportResponseDTO importResult, HttpServletResponse response) throws IOException {
+        CommonUtils.writeExcelResponse(response, process.process(importResult), "thaca-users-file-error-{{date}}.xlsx");
     }
 
     @PostMapping("/users/lock")

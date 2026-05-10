@@ -32,6 +32,12 @@ public class InternalUserController {
         return ResponseEntity.ok(process.process(request));
     }
 
+    @PostMapping("/cms/users/detail")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_DETAIL_USER, type = RequestType.INTERNAL)
+    public ResponseEntity<UserDTO> detailUser(UserDTO request) {
+        return ResponseEntity.ok(process.process(request));
+    }
+
     @PostMapping("/cms/users/download-template")
     @FwRequest(
         name = InternalMethod.INTERNAL_CMS_DOWNLOAD_USER_TEMPLATE,
@@ -48,17 +54,13 @@ public class InternalUserController {
         return ResponseEntity.ok(process.process(file));
     }
 
-    @PostMapping("/cms/users/export-error")
+    @PostMapping("/cms/users/file-error")
     @FwRequest(
         name = InternalMethod.INTERNAL_CMS_EXPORT_USER_IMPORT_ERROR,
         type = RequestType.INTERNAL,
         isSuperAdmin = true
     )
     public void exportUserImportError(ImportResponseDTO importResult, HttpServletResponse response) throws IOException {
-        CommonUtils.writeExcelResponse(
-            response,
-            process.process(importResult),
-            "thaca-users-export-error-{{date}}.xlsx"
-        );
+        CommonUtils.writeExcelResponse(response, process.process(importResult), "thaca-users-file-error-{{date}}.xlsx");
     }
 }

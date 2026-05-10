@@ -23,6 +23,7 @@ public class LoginHistoryDTO {
 
     private Long id;
     private Long userId;
+    private String username;
     private Long systemUserId;
     private String ipAddress;
     private String country;

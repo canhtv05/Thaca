@@ -6,7 +6,6 @@ import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.framework.blocking.starter.services.InternalApiClient;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.configs.FrameworkProperties;
-import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import java.io.IOException;

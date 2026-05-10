@@ -3,6 +3,7 @@ package com.thaca.common.dtos.internal;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thaca.common.dtos.BaseAuditResponse;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,4 +28,6 @@ public class UserDTO extends BaseAuditResponse {
     private String email;
     private Boolean isActivated;
     private Boolean isLocked;
+    private String tenantId;
+    private TenantInfoPrj tenant;
 }

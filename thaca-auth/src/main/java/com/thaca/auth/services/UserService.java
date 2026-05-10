@@ -9,6 +9,7 @@ import com.thaca.auth.dtos.req.ForgotPasswordReq;
 import com.thaca.auth.dtos.req.ResetPasswordReq;
 import com.thaca.auth.dtos.req.VerifyOTPReq;
 import com.thaca.auth.enums.ErrorMessage;
+import com.thaca.auth.mappers.TenantMapper;
 import com.thaca.auth.mappers.UserMapper;
 import com.thaca.auth.repositories.TenantRepository;
 import com.thaca.auth.repositories.UserRepository;
@@ -43,6 +44,8 @@ import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -78,14 +81,43 @@ public class UserService {
     public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> request) {
         Specification<User> spec = createUserSpecification(request);
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
-        return new SearchResponse<>(
-            users
-                .getContent()
-                .stream()
-                .map(u -> UserMapper.fromEntityWithCms(u, true))
-                .collect(Collectors.toList()),
-            PaginationResponse.of(users)
-        );
+        Map<Long, TenantInfoProjection> tenantMap = tenantRepository
+            .findAllTenants()
+            .stream()
+            .collect(Collectors.toMap(TenantInfoProjection::getId, (t -> t)));
+        var response = users
+            .getContent()
+            .stream()
+            .map(u -> {
+                var res = UserMapper.fromEntityWithCms(u, true);
+                res.setTenant(TenantMapper.fromInfoProj(tenantMap.getOrDefault(u.getTenantId(), null)));
+                return res;
+            })
+            .toList();
+
+        return new SearchResponse<>(response, PaginationResponse.of(users));
+    }
+
+    @FwMode(name = InternalMethod.INTERNAL_CMS_DETAIL_USER, type = ModeType.VALIDATE)
+    public void validateDetailUser(UserDTO request) {
+        if (StringUtils.isBlank(request.getUsername())) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_DETAIL_USER, type = ModeType.HANDLE)
+    public UserDTO detailUser(UserDTO request) {
+        Map<Long, TenantInfoProjection> tenantMap = tenantRepository
+            .findAllTenants()
+            .stream()
+            .collect(Collectors.toMap(TenantInfoProjection::getId, (t -> t)));
+        User user = userRepository
+            .findByUsername(request.getUsername())
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        var res = UserMapper.fromEntityWithCms(user, true);
+        res.setTenant(TenantMapper.fromInfoProj(tenantMap.getOrDefault(user.getTenantId(), null)));
+        return res;
     }
 
     @Transactional(readOnly = true)
@@ -574,6 +606,13 @@ public class UserService {
                 }
                 if (filter.getIsLocked() != null) {
                     predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
+                }
+                if (StringUtils.isNotBlank(filter.getTenantId())) {
+                    Subquery<Long> subquery = query.subquery(Long.class);
+                    Root<Tenant> tenantRoot = subquery.from(Tenant.class);
+                    subquery.select(tenantRoot.get("id")).where(cb.equal(tenantRoot.get("id"), filter.getTenantId()));
+                    Predicate predicate = root.get("tenantId").in(subquery);
+                    predicates.add(predicate);
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));

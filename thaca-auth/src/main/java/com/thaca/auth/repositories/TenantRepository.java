@@ -28,6 +28,15 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     )
     List<TenantInfoProjection> findAllActiveTenants();
 
+    @Query(
+        nativeQuery = true,
+        value = """
+        SELECT t.id, t.name, t.code FROM auth.tenants t
+        ORDER BY t.updated_at DESC
+        """
+    )
+    List<TenantInfoProjection> findAllTenants();
+
     @EntityGraph(attributePaths = { "plan" })
     List<Tenant> findAllByIdIn(Collection<Long> ids);
 }

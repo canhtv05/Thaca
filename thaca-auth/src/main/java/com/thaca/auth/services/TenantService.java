@@ -191,11 +191,7 @@ public class TenantService {
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_TENANTS, type = ModeType.HANDLE)
     public List<TenantInfoPrj> getAllTenants() {
-        return tenantRepository
-            .findAllActiveTenants()
-            .stream()
-            .map(p -> TenantInfoPrj.builder().id(p.getId()).name(p.getName()).code(p.getCode()).build())
-            .collect(Collectors.toList());
+        return tenantRepository.findAllTenants().stream().map(TenantMapper::fromInfoProj).collect(Collectors.toList());
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_TENANT, type = ModeType.HANDLE)

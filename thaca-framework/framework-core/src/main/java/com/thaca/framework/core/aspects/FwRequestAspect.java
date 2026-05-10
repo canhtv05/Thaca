@@ -19,7 +19,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -75,11 +74,6 @@ public class FwRequestAspect {
                     }
                     return joinPoint.proceed();
                 }
-
-                if (requestMode.isSuperAdmin()) {
-                    throw new FwException(CommonErrorMessage.FORBIDDEN);
-                }
-
                 if (RequestType.INTERNAL.equals(requestMode.type())) {
                     String expectedApiKey = frameworkProperties.getHttpClient().getApiKey();
 
@@ -101,12 +95,21 @@ public class FwRequestAspect {
                             }
                         }
                     }
+                    if (requestMode.isSuperAdmin()) {
+                        throw new FwException(CommonErrorMessage.FORBIDDEN);
+                    }
                     throw new FwException(CommonErrorMessage.UNAUTHORIZED);
                 }
+            }
+            if (requestMode.isSuperAdmin()) {
+                throw new FwException(CommonErrorMessage.FORBIDDEN);
             }
             return joinPoint.proceed();
         } catch (Throwable t) {
             log.error("[FwRequestAspect] error in {}: {}", method.getName(), t.getMessage(), t);
+            if (t instanceof FwException) {
+                throw (FwException) t;
+            }
             throw new FwException(CommonErrorMessage.INTERNAL_SERVER_ERROR);
         } finally {
             FwServiceContext.clear();

@@ -3,6 +3,7 @@ import { AppConfigService } from '../../core/configs/app-config.service';
 import { CommonService } from '../../core/services/common.service';
 import { GlobalHttp } from '../../core/global/global-http';
 import { IApiPayload, IImportResult } from '../../core/models/common.model';
+import { IUserDTO } from './user.model';
 import { createBody, createHeader } from '../../utils/common.utils';
 
 @Injectable({
@@ -11,6 +12,15 @@ import { createBody, createHeader } from '../../utils/common.utils';
 export class UserService {
   private readonly config = inject(AppConfigService);
   private readonly commonService = inject(CommonService);
+
+  async getUser(req: Pick<IUserDTO, 'username'>): Promise<IApiPayload<IUserDTO>> {
+    const url = `${this.config.getApiUrl()}/cms/users/detail`;
+    const payload: IApiPayload<Pick<IUserDTO, 'username'>> = {
+      header: createHeader(),
+      body: createBody(req),
+    };
+    return await GlobalHttp.post<IApiPayload<IUserDTO>>(url, payload);
+  }
 
   async downloadTemplate(): Promise<void> {
     const url = `${this.config.getApiUrl()}/cms/users/download-template`;
@@ -24,11 +34,11 @@ export class UserService {
     return await GlobalHttp.post<IApiPayload<IImportResult>>(url, formData);
   }
 
-  async downloadExportError(importResult: IImportResult): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/users/export-error`;
+  async downloadFileError(importResult: IImportResult): Promise<void> {
+    const url = `${this.config.getApiUrl()}/cms/users/file-error`;
     await this.commonService.downloadFile(
       url,
-      'thaca-users-export-error-{{date}}.xlsx',
+      'thaca-users-file-error-{{date}}.xlsx',
       importResult,
     );
   }

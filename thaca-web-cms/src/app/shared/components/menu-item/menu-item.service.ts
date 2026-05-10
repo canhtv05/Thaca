@@ -1,6 +1,6 @@
 import { Injectable, inject, effect, signal, computed } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { AuthService } from './auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {
@@ -164,7 +164,7 @@ export class MenuService {
                 {
                   label: 'menu.end_user_list',
                   icon: 'pi pi-user',
-                  routerLink: ['/user-management/list'],
+                  routerLink: ['/user-management/users'],
                 },
                 {
                   label: 'menu.verification',
