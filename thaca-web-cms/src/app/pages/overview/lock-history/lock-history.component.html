@@ -1,8 +1,5 @@
 <div class="page-container flex flex-col gap-4">
-  <app-breadcrumb
-    [title]="'menu.system_user_management'"
-    [items]="breadcrumbItems"
-  ></app-breadcrumb>
+  <app-breadcrumb [title]="'menu.lock_history'" [items]="breadcrumbItems"></app-breadcrumb>
   <app-data-table [config]="tableConfig" [externalFilter]="filter()">
     <ng-template #searchTemplate>
       <div class="flex justify-end items-end gap-4 leading-none">

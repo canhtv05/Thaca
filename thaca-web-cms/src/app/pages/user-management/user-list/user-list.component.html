@@ -111,3 +111,21 @@
     </div>
   }
 </thaca-modal>
+
+<thaca-modal
+  #reasonModal
+  [formGroup]="lockReasonForm"
+  [title]="'user.modal.reason_title' | translate"
+  size="lg"
+  (onSubmit)="confirmLockUnlock()"
+  [disableSubmit]="!lockReasonForm.get('lockReason')?.value"
+>
+  <div class="form-control">
+    <thaca-textarea
+      formControlName="lockReason"
+      [placeholder]="'user.reason_placeholder' | translate"
+      [required]="true"
+    ></thaca-textarea>
+    <validation-message [control]="lockReasonForm.get('lockReason')"></validation-message>
+  </div>
+</thaca-modal>

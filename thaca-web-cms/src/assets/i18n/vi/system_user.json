@@ -47,6 +47,14 @@
       "update": {
         "title": "Xác nhận cập nhật",
         "message": "Bạn có chắc chắn muốn cập nhật người dùng này?"
+      },
+      "lock": {
+        "title": "Xác nhận khóa người dùng",
+        "message": "Bạn có chắc chắn muốn khóa người dùng này?"
+      },
+      "unlock": {
+        "title": "Xác nhận mở khóa người dùng",
+        "message": "Bạn có chắc chắn muốn mở khóa người dùng này?"
       }
     },
     "toast": {

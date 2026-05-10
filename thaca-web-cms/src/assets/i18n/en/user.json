@@ -19,8 +19,29 @@
     "status_placeholder": "Select status",
     "locked_placeholder": "Select lock status",
     "modal": {
-      "create_title": "Create User"
+      "create_title": "Create User",
+      "update_title": "Update User",
+      "reason_title": "Lock/Unlock Reason"
     },
+    "popup": {
+      "create": {
+        "title": "Confirm Create",
+        "message": "Are you sure you want to create this user?"
+      },
+      "update": {
+        "title": "Confirm Update",
+        "message": "Are you sure you want to update this user?"
+      },
+      "lock": {
+        "title": "Confirm Lock User",
+        "message": "Are you sure you want to lock this user?"
+      },
+      "unlock": {
+        "title": "Confirm Unlock User",
+        "message": "Are you sure you want to unlock this user?"
+      }
+    },
+    "reason_placeholder": "Enter reason",
     "import": {
       "success": "Successfully imported {{count}} users",
       "success_title": "Import Successful",
@@ -38,6 +59,12 @@
       "download_export_error": "Download error file (Excel)",
       "export_error_done": "Error export file downloaded",
       "export_error_failed": "Could not download error export file"
+    },
+    "toast": {
+      "lock_unlock": {
+        "titleSuccess": "Success",
+        "messageSuccess": "User lock status has been changed."
+      }
     }
   }
 }

@@ -40,11 +40,8 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/users/file-error", name = ServiceMethod.CMS_EXPORT_USER_FILE_ERROR)
     byte[] exportUserFileError(ImportResponseDTO importResult);
 
-    @FwInternalApi(path = "/cms/users/lock", name = ServiceMethod.CMS_LOCK_USER)
-    Void lockUser(Long id);
-
-    @FwInternalApi(path = "/cms/users/unlock", name = ServiceMethod.CMS_UNLOCK_USER)
-    Void unlockUser(Long id);
+    @FwInternalApi(path = "/cms/users/lock-unlock", name = ServiceMethod.CMS_LOCK_UNLOCK_USER)
+    Void lockUnlockUser(SystemUserDTO user);
 
     // ==========================================
     // SYSTEM USER MANAGEMENT

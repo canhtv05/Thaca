@@ -2,6 +2,7 @@ package com.thaca.cms.controllers;
 
 import com.thaca.cms.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.ImportResponseDTO;
+import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -56,15 +57,10 @@ public class UserController {
         CommonUtils.writeExcelResponse(response, process.process(importResult), "thaca-users-file-error-{{date}}.xlsx");
     }
 
-    @PostMapping("/users/lock")
-    @FwRequest(name = ServiceMethod.CMS_LOCK_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<Void> lockUser(Long id) {
-        return ResponseEntity.ok(process.process(id));
-    }
-
-    @PostMapping("/users/unlock")
-    @FwRequest(name = ServiceMethod.CMS_UNLOCK_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<Void> unlockUser(Long id) {
-        return ResponseEntity.ok(process.process(id));
+    // sau này checkpermission chỉ cho phép lock tenant thuộc tenant quản lý
+    @PostMapping("/users/lock-unlock")
+    @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_USER, type = RequestType.PROTECTED)
+    public ResponseEntity<Void> lockUnlock(SystemUserDTO request) {
+        return ResponseEntity.ok(process.process(request));
     }
 }

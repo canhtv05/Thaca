@@ -3,6 +3,7 @@ package com.thaca.auth.services;
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.Tenant;
 import com.thaca.auth.domains.User;
+import com.thaca.auth.domains.UserLockHistory;
 import com.thaca.auth.domains.projections.TenantInfoProjection;
 import com.thaca.auth.dtos.req.ChangePasswordReq;
 import com.thaca.auth.dtos.req.ForgotPasswordReq;
@@ -12,6 +13,7 @@ import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.mappers.TenantMapper;
 import com.thaca.auth.mappers.UserMapper;
 import com.thaca.auth.repositories.TenantRepository;
+import com.thaca.auth.repositories.UserLockHistoryRepository;
 import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.validators.core.Validator;
 import com.thaca.auth.validators.rules.EmailRule;
@@ -20,11 +22,13 @@ import com.thaca.auth.validators.rules.PasswordRule;
 import com.thaca.auth.validators.rules.UsernameRule;
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.ImportResponseDTO;
+import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.VerifyEmailTokenDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
+import com.thaca.common.enums.AccountStatus;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.excel.ExcelEngine;
 import com.thaca.common.excel.ImportErrorExcelExport;
@@ -75,6 +79,7 @@ public class UserService {
     private final RedisCacheService redisService;
     private final SessionStore sessionStore;
     private final TenantRepository tenantRepository;
+    private final UserLockHistoryRepository userLockHistoryRepository;
 
     @Transactional(readOnly = true)
     @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_USERS, type = ModeType.HANDLE)
@@ -556,6 +561,27 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         userRepository.save(user);
         authService.logoutAllDevices();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_USER, type = ModeType.HANDLE)
+    public void lockUnlock(SystemUserDTO request) {
+        if (request.getId() == null || StringUtils.isBlank(request.getLockReason())) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        User su = userRepository
+            .findById(request.getId())
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        boolean newStatus = !Boolean.TRUE.equals(su.getIsLocked());
+        su.setIsLocked(newStatus);
+        userRepository.save(su);
+        userLockHistoryRepository.save(
+            UserLockHistory.builder()
+                .targetUserId(request.getId())
+                .action(newStatus ? AccountStatus.LOCK : AccountStatus.UNLOCK)
+                .reason(request.getLockReason())
+                .build()
+        );
     }
 
     @FwMode(name = ServiceMethod.AUTH_FORGOT_PASSWORD_REQUEST, type = ModeType.VALIDATE)

@@ -36,6 +36,7 @@
     "user_list": "Danh sách người dùng",
     "system_user_management": "Quản lý người dùng hệ thống",
     "system_user_lock_history": "Lịch sử khóa",
-    "project_plan": "Lộ trình Dự án"
+    "project_plan": "Lộ trình Dự án",
+    "lock_history": "Lịch sử khóa"
   }
 }

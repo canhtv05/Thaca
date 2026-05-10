@@ -31,6 +31,7 @@ public class ServiceMethod {
     public static final String CMS_UPDATE_SYSTEM_USER = "cms.updateSystemUser";
     public static final String CMS_LOCK_UNLOCK_SYSTEM_USER = "cms.lockUnlockSystemUser";
     public static final String CMS_EXPORT_SYSTEM_USER = "cms.exportSystemUser";
+    public static final String CMS_LOCK_UNLOCK_USER = "cms.lockUnlockUser";
 
     public static final String CMS_SEARCH_PLANS = "cms.searchPlans";
     public static final String CMS_GET_PLAN = "cms.getPlan";
@@ -46,8 +47,6 @@ public class ServiceMethod {
     public static final String CMS_GET_USER_BY_ID = "cms.getUserById";
     public static final String CMS_CREATE_USER = "cms.createUser";
     public static final String CMS_UPDATE_USER = "cms.updateUser";
-    public static final String CMS_LOCK_USER = "cms.lockUser";
-    public static final String CMS_UNLOCK_USER = "cms.unlockUser";
     public static final String CMS_GET_USER_PERMISSION = "cms.getUserPermission";
     public static final String CMS_UPDATE_USER_PERMISSION = "cms.updateUserPermission";
     public static final String CMS_GET_PROFILE = "cms.getProfile";

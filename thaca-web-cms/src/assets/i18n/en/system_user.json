@@ -47,6 +47,14 @@
       "update": {
         "title": "Confirm Update",
         "message": "Are you sure you want to update this user?"
+      },
+      "lock": {
+        "title": "Confirm Lock User",
+        "message": "Are you sure you want to lock this user?"
+      },
+      "unlock": {
+        "title": "Confirm Unlock User",
+        "message": "Are you sure you want to unlock this user?"
       }
     },
     "toast": {
