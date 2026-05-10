@@ -192,12 +192,12 @@ export class UserListComponent {
         });
         const title = this.translate.instant('user.import.partial_success');
         GlobalToast.warnPlain(msg, title);
+        this.importResultModal?.show();
       } else {
         const msg = this.translate.instant('user.import.success', { count: data.successCount });
         const title = this.translate.instant('common.success');
         GlobalToast.successPlain(msg, title);
       }
-      this.importResultModal?.show();
     }
   }
 
