@@ -18,8 +18,29 @@
     "email_placeholder": "Nhập email",
     "status_placeholder": "Chọn trạng thái",
     "locked_placeholder": "Chọn trạng thái khóa",
+    "reason_placeholder": "Nhập lý do",
     "modal": {
-      "create_title": "Thêm người dùng"
+      "create_title": "Thêm người dùng",
+      "update_title": "Cập nhật người dùng",
+      "reason_title": "Lý do khóa/mở khóa"
+    },
+    "popup": {
+      "create": {
+        "title": "Xác nhận thêm mới",
+        "message": "Bạn có chắc chắn muốn thêm người dùng này?"
+      },
+      "update": {
+        "title": "Xác nhận cập nhật",
+        "message": "Bạn có chắc chắn muốn cập nhật người dùng này?"
+      },
+      "lock": {
+        "title": "Xác nhận khóa người dùng",
+        "message": "Bạn có chắc chắn muốn khóa người dùng này?"
+      },
+      "unlock": {
+        "title": "Xác nhận mở khóa người dùng",
+        "message": "Bạn có chắc chắn muốn mở khóa người dùng này?"
+      }
     },
     "import": {
       "success": "Nhập thành công {{count}} người dùng",
@@ -38,6 +59,12 @@
       "download_export_error": "Tải file lỗi (Excel)",
       "export_error_done": "Đã tải file xuất lỗi",
       "export_error_failed": "Không tải được file xuất lỗi"
+    },
+    "toast": {
+      "lock_unlock": {
+        "titleSuccess": "Thành công",
+        "messageSuccess": "Đã thay đổi trạng thái khóa người dùng."
+      }
     }
   }
 }

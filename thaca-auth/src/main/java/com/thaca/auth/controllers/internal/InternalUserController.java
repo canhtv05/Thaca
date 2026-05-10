@@ -2,6 +2,7 @@ package com.thaca.auth.controllers.internal;
 
 import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.ImportResponseDTO;
+import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -62,5 +63,12 @@ public class InternalUserController {
     )
     public void exportUserImportError(ImportResponseDTO importResult, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(importResult), "thaca-users-file-error-{{date}}.xlsx");
+    }
+
+    // sau này checkpermission chỉ cho phép lock tenant thuộc tenant quản lý
+    @PostMapping("/cms/users/lock-unlock")
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_USER, type = RequestType.INTERNAL)
+    public ResponseEntity<Void> lockUnlockUser(SystemUserDTO request) {
+        return ResponseEntity.ok(process.process(request));
     }
 }

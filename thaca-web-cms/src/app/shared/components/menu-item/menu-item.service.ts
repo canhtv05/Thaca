@@ -110,7 +110,11 @@ export class MenuService {
           items: [
             { label: 'menu.dashboard', icon: 'pi pi-chart-line', routerLink: ['/home'] },
             { label: 'menu.analytics', icon: 'pi pi-chart-bar', routerLink: ['/analytics'] },
-            { label: 'menu.login_history', icon: 'pi pi-history', routerLink: ['/login-history'] },
+            {
+              label: 'menu.lock_history',
+              icon: 'pi pi-lock',
+              routerLink: [`/overview/${user?.id}/lock-history`],
+            },
           ],
         },
         {

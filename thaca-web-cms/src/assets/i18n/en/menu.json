@@ -36,6 +36,7 @@
     "user_list": "User List",
     "system_user_management": "System User Management",
     "system_user_lock_history": "Lock History",
-    "project_plan": "Project Roadmap"
+    "project_plan": "Project Roadmap",
+    "lock_history": "Lock History"
   }
 }

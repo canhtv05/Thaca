@@ -31,7 +31,7 @@ export const mainLayoutRoute: Route[] = [
           ),
       },
       {
-        path: '',
+        path: 'overview',
         loadChildren: () =>
           import('../../pages/overview/overview.route').then((m) => m.overviewRoute),
       },

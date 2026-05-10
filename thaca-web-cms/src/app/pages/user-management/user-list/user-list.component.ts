@@ -8,7 +8,7 @@ import {
 import { AppConfigService } from '../../../core/configs/app-config.service';
 import { IUserDTO } from '../user.model';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
 import {
   IDropdownOption,
@@ -23,6 +23,9 @@ import { IImportResult } from '../../../core/models/common.model';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { TenantService } from '../../system/tenant/tenant.service';
 import { Router } from '@angular/router';
+import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
+import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
+import { Popup } from '../../../core/global/popup-notify';
 
 @Component({
   selector: 'app-user-list',
@@ -31,12 +34,15 @@ import { Router } from '@angular/router';
     CommonModule,
     FormsModule,
     BreadcrumbComponent,
+    ReactiveFormsModule,
     DataTableComponent,
     ThacaInputComponent,
     ThacaDropdownComponent,
     ThacaButtonComponent,
     TranslateModule,
     ThacaModalComponent,
+    ThacaTextareaComponent,
+    ValidationMessageComponent,
   ],
   templateUrl: './user-list.component.html',
 })
@@ -46,10 +52,12 @@ export class UserListComponent implements OnInit {
   private userService = inject(UserService);
   private tenantService = inject(TenantService);
   private router = inject(Router);
+  private fb = inject(FormBuilder);
 
   @ViewChild('mainTable') table!: DataTableComponent;
   @ViewChild('createModal') createModal!: ThacaModalComponent;
   @ViewChild('importResultModal') importResultModal!: ThacaModalComponent;
+  @ViewChild('reasonModal') reasonModal!: ThacaModalComponent;
 
   breadcrumbItems: MenuItem[] = [
     { icon: 'pi pi-user', label: 'menu.user_management', routerLink: '/user-management/list' },
@@ -65,7 +73,7 @@ export class UserListComponent implements OnInit {
   });
 
   importResult = signal<IImportResult | null>(null);
-
+  private selectedRow: any;
   importErrorRows = computed(() => {
     const r = this.importResult();
     if (!r?.errors?.length) return [];
@@ -98,6 +106,10 @@ export class UserListComponent implements OnInit {
     { label: 'user.locked', value: true },
   ];
 
+  lockReasonForm = this.fb.group({
+    lockReason: ['', [Validators.required]],
+  });
+
   tableConfig: ITableConfig = {
     url: `${this.configService.getApiUrl()}/cms/users/search`,
     rows: 10,
@@ -117,10 +129,12 @@ export class UserListComponent implements OnInit {
       },
       {
         field: 'isActivated',
-        header: 'user.status',
+        header: 'user.activated',
         render: (row: IUserDTO) => {
-          const label = this.translate.instant(row.isActivated ? 'user.active' : 'user.inactive');
-          const variant = row.isActivated ? 'success' : 'warning';
+          const label = this.translate.instant(
+            row.isActivated ? 'common.status.active' : 'common.status.inactive',
+          );
+          const variant = row.isActivated ? 'success' : 'danger';
           return `<span class="thaca-badge thaca-badge-${variant}">
                     <span class="thb-dot"></span>${label}
                   </span>`;
@@ -130,7 +144,9 @@ export class UserListComponent implements OnInit {
         field: 'isLocked',
         header: 'user.locked',
         render: (row: IUserDTO) => {
-          const label = this.translate.instant(row.isLocked ? 'user.locked' : 'user.safe');
+          const label = this.translate.instant(
+            row.isLocked ? 'common.status.lock' : 'common.status.unlock',
+          );
           const variant = row.isLocked ? 'danger' : 'info';
           return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
         },
@@ -144,16 +160,29 @@ export class UserListComponent implements OnInit {
         color: 'secondary',
       },
       {
-        icon: 'pi pi-trash',
-        titleKey: 'common.button.delete',
-        key: 'delete',
+        icon: 'pi pi-key',
+        key: 'lock',
+        titleKey: 'common.button.lock',
         color: 'danger',
-        condition: (row) => !row.isActivated,
+        condition: (row: IUserDTO) => !row.isLocked,
+      },
+      {
+        icon: 'pi pi-unlock',
+        key: 'unlock',
+        titleKey: 'common.button.unlock',
+        color: 'success',
+        condition: (row: IUserDTO) => row.isLocked ?? false,
       },
       {
         icon: 'pi pi-eye',
         titleKey: 'common.button.view',
         key: 'view',
+        color: 'primary',
+      },
+      {
+        icon: 'pi pi-lock',
+        titleKey: 'menu.lock_history',
+        key: 'view_lock_history',
         color: 'primary',
       },
       {
@@ -191,6 +220,40 @@ export class UserListComponent implements OnInit {
       case 'view_login_history':
         this.router.navigate(['/user-management/users', event.row?.username, 'login-history']);
         break;
+      case 'lock':
+      case 'unlock': {
+        this.selectedRow = event.row;
+        this.lockReasonForm.reset();
+        this.reasonModal.show();
+        break;
+      }
+      case 'view_lock_history':
+        this.router.navigate(['/user-management/users', event.row?.id, 'lock-history']);
+        break;
+    }
+  }
+
+  async confirmLockUnlock() {
+    const isLocked = this.selectedRow.isLocked;
+    const confirmed = await Popup.confirm({
+      title: isLocked ? 'user.popup.unlock.title' : 'user.popup.lock.title',
+      message: isLocked ? 'user.popup.unlock.message' : 'user.popup.lock.message',
+      acceptText: isLocked ? 'common.button.unlock' : 'common.button.lock',
+      cancelText: 'common.button.cancel',
+    });
+    if (!confirmed) return;
+
+    const res = await this.userService.lockUnlock({
+      ...this.selectedRow,
+      lockReason: this.lockReasonForm.get('lockReason')?.value,
+    });
+    if (res.body.status === 'OK') {
+      GlobalToast.success(
+        'user.toast.lock_unlock.messageSuccess',
+        'user.toast.lock_unlock.titleSuccess',
+      );
+      this.onSearch();
+      this.reasonModal.hide();
     }
   }
 

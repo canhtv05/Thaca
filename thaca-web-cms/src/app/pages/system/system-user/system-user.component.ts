@@ -195,7 +195,7 @@ export class SystemUserComponent implements OnInit {
         condition: (row: ISystemUserDTO) => row.isLocked ?? false,
       },
       {
-        icon: 'pi pi-history',
+        icon: 'pi pi-lock',
         key: 'view_lock_reason',
         titleKey: 'menu.system_user_lock_history',
         color: 'primary',
@@ -360,6 +360,15 @@ export class SystemUserComponent implements OnInit {
   }
 
   async confirmLockUnlock() {
+    const isLocked = this.selectedRow.isLocked;
+    const confirmed = await Popup.confirm({
+      title: isLocked ? 'system_user.popup.unlock.title' : 'system_user.popup.lock.title',
+      message: isLocked ? 'system_user.popup.unlock.message' : 'system_user.popup.lock.message',
+      acceptText: isLocked ? 'common.button.unlock' : 'common.button.lock',
+      cancelText: 'common.button.cancel',
+    });
+    if (!confirmed) return;
+
     const res = await this.systemUserService.lockUnlock({
       ...this.selectedRow,
       lockReason: this.lockReasonForm.get('lockReason')?.value,

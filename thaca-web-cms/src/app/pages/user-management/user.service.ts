@@ -42,4 +42,15 @@ export class UserService {
       importResult,
     );
   }
+
+  async lockUnlock(req: IUserDTO): Promise<IApiPayload<any>> {
+    const payload: IApiPayload<IUserDTO> = {
+      header: createHeader(),
+      body: createBody(req),
+    };
+    return await GlobalHttp.post<IApiPayload<any>>(
+      `${this.config.getApiUrl()}/cms/users/lock-unlock`,
+      payload,
+    );
+  }
 }

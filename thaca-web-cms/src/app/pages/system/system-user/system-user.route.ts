@@ -11,8 +11,8 @@ export const systemUserRoutes: Routes = [
   {
     path: 'system-users/:targetUserId/lock-history',
     loadComponent: () =>
-      import('./system-user-lock-history/system-user-lock-history.component').then(
-        (m) => m.SystemUserLockHistoryComponent,
+      import('../../overview/lock-history/lock-history.component').then(
+        (m) => m.LockHistoryComponent,
       ),
     resolve: { i18n: I18nResolver },
     data: { i18n: ['system_user'] },

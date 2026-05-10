@@ -47,13 +47,13 @@
         [label]="'user.locked' | translate"
         [ngModel]="
           user()?.isLocked
-            ? ('common.status.locked' | translate)
+            ? ('common.status.lock' | translate)
             : ('common.status.unlock' | translate)
         "
         [disabled]="true"
       ></thaca-input>
       <thaca-input
-        [label]="'user.activated' | translate"
+        [label]="'user.status' | translate"
         [ngModel]="
           user()?.isActivated
             ? ('common.status.active' | translate)
