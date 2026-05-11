@@ -1,4 +1,4 @@
 id;fullname;email;is_activated;is_locked;is_super_admin;created_by;created_at;updated_by;updated_at;avatar_url;tenant_id
 1;Super Admin;superadmin@thaca.com;true;false;true;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00;https://api.dicebear.com/7.x/adventurer/png?seed=admin_thaca;
 2;Admin User;admin@thaca.com;true;false;false;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00;https://api.dicebear.com/7.x/micah/png?seed=rain_tran;1
-3;Manager User;manager@thaca.com;true;false;false;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00;https://api.dicebear.com/7.x/big-smile/png?seed=user_system;1
+3;Manager User;manager@thaca.com;true;false;false;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00;https://api.dicebear.com/7.x/big-smile/png?seed=user_system;2

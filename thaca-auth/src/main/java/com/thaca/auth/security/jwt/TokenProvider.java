@@ -309,7 +309,7 @@ public class TokenProvider {
             username = sc.getUsername();
             password = sc.getPassword();
             isSuperAdmin = sc.getSystemUser().getIsSuperAdmin();
-            tenantId = sc.getTenantId();
+            tenantId = sc.getSystemUser().getTenantId();
             if (isSuperAdmin) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));

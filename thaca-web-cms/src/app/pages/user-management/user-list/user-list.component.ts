@@ -27,6 +27,7 @@ import { ThacaTextareaComponent } from '../../../shared/components/thaca-textare
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { Popup } from '../../../core/global/popup-notify';
 import { CheckPermissionDirective } from '../../../shared/directives/check-permission.directive';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-user-list',
@@ -55,6 +56,7 @@ export class UserListComponent implements OnInit {
   private tenantService = inject(TenantService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  readonly authService = inject(AuthService);
 
   @ViewChild('mainTable') table!: DataTableComponent;
   @ViewChild('createModal') createModal!: ThacaModalComponent;
@@ -123,7 +125,7 @@ export class UserListComponent implements OnInit {
       { field: 'email', header: 'user.email', sortable: true },
       {
         field: 'tenant',
-        header: 'Tenant',
+        header: 'user.tenant',
         center: true,
         render: (row: IUserDTO) => {
           return row.tenant
@@ -162,6 +164,7 @@ export class UserListComponent implements OnInit {
         titleKey: 'common.button.update',
         key: 'edit',
         color: 'secondary',
+        permissions: ['USER_MAKER'],
       },
       {
         icon: 'pi pi-key',
@@ -169,6 +172,7 @@ export class UserListComponent implements OnInit {
         titleKey: 'common.button.lock',
         color: 'danger',
         condition: (row: IUserDTO) => !row.isLocked,
+        permissions: ['USER_MAKER'],
       },
       {
         icon: 'pi pi-unlock',
@@ -176,24 +180,28 @@ export class UserListComponent implements OnInit {
         titleKey: 'common.button.unlock',
         color: 'success',
         condition: (row: IUserDTO) => row.isLocked ?? false,
+        permissions: ['USER_MAKER'],
       },
       {
         icon: 'pi pi-eye',
         titleKey: 'common.button.view',
         key: 'view',
         color: 'primary',
+        permissions: ['USER_VIEWER', 'USER_MAKER'],
       },
       {
         icon: 'pi pi-lock',
         titleKey: 'menu.lock_history',
         key: 'view_lock_history',
         color: 'primary',
+        permissions: ['USER_VIEWER', 'USER_MAKER'],
       },
       {
         icon: 'pi pi-clock',
         titleKey: 'menu.login_history',
         key: 'view_login_history',
         color: 'primary',
+        permissions: ['USER_VIEWER', 'USER_MAKER'],
       },
     ],
   };
@@ -201,12 +209,15 @@ export class UserListComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const tenants = await this.tenantService.getAll();
     if (tenants.body.status === 'OK') {
-      this.tenantOptions.set(
-        tenants.body.data.map((t) => ({
-          label: `${t.code} - ${t.name}`,
-          value: t.id,
-        })),
-      );
+      let data = tenants.body.data;
+      if (this.authService.user()?.tenantId && !this.authService.isSuperAdmin()) {
+        data = data.filter((t) => t.id === this.authService.user()?.tenantId);
+      }
+      const options = data.map((t) => ({
+        label: `${t.code} - ${t.name}`,
+        value: t.id,
+      }));
+      this.tenantOptions.set(options);
     }
   }
 

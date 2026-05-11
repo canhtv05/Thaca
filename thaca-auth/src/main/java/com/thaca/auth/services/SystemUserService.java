@@ -59,7 +59,9 @@ public class SystemUserService {
         String username = SecurityUtils.getCurrentUsername();
         return systemCredentialRepository
             .findByUsername(username)
-            .map(sc -> SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), getTenantOrNull(sc.getTenantId())))
+            .map(sc ->
+                SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), getTenantOrNull(sc.getSystemUser().getTenantId()))
+            )
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
@@ -86,7 +88,7 @@ public class SystemUserService {
         List<Long> tenantIds = result
             .getContent()
             .stream()
-            .map(SystemCredential::getTenantId)
+            .map(sc -> sc.getSystemUser().getTenantId())
             .filter(Objects::nonNull)
             .distinct()
             .toList();
@@ -96,7 +98,9 @@ public class SystemUserService {
         List<SystemUserDTO> data = result
             .getContent()
             .stream()
-            .map(sc -> SystemUserMapper.toSearchDTO(sc, sc.getSystemUser(), tenantMap.get(sc.getTenantId())))
+            .map(sc ->
+                SystemUserMapper.toSearchDTO(sc, sc.getSystemUser(), tenantMap.get(sc.getSystemUser().getTenantId()))
+            )
             .toList();
         return new SearchResponse<>(data, PaginationResponse.of(result));
     }
@@ -113,7 +117,7 @@ public class SystemUserService {
         SystemCredential sc = systemCredentialRepository
             .findBySystemUser(su)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        return SystemUserMapper.toFullDTO(sc, su, getTenantOrNull(sc.getTenantId()));
+        return SystemUserMapper.toFullDTO(sc, su, getTenantOrNull(su.getTenantId()));
     }
 
     @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
@@ -138,7 +142,6 @@ public class SystemUserService {
         SystemCredential sc = SystemCredential.builder()
             .username(request.getUsername())
             .systemUser(su)
-            .tenantId(request.getTenantId())
             .password(passwordEncoder.encode(request.getPassword()))
             .build();
         if (request.getRoles() != null && !request.getRoles().isEmpty()) {
@@ -180,7 +183,6 @@ public class SystemUserService {
         su.setAvatarUrl(request.getAvatarUrl());
         if (isSuperAdmin && request.getTenantId() != null) {
             su.setTenantId(request.getTenantId());
-            sc.setTenantId(request.getTenantId());
         }
         if (isSuperAdmin) {
             if (request.getIsActivated() != null) su.setIsActivated(request.getIsActivated());
@@ -220,7 +222,7 @@ public class SystemUserService {
             );
         }
 
-        return SystemUserMapper.toFullDTO(sc, su, getTenantOrNull(sc.getTenantId()));
+        return SystemUserMapper.toFullDTO(sc, su, getTenantOrNull(su.getTenantId()));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -251,7 +253,7 @@ public class SystemUserService {
             if (request.getFilter() != null) {
                 SystemUserDTO f = request.getFilter();
                 if (!CollectionUtils.isEmpty(f.getTenantIds())) predicates.add(
-                    root.get("tenantId").in(f.getTenantIds())
+                    userJoin.get("tenantId").in(f.getTenantIds())
                 );
                 if (StringUtils.isNotBlank(f.getEmail())) predicates.add(
                     cb.like(cb.lower(userJoin.get("email")), "%" + f.getEmail().toLowerCase() + "%")
@@ -291,7 +293,7 @@ public class SystemUserService {
         List<SystemCredential> result = systemCredentialRepository.findAll(spec, sort);
         List<Long> tenantIds = result
             .stream()
-            .map(SystemCredential::getTenantId)
+            .map(sc -> sc.getSystemUser().getTenantId())
             .filter(Objects::nonNull)
             .distinct()
             .toList();
@@ -300,7 +302,9 @@ public class SystemUserService {
             : tenantRepository.findAllById(tenantIds).stream().collect(Collectors.toMap(Tenant::getId, t -> t));
         List<SystemUserDTO> data = result
             .stream()
-            .map(sc -> SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), tenantMap.get(sc.getTenantId())))
+            .map(sc ->
+                SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), tenantMap.get(sc.getSystemUser().getTenantId()))
+            )
             .toList();
 
         List<Map<String, Object>> rows = new ArrayList<>();
@@ -345,7 +349,7 @@ public class SystemUserService {
             )
             .addColumn(ExcelColumn.builder("email", "Email").required().dataType(ExcelDataType.STRING).build())
             .addColumn(
-                ExcelColumn.builder("tenantName", isVietnamese ? "Tenant" : "Tenant")
+                ExcelColumn.builder("tenantName", isVietnamese ? "Tổ chức" : "Tenant")
                     .dataType(ExcelDataType.STRING)
                     .build()
             )
@@ -380,7 +384,7 @@ public class SystemUserService {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         if (isCreate) {
-            if (systemCredentialRepository.existsByUsernameAndTenantId(request.getUsername(), request.getTenantId())) {
+            if (systemCredentialRepository.existsById(request.getUsername())) {
                 throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
             }
             if (systemUserRepository.existsByEmailAndTenantId(request.getEmail(), request.getTenantId())) {

@@ -14,7 +14,7 @@ public class SystemUserMapper {
     public static SystemUserDTO toSearchDTO(SystemCredential sc, SystemUser su, Tenant tenant) {
         return SystemUserDTO.builder()
             .id(su.getId())
-            .tenantId(sc.getTenantId())
+            .tenantId(su.getTenantId())
             .tenantInfo(TenantMapper.fromEntity(tenant))
             .username(sc.getUsername())
             .email(su.getEmail())
@@ -44,7 +44,7 @@ public class SystemUserMapper {
 
         return SystemUserDTO.builder()
             .id(su.getId())
-            .tenantId(sc.getTenantId())
+            .tenantId(su.getTenantId())
             .tenantInfo(TenantMapper.fromEntity(tenant))
             .username(sc.getUsername())
             .email(su.getEmail())

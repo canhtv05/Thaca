@@ -34,6 +34,7 @@ import {
 } from '../thaca-dropdown/thaca-dropdown.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface ITableColumn {
   field: string;
@@ -52,6 +53,7 @@ export interface ITableAction {
   titleKey: string;
   color?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger';
   condition?: (row: any) => boolean;
+  permissions?: string[];
 }
 
 export interface ITableActionEvent<T = any> {
@@ -96,6 +98,7 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy, OnC
   private zone = inject(NgZone);
   private sanitizer = inject(DomSanitizer);
   private el = inject(ElementRef);
+  private readonly auth = inject(AuthService);
   @Input({ required: true }) config!: ITableConfig;
   @Input() staticRows?: any[];
   @Input() externalFilter: any = {};
@@ -245,6 +248,18 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy, OnC
     });
   }
 
+  hasPermission(permissions: string[]): boolean {
+    if (this.auth.isSuperAdmin() || !permissions.length) {
+      return true;
+    }
+    const userRoles = Object.values(this.auth.user()?.roles ?? {});
+    return permissions.some((permission) => {
+      const isDenied = userRoles.some((role) => role[permission] === 'DENY');
+      if (isDenied) return false;
+      return userRoles.some((role) => role[permission] === 'GRANT');
+    });
+  }
+
   sanitizeHtml(html: string): SafeHtml {
     const clean = DOMPurify.sanitize(html, {
       ALLOWED_TAGS: ['div', 'span', 'img', 'p', 'b', 'i', 'strong', 'em', 'br', 'ul', 'li', 'a'],
@@ -377,12 +392,16 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy, OnC
   }
 
   getVisibleActions(row: any): ITableAction[] {
-    const all = (this.config.actions || []).filter((a) => !a.condition || a.condition(row));
+    const all = (this.config.actions || []).filter(
+      (a) => (!a.condition || a.condition(row)) && this.hasPermission(a.permissions ?? []),
+    );
     return all.length > 2 ? [] : all;
   }
 
   getHiddenActions(row: any): ITableAction[] {
-    const all = (this.config.actions || []).filter((a) => !a.condition || a.condition(row));
+    const all = (this.config.actions || []).filter(
+      (a) => (!a.condition || a.condition(row)) && this.hasPermission(a.permissions ?? []),
+    );
     return all.length > 2 ? all : [];
   }
 }

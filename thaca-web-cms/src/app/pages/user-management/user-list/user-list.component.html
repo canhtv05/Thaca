@@ -40,14 +40,16 @@
           [label]="'user.locked' | translate"
           [options]="lockedOptions"
         />
-        <thaca-dropdown
-          class="w-full"
-          [(ngModel)]="filter().tenantId"
-          [placeholder]="'user.tenant_placeholder' | translate"
-          (onChange)="onSearch()"
-          [label]="'Tenant' | translate"
-          [options]="tenantOptions()"
-        />
+        @if (this.authService.user()?.isSuperAdmin) {
+          <thaca-dropdown
+            class="w-full"
+            [(ngModel)]="filter().tenantId"
+            [placeholder]="'user.tenant_placeholder' | translate"
+            (onChange)="onSearch()"
+            [label]="'user.tenant' | translate"
+            [options]="tenantOptions()"
+          />
+        }
         <thaca-button class="w-full" variant="primary" (clicked)="onSearch()">
           <span class="text-white"> {{ 'common.button.search' | translate }} </span>
         </thaca-button>

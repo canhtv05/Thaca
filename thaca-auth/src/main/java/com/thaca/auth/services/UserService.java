@@ -271,8 +271,8 @@ public class UserService {
                             new RowError(
                                 excelRowIndex,
                                 "tenantId",
-                                isVietnamese ? "Mã Tenant" : "Tenant ID",
-                                isVietnamese ? "Tenant không tồn tại" : "Tenant does not exist",
+                                isVietnamese ? "Mã Tổ chức" : "Tenant ID",
+                                isVietnamese ? "Tổ chức không tồn tại" : "Tenant does not exist",
                                 tenantStr
                             )
                         );
@@ -754,13 +754,13 @@ public class UserService {
             .addColumnCondition(
                 isSuperAdmin,
                 3,
-                ExcelColumn.builder("tenantId", isVietnamese ? "Mã Tenant" : "Tenant ID")
+                ExcelColumn.builder("tenantId", isVietnamese ? "Mã Tổ chức" : "Tenant ID")
                     .required()
                     .dataType(ExcelDataType.STRING)
                     .allowedValues(tenantIds)
                     .comment(
                         isVietnamese
-                            ? "Chọn Tenant từ danh sách thả xuống. Hệ thống sẽ tự động ánh xạ từ mã (CODE)."
+                            ? "Chọn Tổ chức từ danh sách thả xuống. Hệ thống sẽ tự động ánh xạ từ mã (CODE)."
                             : "Select Tenant from dropdown. System will auto-map from code (CODE)."
                     )
                     .build()

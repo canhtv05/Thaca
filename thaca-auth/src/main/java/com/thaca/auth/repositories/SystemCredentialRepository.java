@@ -31,6 +31,4 @@ public interface SystemCredentialRepository
     Optional<SystemCredential> findByUsername(String username);
 
     Optional<SystemCredential> findBySystemUser(SystemUser systemUser);
-
-    boolean existsByUsernameAndTenantId(String username, Long tenantId);
 }

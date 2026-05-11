@@ -219,7 +219,7 @@ public class AuthService {
                 StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
                 su.getIsSuperAdmin(),
                 true,
-                sc.getTenantId()
+                su.getTenantId()
             );
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);

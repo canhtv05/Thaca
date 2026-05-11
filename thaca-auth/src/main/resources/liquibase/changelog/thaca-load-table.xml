@@ -112,7 +112,6 @@
       <column name="updated_by" type="VARCHAR(255)"/>
       <column name="system_user_id" type="BIGINT"><constraints nullable="false"/></column>
       <column name="password" type="VARCHAR(255)"><constraints nullable="false"/></column>
-      <column name="tenant_id" type="BIGINT"/>
     </createTable>
 
     <createTable schemaName="auth" tableName="system_credential_roles">
@@ -186,7 +185,6 @@
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="roles" baseTableSchemaName="auth" constraintName="fk_roles_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="permissions" baseTableSchemaName="auth" constraintName="fk_permissions_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="system_users" baseTableSchemaName="auth" constraintName="fk_sys_users_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
-    <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="system_credentials" baseTableSchemaName="auth" constraintName="fk_sys_cred_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="fk_login_hist_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
 
     <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="FK_LOGIN_HISTORY_ON_USER" referencedColumnNames="id" referencedTableName="users" referencedTableSchemaName="auth"/>
