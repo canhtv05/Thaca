@@ -380,10 +380,10 @@ public class SystemUserService {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         if (isCreate) {
-            if (systemCredentialRepository.existsById(request.getUsername())) {
+            if (systemCredentialRepository.existsByUsernameAndTenantId(request.getUsername(), request.getTenantId())) {
                 throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
             }
-            if (systemUserRepository.existsByEmail(request.getEmail())) {
+            if (systemUserRepository.existsByEmailAndTenantId(request.getEmail(), request.getTenantId())) {
                 throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
             }
         }

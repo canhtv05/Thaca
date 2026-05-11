@@ -296,6 +296,7 @@ export class UserListComponent implements OnInit {
         const msg = this.translate.instant('user.import.success', { count: data.successCount });
         const title = this.translate.instant('common.success');
         GlobalToast.successPlain(msg, title);
+        this.onSearch();
       }
     }
   }

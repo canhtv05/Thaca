@@ -47,6 +47,17 @@ public class SecurityUtils {
             .anyMatch(a -> Objects.equals(a.getAuthority(), AuthoritiesConstants.SUPER_ADMIN));
     }
 
+    public static Long getCurrentTenantId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return null;
+        }
+        if (authentication.getPrincipal() instanceof UserPrincipal userPrincipal) {
+            return userPrincipal.getTenantId();
+        }
+        return null;
+    }
+
     public static void clear() {
         SecurityContextHolder.clearContext();
     }

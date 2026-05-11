@@ -177,9 +177,9 @@
 
   <changeSet id="init-constraints" author="CanhPC">
     <addUniqueConstraint columnNames="system_user_id" constraintName="uc_system_credentials_system_user" schemaName="auth" tableName="system_credentials"/>
-    <addUniqueConstraint columnNames="email" constraintName="uc_system_users_email" schemaName="auth" tableName="system_users"/>
-    <addUniqueConstraint columnNames="email" constraintName="uc_users_email" schemaName="auth" tableName="users"/>
-    <addUniqueConstraint columnNames="username" constraintName="uc_users_username" schemaName="auth" tableName="users"/>
+    <addUniqueConstraint columnNames="email, tenant_id" constraintName="uc_system_users_email_tenant" schemaName="auth" tableName="system_users"/>
+    <addUniqueConstraint columnNames="email, tenant_id" constraintName="uc_users_email_tenant" schemaName="auth" tableName="users"/>
+    <addUniqueConstraint columnNames="username, tenant_id" constraintName="uc_users_username_tenant" schemaName="auth" tableName="users"/>
 
     <addForeignKeyConstraint baseColumnNames="plan_id" baseTableName="tenants" baseTableSchemaName="auth" constraintName="fk_tenants_plan_id" referencedColumnNames="id" referencedTableName="plans" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="users" baseTableSchemaName="auth" constraintName="fk_users_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
@@ -205,3 +205,4 @@
   </changeSet>
 
 </databaseChangeLog>
+

@@ -1,6 +1,7 @@
 package com.thaca.framework.blocking.starter.utils;
 
 import com.thaca.common.enums.TokenStatus;
+import com.thaca.framework.blocking.starter.security.JwtUserPrincipal;
 import com.thaca.framework.blocking.starter.services.UserSessionService;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
@@ -61,7 +62,8 @@ public class JwtUtils {
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toList());
 
-        return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, allAuthorities);
+        JwtUserPrincipal principal = JwtUserPrincipal.fromClaims(claims, allAuthorities);
+        return new UsernamePasswordAuthenticationToken(principal, token, allAuthorities);
     }
 
     public TokenStatus validateToken(String authToken) {

@@ -40,27 +40,19 @@ public class InternalUserController {
     }
 
     @PostMapping("/cms/users/download-template")
-    @FwRequest(
-        name = InternalMethod.INTERNAL_CMS_DOWNLOAD_USER_TEMPLATE,
-        type = RequestType.INTERNAL,
-        isSuperAdmin = true
-    )
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_DOWNLOAD_USER_TEMPLATE, type = RequestType.INTERNAL)
     public void downloadTemplate(HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(null), "thaca-users-template-{{date}}.xlsx");
     }
 
     @PostMapping(value = "/cms/users/import", consumes = "multipart/form-data")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_IMPORT_USERS, type = RequestType.INTERNAL, isSuperAdmin = true)
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_IMPORT_USERS, type = RequestType.INTERNAL)
     public ResponseEntity<ImportResponseDTO> importUsers(@RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(process.process(file));
     }
 
     @PostMapping("/cms/users/file-error")
-    @FwRequest(
-        name = InternalMethod.INTERNAL_CMS_EXPORT_USER_IMPORT_ERROR,
-        type = RequestType.INTERNAL,
-        isSuperAdmin = true
-    )
+    @FwRequest(name = InternalMethod.INTERNAL_CMS_EXPORT_USER_IMPORT_ERROR, type = RequestType.INTERNAL)
     public void exportUserImportError(ImportResponseDTO importResult, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(importResult), "thaca-users-file-error-{{date}}.xlsx");
     }

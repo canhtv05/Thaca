@@ -49,8 +49,6 @@ import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -113,6 +111,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
     @FwMode(name = InternalMethod.INTERNAL_CMS_DETAIL_USER, type = ModeType.HANDLE)
     public UserDTO detailUser(UserDTO request) {
         Map<Long, TenantInfoProjection> tenantMap = tenantRepository
@@ -128,13 +127,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @CheckPermission(value = { "USER_MAKER" })
     @FwMode(name = InternalMethod.INTERNAL_CMS_DOWNLOAD_USER_TEMPLATE, type = ModeType.HANDLE)
     public byte[] downloadTemplate() throws IOException {
         ApiHeader header = FwContextHeader.get();
         boolean isVietnamese = "vi".equals(header.getLanguage());
-        return ExcelEngine.generateTemplate(this.buildImportSchema(isVietnamese));
+        boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
+        return ExcelEngine.generateTemplate(this.buildImportSchema(isVietnamese, isSuperAdmin));
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @CheckPermission(value = { "USER_MAKER" })
     @FwMode(name = InternalMethod.INTERNAL_CMS_IMPORT_USERS, type = ModeType.HANDLE)
     public ImportResponseDTO importUsers(MultipartFile file) {
         if (file == null || file.isEmpty()) {
@@ -142,7 +145,8 @@ public class UserService {
         }
         ApiHeader header = FwContextHeader.get();
         boolean isVietnamese = "vi".equals(header.getLanguage());
-        ExcelSchema schema = this.buildImportSchema(isVietnamese);
+        boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
+        ExcelSchema schema = this.buildImportSchema(isVietnamese, isSuperAdmin);
 
         ImportResult<Map<String, Object>> result;
         try {
@@ -154,30 +158,15 @@ public class UserService {
             return toImportResponse(result);
         }
         List<Map<String, Object>> successRows = result.getSuccessRows();
-        Set<String> importUsernames = successRows
-            .stream()
-            .map(row -> String.valueOf(row.get("username")).trim().toLowerCase())
-            .collect(Collectors.toSet());
-        Set<String> importEmails = successRows
-            .stream()
-            .map(row -> String.valueOf(row.get("email")).trim().toLowerCase())
-            .collect(Collectors.toSet());
+        Set<String> existingUsernames = new HashSet<>();
+        Set<String> existingEmails = new HashSet<>();
 
-        Set<String> existingUsernames = userRepository
-            .findAllByUsernameIn(importUsernames)
-            .stream()
-            .map(u -> u.getUsername().toLowerCase())
-            .collect(Collectors.toSet());
-        Set<String> existingEmails = userRepository
-            .findAllByEmailIn(importEmails)
-            .stream()
-            .map(u -> u.getEmail().toLowerCase())
-            .collect(Collectors.toSet());
-
-        Map<String, TenantInfoProjection> tenantCodeToId = tenantRepository
-            .findAllActiveTenants()
-            .stream()
-            .collect(Collectors.toMap(TenantInfoProjection::getCode, a -> a));
+        Map<String, TenantInfoProjection> tenantCodeToId = isSuperAdmin
+            ? tenantRepository
+                  .findAllActiveTenants()
+                  .stream()
+                  .collect(Collectors.toMap(TenantInfoProjection::getCode, a -> a))
+            : new HashMap<>();
 
         List<User> usersToSave = new ArrayList<>();
         List<RowError> businessErrors = new ArrayList<>();
@@ -215,23 +204,27 @@ public class UserService {
                 hasError = true;
             }
             Long tenantId = null;
-            Object tenantRaw = row.get("tenantId");
-            if (tenantRaw != null) {
-                String tenantStr = String.valueOf(tenantRaw);
-                String tenantCode = tenantStr.contains(" - ") ? tenantStr.split(" - ")[0].trim() : tenantStr.trim();
-                tenantId = tenantCodeToId.get(tenantCode).getId();
-                if (tenantId == null) {
-                    businessErrors.add(
-                        new RowError(
-                            excelRowIndex,
-                            "tenantId",
-                            isVietnamese ? "Mã Tenant" : "Tenant ID",
-                            isVietnamese ? "Tenant không tồn tại" : "Tenant does not exist",
-                            tenantStr
-                        )
-                    );
-                    hasError = true;
+            if (SecurityUtils.isSuperAdmin()) {
+                Object tenantRaw = row.get("tenantId");
+                if (tenantRaw != null) {
+                    String tenantStr = String.valueOf(tenantRaw);
+                    String tenantCode = tenantStr.contains(" - ") ? tenantStr.split(" - ")[0].trim() : tenantStr.trim();
+                    tenantId = tenantCodeToId.get(tenantCode).getId();
+                    if (tenantId == null) {
+                        businessErrors.add(
+                            new RowError(
+                                excelRowIndex,
+                                "tenantId",
+                                isVietnamese ? "Mã Tenant" : "Tenant ID",
+                                isVietnamese ? "Tenant không tồn tại" : "Tenant does not exist",
+                                tenantStr
+                            )
+                        );
+                        hasError = true;
+                    }
                 }
+            } else {
+                tenantId = SecurityUtils.getCurrentTenantId();
             }
             if (hasError) {
                 continue;
@@ -252,9 +245,6 @@ public class UserService {
             existingEmails.add(email);
         }
 
-        if (!businessErrors.isEmpty()) {
-            return getImportResponseDTO(businessErrors, result);
-        }
         if (!usersToSave.isEmpty()) {
             usersByTenant = usersToSave
                 .stream()
@@ -341,6 +331,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @CheckPermission(value = { "USER_MAKER" })
     @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_USER_IMPORT_ERROR, type = ModeType.HANDLE)
     public byte[] exportUserImportError(ImportResponseDTO importResult) throws IOException {
         if (importResult == null || importResult.getErrors() == null || importResult.getErrors().isEmpty()) {
@@ -376,26 +367,13 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
     @FwMode(name = InternalMethod.INTERNAL_CMS_GET_USER_BY_ID, type = ModeType.HANDLE)
     public UserDTO findById(Long id) {
         return userRepository
             .findById(id)
             .map(u -> UserMapper.fromEntityWithCms(u, true))
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void lockUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setIsLocked(true);
-        userRepository.save(user);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void unlockUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        user.setIsLocked(false);
-        userRepository.save(user);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -427,10 +405,11 @@ public class UserService {
             List.of(new EmailRule<>(), new FullnameRule<>(), new PasswordRule<>(), new UsernameRule<>())
         );
         validator.validate(request);
-        if (userRepository.existsUserByUsername(request.getUsername())) {
+        Long tenantId = SecurityUtils.getCurrentTenantId();
+        if (tenantId != null && userRepository.existsByUsernameAndTenantId(request.getUsername(), tenantId)) {
             throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (tenantId != null && userRepository.existsByEmailAndTenantId(request.getEmail(), tenantId)) {
             throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
         }
     }
@@ -566,6 +545,7 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @CheckPermission(value = { "USER_MAKER" })
     @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_USER, type = ModeType.HANDLE)
     public void lockUnlock(SystemUserDTO request) {
         if (request.getId() == null || StringUtils.isBlank(request.getLockReason())) {
@@ -619,6 +599,8 @@ public class UserService {
     private Specification<User> createUserSpecification(SearchRequest<UserDTO> req) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
+            Long currentTenantId = SecurityUtils.getCurrentTenantId();
             if (req.getFilter() != null) {
                 UserDTO filter = req.getFilter();
                 if (StringUtils.isNotBlank(filter.getUsername())) {
@@ -635,12 +617,10 @@ public class UserService {
                 if (filter.getIsLocked() != null) {
                     predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
                 }
-                if (StringUtils.isNotBlank(filter.getTenantId())) {
-                    Subquery<Long> subquery = query.subquery(Long.class);
-                    Root<Tenant> tenantRoot = subquery.from(Tenant.class);
-                    subquery.select(tenantRoot.get("id")).where(cb.equal(tenantRoot.get("id"), filter.getTenantId()));
-                    Predicate predicate = root.get("tenantId").in(subquery);
-                    predicates.add(predicate);
+                if (StringUtils.isNotBlank(filter.getTenantId()) && isSuperAdmin) {
+                    predicates.add(cb.equal(root.get("tenantId"), filter.getTenantId()));
+                } else if (!isSuperAdmin) {
+                    predicates.add(cb.equal(root.get("tenantId"), currentTenantId));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));
@@ -652,14 +632,16 @@ public class UserService {
         return StringUtils.isNotEmpty(redisService.get(keyForgotPassword, String.class));
     }
 
-    private ExcelSchema buildImportSchema(boolean isVietnamese) {
-        List<String> tenantIds = tenantRepository
-            .findAllActiveTenants()
-            .stream()
-            .map(t -> t.getCode() + " - " + t.getName())
-            .toList();
+    private ExcelSchema buildImportSchema(boolean isVietnamese, boolean isSuperAdmin) {
+        List<String> tenantIds = isSuperAdmin
+            ? tenantRepository
+                  .findAllActiveTenants()
+                  .stream()
+                  .map(t -> t.getCode() + " - " + t.getName())
+                  .toList()
+            : List.of();
 
-        return ExcelSchema.builder()
+        var schema = ExcelSchema.builder()
             .sheetName(isVietnamese ? "Nhập người dùng" : "Import Users")
             .headerRowIndex(0)
             .dataStartRowIndex(1)
@@ -713,7 +695,9 @@ public class UserService {
                     })
                     .build()
             )
-            .addColumn(
+            .addColumnCondition(
+                isSuperAdmin,
+                3,
                 ExcelColumn.builder("tenantId", isVietnamese ? "Mã Tenant" : "Tenant ID")
                     .required()
                     .dataType(ExcelDataType.STRING)
@@ -736,6 +720,7 @@ public class UserService {
                     .build()
             )
             .build();
+        return schema;
     }
 
     private ImportResponseDTO getImportResponseDTO(

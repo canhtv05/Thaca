@@ -98,8 +98,32 @@ public class ExcelSchema {
             return this;
         }
 
+        public Builder addColumnCondition(boolean condition, Integer index, ExcelColumn column) {
+            if (condition) {
+                return addColumn(index, column);
+            }
+            return this;
+        }
+
+        public Builder addColumn(Integer index, ExcelColumn column) {
+            this.columns.add(index, column);
+            return this;
+        }
+
+        public Builder addColumnCondition(boolean condition, Integer index, ExcelColumn.Builder columnBuilder) {
+            if (condition) {
+                return addColumn(index, columnBuilder);
+            }
+            return this;
+        }
+
         public Builder addColumn(ExcelColumn.Builder columnBuilder) {
             this.columns.add(columnBuilder.build());
+            return this;
+        }
+
+        public Builder addColumn(Integer index, ExcelColumn.Builder columnBuilder) {
+            this.columns.add(index, columnBuilder.build());
             return this;
         }
 

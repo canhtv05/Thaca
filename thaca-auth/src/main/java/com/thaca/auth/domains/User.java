@@ -21,10 +21,10 @@ public class User extends BaseTenantEntity {
     @SequenceGenerator(name = "user_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(name = "username", nullable = false)
     private String username;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
     @JsonIgnore

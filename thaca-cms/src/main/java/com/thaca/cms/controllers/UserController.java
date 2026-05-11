@@ -40,19 +40,19 @@ public class UserController {
     }
 
     @PostMapping("/users/download-template")
-    @FwRequest(name = ServiceMethod.CMS_DOWNLOAD_USER_TEMPLATE, type = RequestType.PROTECTED, isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.CMS_DOWNLOAD_USER_TEMPLATE, type = RequestType.PROTECTED)
     public void downloadUserTemplate(HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(null), "thaca-users-template-{{date}}.xlsx");
     }
 
     @PostMapping(value = "/users/import", consumes = "multipart/form-data")
-    @FwRequest(name = ServiceMethod.CMS_IMPORT_USERS, type = RequestType.PROTECTED, isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.CMS_IMPORT_USERS, type = RequestType.PROTECTED)
     public ResponseEntity<ImportResponseDTO> importUsers(@RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(process.process(file));
     }
 
     @PostMapping("/users/file-error")
-    @FwRequest(name = ServiceMethod.CMS_EXPORT_USER_FILE_ERROR, type = RequestType.PROTECTED, isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_USER_FILE_ERROR, type = RequestType.PROTECTED)
     public void exportUserFileError(ImportResponseDTO importResult, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(importResult), "thaca-users-file-error-{{date}}.xlsx");
     }
