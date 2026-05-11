@@ -107,4 +107,8 @@ export class LoginComponent implements OnInit {
       this.onReloadCaptcha();
     }
   }
+
+  onBackToType(): void {
+    this.router.navigate(['/auth/platform']);
+  }
 }
