@@ -46,7 +46,14 @@
     }
   </div>
   <div class="order-1 lg:w-auto w-full flex justify-center items-center">
-    <div class="card rounded-xl p-0"><ng-content></ng-content></div>
+    <div class="card rounded-xl p-0">
+      @if (contentTemplate) {
+        <ng-container *ngTemplateOutlet="contentTemplate"></ng-container>
+      }
+    </div>
+    @if (!contentTemplate) {
+      <ng-content></ng-content>
+    }
   </div>
   <!-- <div class="hidden lg:block flex-1 order-1 lg:order-2">
     <img

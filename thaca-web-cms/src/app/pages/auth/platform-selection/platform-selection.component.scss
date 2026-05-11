@@ -1,0 +1,14 @@
+.tenant-list {
+  scrollbar-width: thin;
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color, #e2e8f0);
+    border-radius: 4px;
+  }
+}
+
+:host ::ng-deep i {
+  font-size: var(--thaca-fs);
+}

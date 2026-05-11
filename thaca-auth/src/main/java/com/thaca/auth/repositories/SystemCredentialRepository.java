@@ -30,5 +30,18 @@ public interface SystemCredentialRepository
     @EntityGraph(attributePaths = { "roles", "roles.permissions", "credentialPermissions.permission", "systemUser" })
     Optional<SystemCredential> findByUsername(String username);
 
+    @Query(
+        value = """
+        SELECT sc.* FROM auth.system_credentials sc
+        JOIN auth.system_users su ON sc.system_user_id = su.id
+        WHERE sc.username = :username AND su.tenant_id = :tenantId
+        """,
+        nativeQuery = true
+    )
+    Optional<SystemCredential> findByUsernameAndTenantId(
+        @Param("username") String username,
+        @Param("tenantId") Long tenantId
+    );
+
     Optional<SystemCredential> findBySystemUser(SystemUser systemUser);
 }

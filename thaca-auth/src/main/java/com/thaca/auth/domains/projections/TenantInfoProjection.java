@@ -6,4 +6,6 @@ public interface TenantInfoProjection {
     String getName();
 
     String getCode();
+
+    String getLogoUrl();
 }

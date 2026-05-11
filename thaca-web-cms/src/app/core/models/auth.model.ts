@@ -3,6 +3,7 @@ export interface ILoginReq {
   password: string;
   captcha: string;
   captchaId: string;
+  tenantId?: number;
 }
 
 export interface IAuthUserDTO {

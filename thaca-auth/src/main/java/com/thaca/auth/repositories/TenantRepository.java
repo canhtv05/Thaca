@@ -21,7 +21,7 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     @Query(
         nativeQuery = true,
         value = """
-        SELECT t.id, t.name, t.code FROM auth.tenants t
+        SELECT t.id, t.name, t.code, t.logo_url FROM auth.tenants t
         WHERE t.status = 'ACTIVE'
         ORDER BY t.updated_at DESC
         """
@@ -31,7 +31,7 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     @Query(
         nativeQuery = true,
         value = """
-        SELECT t.id, t.name, t.code FROM auth.tenants t
+        SELECT t.id, t.name, t.code, t.logo_url FROM auth.tenants t
         ORDER BY t.updated_at DESC
         """
     )

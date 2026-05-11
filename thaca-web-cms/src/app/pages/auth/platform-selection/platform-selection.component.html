@@ -1,0 +1,74 @@
+<app-auth-layout>
+  <div
+    class="rounded-xl p-10 w-full lg:min-w-md max-w-md flex flex-col justify-center border border-border bg-card"
+  >
+    @if (selectionStep() === 'choose-type') {
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-foreground mb-2">{{ 'auth.welcome' | translate }}</h1>
+        <p class="text-foreground text-sm">{{ 'auth.choosePlatform' | translate }}</p>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <thaca-button class="w-full" (click)="onSelectSuperAdmin()" variant="outline" size="lg">
+          <div class="flex items-center gap-3">
+            <i class="pi pi-shield"></i>
+            <span>{{ 'auth.superAdmin' | translate }}</span>
+          </div>
+        </thaca-button>
+
+        <thaca-button class="w-full" (click)="onSelectOrganization()" variant="outline" size="lg">
+          <div class="flex items-center gap-3">
+            <i class="pi pi-building"></i>
+            <span>{{ 'auth.organization' | translate }}</span>
+          </div>
+        </thaca-button>
+      </div>
+    }
+
+    @if (selectionStep() === 'choose-tenant') {
+      <div class="mb-4">
+        <thaca-button variant="outline" size="sm" (click)="onBackToType()">
+          <i class="pi pi-arrow-left mr-2"></i>
+          {{ 'common.button.back' | translate }}
+        </thaca-button>
+      </div>
+
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-foreground mb-2">
+          {{ 'auth.selectTenant' | translate }}
+        </h1>
+        <p class="text-foreground text-sm">{{ 'auth.selectTenantDesc' | translate }}</p>
+      </div>
+
+      <div class="tenant-list flex flex-col gap-2 max-h-[400px] overflow-y-auto">
+        @if (isLoadingTenants()) {
+          <div class="flex justify-center py-8">
+            <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+          </div>
+        } @else {
+          @for (tenant of tenants(); track tenant.id) {
+            <div
+              (click)="onSelectTenant(tenant)"
+              class="flex items-center p-3 rounded-lg border border-border hover:bg-accent cursor-pointer transition-colors"
+            >
+              <div
+                class="w-10 h-10 rounded bg-muted flex items-center justify-center mr-3 shrink-0 overflow-hidden"
+              >
+                @if (tenant.logoUrl) {
+                  <img [src]="tenant.logoUrl" class="w-full h-full object-cover" />
+                } @else {
+                  <span class="font-bold text-primary">{{ tenant.name.charAt(0) }}</span>
+                }
+              </div>
+              <div class="flex flex-col overflow-hidden">
+                <span class="font-medium truncate">{{ tenant.name }}</span>
+                <span class="text-xs text-muted-foreground">{{ tenant.code }}</span>
+              </div>
+              <i class="pi pi-chevron-right ml-auto text-muted-foreground"></i>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</app-auth-layout>

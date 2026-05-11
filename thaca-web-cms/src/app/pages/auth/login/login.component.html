@@ -1,0 +1,95 @@
+<app-auth-layout [contentTemplate]="layout">
+  <ng-template #layout>
+    <div
+      id="sing-in-card"
+      class="h-full rounded-xl p-10 w-full lg:min-w-md max-w-md flex flex-col justify-center"
+    >
+      <thaca-button variant="outline" size="sm" (click)="onBackToType()" class="mb-2">
+        <i class="pi pi-arrow-left mr-2 text-xs"></i>
+        {{ 'common.button.back' | translate }}
+      </thaca-button>
+      <div id="logo-section" class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-foreground mb-2">{{ 'auth.greeting' | translate }}</h1>
+        <p class="text-foreground text-sm">{{ 'auth.description' | translate }}</p>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-1">
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col justify-center w-full">
+            <thaca-input
+              placeholder="{{ 'auth.usernamePlaceholder' | translate }}"
+              [startIcon]="APP_CONFIG_ICONS['solarUserBold']"
+              label="{{ 'auth.usernameLabel' | translate }}"
+              [required]="true"
+              formControlName="username"
+              size="lg"
+            />
+            <validation-message
+              [control]="form.get('username')"
+              i18nPrefix="auth.validation"
+              fieldName="username"
+            ></validation-message>
+          </div>
+          <div class="flex flex-col justify-center w-full">
+            <thaca-input
+              placeholder="{{ 'auth.passwordPlaceholder' | translate }}"
+              [startIcon]="APP_CONFIG_ICONS['solarLockPasswordBold']"
+              label="{{ 'auth.passwordLabel' | translate }}"
+              [required]="true"
+              type="password"
+              formControlName="password"
+              size="lg"
+            />
+            <validation-message
+              [control]="form.get('password')"
+              i18nPrefix="auth.validation"
+              fieldName="password"
+            ></validation-message>
+          </div>
+          <div class="flex flex-col gap-1.5 w-full">
+            <label class="text-sm font-medium text-foreground thaca-label" [for]="captchaInputId">
+              {{ 'auth.captchaLabel' | translate }} <span class="thaca-required">(*)</span>
+            </label>
+            <div class="flex items-stretch gap-3">
+              <div class="form-control">
+                <thaca-input
+                  [id]="captchaInputId"
+                  placeholder="{{ 'auth.captchaPlaceholder' | translate }}"
+                  size="lg"
+                  formControlName="captcha"
+                />
+              </div>
+              <div class="shrink-0 flex items-center gap-1.5">
+                <img
+                  [src]="captchaImage()"
+                  alt="Captcha"
+                  class="h-11 min-w-[150px] rounded-md border border-border cursor-pointer"
+                  (click)="onReloadCaptcha()"
+                  (error)="
+                    $event.target.src =
+                      'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+                  "
+                />
+                <thaca-button
+                  variant="outline"
+                  [iconOnly]="true"
+                  size="lg"
+                  [startIcon]="APP_CONFIG_ICONS['solarRefreshBold']"
+                  (click)="onReloadCaptcha()"
+                ></thaca-button>
+              </div>
+            </div>
+            <validation-message [control]="form.get('captcha')"></validation-message>
+          </div>
+        </div>
+        <div id="options-section" class="flex items-center justify-end py-2">
+          <a class="text-primary text-sm" tabindex="-1" href="/forgot-password">{{
+            'auth.forgotPassword' | translate
+          }}</a>
+        </div>
+        <thaca-button class="w-full rounded-full!" type="submit" variant="primary" size="lg">
+          <span class="text-white"> {{ 'auth.login' | translate }}</span>
+        </thaca-button>
+      </form>
+    </div>
+  </ng-template>
+</app-auth-layout>

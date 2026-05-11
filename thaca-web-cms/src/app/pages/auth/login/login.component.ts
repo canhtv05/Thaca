@@ -1,22 +1,18 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { AuthLayoutComponent } from '../../layouts/auth-layout/auth-layout.component';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthLayoutComponent } from '../../../layouts/auth-layout/auth-layout.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
-import { ThacaInputComponent } from '../../shared/components/thaca-input/thaca-input.component';
-import { APP_CONFIG_ICONS } from '../../core/configs/app-config.icon';
-import {
-  FormBuilder,
-  Validators,
-  ɵInternalFormsSharedModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { ValidationMessageComponent } from '../../shared/components/validation-message/validation-message.component';
-import { AuthService } from '../../core/services/auth.service';
-import { ILoginReq } from '../../core/models/auth.model';
+import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
+import { ɵInternalFormsSharedModule } from '@angular/forms';
+import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
+import { AuthService } from '../../../core/services/auth.service';
+import { ILoginReq } from '../../../core/models/auth.model';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ThacaButtonComponent } from '../../shared/components/thaca-button/thaca-button.component';
+import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
 
 @Component({
   selector: 'app-login',
@@ -65,10 +61,17 @@ export class LoginComponent implements OnInit {
 
   captchaImage = signal<string>('');
   captchaId = signal<string>('');
-  captchaInputId = `thaca-input-captcha-${Math.random().toString(36).substring(2, 15)}`;
+  tenantId = signal<number | null>(null);
 
-  async ngOnInit(): Promise<void> {
+  readonly captchaInputId = 'captcha-input-' + Math.random().toString(36).substring(2, 9);
+
+  ngOnInit(): void {
     this.generateCaptcha();
+    this.route.queryParams.subscribe((params) => {
+      if (params['tenantId']) {
+        this.tenantId.set(+params['tenantId']);
+      }
+    });
   }
 
   async generateCaptcha(): Promise<void> {
@@ -94,19 +97,18 @@ export class LoginComponent implements OnInit {
     const loginReq: ILoginReq = {
       ...(this.form.getRawValue() as unknown as ILoginReq),
       captchaId: this.captchaId(),
+      tenantId: this.tenantId() ?? undefined,
     };
     const res = await this.authService.login(loginReq);
-    const returnUrl =
-      this.route.snapshot.queryParamMap.get('returnUrl') ||
-      this.route.snapshot.queryParamMap.get('returnByUrl');
-
+    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
     if (res.body.status === 'OK') {
-      this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : '/home');
+      this.router.navigateByUrl(returnUrl);
     } else {
-      this.generateCaptcha();
-      this.form.get('captcha')?.setValue('');
-      this.form.get('captcha')?.markAsTouched();
-      this.form.get('captcha')?.updateValueAndValidity();
+      this.onReloadCaptcha();
     }
+  }
+
+  onBackToType(): void {
+    this.router.navigate(['/auth/platform']);
   }
 }

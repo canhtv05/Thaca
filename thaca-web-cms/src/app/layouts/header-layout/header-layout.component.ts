@@ -72,6 +72,6 @@ export class HeaderLayoutComponent {
 
   async logout() {
     await this.authService.logoutAsync();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/platform']);
   }
 }

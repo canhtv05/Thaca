@@ -14,11 +14,11 @@ export const routes: Routes = [
       import('./layouts/main-layout/main-layout.route').then((m) => m.mainLayoutRoute),
   },
   {
-    path: 'login',
+    path: 'auth',
     resolve: { i18n: I18nResolver },
     data: { i18n: ['auth'] },
     canActivate: [GuestGuard],
-    loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
+    loadChildren: () => import('./pages/auth/auth.routes').then((m) => m.authRoutes),
   },
   {
     path: '403',

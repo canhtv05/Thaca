@@ -25,4 +25,5 @@ export interface ITenantInfoPrj {
   id: number;
   code: string;
   name: string;
+  logoUrl?: string;
 }
