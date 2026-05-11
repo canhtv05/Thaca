@@ -10,4 +10,6 @@ public interface UserPrincipal {
     boolean isSuperAdmin();
 
     boolean isCmsUser();
+
+    Long getTenantId();
 }

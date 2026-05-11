@@ -1,4 +1,4 @@
-import { inject, Injectable, computed } from '@angular/core';
+import { inject, Injectable, computed, signal } from '@angular/core';
 import { AppConfigService } from '../configs/app-config.service';
 import { GlobalHttp } from '../global/global-http';
 import { IAuthenticateRes, IAuthUserDTO, ILoginReq } from '../models/auth.model';
@@ -6,16 +6,38 @@ import { IApiPayload } from '../models/common.model';
 import { createBody, createHeader } from '../../utils/common.utils';
 import { currentUser } from '../stores/app.store';
 
-@Injectable({
-  providedIn: 'root',
-})
+type AuthState = 'unknown' | 'authenticated' | 'unauthenticated' | 'logged-out';
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly config = inject(AppConfigService);
+
+  private readonly authState = signal<AuthState>('unknown');
   private profilePromise: Promise<boolean> | null = null;
-  private profileChecked = false;
 
   readonly user = computed(() => currentUser());
-  readonly isAuthenticated = computed(() => !!currentUser());
+  readonly isAuthenticated = computed(() => this.authState() === 'authenticated');
+
+  ensureAuthenticated(): Promise<boolean> {
+    switch (this.authState()) {
+      case 'authenticated':
+        return Promise.resolve(true);
+      case 'unauthenticated':
+      case 'logged-out':
+        return Promise.resolve(false);
+      case 'unknown':
+      default:
+        if (window.location.pathname.includes('/login')) {
+          return Promise.resolve(false);
+        }
+        if (!this.profilePromise) {
+          this.profilePromise = this.loadProfile().finally(() => {
+            this.profilePromise = null;
+          });
+        }
+        return this.profilePromise;
+    }
+  }
 
   async login(req: ILoginReq): Promise<IApiPayload<IAuthenticateRes>> {
     const payload: IApiPayload<ILoginReq> = {
@@ -28,82 +50,49 @@ export class AuthService {
     );
     if (res.body.status === 'OK' && res.body.data.isAuthenticate) {
       currentUser.set(res.body.data.info);
-      this.profileChecked = true;
+      this.authState.set('authenticated');
     }
     return res;
   }
 
-  ensureAuthenticated(): Promise<boolean> {
-    if (this.isAuthenticated()) {
-      return Promise.resolve(true);
-    }
-
-    if (this.profileChecked) {
-      return Promise.resolve(false);
-    }
-
-    if (!this.profilePromise) {
-      this.profilePromise = this.loadProfile().finally(() => {
-        this.profilePromise = null;
-        this.profileChecked = true;
-      });
-    }
-
-    return this.profilePromise;
-  }
-
-  private async loadProfile(): Promise<boolean> {
-    const profile = await GlobalHttp.post<IApiPayload<IAuthUserDTO>>(
-      `${this.config.getApiUrl()}/cms/profile`,
-      {
-        header: createHeader(),
-        body: createBody({}),
-      },
-    );
-    if (profile?.body?.status === 'OK' && profile?.body?.data) {
-      currentUser.set(profile?.body?.data);
-      return true;
-    }
-    return false;
-  }
-
-  async getUserProfile(): Promise<IApiPayload<IAuthUserDTO>> {
-    if (this.isAuthenticated()) {
-      return { header: null, body: { status: 'OK', data: currentUser() } } as any;
-    }
-
-    const ok = await this.loadProfile();
-    return { header: null, body: { status: ok ? 'OK' : 'FAILED', data: currentUser() } } as any;
-  }
-
-  async generateCaptcha(): Promise<IApiPayload<{ image: string; captchaId: string }>> {
-    const payload: IApiPayload<any> = {
-      header: createHeader(),
-      body: createBody({}),
-    };
-    return await GlobalHttp.post<IApiPayload<{ image: string; captchaId: string }>>(
-      `${this.config.getApiUrl()}/auth/generate-captcha`,
-      payload,
-    );
-  }
-
-  logout() {
+  logout(): void {
     currentUser.set(null);
     this.profilePromise = null;
-    this.profileChecked = true;
+    this.authState.set('logged-out');
   }
 
   async logoutAsync(): Promise<void> {
-    const payload: IApiPayload<any> = {
-      header: createHeader(),
-      body: createBody({}),
-    };
     const res = await GlobalHttp.post<IApiPayload<void>>(
       `${this.config.getApiUrl()}/cms/sign-out`,
-      payload,
+      { header: createHeader(), body: createBody({}) },
     );
     if (res.body.status === 'OK') {
       this.logout();
     }
+  }
+
+  async generateCaptcha(): Promise<IApiPayload<{ image: string; captchaId: string }>> {
+    return GlobalHttp.post<IApiPayload<{ image: string; captchaId: string }>>(
+      `${this.config.getApiUrl()}/auth/generate-captcha`,
+      { header: createHeader(), body: createBody({}) },
+    );
+  }
+
+  isSuperAdmin(): boolean {
+    return this.user()?.isSuperAdmin ?? false;
+  }
+
+  private async loadProfile(): Promise<boolean> {
+    const res = await GlobalHttp.post<IApiPayload<IAuthUserDTO>>(
+      `${this.config.getApiUrl()}/cms/profile`,
+      { header: createHeader(), body: createBody({}) },
+    );
+    if (res?.body?.status === 'OK' && res.body.data) {
+      currentUser.set(res.body.data);
+      this.authState.set('authenticated');
+      return true;
+    }
+    this.authState.set('unauthenticated');
+    return false;
   }
 }

@@ -186,7 +186,7 @@ public class CaptchaUtils {
         }
 
         // ── bubble decorations ────────────────────────────────────────────────
-        drawBubbles(g, rng, w, h);
+        // drawBubbles(g, rng, w, h);
 
         // ── two wavy noise lines ──────────────────────────────────────────────
         drawWaves(g, rng, w, h);
@@ -211,34 +211,34 @@ public class CaptchaUtils {
         );
     }
 
-    private static void drawBubbles(Graphics2D g, Random rng, int w, int h) {
-        int count = 12 + rng.nextInt(8);
-        for (int i = 0; i < count; i++) {
-            int r = 5 + rng.nextInt(12);
-            int x = r + rng.nextInt(w - r * 2);
-            int y = r + rng.nextInt(h - r * 2);
-            Color c = COLORS[rng.nextInt(COLORS.length)];
+    // private static void drawBubbles(Graphics2D g, Random rng, int w, int h) {
+    // int count = 12 + rng.nextInt(8);
+    // for (int i = 0; i < count; i++) {
+    // int r = 5 + rng.nextInt(12);
+    // int x = r + rng.nextInt(w - r * 2);
+    // int y = r + rng.nextInt(h - r * 2);
+    // Color c = COLORS[rng.nextInt(COLORS.length)];
 
-            // translucent bubble fill
-            g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 40));
-            g.fillOval(x - r, y - r, r * 2, r * 2);
+    // // translucent bubble fill
+    // g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 40));
+    // g.fillOval(x - r, y - r, r * 2, r * 2);
 
-            // coloured rim
-            g.setStroke(new BasicStroke(1.6f));
-            g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 175));
-            g.drawOval(x - r, y - r, r * 2, r * 2);
+    // // coloured rim
+    // g.setStroke(new BasicStroke(1.6f));
+    // g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 175));
+    // g.drawOval(x - r, y - r, r * 2, r * 2);
 
-            // inner shimmer arc
-            g.setColor(new Color(255, 255, 255, 110));
-            g.setStroke(new BasicStroke(1.3f));
-            g.drawArc(x - r + 2, y - r + 2, (int) (r * 0.85), (int) (r * 0.85), 40, 110);
+    // // inner shimmer arc
+    // g.setColor(new Color(255, 255, 255, 110));
+    // g.setStroke(new BasicStroke(1.3f));
+    // g.drawArc(x - r + 2, y - r + 2, (int) (r * 0.85), (int) (r * 0.85), 40, 110);
 
-            // bright shine dot
-            g.setColor(new Color(255, 255, 255, 230));
-            int sd = Math.max(2, r / 3);
-            g.fillOval(x - r / 3, y - r / 3, sd, sd);
-        }
-    }
+    // // bright shine dot
+    // g.setColor(new Color(255, 255, 255, 230));
+    // int sd = Math.max(2, r / 3);
+    // g.fillOval(x - r / 3, y - r / 3, sd, sd);
+    // }
+    // }
 
     private static void drawWaves(Graphics2D g, Random rng, int w, int h) {
         for (int wave = 0; wave < 2; wave++) {

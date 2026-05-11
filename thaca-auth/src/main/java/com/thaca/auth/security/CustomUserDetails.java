@@ -58,4 +58,9 @@ public class CustomUserDetails extends User implements UserPrincipal {
     public boolean isCmsUser() {
         return this.isCmsUser;
     }
+
+    @Override
+    public Long getTenantId() {
+        return this.tenantId;
+    }
 }

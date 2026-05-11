@@ -124,17 +124,18 @@
             >
               <div class="dt-action-group">
                 @for (action of getVisibleActions(rowData); track action.key || action.titleKey) {
-                  <button
-                    type="button"
-                    class="dt-act dt-act--{{ action.color || 'default' }}"
-                    (click)="handleAction(action, rowData, $event)"
-                    [pTooltip]="action.titleKey || action.key || '' | translate"
-                    tooltipPosition="top"
-                  >
-                    <i [class]="action.icon"></i>
-                  </button>
+                  @if (hasPermission(action.permissions ?? [])) {
+                    <button
+                      type="button"
+                      class="dt-act dt-act--{{ action.color || 'default' }}"
+                      (click)="handleAction(action, rowData, $event)"
+                      [pTooltip]="action.titleKey || action.key || '' | translate"
+                      tooltipPosition="top"
+                    >
+                      <i [class]="action.icon"></i>
+                    </button>
+                  }
                 }
-
                 @if (getHiddenActions(rowData).length > 0) {
                   <div
                     class="dt-act dt-act--more dt-more-wrap"
@@ -151,13 +152,15 @@
                         action of getHiddenActions(rowData);
                         track action.key || action.titleKey
                       ) {
-                        <div
-                          class="dt-more-item dt-more-item--{{ action.color || 'default' }}"
-                          (click)="handleAction(action, rowData, $event); closeMoreMenu()"
-                        >
-                          <i [class]="action.icon"></i>
-                          <span>{{ action.titleKey || action.key || '' | translate }}</span>
-                        </div>
+                        @if (hasPermission(action.permissions ?? [])) {
+                          <div
+                            class="dt-more-item dt-more-item--{{ action.color || 'default' }}"
+                            (click)="handleAction(action, rowData, $event); closeMoreMenu()"
+                          >
+                            <i [class]="action.icon"></i>
+                            <span>{{ action.titleKey || action.key || '' | translate }}</span>
+                          </div>
+                        }
                       }
                     </div>
                   </div>

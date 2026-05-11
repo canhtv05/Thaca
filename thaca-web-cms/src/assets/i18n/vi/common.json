@@ -47,12 +47,15 @@
     "yes": "Có",
     "no": "Không",
     "status": {
+      "normal": "Bình thường",
       "active": "Hoạt động",
       "inactive": "Không hoạt động",
+      "activated": "Đã kích hoạt",
+      "un_activated": "Chưa kích hoạt",
       "all": "Tất cả",
       "suspended": "Tạm khóa",
-      "lock": "Khóa",
-      "unlock": "Mở khóa"
+      "lock": "Đã khóa",
+      "unlock": "Bị khóa"
     },
     "infinite": "Vô thời hạn",
     "audit": "Thông tin nhật ký",

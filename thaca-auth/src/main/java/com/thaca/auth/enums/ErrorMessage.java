@@ -268,22 +268,22 @@ public enum ErrorMessage implements ErrorMessageRule {
     ),
     TENANT_NOT_FOUND(
         "TENANT.NOT.FOUND",
-        "Tenant không tồn tại",
-        "Tenant không tồn tại trong hệ thống",
+        "Tổ chức không tồn tại",
+        "Tổ chức không tồn tại trong hệ thống",
         "Tenant not found",
         "Tenant not found in system"
     ),
     TENANT_CODE_ALREADY_EXISTS(
         "TENANT.CODE.ALREADY.EXISTS",
-        "Mã tenant đã tồn tại",
-        "Mã tenant đã tồn tại trong hệ thống",
+        "Mã tổ chức đã tồn tại",
+        "Mã tổ chức đã tồn tại trong hệ thống",
         "Tenant code already exists",
         "Tenant code already exists in system"
     ),
     TENANT_INACTIVE_CANNOT_UPDATE(
         "PLAN.INACTIVE",
-        "Tenant đã bị khóa",
-        "Tenant đã bị khóa không thể cập nhật. Vui lòng mở khóa tenant để cập nhật",
+        "Tổ chức đã bị khóa",
+        "Tổ chức đã bị khóa không thể cập nhật. Vui lòng mở khóa tổ chức để cập nhật",
         "Tenant is inactive",
         "Tenant is inactive cannot update. Please unlock tenant to update"
     );

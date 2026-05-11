@@ -1,6 +1,7 @@
 package com.thaca.auth.domains;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "system_credentials", schema = "auth")
-public class SystemCredential extends BaseTenantEntity {
+public class SystemCredential extends BaseEntityAudit {
 
     @Id
     @Column(name = "username", nullable = false)

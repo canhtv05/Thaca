@@ -72,7 +72,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             password = sc.getPassword();
             isLocked = su.getIsLocked();
             isActivated = su.getIsActivated();
-            tenantId = sc.getTenantId();
+            tenantId = su.getTenantId();
             isSuperAdmin = su.getIsSuperAdmin();
 
             Set<Role> roles = sc.getRoles();

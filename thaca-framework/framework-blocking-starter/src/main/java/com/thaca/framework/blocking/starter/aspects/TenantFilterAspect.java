@@ -30,12 +30,15 @@ public class TenantFilterAspect {
         if (entityManager == null) {
             return;
         }
-
         Session session = entityManager.unwrap(Session.class);
-        if (tenantId != null) {
-            session.enableFilter("tenantFilter").setParameter("tenantId", tenantId);
-        } else {
-            session.disableFilter("tenantFilter");
-        }
+        try {
+            if (session.getSessionFactory().getDefinedFilterNames().contains("tenantFilter")) {
+                if (tenantId != null) {
+                    session.enableFilter("tenantFilter").setParameter("tenantId", tenantId);
+                } else {
+                    session.disableFilter("tenantFilter");
+                }
+            }
+        } catch (Exception ignored) {}
     }
 }

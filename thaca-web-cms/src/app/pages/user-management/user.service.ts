@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { AppConfigService } from '../../core/configs/app-config.service';
 import { CommonService } from '../../core/services/common.service';
 import { GlobalHttp } from '../../core/global/global-http';
-import { IApiPayload, IImportResult } from '../../core/models/common.model';
+import { IApiPayload, IImportResult, ISearchRequest } from '../../core/models/common.model';
 import { IUserDTO } from './user.model';
 import { createBody, createHeader } from '../../utils/common.utils';
 
@@ -25,6 +25,11 @@ export class UserService {
   async downloadTemplate(): Promise<void> {
     const url = `${this.config.getApiUrl()}/cms/users/download-template`;
     await this.commonService.downloadFile(url, 'thaca-users-template-{{date}}.xlsx');
+  }
+
+  async exportUsers(request: ISearchRequest<IUserDTO>): Promise<void> {
+    const url = `${this.config.getApiUrl()}/cms/users/export`;
+    return this.commonService.downloadFile(url, 'thaca-users-export-{{date}}.xlsx', request);
   }
 
   async importUsers(file: File): Promise<IApiPayload<IImportResult>> {

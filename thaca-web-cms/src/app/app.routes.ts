@@ -1,7 +1,4 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login.component';
-import { ForbiddenComponent } from './pages/403/403.component';
-import { NotFoundComponent } from './pages/404/404.component';
 import { I18nResolver } from './core/i18n/i18n.resolver';
 import { GuestGuard } from './core/guards/guest.guard';
 
@@ -21,19 +18,19 @@ export const routes: Routes = [
     resolve: { i18n: I18nResolver },
     data: { i18n: ['auth'] },
     canActivate: [GuestGuard],
-    component: LoginComponent,
+    loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: '403',
     resolve: { i18n: I18nResolver },
     data: { i18n: ['error'] },
-    component: ForbiddenComponent,
+    loadComponent: () => import('./pages/403/403.component').then((m) => m.ForbiddenComponent),
   },
   {
     path: '404',
     resolve: { i18n: I18nResolver },
     data: { i18n: ['error'] },
-    component: NotFoundComponent,
+    loadComponent: () => import('./pages/404/404.component').then((m) => m.NotFoundComponent),
   },
   {
     path: '**',

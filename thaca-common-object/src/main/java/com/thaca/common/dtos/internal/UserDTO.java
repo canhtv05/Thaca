@@ -28,6 +28,6 @@ public class UserDTO extends BaseAuditResponse {
     private String email;
     private Boolean isActivated;
     private Boolean isLocked;
-    private String tenantId;
+    private Long tenantId;
     private TenantInfoPrj tenant;
 }

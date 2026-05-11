@@ -24,7 +24,7 @@ public class SystemUser extends BaseTenantEntity {
     @Column(name = "fullname")
     private String fullname;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
     @Column(name = "avatar_url", columnDefinition = "text")
