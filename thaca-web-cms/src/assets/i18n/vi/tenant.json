@@ -1,9 +1,9 @@
 {
   "tenant": {
-    "title": "Quản lý Đối tác (Tenant)",
-    "detail_title": "Chi tiết Tenant {{code}}",
-    "code": "Mã Tenant",
-    "name": "Tên Tenant",
+    "title": "Quản lý Tổ chức",
+    "detail_title": "Chi tiết Tổ chức {{code}}",
+    "code": "Mã Tổ chức",
+    "name": "Tên Tổ chức",
     "domain": "Tên miền",
     "status": "Trạng thái",
     "plan": "Gói dịch vụ (Plan)",
@@ -11,8 +11,8 @@
     "contact_email": "Email liên hệ",
     "logo_url": "Logo URL",
     "version": "Phiên bản",
-    "code_placeholder": "Nhập mã Tenant",
-    "name_placeholder": "Nhập tên Tenant",
+    "code_placeholder": "Nhập mã Tổ chức",
+    "name_placeholder": "Nhập tên Tổ chức",
     "domain_placeholder": "Nhập tên miền",
     "status_placeholder": "Chọn trạng thái",
     "plan_placeholder": "Chọn gói dịch vụ",
@@ -20,57 +20,57 @@
     "contact_email_placeholder": "Nhập email liên hệ",
     "logo_url_placeholder": "Nhập URL logo",
     "actions": {
-      "create": "Thêm Tenant mới",
-      "edit": "Chỉnh sửa Tenant",
-      "delete": "Xóa Tenant"
+      "create": "Thêm Tổ chức mới",
+      "edit": "Chỉnh sửa Tổ chức",
+      "delete": "Xóa Tổ chức"
     },
     "validation": {
-      "codePattern": "Mã Tenant không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9, -, _"
+      "codePattern": "Mã Tổ chức không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9, -, _"
     },
     "popup": {
       "lock": {
-        "title": "Xác nhận khóa Tenant",
-        "message": "Bạn có chắc chắn muốn khóa Tenant này không?"
+        "title": "Xác nhận khóa Tổ chức",
+        "message": "Bạn có chắc chắn muốn khóa Tổ chức này không?"
       },
       "unlock": {
-        "title": "Xác nhận mở khóa Tenant",
-        "message": "Bạn có chắc chắn muốn mở khóa Tenant này không?"
+        "title": "Xác nhận mở khóa Tổ chức",
+        "message": "Bạn có chắc chắn muốn mở khóa Tổ chức này không?"
       },
       "update": {
-        "title": "Xác nhận cập nhật Tenant",
-        "message": "Bạn có chắc chắn muốn cập nhật Tenant này không?"
+        "title": "Xác nhận cập nhật Tổ chức",
+        "message": "Bạn có chắc chắn muốn cập nhật Tổ chức này không?"
       },
       "create": {
-        "title": "Xác nhận tạo Tenant",
-        "message": "Bạn có chắc chắn muốn tạo Tenant này không?"
+        "title": "Xác nhận tạo Tổ chức",
+        "message": "Bạn có chắc chắn muốn tạo Tổ chức này không?"
       }
     },
     "toast": {
-      "tenant_code_is_invalid": "Mã Tenant không hợp lệ",
+      "tenant_code_is_invalid": "Mã Tổ chức không hợp lệ",
       "error": "Đã xảy ra lỗi",
       "lock": {
-        "titleSuccess": "Tenant đã được khóa",
-        "messageSuccess": "Tenant đã được khóa thành công",
-        "titleError": "Tenant không được khóa",
-        "messageError": "Tenant không được khóa thành công"
+        "titleSuccess": "Tổ chức đã được khóa",
+        "messageSuccess": "Tổ chức đã được khóa thành công",
+        "titleError": "Tổ chức không được khóa",
+        "messageError": "Tổ chức không được khóa thành công"
       },
       "unlock": {
-        "titleSuccess": "Tenant đã được mở khóa",
-        "messageSuccess": "Tenant đã được mở khóa thành công",
-        "titleError": "Tenant không được mở khóa",
-        "messageError": "Tenant không được mở khóa thành công"
+        "titleSuccess": "Tổ chức đã được mở khóa",
+        "messageSuccess": "Tổ chức đã được mở khóa thành công",
+        "titleError": "Tổ chức không được mở khóa",
+        "messageError": "Tổ chức không được mở khóa thành công"
       },
       "update": {
-        "titleSuccess": "Tenant đã được cập nhật",
-        "messageSuccess": "Tenant đã được cập nhật thành công",
-        "titleError": "Tenant không được cập nhật",
-        "messageError": "Tenant không được cập nhật thành công"
+        "titleSuccess": "Tổ chức đã được cập nhật",
+        "messageSuccess": "Tổ chức đã được cập nhật thành công",
+        "titleError": "Tổ chức không được cập nhật",
+        "messageError": "Tổ chức không được cập nhật thành công"
       },
       "create": {
-        "titleSuccess": "Tenant đã được tạo",
-        "messageSuccess": "Tenant đã được tạo thành công",
-        "titleError": "Tenant không được tạo",
-        "messageError": "Tenant không được tạo thành công"
+        "titleSuccess": "Tổ chức đã được tạo",
+        "messageSuccess": "Tổ chức đã được tạo thành công",
+        "titleError": "Tổ chức không được tạo",
+        "messageError": "Tổ chức không được tạo thành công"
       }
     }
   }

@@ -45,6 +45,12 @@ public class UserController {
         CommonUtils.writeExcelResponse(response, process.process(null), "thaca-users-template-{{date}}.xlsx");
     }
 
+    @PostMapping("/users/export")
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_USERS, type = RequestType.PROTECTED)
+    public void exportUsers(SearchRequest<UserDTO> request, HttpServletResponse response) throws IOException {
+        CommonUtils.writeExcelResponse(response, process.process(request), "thaca-users-{{date}}.xlsx");
+    }
+
     @PostMapping(value = "/users/import", consumes = "multipart/form-data")
     @FwRequest(name = ServiceMethod.CMS_IMPORT_USERS, type = RequestType.PROTECTED)
     public ResponseEntity<ImportResponseDTO> importUsers(@RequestParam("file") MultipartFile file) {

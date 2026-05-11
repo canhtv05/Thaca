@@ -47,8 +47,11 @@
     "yes": "Yes",
     "no": "No",
     "status": {
+      "normal": "Normal",
       "active": "Active",
       "inactive": "Inactive",
+      "activated": "Activated",
+      "un_activated": "Un activated",
       "all": "All",
       "suspended": "Suspended",
       "lock": "Lock",

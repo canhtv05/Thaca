@@ -11,6 +11,7 @@ public class InternalMethod {
     public static final String INTERNAL_CMS_GET_PROFILE = "internal.cmsGetProfile";
 
     public static final String INTERNAL_CMS_SEARCH_USERS = "internal.cmsSearchUsers";
+    public static final String INTERNAL_CMS_EXPORT_USERS = "internal.cmsExportUsers";
     public static final String INTERNAL_CMS_DETAIL_USER = "internal.cmsDetailUser";
     public static final String INTERNAL_CMS_DOWNLOAD_USER_TEMPLATE = "internal.cmsDownloadUserTemplate";
     public static final String INTERNAL_CMS_LOCK_UNLOCK_USER = "internal.cmsLockUnlockUser";

@@ -226,15 +226,15 @@ public class TenantService {
 
     private ExcelSchema buildSchema(boolean isVietnamese) {
         return ExcelSchema.builder()
-            .sheetName(ObjectUtils.notEqual(isVietnamese, false) ? "Danh sách tổ chức" : "Tenants")
+            .sheetName(ObjectUtils.notEqual(isVietnamese, false) ? "Danh sách Tổ chức" : "Tenants")
             .addColumn(
-                ExcelColumn.builder("code", ObjectUtils.notEqual(isVietnamese, false) ? "Mã Tenant" : "Tenant code")
+                ExcelColumn.builder("code", ObjectUtils.notEqual(isVietnamese, false) ? "Mã Tổ chức" : "Tenant code")
                     .required()
                     .dataType(ExcelDataType.STRING)
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("name", ObjectUtils.notEqual(isVietnamese, false) ? "Tên Tenant" : "Tenant name")
+                ExcelColumn.builder("name", ObjectUtils.notEqual(isVietnamese, false) ? "Tên Tổ chức" : "Tenant name")
                     .required()
                     .dataType(ExcelDataType.STRING)
                     .build()

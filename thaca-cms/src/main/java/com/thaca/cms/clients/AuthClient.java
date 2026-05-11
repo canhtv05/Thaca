@@ -37,6 +37,9 @@ public interface AuthClient {
     @FwInternalApi(path = "/cms/users/download-template", name = ServiceMethod.CMS_DOWNLOAD_USER_TEMPLATE)
     byte[] downloadUserTemplate();
 
+    @FwInternalApi(path = "/cms/users/export", name = ServiceMethod.CMS_EXPORT_USERS)
+    byte[] exportUsers(SearchRequest<UserDTO> request);
+
     @FwInternalApi(path = "/cms/users/file-error", name = ServiceMethod.CMS_EXPORT_USER_FILE_ERROR)
     byte[] exportUserFileError(ImportResponseDTO importResult);
 

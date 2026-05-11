@@ -26,6 +26,7 @@ import { Router } from '@angular/router';
 import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { Popup } from '../../../core/global/popup-notify';
+import { CheckPermissionDirective } from '../../../shared/directives/check-permission.directive';
 
 @Component({
   selector: 'app-user-list',
@@ -43,6 +44,7 @@ import { Popup } from '../../../core/global/popup-notify';
     ThacaModalComponent,
     ThacaTextareaComponent,
     ValidationMessageComponent,
+    CheckPermissionDirective,
   ],
   templateUrl: './user-list.component.html',
 })
@@ -134,7 +136,7 @@ export class UserListComponent implements OnInit {
         header: 'user.activated',
         render: (row: IUserDTO) => {
           const label = this.translate.instant(
-            row.isActivated ? 'common.status.active' : 'common.status.inactive',
+            row.isActivated ? 'common.status.activated' : 'common.status.un_activated',
           );
           const variant = row.isActivated ? 'success' : 'danger';
           return `<span class="thaca-badge thaca-badge-${variant}">
@@ -147,7 +149,7 @@ export class UserListComponent implements OnInit {
         header: 'user.locked',
         render: (row: IUserDTO) => {
           const label = this.translate.instant(
-            row.isLocked ? 'common.status.lock' : 'common.status.unlock',
+            row.isLocked ? 'common.status.lock' : 'common.status.normal',
           );
           const variant = row.isLocked ? 'danger' : 'info';
           return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
@@ -321,5 +323,9 @@ export class UserListComponent implements OnInit {
   closeImportResult() {
     this.importResult.set(null);
     this.importResultModal?.hide();
+  }
+
+  async onExportClick() {
+    await this.userService.exportUsers(this.table.getSearchRequest());
   }
 }

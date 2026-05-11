@@ -55,10 +55,18 @@
     </ng-template>
     <ng-template #headerActions>
       <div class="flex justify-end items-center flex-wrap gap-4">
-        <thaca-button variant="outline">
+        <thaca-button
+          variant="outline"
+          (click)="onExportClick()"
+          *checkPermission="['USER_MAKER', 'USER_VIEWER']"
+        >
           <span class="text-primary"> {{ 'common.button.export' | translate }} </span>
         </thaca-button>
-        <thaca-button variant="outline" (click)="downloadTemplate()">
+        <thaca-button
+          variant="outline"
+          (click)="downloadTemplate()"
+          *checkPermission="['USER_MAKER']"
+        >
           <span class="text-primary"> {{ 'common.button.download_template' | translate }} </span>
         </thaca-button>
         <input
@@ -68,10 +76,14 @@
           class="hidden"
           (change)="onFileSelected($event)"
         />
-        <thaca-button variant="outline" (click)="onImportClick(fileInput)">
+        <thaca-button
+          variant="outline"
+          (click)="onImportClick(fileInput)"
+          *checkPermission="['USER_MAKER']"
+        >
           <span class="text-primary"> {{ 'common.button.import' | translate }} </span>
         </thaca-button>
-        <thaca-button variant="primary" (click)="onCreate()">
+        <thaca-button variant="primary" (click)="onCreate()" *checkPermission="['USER_MAKER']">
           <span class="text-white"> {{ 'common.button.create' | translate }} </span>
         </thaca-button>
       </div>

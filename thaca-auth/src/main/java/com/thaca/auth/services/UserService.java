@@ -103,6 +103,62 @@ public class UserService {
         return new SearchResponse<>(response, PaginationResponse.of(users));
     }
 
+    @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
+    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_USERS, type = ModeType.HANDLE)
+    public byte[] exportUsers(SearchRequest<UserDTO> request) throws IOException {
+        Specification<User> spec = createUserSpecification(request);
+        Map<Long, TenantInfoProjection> tenantMap = tenantRepository
+            .findAllTenants()
+            .stream()
+            .collect(Collectors.toMap(TenantInfoProjection::getId, (t -> t)));
+        List<UserDTO> users = userRepository
+            .findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"))
+            .stream()
+            .map(u -> {
+                var res = UserMapper.fromEntityWithCms(u, true);
+                res.setTenant(TenantMapper.fromInfoProj(tenantMap.getOrDefault(u.getTenantId(), null)));
+                res.setTenantId(u.getTenantId());
+                return res;
+            })
+            .toList();
+        List<Map<String, Object>> rows = new ArrayList<>();
+        ApiHeader header = FwContextHeader.get();
+        boolean isVietnamese = "vi".equals(header.getLanguage());
+        for (UserDTO user : users) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("username", user.getUsername());
+            row.put("email", user.getEmail());
+            if (user.getTenantId() != null) {
+                row.put(
+                    "tenant",
+                    tenantMap.getOrDefault(user.getTenantId(), null).getCode() +
+                        " - " +
+                        tenantMap.getOrDefault(user.getTenantId(), null).getName()
+                );
+            } else {
+                row.put("tenant", "");
+            }
+            row.put(
+                "isActivated",
+                isVietnamese
+                    ? (user.getIsActivated() ? "Đã kích hoạt" : "Chưa kích hoạt")
+                    : (user.getIsActivated() ? "Activated" : "Un activated")
+            );
+            row.put(
+                "isLocked",
+                isVietnamese
+                    ? (user.getIsLocked() ? "Đã khóa" : "Bình thường")
+                    : (user.getIsLocked() ? "Locked" : "Normal")
+            );
+            row.put("createdAt", user.getCreatedAt());
+            row.put("createdBy", user.getCreatedBy());
+            row.put("updatedAt", user.getUpdatedAt());
+            row.put("updatedBy", user.getUpdatedBy());
+            rows.add(row);
+        }
+        return ExcelEngine.exportData(buildExportSchema(isVietnamese), rows);
+    }
+
     @FwMode(name = InternalMethod.INTERNAL_CMS_DETAIL_USER, type = ModeType.VALIDATE)
     public void validateDetailUser(UserDTO request) {
         if (StringUtils.isBlank(request.getUsername())) {
@@ -617,7 +673,7 @@ public class UserService {
                 if (filter.getIsLocked() != null) {
                     predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
                 }
-                if (StringUtils.isNotBlank(filter.getTenantId()) && isSuperAdmin) {
+                if (filter.getTenantId() != null && isSuperAdmin) {
                     predicates.add(cb.equal(root.get("tenantId"), filter.getTenantId()));
                 } else if (!isSuperAdmin) {
                     predicates.add(cb.equal(root.get("tenantId"), currentTenantId));
@@ -721,6 +777,69 @@ public class UserService {
             )
             .build();
         return schema;
+    }
+
+    private ExcelSchema buildExportSchema(boolean isVietnamese) {
+        return ExcelSchema.builder()
+            .sheetName(isVietnamese ? "Danh sách người dùng" : "User List")
+            .headerRowIndex(0)
+            .dataStartRowIndex(1)
+            .strictHeader(true)
+            .failFast(false)
+            .addColumn(
+                ExcelColumn.builder("username", isVietnamese ? "Tên người dùng" : "Username")
+                    .maxLength(50)
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Tên người dùng" : "Username")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("email", isVietnamese ? "Email" : "Email")
+                    .maxLength(100)
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Email" : "Email")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("tenant", isVietnamese ? "Tenant" : "Tenant")
+                    .comment(isVietnamese ? "Tenant" : "Tenant")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("isActivated", isVietnamese ? "Kích hoạt" : "Activated")
+                    .comment(isVietnamese ? "Kích hoạt" : "Activated")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("isLocked", isVietnamese ? "Khóa" : "Locked")
+                    .comment(isVietnamese ? "Bị khóa" : "Locked")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("createdAt", isVietnamese ? "Ngày tạo" : "Created At")
+                    .dataType(ExcelDataType.DATE)
+                    .comment(isVietnamese ? "Ngày tạo" : "Created At")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("createdBy", isVietnamese ? "Người tạo" : "Created By")
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Người tạo" : "Created By")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("updatedAt", isVietnamese ? "Ngày cập nhật" : "Updated At")
+                    .dataType(ExcelDataType.DATE)
+                    .comment(isVietnamese ? "Ngày cập nhật" : "Updated At")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("updatedBy", isVietnamese ? "Người cập nhật" : "Updated By")
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Người cập nhật" : "Updated By")
+                    .build()
+            )
+            .build();
     }
 
     private ImportResponseDTO getImportResponseDTO(
