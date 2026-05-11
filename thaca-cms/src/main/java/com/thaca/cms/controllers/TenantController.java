@@ -38,7 +38,7 @@ public class TenantController {
     }
 
     @PostMapping("/all")
-    @FwRequest(name = ServiceMethod.CMS_GET_ALL_TENANTS, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.CMS_GET_ALL_TENANTS, type = RequestType.PUBLIC)
     public ResponseEntity<List<TenantInfoPrj>> getAll() {
         return ResponseEntity.ok(process.process(null));
     }

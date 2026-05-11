@@ -169,9 +169,15 @@ public class AuthService {
             (ServletRequestAttributes) RequestContextHolder.getRequestAttributes()
         ).getResponse();
         try {
-            SystemCredential sc = systemCredentialRepository
-                .findByUsername(loginReq.getUsername())
-                .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+            Optional<SystemCredential> scOpt =
+                loginReq.getTenantId() != null
+                    ? systemCredentialRepository.findByUsernameAndTenantId(
+                          loginReq.getUsername(),
+                          loginReq.getTenantId()
+                      )
+                    : systemCredentialRepository.findByUsername(loginReq.getUsername());
+
+            SystemCredential sc = scOpt.orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
             SystemUser su = sc.getSystemUser();
             if (su.getLockedUntil() != null && su.getLockedUntil().isAfter(Instant.now())) {
                 throw new FwException(ErrorMessage.USER_TEMPORARILY_LOCKED);

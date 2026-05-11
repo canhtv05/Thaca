@@ -16,4 +16,5 @@ public class TenantInfoPrj {
     private Long id;
     private String name;
     private String code;
+    private String logoUrl;
 }

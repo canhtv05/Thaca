@@ -15,4 +15,5 @@ public class LoginReq {
     private String password;
     private String captcha;
     private String captchaId;
+    private Long tenantId;
 }

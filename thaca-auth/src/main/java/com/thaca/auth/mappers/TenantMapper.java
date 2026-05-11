@@ -40,6 +40,7 @@ public class TenantMapper {
             .id(projection.getId())
             .code(projection.getCode())
             .name(projection.getName())
+            .logoUrl(projection.getLogoUrl())
             .build();
     }
 }
