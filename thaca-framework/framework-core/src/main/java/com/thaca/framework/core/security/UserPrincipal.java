@@ -14,4 +14,6 @@ public interface UserPrincipal {
     boolean isCmsUser();
 
     List<Long> getTenantIds();
+
+    Long getTenantId();
 }

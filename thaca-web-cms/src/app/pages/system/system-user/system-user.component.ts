@@ -104,7 +104,7 @@ export class SystemUserComponent implements OnInit {
     email: ['', [Validators.required, Validators.email]],
     fullname: ['', [Validators.required]],
     password: [''],
-    tenantId: [null, [Validators.required]],
+    tenantIds: [[], [Validators.required]],
     isActivated: [true],
     isLocked: [false],
     isSuperAdmin: [false],
@@ -323,7 +323,7 @@ export class SystemUserComponent implements OnInit {
       username: 'test',
       email: 'test@gmail.com',
       fullname: 'test',
-      tenantId: 1 as any,
+      tenantIds: [1] as any,
       password: 'Thaca@2026',
     });
     this.userModal.show();

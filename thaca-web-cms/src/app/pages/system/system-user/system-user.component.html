@@ -5,9 +5,7 @@
   ></app-breadcrumb>
   <app-data-table [config]="tableConfig" (onAction)="handleAction($event)">
     <ng-template #searchTemplate>
-      <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 place-content-end place-items-end"
-      >
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 place-content-end place-items-end">
         <thaca-input
           class="w-full"
           [label]="'system_user.username' | translate"
@@ -131,14 +129,15 @@
     </div>
     <div class="form-control">
       <thaca-dropdown
-        formControlName="tenantId"
+        formControlName="tenantIds"
         [label]="'system_user.tenant' | translate"
         [placeholder]="'system_user.tenant_placeholder'"
         [options]="tenantOptions()"
         [appendTo]="'body'"
         [required]="true"
+        [multiple]="true"
       ></thaca-dropdown>
-      <validation-message [control]="userForm.get('tenantId')"></validation-message>
+      <validation-message [control]="userForm.get('tenantIds')"></validation-message>
     </div>
 
     <div class="form-control">

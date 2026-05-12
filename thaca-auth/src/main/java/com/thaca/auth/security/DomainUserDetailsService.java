@@ -131,7 +131,8 @@ public class DomainUserDetailsService implements UserDetailsService {
             StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
             isSuperAdmin,
             cmsUser,
-            tenantIds
+            tenantIds,
+            (tenantIds != null && !tenantIds.isEmpty()) ? tenantIds.getFirst() : null
         );
     }
 }

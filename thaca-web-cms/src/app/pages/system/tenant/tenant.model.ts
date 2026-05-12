@@ -26,4 +26,10 @@ export interface ITenantInfoPrj {
   code: string;
   name: string;
   logoUrl?: string;
+  domain?: string;
+  status?: string;
+  planId?: number;
+  expiresAt?: string;
+  contactEmail?: string;
+  version?: number;
 }

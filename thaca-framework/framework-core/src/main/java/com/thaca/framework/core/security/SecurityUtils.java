@@ -60,6 +60,18 @@ public class SecurityUtils {
         return Collections.emptyList();
     }
 
+    public static Long getCurrentTenantId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal) {
+            if (userPrincipal.getTenantId() == null && !userPrincipal.getTenantIds().isEmpty()) {
+                return userPrincipal.getTenantIds().getFirst();
+            } else {
+                return userPrincipal.getTenantId();
+            }
+        }
+        return null;
+    }
+
     public static void clear() {
         SecurityContextHolder.clearContext();
     }

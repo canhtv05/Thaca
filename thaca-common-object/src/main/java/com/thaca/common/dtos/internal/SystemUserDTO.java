@@ -2,6 +2,7 @@ package com.thaca.common.dtos.internal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thaca.common.dtos.BaseAuditResponse;
+import com.thaca.common.dtos.internal.contracts.TenantAwareDTO;
 import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.enums.PermissionEffect;
 import java.util.List;
@@ -18,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SystemUserDTO extends BaseAuditResponse {
+public class SystemUserDTO extends BaseAuditResponse implements TenantAwareDTO {
 
     private Long id;
     private Long tenantId;

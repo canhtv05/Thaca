@@ -40,7 +40,13 @@ public class TenantMapper {
             .id(tenant.getId())
             .code(tenant.getCode())
             .name(tenant.getName())
+            .domain(tenant.getDomain())
+            .status(tenant.getStatus())
+            .planId(tenant.getPlanId())
+            .expiresAt(DateUtils.localDateToString(tenant.getExpiresAt()))
+            .contactEmail(tenant.getContactEmail())
             .logoUrl(tenant.getLogoUrl())
+            .version(tenant.getVersion())
             .build();
     }
 }

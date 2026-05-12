@@ -27,14 +27,10 @@
         [ngModel]="user()?.email"
         [disabled]="true"
       ></thaca-input>
+    </div>
+    <div class="grid grid-cols-12 gap-4 my-4">
       <thaca-input
-        [label]="'system_user.tenant' | translate"
-        [ngModel]="
-          user()?.tenantInfo ? user()?.tenantInfo?.code + ' - ' + user()?.tenantInfo?.name : ''
-        "
-        [disabled]="true"
-      ></thaca-input>
-      <thaca-input
+        class="col-span-6"
         [label]="'system_user.is_activated' | translate"
         [ngModel]="
           user()?.isActivated
@@ -44,6 +40,7 @@
         [disabled]="true"
       ></thaca-input>
       <thaca-input
+        class="col-span-6"
         [label]="'system_user.is_locked' | translate"
         [ngModel]="
           user()?.isLocked
@@ -52,6 +49,96 @@
         "
         [disabled]="true"
       ></thaca-input>
+    </div>
+    <div class="card">
+      <div class="mb-3 thaca-label font-bold flex items-center gap-2">
+        <i class="ki-duotone ki-category text-primary text-xl"
+          ><span class="path1"></span><span class="path2"></span><span class="path3"></span
+          ><span class="path4"></span
+        ></i>
+        {{ 'system_user.tenant' | translate }}
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        @for (tenant of user()?.tenants; track $index) {
+          <div
+            class="flex flex-col gap-3 p-4 rounded-2xl bg-primary text-white shadow-sm border border-primary/20 transition-all hover:shadow-md relative overflow-hidden group"
+          >
+            <div
+              class="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all"
+            ></div>
+
+            <div class="flex items-center gap-4">
+              <div
+                class="shrink-0 w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center overflow-hidden border border-white/20 shadow-inner"
+              >
+                @if (tenant?.logoUrl) {
+                  <img
+                    [src]="tenant?.logoUrl"
+                    class="w-full h-full object-cover"
+                    [alt]="tenant?.name"
+                  />
+                } @else {
+                  <span class="text-2xl font-bold uppercase text-white/90">{{
+                    tenant?.name?.charAt(0)
+                  }}</span>
+                }
+              </div>
+              <div class="flex flex-col min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span
+                    class="text-[10px] font-bold uppercase tracking-widest text-white/60 leading-none"
+                    >{{ tenant?.code }}</span
+                  >
+                  <span
+                    class="px-2 py-1 rounded-md text-[10px] font-bold uppercase border border-white/5"
+                    [class]="
+                      tenant?.status === 'ACTIVE'
+                        ? 'bg-emerald-500 text-white'
+                        : tenant?.status === 'INACTIVE'
+                          ? 'bg-rose-500 text-white'
+                          : 'bg-yellow-500 text-white'
+                    "
+                  >
+                    {{ 'common.status.' + tenant?.status | lowercase | translate }}
+                  </span>
+                </div>
+                <span class="text-base font-bold truncate mt-1">{{ tenant?.name }}</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2 mt-2 pt-3 border-t border-white/10">
+              @if (tenant?.domain) {
+                <div class="flex items-center gap-2 text-xs text-white/80">
+                  <i class="ki-duotone ki-geolocation text-sm text-white/60"
+                    ><span class="path1"></span><span class="path2"></span
+                  ></i>
+                  <span class="font-bold opacity-60">{{ 'tenant.domain' | translate }}:</span>
+                  <span class="truncate">{{ tenant?.domain }}</span>
+                </div>
+              }
+              @if (tenant?.contactEmail) {
+                <div class="flex items-center gap-2 text-xs text-white/80">
+                  <i class="ki-duotone ki-sms text-sm text-white/60"
+                    ><span class="path1"></span><span class="path2"></span
+                  ></i>
+                  <span class="font-bold opacity-60">{{ 'tenant.contact_email' | translate }}:</span>
+                  <span class="truncate">{{ tenant?.contactEmail }}</span>
+                </div>
+              }
+              <div
+                class="flex items-center gap-2 text-xs font-medium bg-white/10 self-start px-3 py-1.5 rounded-lg mt-1"
+              >
+                <i class="ki-duotone ki-calendar-8 text-sm text-white/60"
+                  ><span class="path1"></span><span class="path2"></span><span class="path3"></span
+                  ><span class="path4"></span><span class="path5"></span><span class="path6"></span
+                ></i>
+                <span class="font-bold opacity-60">{{ 'tenant.expires_at' | translate }}:</span>
+                <span>{{ (tenant?.expiresAt || 'system_user.permanent') | translate }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     </div>
     @if (user()?.isSuperAdmin) {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -63,12 +150,20 @@
       </div>
     }
     @if (user()?.avatarUrl) {
-      <thaca-textarea
-        class="mt-4"
-        [label]="'system_user.avatar_url' | translate"
-        [ngModel]="user()?.avatarUrl"
-        [disabled]="true"
-      ></thaca-textarea>
+      <div class="flex flex-col gap-4">
+        <thaca-textarea
+          class="mt-4"
+          [label]="'system_user.avatar_url' | translate"
+          [ngModel]="user()?.avatarUrl"
+          [disabled]="true"
+        ></thaca-textarea>
+        <img
+          class="w-16 h-16 object-cover rounded-lg"
+          onerror="this.style.display = 'none'"
+          [src]="user()?.avatarUrl"
+          alt=""
+        />
+      </div>
     }
     @if (user()?.isLocked && user()?.lockReason) {
       <thaca-textarea

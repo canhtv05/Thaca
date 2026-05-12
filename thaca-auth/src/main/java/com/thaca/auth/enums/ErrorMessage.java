@@ -72,17 +72,17 @@ public enum ErrorMessage implements ErrorMessageRule {
     USERNAME_ALREADY_EXISTS(
         "USERNAME.ALREADY.EXISTS",
         "Tài khoản đã tồn tại",
-        "Tài khoản đã tồn tại",
+        "Tài khoản đã tồn tại trong tổ chức: {{conflictingTenants}}",
         "Account already exists",
-        "Account already exists"
+        "Account already exists in tenant: {{conflictingTenants}}"
     ),
     EMAIL_INVALID("EMAIL.INVALID", "Email không hợp lệ", "Email không hợp lệ", "Email invalid", "Email invalid"),
     EMAIL_ALREADY_EXITS(
         "EMAIL.ALREADY.EXITS",
         "Email đã tồn tại",
-        "Email đã tồn tại",
+        "Email đã được sử dụng trong tổ chức: {{conflictingTenants}}",
         "Email already exists",
-        "Email already exists"
+        "Email already in use in tenant: {{conflictingTenants}}"
     ),
     FORGET_PASSWORD_OTP_INVALID(
         "FORGET.PASSWORD.OTP.INVALID",

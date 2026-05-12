@@ -213,6 +213,7 @@ public class TokenProvider {
             .claim(CommonConstants.CHANNEL_KEY, channel)
             .claim("c", userDetails.isCmsUser() ? 1 : 0)
             .claim("tenantIds", userDetails.getTenantIds())
+            .claim("tid", userDetails.getTenantId())
             .issuedAt(new Date(now))
             .expiration(validity)
             .signWith(key, Jwts.SIG.HS512)
@@ -298,18 +299,25 @@ public class TokenProvider {
         String rolesString = AuthoritiesConstants.USER;
         boolean isSuperAdmin = false;
         List<GrantedAuthority> authorities = new ArrayList<>();
-
         List<Long> tenantIds = null;
+        Long tenantId = null;
+
         if (userObj instanceof User u) {
             username = u.getUsername();
             password = u.getPassword();
-            tenantIds = new ArrayList<>(u.getTenantIds());
+            if (u.getTenantIds() != null && !u.getTenantIds().isEmpty()) {
+                tenantIds = new ArrayList<>(u.getTenantIds());
+                tenantId = tenantIds.get(0);
+            }
             authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
         } else if (userObj instanceof SystemCredential sc) {
             username = sc.getUsername();
             password = sc.getPassword();
             isSuperAdmin = sc.getSystemUser().getIsSuperAdmin();
-            tenantIds = new ArrayList<>(sc.getSystemUser().getTenantIds());
+            if (sc.getSystemUser().getTenantIds() != null && !sc.getSystemUser().getTenantIds().isEmpty()) {
+                tenantIds = new ArrayList<>(sc.getSystemUser().getTenantIds());
+                tenantId = tenantIds.get(0);
+            }
             if (isSuperAdmin) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
@@ -335,7 +343,8 @@ public class TokenProvider {
             channel.name(),
             isSuperAdmin,
             cmsUser,
-            tenantIds
+            tenantIds,
+            tenantId
         );
         return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }

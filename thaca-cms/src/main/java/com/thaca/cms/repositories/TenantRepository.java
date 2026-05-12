@@ -22,7 +22,7 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     @Query(
         nativeQuery = true,
         value = """
-        SELECT t.id, t.name, t.code, t.logo_url FROM cms.tenants t
+        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version FROM cms.tenants t
         WHERE t.status = 'ACTIVE' AND t.deleted_at IS NULL
         ORDER BY t.updated_at DESC
         """
@@ -32,7 +32,7 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     @Query(
         nativeQuery = true,
         value = """
-        SELECT t.id, t.name, t.code, t.logo_url FROM cms.tenants t
+        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version FROM cms.tenants t
         WHERE t.deleted_at IS NULL
         ORDER BY t.updated_at DESC
         """
@@ -48,7 +48,7 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     @Query(
         nativeQuery = true,
         value = """
-        SELECT t.id, t.name, t.code, t.logo_url FROM cms.tenants t
+        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version FROM cms.tenants t
         WHERE t.id IN :ids AND t.deleted_at IS NULL
         """
     )

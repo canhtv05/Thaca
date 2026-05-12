@@ -6,7 +6,7 @@ export const systemUserRoutes: Routes = [
     path: 'system-users',
     loadComponent: () => import('./system-user.component').then((m) => m.SystemUserComponent),
     resolve: { i18n: I18nResolver },
-    data: { i18n: ['system_user'] },
+    data: { i18n: ['system_user', 'tenant'] },
   },
   {
     path: 'system-users/:targetUserId/lock-history',
@@ -15,7 +15,7 @@ export const systemUserRoutes: Routes = [
         (m) => m.LockHistoryComponent,
       ),
     resolve: { i18n: I18nResolver },
-    data: { i18n: ['system_user'] },
+    data: { i18n: ['system_user', 'tenant'] },
   },
   {
     path: 'system-users/:targetUserId/login-history',
@@ -25,7 +25,7 @@ export const systemUserRoutes: Routes = [
       ),
     resolve: { i18n: I18nResolver },
     data: {
-      i18n: ['user', 'auth'],
+      i18n: ['user', 'auth', 'tenant'],
       viewMode: 'system-user',
     },
   },
@@ -36,6 +36,6 @@ export const systemUserRoutes: Routes = [
         (m) => m.SystemUserDetailComponent,
       ),
     resolve: { i18n: I18nResolver },
-    data: { i18n: ['system_user'] },
+    data: { i18n: ['system_user', 'tenant'] },
   },
 ];

@@ -17,6 +17,7 @@ export interface ISystemUserDTO {
   updatedAt?: string;
   createdBy?: string;
   updatedBy?: string;
+  tenants?: ITenantInfoPrj[];
   tenantInfos?: ITenantInfoPrj[];
   roles?: { [roleCode: string]: { [permCode: string]: 'GRANT' | 'DENY' } };
 }

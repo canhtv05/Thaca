@@ -78,6 +78,7 @@ public class UserService {
     private final SessionStore sessionStore;
     private final UserLockHistoryRepository userLockHistoryRepository;
     private final CmsClient cmsClient;
+    private final TenantEnrichmentHelper tenantHelper;
 
     @Transactional(readOnly = true)
     @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
@@ -85,34 +86,14 @@ public class UserService {
     public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> request) {
         Specification<User> spec = createUserSpecification(request);
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
-        Set<Long> tenantIds = users
-            .getContent()
-            .stream()
-            .flatMap(u -> u.getTenantIds().stream())
-            .collect(Collectors.toSet());
-        if (!tenantIds.isEmpty()) {
-            if (!SecurityUtils.isSuperAdmin()) {
-                List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
-                tenantIds = tenantIds.stream().filter(currentTenantIds::contains).collect(Collectors.toSet());
-            }
-        }
-        Map<Long, TenantInfoPrj> tenantMap = getLongTenantInfoPrjMap(tenantIds);
-        var response = users
-            .getContent()
-            .stream()
-            .map(u -> {
-                UserDTO dto = UserMapper.fromEntity(u);
-                if (dto.getTenantIds() != null) {
-                    dto.setTenantInfos(
-                        dto.getTenantIds().stream().map(tenantMap::get).filter(Objects::nonNull).toList()
-                    );
-                    dto.setTenants(null);
-                }
-                return dto;
-            })
-            .toList();
+        List<UserDTO> data = users.getContent().stream().map(UserMapper::fromEntity).toList();
 
-        return new SearchResponse<>(response, PaginationResponse.of(users));
+        Map<Long, TenantInfoPrj> tenantMap = tenantHelper.fetchTenantMap(tenantHelper.collectTenantIds(data));
+        if (!tenantMap.isEmpty()) {
+            data.forEach(d -> tenantHelper.enrichTenantInfo(d, tenantMap));
+        }
+
+        return new SearchResponse<>(data, PaginationResponse.of(users));
     }
 
     @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
@@ -120,54 +101,40 @@ public class UserService {
     public byte[] exportUsers(SearchRequest<UserDTO> request) throws IOException {
         Specification<User> spec = createUserSpecification(request);
         List<User> userPage = userRepository.findAll(spec);
-        Set<Long> tenantIds = userPage
-            .stream()
-            .flatMap(u -> u.getTenantIds().stream())
-            .collect(Collectors.toSet());
-        if (!tenantIds.isEmpty()) {
-            if (!SecurityUtils.isSuperAdmin()) {
-                List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
-                tenantIds = tenantIds.stream().filter(currentTenantIds::contains).collect(Collectors.toSet());
-            }
+        List<UserDTO> data = userPage.stream().map(UserMapper::fromEntity).toList();
+
+        Map<Long, TenantInfoPrj> tenantMap = tenantHelper.fetchTenantMap(tenantHelper.collectTenantIds(data));
+        if (!tenantMap.isEmpty()) {
+            data.forEach(d -> tenantHelper.enrichTenantInfo(d, tenantMap));
         }
-        Map<Long, TenantInfoPrj> tenantMap = getLongTenantInfoPrjMap(tenantIds);
-        List<UserDTO> users = userPage
-            .stream()
-            .map(u -> {
-                UserDTO dto = UserMapper.fromEntity(u);
-                if (dto.getTenantIds() != null) {
-                    dto.setTenantInfos(
-                        dto.getTenantIds().stream().map(tenantMap::get).filter(Objects::nonNull).toList()
-                    );
-                    dto.setTenants(null);
-                }
-                return dto;
-            })
-            .toList();
+
         List<Map<String, Object>> rows = new ArrayList<>();
         ApiHeader header = FwContextHeader.get();
         boolean isVietnamese = "vi".equals(header.getLanguage());
-        for (UserDTO user : users) {
+        for (UserDTO user : data) {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("username", user.getUsername());
             row.put("email", user.getEmail());
-            if (user.getTenantIds() != null && !user.getTenantIds().isEmpty()) {
-                String tenantStr = user.getTenantIds().stream().map(String::valueOf).collect(Collectors.joining(", "));
-                row.put("tenant", tenantStr);
-            } else {
-                row.put("tenant", "");
+            String tenantNames = "";
+            if (user.getTenantInfos() != null) {
+                tenantNames = user
+                    .getTenantInfos()
+                    .stream()
+                    .map(TenantInfoPrj::getName)
+                    .collect(Collectors.joining(", "));
             }
+            row.put("tenantName", tenantNames);
             row.put(
                 "isActivated",
-                isVietnamese
-                    ? (user.getIsActivated() ? "Đã kích hoạt" : "Chưa kích hoạt")
-                    : (user.getIsActivated() ? "Activated" : "Un activated")
+                Boolean.TRUE.equals(user.getIsActivated())
+                    ? (isVietnamese ? "Đã kích hoạt" : "Activated")
+                    : (isVietnamese ? "Chưa kích hoạt" : "Inactive")
             );
             row.put(
                 "isLocked",
-                isVietnamese
-                    ? (user.getIsLocked() ? "Đã khóa" : "Bình thường")
-                    : (user.getIsLocked() ? "Locked" : "Normal")
+                Boolean.TRUE.equals(user.getIsLocked())
+                    ? (isVietnamese ? "Bị khóa" : "Locked")
+                    : (isVietnamese ? "Bình thường" : "Normal")
             );
             row.put("createdAt", user.getCreatedAt());
             row.put("createdBy", user.getCreatedBy());
@@ -194,7 +161,7 @@ public class UserService {
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
 
         UserDTO dto = UserMapper.fromEntity(user);
-        return getUserDTO(dto);
+        return tenantHelper.enrichTenantFull(dto);
     }
 
     @Transactional(readOnly = true)
@@ -501,7 +468,7 @@ public class UserService {
     public UserDTO findById(Long id) {
         return userRepository
             .findById(id)
-            .map(u -> getUserDTO(UserMapper.fromEntityWithCms(u, true)))
+            .map(u -> tenantHelper.enrichTenantFull(UserMapper.fromEntityWithCms(u, true)))
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
@@ -880,7 +847,7 @@ public class UserService {
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("tenant", isVietnamese ? "Tổ chức" : "Tenant")
+                ExcelColumn.builder("tenantName", isVietnamese ? "Tổ chức" : "Tenant")
                     .comment(isVietnamese ? "Tổ chức" : "Tenant")
                     .build()
             )
@@ -933,13 +900,6 @@ public class UserService {
         return toImportResponse(errorResult);
     }
 
-    private Map<Long, TenantInfoPrj> getLongTenantInfoPrjMap(Set<Long> tenantIds) {
-        List<TenantInfoPrj> tenants = tenantIds.isEmpty()
-            ? List.of()
-            : cmsClient.getTenantsByIds(TenantDTO.builder().tenantIds(new ArrayList<>(tenantIds)).build());
-        return tenants.stream().collect(Collectors.toMap(TenantInfoPrj::getId, t -> t));
-    }
-
     // private void publishUserEvent(UserDTO request, User user, boolean isAdmin) {
     // String topic;
     // Object payload;
@@ -951,34 +911,4 @@ public class UserService {
     // topic = EventConstants.USER_CREATED_TOPIC;
     // payload = new UserCreationEvent(user.getUsername(), request.getFullname());
     // }
-
-    private UserDTO getUserDTO(UserDTO dto) {
-        if (dto.getTenantIds() != null && !dto.getTenantIds().isEmpty()) {
-            List<Long> visibleTenantIds = dto.getTenantIds();
-            if (!SecurityUtils.isSuperAdmin()) {
-                List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
-                visibleTenantIds = visibleTenantIds.stream().filter(currentTenantIds::contains).toList();
-            }
-            if (!visibleTenantIds.isEmpty()) {
-                List<TenantInfoPrj> tenants = cmsClient.getTenantsByIds(
-                    TenantDTO.builder().tenantIds(new ArrayList<>(visibleTenantIds)).build()
-                );
-                dto.setTenants(
-                    tenants
-                        .stream()
-                        .map(t ->
-                            TenantDTO.builder()
-                                .id(t.getId())
-                                .code(t.getCode())
-                                .name(t.getName())
-                                .logoUrl(t.getLogoUrl())
-                                .build()
-                        )
-                        .collect(Collectors.toList())
-                );
-                dto.setTenantInfos(null);
-            }
-        }
-        return dto;
-    }
 }
