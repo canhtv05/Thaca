@@ -84,8 +84,13 @@
       <column name="is_activated" type="BOOLEAN"><constraints nullable="false"/></column>
       <column name="is_locked" type="BOOLEAN"><constraints nullable="false"/></column>
       <column name="refresh_token" type="TEXT"/>
-      <column name="tenant_id" type="BIGINT" defaultValueNumeric="1"/>
     </createTable>
+
+    <createTable schemaName="auth" tableName="user_tenants">
+      <column name="user_id" type="BIGINT"><constraints nullable="false"/></column>
+      <column name="tenant_id" type="BIGINT"><constraints nullable="false"/></column>
+    </createTable>
+    <addPrimaryKey schemaName="auth" tableName="user_tenants" columnNames="user_id, tenant_id" constraintName="pk_user_tenants"/>
 
     <createTable schemaName="auth" tableName="system_users">
       <column name="id" type="BIGINT"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_users"/></column>
@@ -101,26 +106,31 @@
       <column name="locked_until" type="DATETIME"/>
       <column name="failed_login_attempts" type="INT"/>
       <column name="is_super_admin" type="BOOLEAN"><constraints nullable="false"/></column>
-      <column name="tenant_id" type="BIGINT"/>
     </createTable>
 
+    <createTable schemaName="auth" tableName="system_user_tenants">
+      <column name="system_user_id" type="BIGINT"><constraints nullable="false"/></column>
+      <column name="tenant_id" type="BIGINT"><constraints nullable="false"/></column>
+    </createTable>
+    <addPrimaryKey schemaName="auth" tableName="system_user_tenants" columnNames="system_user_id, tenant_id" constraintName="pk_system_user_tenants"/>
+
     <createTable schemaName="auth" tableName="system_credentials">
-      <column name="username" type="VARCHAR(255)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credentials"/></column>
+      <column name="system_user_id" type="BIGINT"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credentials"/></column>
       <column name="created_at" type="DATETIME"/>
       <column name="updated_at" type="DATETIME"/>
       <column name="created_by" type="VARCHAR(255)"/>
       <column name="updated_by" type="VARCHAR(255)"/>
-      <column name="system_user_id" type="BIGINT"><constraints nullable="false"/></column>
+      <column name="username" type="VARCHAR(255)"><constraints nullable="false"/></column>
       <column name="password" type="VARCHAR(255)"><constraints nullable="false"/></column>
     </createTable>
 
     <createTable schemaName="auth" tableName="system_credential_roles">
-      <column name="credential_id" type="VARCHAR(255)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credential_roles"/></column>
+      <column name="system_user_id" type="BIGINT"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credential_roles"/></column>
       <column name="role_code" type="VARCHAR(50)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_system_credential_roles"/></column>
     </createTable>
 
     <createTable tableName="system_credential_permissions" schemaName="auth">
-        <column name="credential_id" type="varchar(255)"><constraints nullable="false" primaryKey="true"/></column>
+        <column name="system_user_id" type="BIGINT"><constraints nullable="false" primaryKey="true"/></column>
         <column name="role_code" type="varchar(50)"><constraints nullable="false" primaryKey="true"/></column>
         <column name="permission_code" type="varchar(50)"><constraints nullable="false" primaryKey="true"/></column>
         <column name="effect" type="varchar(20)" defaultValue="DENY"><constraints nullable="false"/></column>
@@ -176,15 +186,16 @@
 
   <changeSet id="init-constraints" author="CanhPC">
     <addUniqueConstraint columnNames="system_user_id" constraintName="uc_system_credentials_system_user" schemaName="auth" tableName="system_credentials"/>
-    <addUniqueConstraint columnNames="email, tenant_id" constraintName="uc_system_users_email_tenant" schemaName="auth" tableName="system_users"/>
-    <addUniqueConstraint columnNames="email, tenant_id" constraintName="uc_users_email_tenant" schemaName="auth" tableName="users"/>
-    <addUniqueConstraint columnNames="username, tenant_id" constraintName="uc_users_username_tenant" schemaName="auth" tableName="users"/>
 
     <addForeignKeyConstraint baseColumnNames="plan_id" baseTableName="tenants" baseTableSchemaName="auth" constraintName="fk_tenants_plan_id" referencedColumnNames="id" referencedTableName="plans" referencedTableSchemaName="auth"/>
-    <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="users" baseTableSchemaName="auth" constraintName="fk_users_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="roles" baseTableSchemaName="auth" constraintName="fk_roles_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="permissions" baseTableSchemaName="auth" constraintName="fk_permissions_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
-    <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="system_users" baseTableSchemaName="auth" constraintName="fk_sys_users_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
+
+    <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="system_user_tenants" baseColumnNames="system_user_id" constraintName="fk_sut_user" referencedTableSchemaName="auth" referencedTableName="system_users" referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="system_user_tenants" baseColumnNames="tenant_id" constraintName="fk_sut_tenant" referencedTableSchemaName="auth" referencedTableName="tenants" referencedColumnNames="id"/>
+    
+    <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="user_tenants" baseColumnNames="user_id" constraintName="fk_ut_user" referencedTableSchemaName="auth" referencedTableName="users" referencedColumnNames="id"/>
+    <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="user_tenants" baseColumnNames="tenant_id" constraintName="fk_ut_tenant" referencedTableSchemaName="auth" referencedTableName="tenants" referencedColumnNames="id"/>
     <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="fk_login_hist_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
 
     <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="FK_LOGIN_HISTORY_ON_USER" referencedColumnNames="id" referencedTableName="users" referencedTableSchemaName="auth"/>
@@ -195,9 +206,9 @@
     <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="role_permissions" baseTableSchemaName="auth" constraintName="fk_rolper_on_role" referencedColumnNames="code" referencedTableName="roles" referencedTableSchemaName="auth"/>
 
     <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="system_credential_roles" baseTableSchemaName="auth" constraintName="fk_syscrerol_on_role" referencedColumnNames="code" referencedTableName="roles" referencedTableSchemaName="auth"/>
-    <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_roles" baseTableSchemaName="auth" constraintName="fk_syscrerol_on_system_credential" referencedColumnNames="username" referencedTableName="system_credentials" referencedTableSchemaName="auth"/>
+    <addForeignKeyConstraint baseColumnNames="system_user_id" baseTableName="system_credential_roles" baseTableSchemaName="auth" constraintName="fk_syscrerol_on_system_credential" referencedColumnNames="system_user_id" referencedTableName="system_credentials" referencedTableSchemaName="auth"/>
 
-    <addForeignKeyConstraint baseColumnNames="credential_id" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_credential" referencedColumnNames="username" referencedTableName="system_credentials" referencedTableSchemaName="auth"/>
+    <addForeignKeyConstraint baseColumnNames="system_user_id" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_credential" referencedColumnNames="system_user_id" referencedTableName="system_credentials" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="role_code" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_role" referencedColumnNames="code" referencedTableName="roles" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="permission_code" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_permission" referencedColumnNames="code" referencedTableName="permissions" referencedTableSchemaName="auth"/>
   </changeSet>

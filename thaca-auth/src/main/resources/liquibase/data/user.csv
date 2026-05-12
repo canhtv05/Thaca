@@ -1,3 +1,4 @@
 id;username;password;is_activated;is_locked;email;created_by;created_at;updated_by;updated_at
 1;admin;$2a$10$1MbJE0GmNjzMIoi9VF5EeelXKT9xmHj0/sW5ZJ4rcHoo8udgqTEd.;true;false;admin@thaca.com;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
 2;user;$2a$10$1MbJE0GmNjzMIoi9VF5EeelXKT9xmHj0/sW5ZJ4rcHoo8udgqTEd.;true;false;user@thaca.com;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00
+3;multi_tenant_user;$2a$10$1MbJE0GmNjzMIoi9VF5EeelXKT9xmHj0/sW5ZJ4rcHoo8udgqTEd.;true;false;mtuser@thaca.com;system;2025-01-01 00:00:00;system;2025-01-01 00:00:00

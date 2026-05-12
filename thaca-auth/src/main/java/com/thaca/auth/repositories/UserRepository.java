@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -14,12 +19,21 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+    @Override
+    @EntityGraph(attributePaths = { "tenants" })
+    Page<User> findAll(Specification<User> spec, Pageable pageable);
+
+    @Override
+    @EntityGraph(attributePaths = { "tenants" })
+    List<User> findAll(Specification<User> spec, Sort sort);
+
     @Query(
         value = """
-        SELECT u.tenant_id AS tenantId, COUNT(*) AS count
+        SELECT ut.tenant_id AS tenantId, COUNT(u.id) AS count
         FROM auth.users u
-        WHERE u.tenant_id IN (:tenantIds)
-        GROUP BY u.tenant_id
+        JOIN auth.user_tenants ut ON u.id = ut.user_id
+        WHERE ut.tenant_id IN (:tenantIds)
+        GROUP BY ut.tenant_id
         """,
         nativeQuery = true
     )
@@ -32,9 +46,17 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     Boolean existsUserByUsername(String username);
 
-    boolean existsByUsernameAndTenantId(String username, Long tenantId);
+    @Query(
+        value = "SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM auth.users u JOIN auth.user_tenants ut ON u.id = ut.user_id WHERE u.username = :username AND ut.tenant_id = :tenantId",
+        nativeQuery = true
+    )
+    boolean existsByUsernameAndTenantId(@Param("username") String username, @Param("tenantId") Long tenantId);
 
-    boolean existsByEmailAndTenantId(String email, Long tenantId);
+    @Query(
+        value = "SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM auth.users u JOIN auth.user_tenants ut ON u.id = ut.user_id WHERE u.email = :email AND ut.tenant_id = :tenantId",
+        nativeQuery = true
+    )
+    boolean existsByEmailAndTenantId(@Param("email") String email, @Param("tenantId") Long tenantId);
 
     Optional<User> findByUsername(String username);
 
@@ -43,4 +65,36 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     List<User> findAllByUsernameIn(Collection<String> usernames);
 
     List<User> findAllByEmailIn(Collection<String> emails);
+
+    boolean existsByUsernameAndIdNot(String username, Long id);
+
+    boolean existsByEmailAndIdNot(String email, Long id);
+
+    @Query(
+        value = "SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM auth.users u JOIN auth.user_tenants ut ON u.id = ut.user_id WHERE u.email = :email AND ut.tenant_id IN (:tenantIds)",
+        nativeQuery = true
+    )
+    boolean existsByEmailAndTenantIds(@Param("email") String email, @Param("tenantIds") Collection<Long> tenantIds);
+
+    @Query(
+        value = "SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM auth.users u JOIN auth.user_tenants ut ON u.id = ut.user_id WHERE u.username = :username AND ut.tenant_id IN (:tenantIds)",
+        nativeQuery = true
+    )
+    boolean existsByUsernameAndTenantIds(
+        @Param("username") String username,
+        @Param("tenantIds") Collection<Long> tenantIds
+    );
+
+    @Query(
+        value = """
+        SELECT u.* FROM auth.users u
+        JOIN auth.user_tenants ut ON u.id = ut.user_id
+        WHERE u.username IN (:usernames) AND ut.tenant_id IN (:tenantIds)
+        """,
+        nativeQuery = true
+    )
+    List<User> findByUsernamesAndTenantIds(
+        @Param("usernames") Collection<String> usernames,
+        @Param("tenantIds") Collection<Long> tenantIds
+    );
 }

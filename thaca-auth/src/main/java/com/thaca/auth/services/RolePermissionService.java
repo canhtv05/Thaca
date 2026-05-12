@@ -184,7 +184,7 @@ public class RolePermissionService {
                         SystemCredentialPermission scp = new SystemCredentialPermission();
                         scp.setId(
                             new SystemCredentialPermission.SystemCredentialPermissionId(
-                                username,
+                                sc.getId(),
                                 role.getCode(),
                                 perm.getCode()
                             )

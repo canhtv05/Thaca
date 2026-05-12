@@ -20,7 +20,7 @@ public class SystemCredentialPermission extends BaseEntityAudit {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("credentialId")
-    @JoinColumn(name = "credential_id")
+    @JoinColumn(name = "system_user_id")
     private SystemCredential credential;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -57,8 +57,8 @@ public class SystemCredentialPermission extends BaseEntityAudit {
     @AllArgsConstructor
     public static class SystemCredentialPermissionId implements java.io.Serializable {
 
-        @Column(name = "credential_id")
-        private String credentialId;
+        @Column(name = "system_user_id")
+        private Long credentialId;
 
         @Column(name = "role_code")
         private String roleCode;

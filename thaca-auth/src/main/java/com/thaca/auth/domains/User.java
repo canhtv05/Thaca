@@ -1,7 +1,10 @@
 package com.thaca.auth.domains;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "users", schema = "auth")
-public class User extends BaseTenantEntity {
+public class User extends BaseEntityAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
@@ -42,4 +45,14 @@ public class User extends BaseTenantEntity {
     @JsonIgnore
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     String refreshToken;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "user_tenants",
+        schema = "auth",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "tenant_id")
+    )
+    @Builder.Default
+    private Set<Tenant> tenants = new HashSet<>();
 }

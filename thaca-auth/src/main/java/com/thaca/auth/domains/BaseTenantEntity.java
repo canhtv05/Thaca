@@ -16,8 +16,8 @@ import org.hibernate.annotations.ParamDef;
 @SuperBuilder
 @NoArgsConstructor
 @MappedSuperclass
-@FilterDef(name = "tenantFilter", parameters = { @ParamDef(name = "tenantId", type = Long.class) })
-@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
+@FilterDef(name = "tenantFilter", parameters = { @ParamDef(name = "tenantIds", type = Long.class) })
+@Filter(name = "tenantFilter", condition = "tenant_id IN (:tenantIds)")
 public abstract class BaseTenantEntity extends BaseEntityAudit {
 
     @Column(name = "tenant_id", updatable = false)

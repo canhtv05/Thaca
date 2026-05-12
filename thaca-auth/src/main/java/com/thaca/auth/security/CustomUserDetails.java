@@ -2,6 +2,7 @@ package com.thaca.auth.security;
 
 import com.thaca.framework.core.security.UserPrincipal;
 import java.util.Collection;
+import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,7 +15,7 @@ public class CustomUserDetails extends User implements UserPrincipal {
     private final String channel;
     private final boolean isSuperAdmin;
     private final boolean isCmsUser;
-    private final Long tenantId;
+    private final List<Long> tenantIds;
 
     public CustomUserDetails(
         String username,
@@ -24,14 +25,14 @@ public class CustomUserDetails extends User implements UserPrincipal {
         String channel,
         boolean isSuperAdmin,
         boolean isCmsUser,
-        Long tenantId
+        List<Long> tenantIds
     ) {
         super(username, password, authorities);
         this.role = roles;
         this.channel = channel;
         this.isSuperAdmin = isSuperAdmin;
         this.isCmsUser = isCmsUser;
-        this.tenantId = tenantId;
+        this.tenantIds = tenantIds;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class CustomUserDetails extends User implements UserPrincipal {
     }
 
     @Override
-    public Long getTenantId() {
-        return this.tenantId;
+    public List<Long> getTenantIds() {
+        return this.tenantIds;
     }
 }

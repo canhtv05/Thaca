@@ -49,6 +49,10 @@
             <column name="is_activated" type="boolean"/>
             <column name="is_locked" type="boolean"/>
             <column name="email" type="string"/>
+        </loadData>
+
+        <loadData file="liquibase/data/user_tenants.csv" separator=";" tableName="user_tenants" schemaName="auth">
+            <column name="user_id" type="numeric"/>
             <column name="tenant_id" type="numeric"/>
         </loadData>
 
@@ -59,6 +63,10 @@
             <column name="is_activated" type="boolean"/>
             <column name="is_locked" type="boolean"/>
             <column name="is_super_admin" type="boolean"/>
+        </loadData>
+
+        <loadData file="liquibase/data/system_user_tenants.csv" separator=";" tableName="system_user_tenants" schemaName="auth">
+            <column name="system_user_id" type="numeric"/>
             <column name="tenant_id" type="numeric"/>
         </loadData>
 
@@ -74,12 +82,13 @@
         </loadData>
 
         <loadData file="liquibase/data/system_credential_roles.csv" separator=";" tableName="system_credential_roles" schemaName="auth">
-            <column name="credential_id" type="string"/>
+            <column name="system_user_id" type="numeric"/>
             <column name="role_code" type="string"/>
         </loadData>
 
         <loadData file="liquibase/data/system_credential_permissions.csv" separator=";" tableName="system_credential_permissions" schemaName="auth">
-            <column name="credential_id" type="string"/>
+            <column name="system_user_id" type="numeric"/>
+            <column name="role_code" type="string"/>
             <column name="permission_code" type="string"/>
             <column name="effect" type="string"/>
             <column name="created_by" type="string"/>

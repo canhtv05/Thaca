@@ -36,7 +36,8 @@ public class LoginHistoryService {
         HttpServletRequest request,
         LoginStatus status,
         String failureReason,
-        boolean isCms
+        boolean isCms,
+        Long tenantId
     ) {
         String ip = commonService.extractIpAddress(request);
         String ua = request.getHeader("User-Agent");
@@ -75,7 +76,7 @@ public class LoginHistoryService {
             .requestId(FwContextBody.get().getTransId())
             .deviceId(deviceId)
             .isNewDevice(isNewDevice)
-            .tenantId(userDTO.getTenantId())
+            .tenantId(tenantId)
             .build();
 
         loginHistoryRepository.save(history);

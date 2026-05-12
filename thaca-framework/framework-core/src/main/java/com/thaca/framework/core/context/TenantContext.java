@@ -1,18 +1,20 @@
 package com.thaca.framework.core.context;
 
+import java.util.List;
+
 public class TenantContext {
 
-    private static final ThreadLocal<Long> currentTenant = new ThreadLocal<>();
+    private static final ThreadLocal<List<Long>> currentTenantIds = new ThreadLocal<>();
 
-    public static void set(Long tenantId) {
-        currentTenant.set(tenantId);
+    public static void set(List<Long> tenantIds) {
+        currentTenantIds.set(tenantIds);
     }
 
-    public static Long get() {
-        return currentTenant.get();
+    public static List<Long> get() {
+        return currentTenantIds.get();
     }
 
     public static void clear() {
-        currentTenant.remove();
+        currentTenantIds.remove();
     }
 }

@@ -144,7 +144,8 @@ public class AuthService {
                         httpServletRequest,
                         LoginStatus.FAILED,
                         e.getMessage(),
-                        false
+                        false,
+                        loginReq.getTenantId()
                     )
                 );
             if (e instanceof FwException) {
@@ -214,7 +215,7 @@ public class AuthService {
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
             } else {
                 rolesString = getRoleString(sc, authorities);
-                List<String> deniedPermissions = systemCredentialRepository.findDeniedPermissionCodes(sc.getUsername());
+                List<String> deniedPermissions = systemCredentialRepository.findDeniedPermissionCodes(su.getId());
                 deniedPermissions.forEach(p -> authorities.add(new SimpleGrantedAuthority("DENY_" + p)));
             }
             CustomUserDetails userDetails = new CustomUserDetails(
@@ -225,7 +226,9 @@ public class AuthService {
                 StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
                 su.getIsSuperAdmin(),
                 true,
-                su.getTenantId()
+                loginReq.getTenantId() != null
+                    ? Collections.singletonList(loginReq.getTenantId())
+                    : Collections.emptyList()
             );
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -239,7 +242,8 @@ public class AuthService {
                         httpServletRequest,
                         LoginStatus.FAILED,
                         e.getMessage(),
-                        true
+                        true,
+                        loginReq.getTenantId()
                     )
                 );
             if (e instanceof FwException) {
@@ -335,7 +339,7 @@ public class AuthService {
             .map(u ->
                 SystemUserDTO.builder()
                     .id(u.getId())
-                    .tenantId(u.getTenantId())
+                    .tenantIds(u.getTenants().stream().map(Tenant::getId).collect(Collectors.toList()))
                     .username(u.getUsername())
                     .email(u.getEmail())
                     .build()
@@ -406,7 +410,14 @@ public class AuthService {
         SystemUserDTO userInfoDTO = isCms
             ? systemUserService.getSystemProfile()
             : getUserProfile(loginReq.getUsername());
-        loginHistoryService.saveLoginHistory(userInfoDTO, httpServletRequest, LoginStatus.SUCCESS, null, isCms);
+        loginHistoryService.saveLoginHistory(
+            userInfoDTO,
+            httpServletRequest,
+            LoginStatus.SUCCESS,
+            null,
+            isCms,
+            loginReq.getTenantId()
+        );
         return new AuthenticateRes(true, userInfoDTO);
     }
 
