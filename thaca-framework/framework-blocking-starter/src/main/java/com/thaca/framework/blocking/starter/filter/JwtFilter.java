@@ -11,6 +11,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -44,9 +47,19 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                     Claims claims = jwtUtils.parseToken(jwt);
-                    Long tenantId = claims.get("tenantId", Long.class);
-                    if (tenantId != null) {
-                        TenantContext.set(tenantId);
+                    Object tenantIdsObj = claims.get("tenantIds");
+                    List<Long> tenantIds = new ArrayList<>();
+                    if (tenantIdsObj instanceof Collection<?> col) {
+                        for (Object item : col) {
+                            if (item instanceof Number n) {
+                                tenantIds.add(n.longValue());
+                            }
+                        }
+                    } else if (tenantIds instanceof Number n) {
+                        tenantIds.add(n.longValue());
+                    }
+                    if (!tenantIds.isEmpty()) {
+                        TenantContext.set(tenantIds);
                     }
                 } else {
                     log.debug("[JwtFilter] token validation failed: {}", status);

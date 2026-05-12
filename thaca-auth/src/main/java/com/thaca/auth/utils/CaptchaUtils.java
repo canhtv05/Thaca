@@ -4,7 +4,6 @@ import com.thaca.auth.dtos.CaptchaDTO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 import java.util.Random;
@@ -277,38 +276,5 @@ public class CaptchaUtils {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(img, "PNG", baos);
         return Base64.getEncoder().encodeToString(baos.toByteArray());
-    }
-
-    // =========================================================================
-    // Smoke-test (javac ColorfulCaptcha.java && java ColorfulCaptcha)
-    // =========================================================================
-
-    public static void main(String[] args) throws Exception {
-        System.out.println("=== ColorfulCaptcha smoke-test ===\n");
-
-        // TEXT
-        CaptchaDTO text = generateText(5);
-        System.out.println("[TEXT]  image length : " + text.getImage().length());
-        save(text, "captcha_text.png");
-
-        // MATH
-        CaptchaDTO math = generateMath();
-        System.out.println("[MATH]  image length : " + math.getImage().length());
-        save(math, "captcha_math.png");
-
-        // AUTO x3
-        for (int i = 1; i <= 3; i++) {
-            CaptchaDTO auto = generate(CaptchaDTO.Mode.AUTO);
-            System.out.printf("[AUTO%d] image length : %d%n", i, auto.getImage().length());
-            save(auto, "captcha_auto" + i + ".png");
-        }
-    }
-
-    private static void save(CaptchaDTO r, String filename) throws Exception {
-        String base64 = r.getImage().replace(DATA_URI_PREFIX, "");
-        byte[] bytes = Base64.getDecoder().decode(base64);
-        BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
-        ImageIO.write(img, "PNG", new java.io.File(filename));
-        System.out.println("        saved   : " + filename + "\n");
     }
 }

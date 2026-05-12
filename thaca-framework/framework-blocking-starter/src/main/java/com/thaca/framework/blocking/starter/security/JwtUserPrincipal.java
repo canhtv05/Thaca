@@ -4,7 +4,9 @@ import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.constants.CommonConstants;
 import com.thaca.framework.core.security.UserPrincipal;
 import io.jsonwebtoken.Claims;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 
 public final class JwtUserPrincipal implements UserPrincipal {
@@ -14,7 +16,7 @@ public final class JwtUserPrincipal implements UserPrincipal {
     private final String channel;
     private final boolean superAdmin;
     private final boolean cmsUser;
-    private final Long tenantId;
+    private final List<Long> tenantIds;
 
     private JwtUserPrincipal(
         String username,
@@ -22,14 +24,14 @@ public final class JwtUserPrincipal implements UserPrincipal {
         String channel,
         boolean superAdmin,
         boolean cmsUser,
-        Long tenantId
+        List<Long> tenantIds
     ) {
         this.username = username;
         this.role = role;
         this.channel = channel;
         this.superAdmin = superAdmin;
         this.cmsUser = cmsUser;
-        this.tenantId = tenantId;
+        this.tenantIds = tenantIds;
     }
 
     public static JwtUserPrincipal fromClaims(Claims claims, Collection<? extends GrantedAuthority> authorities) {
@@ -38,16 +40,22 @@ public final class JwtUserPrincipal implements UserPrincipal {
         String role = roleObj != null ? roleObj.toString() : "";
         String channel = claims.get(CommonConstants.CHANNEL_KEY, String.class);
         Integer c = claims.get("c", Integer.class);
-        Long tenantId = null;
-        Object tid = claims.get("tenantId");
-        if (tid instanceof Number n) {
-            tenantId = n.longValue();
+        List<Long> tenantIds = new ArrayList<>();
+        Object tenantObjects = claims.get("tenantIds");
+        if (tenantObjects instanceof Collection<?> col) {
+            for (Object item : col) {
+                if (item instanceof Number n) {
+                    tenantIds.add(n.longValue());
+                }
+            }
+        } else if (tenantObjects instanceof Number n) {
+            tenantIds.add(n.longValue());
         }
         boolean superAdmin = authorities
             .stream()
             .anyMatch(a -> AuthoritiesConstants.SUPER_ADMIN.equals(a.getAuthority()));
         boolean cmsUser = c != null && c == 1;
-        return new JwtUserPrincipal(username, role, channel, superAdmin, cmsUser, tenantId);
+        return new JwtUserPrincipal(username, role, channel, superAdmin, cmsUser, tenantIds);
     }
 
     @Override
@@ -66,8 +74,8 @@ public final class JwtUserPrincipal implements UserPrincipal {
     }
 
     @Override
-    public Long getTenantId() {
-        return tenantId;
+    public List<Long> getTenantIds() {
+        return tenantIds;
     }
 
     @Override

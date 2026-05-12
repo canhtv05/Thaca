@@ -95,18 +95,7 @@ public class UserService {
         var response = users
             .getContent()
             .stream()
-            .map(u -> {
-                List<Long> userTenantIds = u.getTenants().stream().map(Tenant::getId).toList();
-                var res = UserMapper.fromEntityWithCms(u, true);
-                List<TenantInfoPrj> tenantInfos = userTenantIds
-                    .stream()
-                    .map(id -> TenantMapper.fromInfoProj(tenantMap.get(id)))
-                    .filter(Objects::nonNull)
-                    .toList();
-                res.setTenants(tenantInfos);
-                res.setTenantIds(userTenantIds);
-                return res;
-            })
+            .map(u -> getUserDTO(u, tenantMap))
             .toList();
 
         return new SearchResponse<>(response, PaginationResponse.of(users));
@@ -123,18 +112,7 @@ public class UserService {
         List<UserDTO> users = userRepository
             .findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"))
             .stream()
-            .map(u -> {
-                List<Long> userTenantIds = u.getTenants().stream().map(Tenant::getId).toList();
-                var res = UserMapper.fromEntityWithCms(u, true);
-                List<TenantInfoPrj> tenantInfos = userTenantIds
-                    .stream()
-                    .map(id -> TenantMapper.fromInfoProj(tenantMap.get(id)))
-                    .filter(Objects::nonNull)
-                    .toList();
-                res.setTenants(tenantInfos);
-                res.setTenantIds(userTenantIds);
-                return res;
-            })
+            .map(u -> getUserDTO(u, tenantMap))
             .toList();
         List<Map<String, Object>> rows = new ArrayList<>();
         ApiHeader header = FwContextHeader.get();
@@ -194,16 +172,7 @@ public class UserService {
         User user = userRepository
             .findByUsername(request.getUsername())
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        List<Long> userTenantIds = user.getTenants().stream().map(Tenant::getId).toList();
-        var res = UserMapper.fromEntityWithCms(user, true);
-        List<TenantInfoPrj> tenantInfos = userTenantIds
-            .stream()
-            .map(id -> TenantMapper.fromInfoProj(tenantMap.get(id)))
-            .filter(Objects::nonNull)
-            .toList();
-        res.setTenants(tenantInfos);
-        res.setTenantIds(userTenantIds);
-        return res;
+        return getUserDTO(user, tenantMap);
     }
 
     @Transactional(readOnly = true)
@@ -801,7 +770,7 @@ public class UserService {
                   .toList()
             : List.of();
 
-        var schema = ExcelSchema.builder()
+        return ExcelSchema.builder()
             .sheetName(isVietnamese ? "Nhập người dùng" : "Import Users")
             .headerRowIndex(0)
             .dataStartRowIndex(1)
@@ -880,7 +849,6 @@ public class UserService {
                     .build()
             )
             .build();
-        return schema;
     }
 
     private ExcelSchema buildExportSchema(boolean isVietnamese) {
@@ -898,15 +866,15 @@ public class UserService {
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("email", isVietnamese ? "Email" : "Email")
+                ExcelColumn.builder("email", "Email")
                     .maxLength(100)
                     .dataType(ExcelDataType.STRING)
-                    .comment(isVietnamese ? "Email" : "Email")
+                    .comment("Email")
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("tenant", isVietnamese ? "Tenant" : "Tenant")
-                    .comment(isVietnamese ? "Tenant" : "Tenant")
+                ExcelColumn.builder("tenant", isVietnamese ? "Tổ chức" : "Tenant")
+                    .comment(isVietnamese ? "Tổ chức" : "Tenant")
                     .build()
             )
             .addColumn(
@@ -944,6 +912,19 @@ public class UserService {
                     .build()
             )
             .build();
+    }
+
+    private UserDTO getUserDTO(User u, Map<Long, TenantInfoProjection> tenantMap) {
+        List<Long> userTenantIds = u.getTenants().stream().map(Tenant::getId).toList();
+        var res = UserMapper.fromEntityWithCms(u, true);
+        List<TenantInfoPrj> tenantInfos = userTenantIds
+            .stream()
+            .map(id -> TenantMapper.fromInfoProj(tenantMap.get(id)))
+            .filter(Objects::nonNull)
+            .toList();
+        res.setTenants(tenantInfos);
+        res.setTenantIds(userTenantIds);
+        return res;
     }
 
     private ImportResponseDTO getImportResponseDTO(

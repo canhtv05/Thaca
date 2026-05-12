@@ -160,19 +160,24 @@ public class PlanService {
         ApiHeader header = FwContextHeader.get();
         boolean isVietnamese = "vi".equals(header.getLanguage());
         for (PlanDTO plan : plans) {
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("code", plan.getCode());
-            row.put("name", plan.getName());
-            row.put("type", plan.getType().getValue());
-            row.put("maxUsers", plan.getMaxUsers());
-            row.put("status", plan.getStatus().getLabel(isVietnamese));
-            row.put("createdAt", plan.getCreatedAt());
-            row.put("createdBy", plan.getCreatedBy());
-            row.put("updatedAt", plan.getUpdatedAt());
-            row.put("updatedBy", plan.getUpdatedBy());
+            Map<String, Object> row = getStringObjectMap(plan, isVietnamese);
             rows.add(row);
         }
         return ExcelEngine.exportData(buildSchema(isVietnamese), rows);
+    }
+
+    private Map<String, Object> getStringObjectMap(PlanDTO plan, boolean isVietnamese) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("code", plan.getCode());
+        row.put("name", plan.getName());
+        row.put("type", plan.getType().getValue());
+        row.put("maxUsers", plan.getMaxUsers());
+        row.put("status", plan.getStatus().getLabel(isVietnamese));
+        row.put("createdAt", plan.getCreatedAt());
+        row.put("createdBy", plan.getCreatedBy());
+        row.put("updatedAt", plan.getUpdatedAt());
+        row.put("updatedBy", plan.getUpdatedBy());
+        return row;
     }
 
     private ExcelSchema buildSchema(boolean isVietnamese) {
