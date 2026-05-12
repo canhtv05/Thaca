@@ -181,18 +181,7 @@ public class RolePermissionService {
             for (Role role : sc.getRoles()) {
                 for (Permission perm : role.getPermissions()) {
                     if (deniedSet.contains(perm.getCode())) {
-                        SystemCredentialPermission scp = new SystemCredentialPermission();
-                        scp.setId(
-                            new SystemCredentialPermission.SystemCredentialPermissionId(
-                                sc.getId(),
-                                role.getCode(),
-                                perm.getCode()
-                            )
-                        );
-                        scp.setCredential(sc);
-                        scp.setRole(role);
-                        scp.setPermission(perm);
-                        scp.setEffect(PermissionEffect.DENY);
+                        SystemCredentialPermission scp = getSystemCredentialPermission(role, perm, sc);
                         sc.getCredentialPermissions().add(scp);
                     }
                 }
@@ -200,10 +189,6 @@ public class RolePermissionService {
         }
         systemCredentialRepository.save(sc);
     }
-
-    // ═══════════════════════════════════════════════════════════════
-    //  Export Excel
-    // ═══════════════════════════════════════════════════════════════
 
     @Transactional(readOnly = true)
     @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_ROLES, type = ModeType.HANDLE)
@@ -254,6 +239,22 @@ public class RolePermissionService {
             rows.add(row);
         }
         return ExcelEngine.exportData(buildPermissionSchema(isVietnamese), rows);
+    }
+
+    private static SystemCredentialPermission getSystemCredentialPermission(
+        Role role,
+        Permission perm,
+        SystemCredential sc
+    ) {
+        SystemCredentialPermission scp = new SystemCredentialPermission();
+        scp.setId(
+            new SystemCredentialPermission.SystemCredentialPermissionId(sc.getId(), role.getCode(), perm.getCode())
+        );
+        scp.setCredential(sc);
+        scp.setRole(role);
+        scp.setPermission(perm);
+        scp.setEffect(PermissionEffect.DENY);
+        return scp;
     }
 
     private ExcelSchema buildRoleSchema(boolean isVietnamese) {

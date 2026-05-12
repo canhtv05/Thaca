@@ -3,7 +3,10 @@ package com.thaca.framework.core.utils;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.List;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -36,5 +39,19 @@ public class FwUtils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static List<Long> extractTenantIds(Object obj) {
+        List<Long> tenantIds = new ArrayList<>();
+        if (obj instanceof Collection<?> col) {
+            for (Object item : col) {
+                if (item instanceof Number n) {
+                    tenantIds.add(n.longValue());
+                }
+            }
+        } else if (obj instanceof Number n) {
+            tenantIds.add(n.longValue());
+        }
+        return tenantIds;
     }
 }
