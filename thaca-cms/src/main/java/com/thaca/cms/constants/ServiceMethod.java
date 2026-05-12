@@ -2,14 +2,15 @@ package com.thaca.cms.constants;
 
 public class ServiceMethod {
 
-    public static final String INTERNAL_ACTIVE_USER = "internal.activeUserByUserName";
-
     public static final String CMS_AUTHENTICATE = "cms.authenticate";
     public static final String CMS_LOGOUT = "cms.logout";
+    public static final String CMS_GET_PROFILE = "cms.getProfile";
+
     public static final String CMS_SEARCH_ROLES = "cms.searchRoles";
     public static final String CMS_GET_ALL_ROLES = "cms.getAllRoles";
     public static final String CMS_EXPORT_ROLES = "cms.exportRoles";
     public static final String CMS_EXPORT_PERMISSIONS = "cms.exportPermissions";
+
     public static final String CMS_SEARCH_TENANTS = "cms.searchTenants";
     public static final String CMS_GET_TENANT = "cms.getTenant";
     public static final String CMS_GET_ALL_TENANTS = "cms.getAllTenants";
@@ -24,6 +25,7 @@ public class ServiceMethod {
     public static final String CMS_IMPORT_USERS = "cms.importUsers";
     public static final String CMS_EXPORT_USER_FILE_ERROR = "cms.exportUserFileError";
     public static final String CMS_EXPORT_USERS = "cms.exportUsers";
+    public static final String CMS_LOCK_UNLOCK_USER = "cms.lockUnlockUser";
 
     public static final String CMS_SEARCH_SYSTEM_USERS = "cms.searchSystemUsers";
     public static final String CMS_SEARCH_USER_LOCK_HISTORY = "cms.searchUserLockHistory";
@@ -32,7 +34,6 @@ public class ServiceMethod {
     public static final String CMS_UPDATE_SYSTEM_USER = "cms.updateSystemUser";
     public static final String CMS_LOCK_UNLOCK_SYSTEM_USER = "cms.lockUnlockSystemUser";
     public static final String CMS_EXPORT_SYSTEM_USER = "cms.exportSystemUser";
-    public static final String CMS_LOCK_UNLOCK_USER = "cms.lockUnlockUser";
 
     public static final String CMS_SEARCH_PLANS = "cms.searchPlans";
     public static final String CMS_GET_PLAN = "cms.getPlan";
@@ -45,12 +46,6 @@ public class ServiceMethod {
     public static final String CMS_SEARCH_PERMISSIONS = "cms.searchPermissions";
     public static final String CMS_GET_ALL_PERMISSIONS = "cms.getAllPermissions";
     public static final String CMS_GET_PERMISSIONS_BY_ROLES = "internal.cmsGetPermissionsByRoles";
-    public static final String CMS_GET_USER_BY_ID = "cms.getUserById";
-    public static final String CMS_CREATE_USER = "cms.createUser";
-    public static final String CMS_UPDATE_USER = "cms.updateUser";
-    public static final String CMS_GET_USER_PERMISSION = "cms.getUserPermission";
-    public static final String CMS_UPDATE_USER_PERMISSION = "cms.updateUserPermission";
-    public static final String CMS_GET_PROFILE = "cms.getProfile";
 
     public static final String CMS_EXCEL_GENERATE_TEMPLATE = "cms.excel.generateTemplate";
     public static final String CMS_EXCEL_IMPORT = "cms.excel.import";

@@ -21,11 +21,11 @@ public interface SystemCredentialRepository
     extends JpaRepository<SystemCredential, Long>, JpaSpecificationExecutor<SystemCredential>
 {
     @Override
-    @EntityGraph(attributePaths = { "systemUser", "systemUser.tenants", "roles", "roles.permissions" })
+    @EntityGraph(attributePaths = { "systemUser", "roles", "roles.permissions" })
     Page<SystemCredential> findAll(Specification<SystemCredential> spec, Pageable pageable);
 
     @Override
-    @EntityGraph(attributePaths = { "systemUser", "systemUser.tenants", "roles", "roles.permissions" })
+    @EntityGraph(attributePaths = { "systemUser", "roles", "roles.permissions" })
     List<SystemCredential> findAll(Specification<SystemCredential> spec, Sort sort);
 
     @Query(

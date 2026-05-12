@@ -52,13 +52,9 @@ public class SystemUser extends BaseEntityAudit {
     @Builder.Default
     private Boolean isSuperAdmin = false;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "system_user_tenants",
-        schema = "auth",
-        joinColumns = @JoinColumn(name = "system_user_id"),
-        inverseJoinColumns = @JoinColumn(name = "tenant_id")
-    )
+    @ElementCollection
+    @CollectionTable(name = "system_user_tenants", schema = "auth", joinColumns = @JoinColumn(name = "system_user_id"))
+    @Column(name = "tenant_id")
     @Builder.Default
-    private Set<Tenant> tenants = new HashSet<>();
+    private Set<Long> tenantIds = new HashSet<>();
 }

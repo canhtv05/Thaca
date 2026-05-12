@@ -2,6 +2,7 @@ package com.thaca.auth.domains;
 
 import com.thaca.auth.enums.DeviceType;
 import com.thaca.auth.enums.LoginStatus;
+import com.thaca.framework.blocking.starter.domains.BaseTenantEntity;
 import com.thaca.framework.core.enums.ChannelType;
 import jakarta.persistence.*;
 import java.time.Instant;

@@ -1,16 +1,13 @@
 package com.thaca.auth.services;
 
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.mappers.SystemUserMapper;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
-import com.thaca.auth.repositories.TenantRepository;
 import com.thaca.auth.repositories.UserLockHistoryRepository;
-import com.thaca.auth.validators.core.Validator;
-import com.thaca.auth.validators.rules.*;
-import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
@@ -28,6 +25,8 @@ import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
+import com.thaca.framework.core.validations.Validator;
+import com.thaca.framework.core.validations.rules.*;
 import jakarta.persistence.criteria.*;
 import java.io.IOException;
 import java.util.*;
@@ -51,23 +50,21 @@ public class SystemUserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserLockHistoryRepository userLockHistoryRepository;
-    private final TenantRepository tenantRepository;
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_PROFILE, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_GET_PROFILE, type = ModeType.HANDLE)
     public SystemUserDTO getSystemProfile() {
         String username = SecurityUtils.getCurrentUsername();
         return systemCredentialRepository
             .findByUsername(username)
             .map(sc -> {
-                List<Tenant> userTenants = new ArrayList<>(sc.getSystemUser().getTenants());
-                return SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), userTenants);
+                return SystemUserMapper.toFullDTO(sc, sc.getSystemUser());
             })
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_SYSTEM_USERS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_SYSTEM_USERS, type = ModeType.HANDLE)
     public SearchResponse<SystemUserDTO> searchSystemUsers(SearchRequest<SystemUserDTO> request) {
         Specification<SystemCredential> spec = createSpecification(request);
 
@@ -90,15 +87,14 @@ public class SystemUserService {
             .getContent()
             .stream()
             .map(sc -> {
-                List<Tenant> userTenants = new ArrayList<>(sc.getSystemUser().getTenants());
-                return SystemUserMapper.toSearchDTO(sc, sc.getSystemUser(), userTenants);
+                return SystemUserMapper.toSearchDTO(sc, sc.getSystemUser());
             })
             .toList();
         return new SearchResponse<>(data, PaginationResponse.of(result));
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_GET_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO getSystemUserById(SystemUserDTO request) {
         if (request.getId() == null) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -109,25 +105,20 @@ public class SystemUserService {
         SystemCredential sc = systemCredentialRepository
             .findBySystemUser(su)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        List<Tenant> userTenants = new ArrayList<>(su.getTenants());
-        return SystemUserMapper.toFullDTO(sc, su, userTenants);
+        return SystemUserMapper.toFullDTO(sc, su);
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
     public void validateCreate(SystemUserDTO request) {
         validateRequest(request, true);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_CREATE_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO create(SystemUserDTO request) {
         boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
         SystemUser su = SystemUser.builder()
-            .tenants(
-                request.getTenantIds() != null
-                    ? new HashSet<>(tenantRepository.findAllById(request.getTenantIds()))
-                    : new HashSet<>()
-            )
+            .tenantIds(request.getTenantIds() != null ? new HashSet<>(request.getTenantIds()) : new HashSet<>())
             .fullname(request.getFullname())
             .email(request.getEmail())
             .isActivated(!isSuperAdmin || Boolean.TRUE.equals(request.getIsActivated()))
@@ -157,17 +148,16 @@ public class SystemUserService {
             );
         }
 
-        List<Tenant> userTenants = new ArrayList<>(su.getTenants());
-        return SystemUserMapper.toFullDTO(sc, su, userTenants);
+        return SystemUserMapper.toFullDTO(sc, su);
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.CMS_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
     public void validateUpdate(SystemUserDTO request) {
         validateRequest(request, false);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_UPDATE_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO update(SystemUserDTO request) {
         SystemUser su = systemUserRepository
             .findById(request.getId())
@@ -180,7 +170,7 @@ public class SystemUserService {
         su.setEmail(request.getEmail());
         su.setAvatarUrl(request.getAvatarUrl());
         if (isSuperAdmin && request.getTenantIds() != null) {
-            su.setTenants(new HashSet<>(tenantRepository.findAllById(request.getTenantIds())));
+            su.setTenantIds(new HashSet<>(request.getTenantIds()));
         }
         if (isSuperAdmin) {
             if (request.getIsActivated() != null) su.setIsActivated(request.getIsActivated());
@@ -220,12 +210,11 @@ public class SystemUserService {
             );
         }
 
-        List<Tenant> userTenants = new ArrayList<>(su.getTenants());
-        return SystemUserMapper.toFullDTO(sc, su, userTenants);
+        return SystemUserMapper.toFullDTO(sc, su);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_LOCK_UNLOCK_SYSTEM_USER, type = ModeType.HANDLE)
     public void lockUnlock(SystemUserDTO request) {
         if (request.getId() == null || StringUtils.isBlank(request.getLockReason())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -254,11 +243,9 @@ public class SystemUserService {
             if (request.getFilter() != null) {
                 SystemUserDTO f = request.getFilter();
                 if (!CollectionUtils.isEmpty(f.getTenantIds()) && isSuperAdmin) {
-                    Join<SystemUser, Tenant> tenantJoin = userJoin.join("tenants");
-                    predicates.add(tenantJoin.get("id").in(f.getTenantIds()));
+                    predicates.add(userJoin.join("tenantIds").in(f.getTenantIds()));
                 } else if (!isSuperAdmin) {
-                    Join<SystemUser, Tenant> tenantJoin = userJoin.join("tenants");
-                    predicates.add(tenantJoin.get("id").in(currentTenantIds));
+                    predicates.add(userJoin.join("tenantIds").in(currentTenantIds));
                 }
                 if (StringUtils.isNotBlank(f.getEmail())) predicates.add(
                     cb.like(cb.lower(userJoin.get("email")), "%" + f.getEmail().toLowerCase() + "%")
@@ -279,7 +266,7 @@ public class SystemUserService {
         };
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_EXPORT_SYSTEM_USER, type = ModeType.HANDLE)
     public byte[] exportSystemUsers(SearchRequest<SystemUserDTO> request) throws IOException {
         boolean isVietnamese = "vi".equalsIgnoreCase(FwContextHeader.get().getLanguage());
         Specification<SystemCredential> spec = createSpecification(request);
@@ -299,8 +286,7 @@ public class SystemUserService {
         List<SystemUserDTO> data = result
             .stream()
             .map(sc -> {
-                List<Tenant> userTenants = new ArrayList<>(sc.getSystemUser().getTenants());
-                return SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), userTenants);
+                return SystemUserMapper.toFullDTO(sc, sc.getSystemUser());
             })
             .toList();
 

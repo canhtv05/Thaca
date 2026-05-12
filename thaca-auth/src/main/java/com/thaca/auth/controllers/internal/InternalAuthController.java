@@ -2,7 +2,6 @@ package com.thaca.auth.controllers.internal;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
-import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
@@ -33,19 +32,19 @@ public class InternalAuthController {
     }
 
     @PostMapping("/cms/sign-in")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_AUTHENTICATE, type = RequestType.INTERNAL)
+    @FwRequest(name = ServiceMethod.CMS_AUTHENTICATE, type = RequestType.INTERNAL)
     public ResponseEntity<AuthenticateRes> signIn(LoginReq loginReq) {
         return ResponseEntity.ok(process.process(loginReq));
     }
 
     @PostMapping("/cms/sign-out")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_LOGOUT, type = RequestType.INTERNAL)
+    @FwRequest(name = ServiceMethod.CMS_LOGOUT, type = RequestType.INTERNAL)
     public ResponseEntity<Void> signOut() {
         return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/cms/profile")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_PROFILE, type = RequestType.INTERNAL)
+    @FwRequest(name = ServiceMethod.CMS_GET_PROFILE, type = RequestType.INTERNAL)
     public ResponseEntity<SystemUserDTO> getProfile() {
         return ResponseEntity.ok(process.process(null));
     }

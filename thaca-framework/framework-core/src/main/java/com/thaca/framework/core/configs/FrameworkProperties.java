@@ -50,6 +50,6 @@ public class FrameworkProperties {
     public static class RoutesConfig {
 
         private String authService;
-        private String adminService;
+        private String cmsService;
     }
 }

@@ -16,10 +16,6 @@ import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.auth.utils.CaptchaUtils;
-import com.thaca.auth.validators.core.Validator;
-import com.thaca.auth.validators.rules.PasswordRule;
-import com.thaca.auth.validators.rules.UsernameRule;
-import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
@@ -46,6 +42,9 @@ import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.CookieUtils;
 import com.thaca.framework.core.utils.FwUtils;
 import com.thaca.framework.core.utils.JsonF;
+import com.thaca.framework.core.validations.Validator;
+import com.thaca.framework.core.validations.rules.PasswordRule;
+import com.thaca.framework.core.validations.rules.UsernameRule;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -155,13 +154,13 @@ public class AuthService {
         }
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_AUTHENTICATE, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.VALIDATE)
     public void validateAuthenticateCms(LoginReq loginReq) {
         validateAuthenticate(loginReq);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_AUTHENTICATE, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.HANDLE)
     public AuthenticateRes authenticateCms(LoginReq loginReq) {
         HttpServletRequest httpServletRequest = (
             (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
@@ -318,7 +317,7 @@ public class AuthService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_LOGOUT, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_LOGOUT, type = ModeType.HANDLE)
     public void logoutCms() {
         String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : ChannelType.CMS.name();
         logoutWithChannel(channel);
@@ -339,7 +338,7 @@ public class AuthService {
             .map(u ->
                 SystemUserDTO.builder()
                     .id(u.getId())
-                    .tenantIds(u.getTenants().stream().map(Tenant::getId).collect(Collectors.toList()))
+                    .tenantIds(u.getTenantIds() != null ? new ArrayList<>(u.getTenantIds()) : null)
                     .username(u.getUsername())
                     .email(u.getEmail())
                     .build()

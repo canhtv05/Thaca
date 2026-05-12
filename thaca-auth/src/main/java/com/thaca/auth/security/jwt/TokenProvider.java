@@ -303,13 +303,13 @@ public class TokenProvider {
         if (userObj instanceof User u) {
             username = u.getUsername();
             password = u.getPassword();
-            tenantIds = u.getTenants().stream().map(com.thaca.auth.domains.Tenant::getId).toList();
+            tenantIds = new ArrayList<>(u.getTenantIds());
             authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
         } else if (userObj instanceof SystemCredential sc) {
             username = sc.getUsername();
             password = sc.getPassword();
             isSuperAdmin = sc.getSystemUser().getIsSuperAdmin();
-            tenantIds = sc.getSystemUser().getTenants().stream().map(com.thaca.auth.domains.Tenant::getId).toList();
+            tenantIds = new ArrayList<>(sc.getSystemUser().getTenantIds());
             if (isSuperAdmin) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));

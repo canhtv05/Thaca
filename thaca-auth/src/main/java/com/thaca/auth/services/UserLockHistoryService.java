@@ -1,9 +1,9 @@
 package com.thaca.auth.services;
 
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
 import com.thaca.auth.mappers.UserLockHistoryMapper;
 import com.thaca.auth.repositories.UserLockHistoryRepository;
-import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.UserLockHistoryDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
@@ -30,13 +30,13 @@ public class UserLockHistoryService {
 
     private final UserLockHistoryRepository userLockHistoryRepository;
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_USER_LOCK_HISTORY, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_USER_LOCK_HISTORY, type = ModeType.VALIDATE)
     public void validateSearchUserLockHistory(SearchRequest<Void> request) {
         CommonService.validateSearchRequest(request);
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_USER_LOCK_HISTORY, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_USER_LOCK_HISTORY, type = ModeType.HANDLE)
     public SearchResponse<UserLockHistoryDTO> searchUserLockHistory(SearchRequest<UserLockHistoryDTO> request) {
         Specification<UserLockHistory> spec = createSpecification(request);
         if (request.getFilter().getTargetUserId() != null) {

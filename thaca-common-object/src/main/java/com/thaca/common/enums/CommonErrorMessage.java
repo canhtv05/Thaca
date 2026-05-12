@@ -139,6 +139,63 @@ public enum CommonErrorMessage implements ErrorMessageRule {
         "File Excel không hợp lệ",
         "Excel invalid",
         "Excel invalid"
+    ),
+    CODE_INVALID(
+        "CODE.INVALID",
+        "Mã không hợp lệ",
+        "Mã không được chứa ký tự đặc biệt. Chỉ được chứa ký tự A-Z, a-z, 0-9",
+        "Code invalid",
+        "Code invalid. It must contain only letters A-Z, a-z, 0-9"
+    ),
+    EMAIL_INVALID("EMAIL.INVALID", "Email không hợp lệ", "Email không hợp lệ", "Email invalid", "Email invalid"),
+    USERNAME_INVALID(
+        "USERNAME.INVALID",
+        "Tên đăng nhập không hợp lệ",
+        "Tên đăng nhập phải từ 4-50 ký tự, chỉ gồm chữ thường, số và ._-",
+        "Username invalid",
+        "Username must be 4-50 characters, lowercase letters, numbers and ._- only"
+    ),
+    FULLNAME_INVALID(
+        "FULLNAME.INVALID",
+        "Họ tên không hợp lệ",
+        "Họ tên phải từ 2-100 ký tự và không chứa ký tự đặc biệt",
+        "Fullname invalid",
+        "Fullname must be 2-100 characters and not contain special characters"
+    ),
+    PASSWORD_INVALID(
+        "PASSWORD.INVALID",
+        "Mật khẩu không chính xác",
+        "Mật khẩu không chính xác",
+        "Password invalid",
+        "Password invalid"
+    ),
+    PASSWORD_TOO_WEAK(
+        "PASSWORD.TOO.WEAK",
+        "Mật khẩu quá yếu",
+        "Mật khẩu phải chứa ít nhất 1 chữ và 1 số",
+        "Password too weak",
+        "Password must contain at least 1 letter and 1 number"
+    ),
+    USERNAME_LENGTH_INVALID(
+        "USERNAME.LENGTH.INVALID",
+        "Độ dài tên đăng nhập không hợp lệ",
+        "Tên đăng nhập phải từ 4 đến 50 ký tự",
+        "Username length invalid",
+        "Username must be between 4 and 50 characters"
+    ),
+    PASSWORD_LENGTH_INVALID(
+        "PASSWORD.LENGTH.INVALID",
+        "Độ dài mật khẩu không hợp lệ",
+        "Mật khẩu phải từ 6 đến 100 ký tự",
+        "Password length invalid",
+        "Password must be between 6 and 100 characters"
+    ),
+    EMAIL_LENGTH_INVALID(
+        "EMAIL.LENGTH.INVALID",
+        "Độ dài email không hợp lệ",
+        "Email không được vượt quá 255 ký tự",
+        "Email length invalid",
+        "Email must not exceed 255 characters"
     );
 
     private final String code;
