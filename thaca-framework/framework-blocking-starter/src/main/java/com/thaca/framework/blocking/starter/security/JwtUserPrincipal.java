@@ -3,8 +3,8 @@ package com.thaca.framework.blocking.starter.security;
 import com.thaca.framework.core.constants.AuthoritiesConstants;
 import com.thaca.framework.core.constants.CommonConstants;
 import com.thaca.framework.core.security.UserPrincipal;
+import com.thaca.framework.core.utils.FwUtils;
 import io.jsonwebtoken.Claims;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,17 +40,8 @@ public final class JwtUserPrincipal implements UserPrincipal {
         String role = roleObj != null ? roleObj.toString() : "";
         String channel = claims.get(CommonConstants.CHANNEL_KEY, String.class);
         Integer c = claims.get("c", Integer.class);
-        List<Long> tenantIds = new ArrayList<>();
         Object tenantObjects = claims.get("tenantIds");
-        if (tenantObjects instanceof Collection<?> col) {
-            for (Object item : col) {
-                if (item instanceof Number n) {
-                    tenantIds.add(n.longValue());
-                }
-            }
-        } else if (tenantObjects instanceof Number n) {
-            tenantIds.add(n.longValue());
-        }
+        List<Long> tenantIds = FwUtils.extractTenantIds(tenantObjects);
         boolean superAdmin = authorities
             .stream()
             .anyMatch(a -> AuthoritiesConstants.SUPER_ADMIN.equals(a.getAuthority()));

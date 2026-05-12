@@ -103,6 +103,10 @@ public class InternalApiClient {
     private HttpHeaders buildMultipartHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        return getHttpHeaders(headers);
+    }
+
+    private HttpHeaders getHttpHeaders(HttpHeaders headers) {
         headers.set(FwHttpHeaderConstants.INTERNAL_CALL_HEADER, "true");
         headers.set(HttpHeaders.AUTHORIZATION, "Basic " + frameworkProperties.getHttpClient().getApiKey());
 
@@ -137,21 +141,7 @@ public class InternalApiClient {
     private HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(FwHttpHeaderConstants.INTERNAL_CALL_HEADER, "true");
-        headers.set(HttpHeaders.AUTHORIZATION, "Basic " + frameworkProperties.getHttpClient().getApiKey());
-
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attr != null) {
-            HttpServletRequest req = attr.getRequest();
-            copyIfPresent(headers, HttpHeaders.COOKIE, req.getHeader(HttpHeaders.COOKIE));
-            copyIfPresent(headers, HttpHeaders.USER_AGENT, req.getHeader(HttpHeaders.USER_AGENT));
-
-            String bearer = req.getHeader(HttpHeaders.AUTHORIZATION);
-            if (StringUtils.isNotBlank(bearer) && bearer.startsWith("Bearer ")) {
-                headers.set(HttpHeaders.AUTHORIZATION, bearer);
-            }
-        }
-        return headers;
+        return getHttpHeaders(headers);
     }
 
     private void copyIfPresent(HttpHeaders headers, String key, String value) {

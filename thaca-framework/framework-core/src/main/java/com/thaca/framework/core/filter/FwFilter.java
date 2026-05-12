@@ -176,16 +176,7 @@ public class FwFilter extends OncePerRequestFilter {
                 requestGuard.release(locked);
             }
             long duration = System.currentTimeMillis() - startTime;
-            byte[] responseArray = responseWrapper.getContentAsByteArray();
-            String responseContentType = responseWrapper.getContentType();
-            String responseStr;
-
-            if (responseContentType != null && responseContentType.contains(MediaType.APPLICATION_JSON_VALUE)) {
-                responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
-                responseStr = maskSensitiveData(responseStr);
-            } else {
-                responseStr = "[BINARY DATA (" + responseArray.length + " bytes)]";
-            }
+            String responseStr = getResponseString(responseWrapper);
 
             int status = responseWrapper.getStatus();
             String logMsg = "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}";
@@ -199,6 +190,20 @@ public class FwFilter extends OncePerRequestFilter {
             MDC.clear();
             FwContextHeader.clear();
         }
+    }
+
+    private String getResponseString(ContentCachingResponseWrapper responseWrapper) {
+        byte[] responseArray = responseWrapper.getContentAsByteArray();
+        String responseContentType = responseWrapper.getContentType();
+        String responseStr;
+
+        if (responseContentType != null && responseContentType.contains(MediaType.APPLICATION_JSON_VALUE)) {
+            responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
+            responseStr = maskSensitiveData(responseStr);
+        } else {
+            responseStr = "[BINARY DATA (" + responseArray.length + " bytes)]";
+        }
+        return responseStr;
     }
 
     private ApiHeader buildContextHeader(ApiPayload<?> envelope) {
