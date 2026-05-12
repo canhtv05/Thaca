@@ -1,7 +1,9 @@
 package com.thaca.cms.mappers;
 
 import com.thaca.cms.domains.Tenant;
+import com.thaca.cms.domains.projection.TenantInfoProjection;
 import com.thaca.common.dtos.internal.TenantDTO;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.framework.core.utils.DateUtils;
 
 public class TenantMapper {
@@ -27,6 +29,18 @@ public class TenantMapper {
             .updatedBy(tenant.getUpdatedBy())
             .createdAt(DateUtils.dateToString(tenant.getCreatedAt()))
             .updatedAt(DateUtils.dateToString(tenant.getUpdatedAt()))
+            .build();
+    }
+
+    public static TenantInfoPrj fromPrj(TenantInfoProjection tenant) {
+        if (tenant == null) {
+            return null;
+        }
+        return TenantInfoPrj.builder()
+            .id(tenant.getId())
+            .code(tenant.getCode())
+            .name(tenant.getName())
+            .logoUrl(tenant.getLogoUrl())
             .build();
     }
 }

@@ -1,7 +1,9 @@
 package com.thaca.cms.mappers;
 
 import com.thaca.cms.domains.Plan;
+import com.thaca.cms.domains.projection.PlanInfoProjection;
 import com.thaca.common.dtos.internal.PlanDTO;
+import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
 import com.thaca.framework.core.utils.DateUtils;
 
 public class PlanMapper {
@@ -24,5 +26,12 @@ public class PlanMapper {
             .createdAt(DateUtils.dateToString(plan.getCreatedAt()))
             .updatedAt(DateUtils.dateToString(plan.getUpdatedAt()))
             .build();
+    }
+
+    public static PlanInfoPrj fromPrj(PlanInfoProjection plan) {
+        if (plan == null) {
+            return null;
+        }
+        return PlanInfoPrj.builder().id(plan.getId()).code(plan.getCode()).name(plan.getName()).build();
     }
 }

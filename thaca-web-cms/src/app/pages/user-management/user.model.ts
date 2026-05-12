@@ -7,5 +7,6 @@ export interface IUserDTO extends Partial<IBaseAuditResponse> {
   email: string;
   isActivated?: boolean;
   isLocked?: boolean;
-  tenant: ITenantInfoPrj;
+  tenantIds?: number[];
+  tenantInfos?: ITenantInfoPrj[];
 }

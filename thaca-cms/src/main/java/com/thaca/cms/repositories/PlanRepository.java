@@ -1,7 +1,7 @@
 package com.thaca.cms.repositories;
 
 import com.thaca.cms.domains.Plan;
-import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
+import com.thaca.cms.domains.projection.PlanInfoProjection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,7 +23,7 @@ public interface PlanRepository extends JpaRepository<Plan, Long>, JpaSpecificat
         ORDER BY p.updated_at DESC
         """
     )
-    List<PlanInfoPrj> findAllActivePlansOrderByUpdatedAtDesc();
+    List<PlanInfoProjection> findAllActivePlansOrderByUpdatedAtDesc();
 
     @Query(
         nativeQuery = true,
@@ -32,5 +32,5 @@ public interface PlanRepository extends JpaRepository<Plan, Long>, JpaSpecificat
         ORDER BY p.updated_at DESC
         """
     )
-    List<PlanInfoPrj> findAllPlanInfo();
+    List<PlanInfoProjection> findAllPlanInfo();
 }

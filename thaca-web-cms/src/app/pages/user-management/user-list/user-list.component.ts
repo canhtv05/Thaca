@@ -124,12 +124,16 @@ export class UserListComponent implements OnInit {
       { field: 'username', header: 'user.username', sortable: true, width: '150px' },
       { field: 'email', header: 'user.email', sortable: true },
       {
-        field: 'tenant',
+        field: 'tenantInfos',
         header: 'user.tenant',
         center: true,
         render: (row: IUserDTO) => {
-          return row.tenant
-            ? `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${row.tenant.code} - ${row.tenant.name}</span>`
+          return row.tenantInfos?.length
+            ? row.tenantInfos
+                .map((t, i) => {
+                  return `<span class="thaca-badge ${i > 0 ? 'mt-[2px]' : ''} thaca-badge-primary"><span class="thb-dot"></span>${t.code} - ${t.name}</span>`;
+                })
+                .join('')
             : '';
         },
       },

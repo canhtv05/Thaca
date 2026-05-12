@@ -61,6 +61,18 @@ public class TenantController {
         return ResponseEntity.ok(process.process(request));
     }
 
+    @PostMapping("/delete")
+    @FwRequest(name = ServiceMethod.CMS_DELETE_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
+    public ResponseEntity<Void> delete(TenantDTO request) {
+        return ResponseEntity.ok(process.process(request));
+    }
+
+    @PostMapping("/restore")
+    @FwRequest(name = ServiceMethod.CMS_RESTORE_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
+    public ResponseEntity<Void> restore(TenantDTO request) {
+        return ResponseEntity.ok(process.process(request));
+    }
+
     @PostMapping("/export")
     @FwRequest(name = ServiceMethod.CMS_EXPORT_TENANT, type = RequestType.PROTECTED)
     public void export(SearchRequest<TenantDTO> request, HttpServletResponse response) throws IOException {

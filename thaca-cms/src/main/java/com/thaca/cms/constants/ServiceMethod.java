@@ -13,10 +13,13 @@ public class ServiceMethod {
 
     public static final String CMS_SEARCH_TENANTS = "cms.searchTenants";
     public static final String CMS_GET_TENANT = "cms.getTenant";
+    public static final String CMS_GET_TENANTS_BY_IDS = "cms.getTenantsByIds";
     public static final String CMS_GET_ALL_TENANTS = "cms.getAllTenants";
     public static final String CMS_CREATE_TENANT = "cms.createTenant";
     public static final String CMS_UPDATE_TENANT = "cms.updateTenant";
     public static final String CMS_LOCK_UNLOCK_TENANT = "cms.lockUnlockTenant";
+    public static final String CMS_DELETE_TENANT = "cms.deleteTenant";
+    public static final String CMS_RESTORE_TENANT = "cms.restoreTenant";
     public static final String CMS_EXPORT_TENANT = "cms.exportTenant";
 
     public static final String CMS_SEARCH_USERS = "cms.searchUsers";

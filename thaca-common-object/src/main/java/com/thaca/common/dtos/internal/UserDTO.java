@@ -30,5 +30,6 @@ public class UserDTO extends BaseAuditResponse {
     private Boolean isActivated;
     private Boolean isLocked;
     private List<Long> tenantIds;
-    private List<TenantInfoPrj> tenants;
+    private List<TenantDTO> tenants;
+    private List<TenantInfoPrj> tenantInfos;
 }

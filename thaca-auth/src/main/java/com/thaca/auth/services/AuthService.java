@@ -176,9 +176,11 @@ public class AuthService {
                           loginReq.getTenantId()
                       )
                     : systemCredentialRepository.findByUsername(loginReq.getUsername());
-
             SystemCredential sc = scOpt.orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
             SystemUser su = sc.getSystemUser();
+            if (loginReq.getTenantId() == null && !su.getIsSuperAdmin()) {
+                throw new FwException(CommonErrorMessage.FORBIDDEN);
+            }
             if (su.getLockedUntil() != null && su.getLockedUntil().isAfter(Instant.now())) {
                 throw new FwException(ErrorMessage.USER_TEMPORARILY_LOCKED);
             }

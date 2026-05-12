@@ -1,5 +1,6 @@
 package com.thaca.auth.services;
 
+import com.thaca.auth.clients.CmsClient;
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
 import com.thaca.auth.enums.ErrorMessage;
@@ -9,7 +10,9 @@ import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.auth.repositories.UserLockHistoryRepository;
 import com.thaca.common.dtos.internal.SystemUserDTO;
+import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.UserDTO;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -50,6 +53,7 @@ public class SystemUserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserLockHistoryRepository userLockHistoryRepository;
+    private final CmsClient cmsClient;
 
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.CMS_GET_PROFILE, type = ModeType.HANDLE)
@@ -58,7 +62,8 @@ public class SystemUserService {
         return systemCredentialRepository
             .findByUsername(username)
             .map(sc -> {
-                return SystemUserMapper.toFullDTO(sc, sc.getSystemUser());
+                SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, sc.getSystemUser());
+                return getSystemUserDTO(dto);
             })
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
@@ -86,10 +91,43 @@ public class SystemUserService {
         List<SystemUserDTO> data = result
             .getContent()
             .stream()
-            .map(sc -> {
-                return SystemUserMapper.toSearchDTO(sc, sc.getSystemUser());
-            })
+            .map(sc -> SystemUserMapper.toSearchDTO(sc, sc.getSystemUser()))
             .toList();
+
+        Set<Long> tenantIds = data
+            .stream()
+            .filter(d -> !CollectionUtils.isEmpty(d.getTenantIds()))
+            .flatMap(d -> d.getTenantIds().stream())
+            .collect(Collectors.toSet());
+
+        if (!tenantIds.isEmpty()) {
+            if (!SecurityUtils.isSuperAdmin()) {
+                List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
+                tenantIds = tenantIds.stream().filter(currentTenantIds::contains).collect(Collectors.toSet());
+            }
+        }
+
+        if (!tenantIds.isEmpty()) {
+            List<TenantInfoPrj> tenants = cmsClient.getTenantsByIds(
+                TenantDTO.builder().tenantIds(new ArrayList<>(tenantIds)).build()
+            );
+            Map<Long, TenantInfoPrj> tenantMap = tenants
+                .stream()
+                .collect(Collectors.toMap(TenantInfoPrj::getId, t -> t));
+            data.forEach(d -> {
+                if (!CollectionUtils.isEmpty(d.getTenantIds())) {
+                    List<TenantInfoPrj> tenantInfos = d
+                        .getTenantIds()
+                        .stream()
+                        .map(tenantMap::get)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                    d.setTenantInfos(tenantInfos);
+                    d.setTenants(null);
+                }
+            });
+        }
+
         return new SearchResponse<>(data, PaginationResponse.of(result));
     }
 
@@ -105,7 +143,8 @@ public class SystemUserService {
         SystemCredential sc = systemCredentialRepository
             .findBySystemUser(su)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        return SystemUserMapper.toFullDTO(sc, su);
+        SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, su);
+        return getSystemUserDTO(dto);
     }
 
     @FwMode(name = ServiceMethod.CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
@@ -147,8 +186,8 @@ public class SystemUserService {
                     .build()
             );
         }
-
-        return SystemUserMapper.toFullDTO(sc, su);
+        SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, su);
+        return getSystemUserDTO(dto);
     }
 
     @FwMode(name = ServiceMethod.CMS_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
@@ -209,8 +248,8 @@ public class SystemUserService {
                     .build()
             );
         }
-
-        return SystemUserMapper.toFullDTO(sc, su);
+        SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, su);
+        return getSystemUserDTO(dto);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -286,7 +325,8 @@ public class SystemUserService {
         List<SystemUserDTO> data = result
             .stream()
             .map(sc -> {
-                return SystemUserMapper.toFullDTO(sc, sc.getSystemUser());
+                SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, sc.getSystemUser());
+                return getSystemUserDTO(dto);
             })
             .toList();
 
@@ -321,6 +361,28 @@ public class SystemUserService {
             rows.add(row);
         }
         return ExcelEngine.exportData(buildSchema(isVietnamese), rows);
+    }
+
+    private TenantDTO fromTenantDTO(TenantInfoPrj t) {
+        return TenantDTO.builder().id(t.getId()).code(t.getCode()).name(t.getName()).logoUrl(t.getLogoUrl()).build();
+    }
+
+    private SystemUserDTO getSystemUserDTO(SystemUserDTO dto) {
+        if (!CollectionUtils.isEmpty(dto.getTenantIds())) {
+            List<Long> visibleTenantIds = dto.getTenantIds();
+            if (!SecurityUtils.isSuperAdmin()) {
+                List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
+                visibleTenantIds = visibleTenantIds.stream().filter(currentTenantIds::contains).toList();
+            }
+            if (!visibleTenantIds.isEmpty()) {
+                List<TenantInfoPrj> tenants = cmsClient.getTenantsByIds(
+                    TenantDTO.builder().tenantIds(new ArrayList<>(visibleTenantIds)).build()
+                );
+                dto.setTenants(tenants.stream().map(this::fromTenantDTO).collect(Collectors.toList()));
+                dto.setTenantInfos(null);
+            }
+        }
+        return dto;
     }
 
     private ExcelSchema buildSchema(boolean isVietnamese) {

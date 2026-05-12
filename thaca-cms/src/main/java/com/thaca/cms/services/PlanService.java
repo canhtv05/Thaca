@@ -141,11 +141,7 @@ public class PlanService {
 
     @FwMode(name = ServiceMethod.CMS_GET_ALL_PLANS, type = ModeType.HANDLE)
     public List<PlanInfoPrj> getAllPlans() {
-        return planRepository
-            .findAllActivePlansOrderByUpdatedAtDesc()
-            .stream()
-            .map(p -> PlanInfoPrj.builder().id(p.getId()).name(p.getName()).code(p.getCode()).build())
-            .collect(Collectors.toList());
+        return planRepository.findAllActivePlansOrderByUpdatedAtDesc().stream().map(PlanMapper::fromPrj).toList();
     }
 
     @FwMode(name = ServiceMethod.CMS_EXPORT_PLAN, type = ModeType.HANDLE)

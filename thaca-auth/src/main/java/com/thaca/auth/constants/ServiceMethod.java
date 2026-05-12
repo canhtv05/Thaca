@@ -68,6 +68,7 @@ public class ServiceMethod {
     // ==========================================
     public static final String CMS_SEARCH_TENANTS = "cms.searchTenants";
     public static final String CMS_GET_TENANT = "cms.getTenant";
+    public static final String CMS_GET_TENANTS_BY_IDS = "cms.getTenantsByIds";
     public static final String CMS_GET_ALL_TENANTS = "cms.getAllTenants";
     public static final String CMS_CREATE_TENANT = "cms.createTenant";
     public static final String CMS_UPDATE_TENANT = "cms.updateTenant";

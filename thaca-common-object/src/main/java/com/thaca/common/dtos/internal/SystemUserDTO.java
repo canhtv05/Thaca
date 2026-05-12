@@ -2,6 +2,7 @@ package com.thaca.common.dtos.internal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thaca.common.dtos.BaseAuditResponse;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.enums.PermissionEffect;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class SystemUserDTO extends BaseAuditResponse {
     private Boolean isSuperAdmin;
     private String avatarUrl;
     private List<TenantDTO> tenants;
+    private List<TenantInfoPrj> tenantInfos;
     private Map<String, Map<String, PermissionEffect>> roles;
 
     private String password;

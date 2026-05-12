@@ -85,20 +85,28 @@ public class UserService {
     public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> request) {
         Specification<User> spec = createUserSpecification(request);
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
-
-        List<TenantInfoPrj> allTenants = cmsClient.getAllTenants();
-        Map<Long, TenantInfoPrj> tenantMap =
-            allTenants != null
-                ? allTenants.stream().collect(Collectors.toMap(TenantInfoPrj::getId, t -> t))
-                : Collections.emptyMap();
-
+        Set<Long> tenantIds = users
+            .getContent()
+            .stream()
+            .flatMap(u -> u.getTenantIds().stream())
+            .collect(Collectors.toSet());
+        if (!tenantIds.isEmpty()) {
+            if (!SecurityUtils.isSuperAdmin()) {
+                List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
+                tenantIds = tenantIds.stream().filter(currentTenantIds::contains).collect(Collectors.toSet());
+            }
+        }
+        Map<Long, TenantInfoPrj> tenantMap = getLongTenantInfoPrjMap(tenantIds);
         var response = users
             .getContent()
             .stream()
             .map(u -> {
                 UserDTO dto = UserMapper.fromEntity(u);
                 if (dto.getTenantIds() != null) {
-                    dto.setTenants(dto.getTenantIds().stream().map(tenantMap::get).filter(Objects::nonNull).toList());
+                    dto.setTenantInfos(
+                        dto.getTenantIds().stream().map(tenantMap::get).filter(Objects::nonNull).toList()
+                    );
+                    dto.setTenants(null);
                 }
                 return dto;
             })
@@ -111,19 +119,27 @@ public class UserService {
     @FwMode(name = ServiceMethod.CMS_EXPORT_USERS, type = ModeType.HANDLE)
     public byte[] exportUsers(SearchRequest<UserDTO> request) throws IOException {
         Specification<User> spec = createUserSpecification(request);
-        List<TenantInfoPrj> allTenants = cmsClient.getAllTenants();
-        Map<Long, TenantInfoPrj> tenantMap =
-            allTenants != null
-                ? allTenants.stream().collect(Collectors.toMap(TenantInfoPrj::getId, t -> t))
-                : Collections.emptyMap();
-
-        List<UserDTO> users = userRepository
-            .findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"))
+        List<User> userPage = userRepository.findAll(spec);
+        Set<Long> tenantIds = userPage
+            .stream()
+            .flatMap(u -> u.getTenantIds().stream())
+            .collect(Collectors.toSet());
+        if (!tenantIds.isEmpty()) {
+            if (!SecurityUtils.isSuperAdmin()) {
+                List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
+                tenantIds = tenantIds.stream().filter(currentTenantIds::contains).collect(Collectors.toSet());
+            }
+        }
+        Map<Long, TenantInfoPrj> tenantMap = getLongTenantInfoPrjMap(tenantIds);
+        List<UserDTO> users = userPage
             .stream()
             .map(u -> {
                 UserDTO dto = UserMapper.fromEntity(u);
                 if (dto.getTenantIds() != null) {
-                    dto.setTenants(dto.getTenantIds().stream().map(tenantMap::get).filter(Objects::nonNull).toList());
+                    dto.setTenantInfos(
+                        dto.getTenantIds().stream().map(tenantMap::get).filter(Objects::nonNull).toList()
+                    );
+                    dto.setTenants(null);
                 }
                 return dto;
             })
@@ -177,17 +193,8 @@ public class UserService {
             .findByUsername(request.getUsername())
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
 
-        List<TenantInfoPrj> allTenants = cmsClient.getAllTenants();
-        Map<Long, TenantInfoPrj> tenantMap =
-            allTenants != null
-                ? allTenants.stream().collect(Collectors.toMap(TenantInfoPrj::getId, t -> t))
-                : Collections.emptyMap();
-
         UserDTO dto = UserMapper.fromEntity(user);
-        if (dto.getTenantIds() != null) {
-            dto.setTenants(dto.getTenantIds().stream().map(tenantMap::get).filter(Objects::nonNull).toList());
-        }
-        return dto;
+        return getUserDTO(dto);
     }
 
     @Transactional(readOnly = true)
@@ -494,7 +501,7 @@ public class UserService {
     public UserDTO findById(Long id) {
         return userRepository
             .findById(id)
-            .map(u -> UserMapper.fromEntityWithCms(u, true))
+            .map(u -> getUserDTO(UserMapper.fromEntityWithCms(u, true)))
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
@@ -926,6 +933,13 @@ public class UserService {
         return toImportResponse(errorResult);
     }
 
+    private Map<Long, TenantInfoPrj> getLongTenantInfoPrjMap(Set<Long> tenantIds) {
+        List<TenantInfoPrj> tenants = tenantIds.isEmpty()
+            ? List.of()
+            : cmsClient.getTenantsByIds(TenantDTO.builder().tenantIds(new ArrayList<>(tenantIds)).build());
+        return tenants.stream().collect(Collectors.toMap(TenantInfoPrj::getId, t -> t));
+    }
+
     // private void publishUserEvent(UserDTO request, User user, boolean isAdmin) {
     // String topic;
     // Object payload;
@@ -937,6 +951,34 @@ public class UserService {
     // topic = EventConstants.USER_CREATED_TOPIC;
     // payload = new UserCreationEvent(user.getUsername(), request.getFullname());
     // }
-    // kafkaProducerService.sendAndWait(topic, user.getUsername(), payload);
-    // }
+
+    private UserDTO getUserDTO(UserDTO dto) {
+        if (dto.getTenantIds() != null && !dto.getTenantIds().isEmpty()) {
+            List<Long> visibleTenantIds = dto.getTenantIds();
+            if (!SecurityUtils.isSuperAdmin()) {
+                List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
+                visibleTenantIds = visibleTenantIds.stream().filter(currentTenantIds::contains).toList();
+            }
+            if (!visibleTenantIds.isEmpty()) {
+                List<TenantInfoPrj> tenants = cmsClient.getTenantsByIds(
+                    TenantDTO.builder().tenantIds(new ArrayList<>(visibleTenantIds)).build()
+                );
+                dto.setTenants(
+                    tenants
+                        .stream()
+                        .map(t ->
+                            TenantDTO.builder()
+                                .id(t.getId())
+                                .code(t.getCode())
+                                .name(t.getName())
+                                .logoUrl(t.getLogoUrl())
+                                .build()
+                        )
+                        .collect(Collectors.toList())
+                );
+                dto.setTenantInfos(null);
+            }
+        }
+        return dto;
+    }
 }

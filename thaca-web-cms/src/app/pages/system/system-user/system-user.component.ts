@@ -132,8 +132,12 @@ export class SystemUserComponent implements OnInit {
         header: 'system_user.tenant',
         center: true,
         render: (row: ISystemUserDTO) => {
-          return row.tenantInfo
-            ? `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${row.tenantInfo.code} - ${row.tenantInfo.name}</span>`
+          return row.tenantInfos?.length
+            ? row.tenantInfos
+                .map((t, i) => {
+                  return `<span class="thaca-badge ${i > 0 ? 'mt-[2px]' : ''} thaca-badge-primary"><span class="thb-dot"></span>${t.code} - ${t.name}</span>`;
+                })
+                .join('')
             : '';
         },
       },

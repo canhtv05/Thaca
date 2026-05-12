@@ -190,7 +190,15 @@ public class TenantService {
 
     @FwMode(name = ServiceMethod.CMS_GET_ALL_TENANTS, type = ModeType.HANDLE)
     public List<TenantInfoPrj> getAllTenants() {
-        return tenantRepository.findAllTenants();
+        return tenantRepository.findAllTenants().stream().map(TenantMapper::fromPrj).toList();
+    }
+
+    @FwMode(name = ServiceMethod.CMS_GET_TENANTS_BY_IDS, type = ModeType.HANDLE)
+    public List<TenantInfoPrj> getTenantsByIds(TenantDTO dto) {
+        if (dto.getTenantIds().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return tenantRepository.findTenantsByIds(dto.getTenantIds()).stream().map(TenantMapper::fromPrj).toList();
     }
 
     @FwMode(name = ServiceMethod.CMS_EXPORT_TENANT, type = ModeType.HANDLE)
@@ -334,6 +342,20 @@ public class TenantService {
         };
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.CMS_RESTORE_TENANT, type = ModeType.HANDLE)
+    public void restoreTenant(TenantDTO dto) {
+        if (dto.getId() == null) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        Tenant tenant = tenantRepository
+            .findSoftDeletedById(dto.getId())
+            .orElseThrow(() -> new FwException(CmsErrorMessage.TENANT_NOT_FOUND));
+
+        tenant.setDeletedAt(null);
+        tenantRepository.save(tenant);
+    }
+
     private void validateTenant(TenantDTO request) {
         if (CommonUtils.isEmpty(request.getCode(), request.getName(), request.getPlanId())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -354,7 +376,12 @@ public class TenantService {
             taskExecutor
         );
         CompletableFuture<Map<Long, PlanInfoPrj>> planMapFuture = CompletableFuture.supplyAsync(
-            () -> planRepository.findAllPlanInfo().stream().collect(Collectors.toMap(PlanInfoPrj::getId, p -> p)),
+            () ->
+                planRepository
+                    .findAllPlanInfo()
+                    .stream()
+                    .map(PlanMapper::fromPrj)
+                    .collect(Collectors.toMap(PlanInfoPrj::getId, p -> p)),
             taskExecutor
         );
         return CompletableFuture.allOf(tenantFuture, planMapFuture)
