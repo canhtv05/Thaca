@@ -29,6 +29,7 @@ import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
     ThacaButtonComponent,
   ],
   templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
