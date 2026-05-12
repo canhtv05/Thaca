@@ -28,7 +28,7 @@ public class SystemUserDTO extends BaseAuditResponse {
     private Boolean isLocked;
     private Boolean isSuperAdmin;
     private String avatarUrl;
-    private TenantDTO tenantInfo;
+    private List<TenantDTO> tenants;
     private Map<String, Map<String, PermissionEffect>> roles;
 
     private String password;

@@ -212,7 +212,7 @@ public class TokenProvider {
             )
             .claim(CommonConstants.CHANNEL_KEY, channel)
             .claim("c", userDetails.isCmsUser() ? 1 : 0)
-            .claim("tenantId", userDetails.getTenantId())
+            .claim("tenantIds", userDetails.getTenantIds())
             .issuedAt(new Date(now))
             .expiration(validity)
             .signWith(key, Jwts.SIG.HS512)
@@ -299,17 +299,17 @@ public class TokenProvider {
         boolean isSuperAdmin = false;
         List<GrantedAuthority> authorities = new ArrayList<>();
 
-        Long tenantId = null;
+        List<Long> tenantIds = null;
         if (userObj instanceof User u) {
             username = u.getUsername();
             password = u.getPassword();
-            tenantId = u.getTenantId();
+            tenantIds = u.getTenants().stream().map(com.thaca.auth.domains.Tenant::getId).toList();
             authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
         } else if (userObj instanceof SystemCredential sc) {
             username = sc.getUsername();
             password = sc.getPassword();
             isSuperAdmin = sc.getSystemUser().getIsSuperAdmin();
-            tenantId = sc.getSystemUser().getTenantId();
+            tenantIds = sc.getSystemUser().getTenants().stream().map(com.thaca.auth.domains.Tenant::getId).toList();
             if (isSuperAdmin) {
                 rolesString = AuthoritiesConstants.SUPER_ADMIN;
                 authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.SUPER_ADMIN));
@@ -335,7 +335,7 @@ public class TokenProvider {
             channel.name(),
             isSuperAdmin,
             cmsUser,
-            tenantId
+            tenantIds
         );
         return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }

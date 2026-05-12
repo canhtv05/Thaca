@@ -1,5 +1,7 @@
 package com.thaca.framework.core.security;
 
+import java.util.List;
+
 public interface UserPrincipal {
     String getUsername();
 
@@ -11,5 +13,5 @@ public interface UserPrincipal {
 
     boolean isCmsUser();
 
-    Long getTenantId();
+    List<Long> getTenantIds();
 }

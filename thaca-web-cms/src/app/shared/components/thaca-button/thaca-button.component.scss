@@ -114,6 +114,20 @@
     }
   }
 
+  &--link {
+    background: transparent;
+    color: var(--primary);
+    border-color: transparent;
+    &:hover:not(:disabled) {
+      text-decoration: underline;
+    }
+    .thaca-btn__icon,
+    i {
+      text-decoration: none !important;
+      display: inline-block;
+    }
+  }
+
   &--destructive {
     background: var(--destructive);
     color: #fff;

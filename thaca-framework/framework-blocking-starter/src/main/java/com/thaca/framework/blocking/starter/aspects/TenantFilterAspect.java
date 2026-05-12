@@ -25,7 +25,7 @@ public class TenantFilterAspect {
             "&& !within(com.thaca.framework..*)"
     )
     public void enableTenantFilter() {
-        Long tenantId = TenantContext.get();
+        java.util.List<Long> tenantIds = TenantContext.get();
         EntityManager entityManager = entityManagerProvider.getIfAvailable();
         if (entityManager == null) {
             return;
@@ -33,8 +33,8 @@ public class TenantFilterAspect {
         Session session = entityManager.unwrap(Session.class);
         try {
             if (session.getSessionFactory().getDefinedFilterNames().contains("tenantFilter")) {
-                if (tenantId != null) {
-                    session.enableFilter("tenantFilter").setParameter("tenantId", tenantId);
+                if (tenantIds != null && !tenantIds.isEmpty()) {
+                    session.enableFilter("tenantFilter").setParameterList("tenantIds", tenantIds);
                 } else {
                     session.disableFilter("tenantFilter");
                 }

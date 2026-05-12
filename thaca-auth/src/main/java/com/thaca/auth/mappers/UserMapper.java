@@ -1,5 +1,6 @@
 package com.thaca.auth.mappers;
 
+import com.thaca.auth.domains.Tenant;
 import com.thaca.auth.domains.User;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.framework.core.utils.DateUtils;
@@ -16,6 +17,7 @@ public class UserMapper {
         if (user == null) return null;
         UserDTO dto = UserDTO.builder()
             .id(user.getId())
+            .tenantIds(user.getTenants() != null ? user.getTenants().stream().map(Tenant::getId).toList() : null)
             .username(user.getUsername())
             .email(user.getEmail())
             .isActivated(user.getIsActivated())

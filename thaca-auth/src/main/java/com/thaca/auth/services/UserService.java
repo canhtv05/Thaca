@@ -25,6 +25,7 @@ import com.thaca.common.dtos.internal.ImportResponseDTO;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.VerifyEmailTokenDTO;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -48,6 +49,7 @@ import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.framework.core.utils.CommonUtils;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.util.*;
@@ -94,8 +96,15 @@ public class UserService {
             .getContent()
             .stream()
             .map(u -> {
+                List<Long> userTenantIds = u.getTenants().stream().map(Tenant::getId).toList();
                 var res = UserMapper.fromEntityWithCms(u, true);
-                res.setTenant(TenantMapper.fromInfoProj(tenantMap.getOrDefault(u.getTenantId(), null)));
+                List<TenantInfoPrj> tenantInfos = userTenantIds
+                    .stream()
+                    .map(id -> TenantMapper.fromInfoProj(tenantMap.get(id)))
+                    .filter(Objects::nonNull)
+                    .toList();
+                res.setTenants(tenantInfos);
+                res.setTenantIds(userTenantIds);
                 return res;
             })
             .toList();
@@ -115,9 +124,15 @@ public class UserService {
             .findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"))
             .stream()
             .map(u -> {
+                List<Long> userTenantIds = u.getTenants().stream().map(Tenant::getId).toList();
                 var res = UserMapper.fromEntityWithCms(u, true);
-                res.setTenant(TenantMapper.fromInfoProj(tenantMap.getOrDefault(u.getTenantId(), null)));
-                res.setTenantId(u.getTenantId());
+                List<TenantInfoPrj> tenantInfos = userTenantIds
+                    .stream()
+                    .map(id -> TenantMapper.fromInfoProj(tenantMap.get(id)))
+                    .filter(Objects::nonNull)
+                    .toList();
+                res.setTenants(tenantInfos);
+                res.setTenantIds(userTenantIds);
                 return res;
             })
             .toList();
@@ -128,13 +143,15 @@ public class UserService {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("username", user.getUsername());
             row.put("email", user.getEmail());
-            if (user.getTenantId() != null) {
-                row.put(
-                    "tenant",
-                    tenantMap.getOrDefault(user.getTenantId(), null).getCode() +
-                        " - " +
-                        tenantMap.getOrDefault(user.getTenantId(), null).getName()
-                );
+            if (user.getTenantIds() != null && !user.getTenantIds().isEmpty()) {
+                String tenantStr = user
+                    .getTenantIds()
+                    .stream()
+                    .map(tenantMap::get)
+                    .filter(Objects::nonNull)
+                    .map(t -> t.getCode() + " - " + t.getName())
+                    .collect(Collectors.joining(", "));
+                row.put("tenant", tenantStr);
             } else {
                 row.put("tenant", "");
             }
@@ -177,8 +194,15 @@ public class UserService {
         User user = userRepository
             .findByUsername(request.getUsername())
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        List<Long> userTenantIds = user.getTenants().stream().map(Tenant::getId).toList();
         var res = UserMapper.fromEntityWithCms(user, true);
-        res.setTenant(TenantMapper.fromInfoProj(tenantMap.getOrDefault(user.getTenantId(), null)));
+        List<TenantInfoPrj> tenantInfos = userTenantIds
+            .stream()
+            .map(id -> TenantMapper.fromInfoProj(tenantMap.get(id)))
+            .filter(Objects::nonNull)
+            .toList();
+        res.setTenants(tenantInfos);
+        res.setTenantIds(userTenantIds);
         return res;
     }
 
@@ -214,8 +238,8 @@ public class UserService {
             return toImportResponse(result);
         }
         List<Map<String, Object>> successRows = result.getSuccessRows();
-        Set<String> existingUsernames = new HashSet<>();
-        Set<String> existingEmails = new HashSet<>();
+        Set<String> existingUsernamesInImport = new HashSet<>();
+        Set<String> existingEmailsInImport = new HashSet<>();
 
         Map<String, TenantInfoProjection> tenantCodeToId = isSuperAdmin
             ? tenantRepository
@@ -224,10 +248,54 @@ public class UserService {
                   .collect(Collectors.toMap(TenantInfoProjection::getCode, a -> a))
             : new HashMap<>();
 
+        Map<Long, Tenant> allTenantsMap = new HashMap<>();
+        if (isSuperAdmin) {
+            tenantRepository.findAll().forEach(t -> allTenantsMap.put(t.getId(), t));
+        } else {
+            List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
+            if (!currentTenantIds.isEmpty()) {
+                tenantRepository.findAllById(currentTenantIds).forEach(t -> allTenantsMap.put(t.getId(), t));
+            }
+        }
+        Set<String> usernamesInFile = successRows
+            .stream()
+            .map(row -> String.valueOf(row.get("username")).trim().toLowerCase())
+            .collect(Collectors.toSet());
+        Set<String> emailsInFile = successRows
+            .stream()
+            .map(row -> String.valueOf(row.get("email")).trim().toLowerCase())
+            .collect(Collectors.toSet());
+        Set<Long> allRelevantTenantIds = allTenantsMap.keySet();
+        Map<Long, Set<String>> existingEmailsInTenants = new HashMap<>();
+        Map<Long, Set<String>> existingUsernamesInTenants = new HashMap<>();
+
+        if (!allRelevantTenantIds.isEmpty()) {
+            if (!emailsInFile.isEmpty()) {
+                userRepository
+                    .findAllByEmailIn(emailsInFile)
+                    .forEach(u -> {
+                        for (Tenant t : u.getTenants()) {
+                            existingEmailsInTenants
+                                .computeIfAbsent(t.getId(), k -> new HashSet<>())
+                                .add(u.getEmail().toLowerCase());
+                        }
+                    });
+            }
+            if (!usernamesInFile.isEmpty()) {
+                userRepository
+                    .findByUsernamesAndTenantIds(usernamesInFile, allRelevantTenantIds)
+                    .forEach(u -> {
+                        for (Tenant t : u.getTenants()) {
+                            existingUsernamesInTenants
+                                .computeIfAbsent(t.getId(), k -> new HashSet<>())
+                                .add(u.getUsername().toLowerCase());
+                        }
+                    });
+            }
+        }
+
         List<User> usersToSave = new ArrayList<>();
         List<RowError> businessErrors = new ArrayList<>();
-        Map<Long, List<User>> usersByTenant = new HashMap<>();
-
         for (int i = 0; i < successRows.size(); i++) {
             Map<String, Object> row = successRows.get(i);
             int excelRowIndex = result.getTotalRows() > 0 ? i + 1 : i;
@@ -235,38 +303,44 @@ public class UserService {
             String email = String.valueOf(row.get("email")).trim().toLowerCase();
             String password = row.get("password") != null ? String.valueOf(row.get("password")) : null;
             boolean hasError = false;
-            if (existingUsernames.contains(username)) {
+
+            if (existingUsernamesInImport.contains(username)) {
                 businessErrors.add(
                     new RowError(
                         excelRowIndex,
                         "username",
                         isVietnamese ? "Tên đăng nhập" : "Username",
-                        isVietnamese ? "Tên đăng nhập đã tồn tại trong hệ thống" : "Username already exists",
+                        isVietnamese
+                            ? "Tên đăng nhập đã tồn tại trong danh sách import"
+                            : "Username already exists in import list",
                         username
                     )
                 );
                 hasError = true;
             }
-            if (existingEmails.contains(email)) {
+            if (existingEmailsInImport.contains(email)) {
                 businessErrors.add(
                     new RowError(
                         excelRowIndex,
                         "email",
                         "Email",
-                        isVietnamese ? "Email đã tồn tại trong hệ thống" : "Email already exists",
+                        isVietnamese
+                            ? "Email đã tồn tại trong danh sách import"
+                            : "Email already exists in import list",
                         email
                     )
                 );
                 hasError = true;
             }
-            Long tenantId = null;
-            if (SecurityUtils.isSuperAdmin()) {
+
+            List<Long> targetTenantIds = new ArrayList<>();
+            if (isSuperAdmin) {
                 Object tenantRaw = row.get("tenantId");
                 if (tenantRaw != null) {
                     String tenantStr = String.valueOf(tenantRaw);
                     String tenantCode = tenantStr.contains(" - ") ? tenantStr.split(" - ")[0].trim() : tenantStr.trim();
-                    tenantId = tenantCodeToId.get(tenantCode).getId();
-                    if (tenantId == null) {
+                    TenantInfoProjection projection = tenantCodeToId.get(tenantCode);
+                    if (projection == null) {
                         businessErrors.add(
                             new RowError(
                                 excelRowIndex,
@@ -277,113 +351,136 @@ public class UserService {
                             )
                         );
                         hasError = true;
+                    } else {
+                        targetTenantIds.add(projection.getId());
                     }
                 }
             } else {
-                tenantId = SecurityUtils.getCurrentTenantId();
+                targetTenantIds.addAll(SecurityUtils.getCurrentTenantIds());
             }
-            if (hasError) {
-                continue;
+
+            for (Long tId : targetTenantIds) {
+                if (existingUsernamesInTenants.getOrDefault(tId, Collections.emptySet()).contains(username)) {
+                    businessErrors.add(
+                        new RowError(
+                            excelRowIndex,
+                            "username",
+                            isVietnamese ? "Tên đăng nhập" : "Username",
+                            isVietnamese
+                                ? "Tên đăng nhập đã tồn tại trong các tổ chức liên quan"
+                                : "Username already exists in associated tenants",
+                            username
+                        )
+                    );
+                    hasError = true;
+                    break;
+                }
+                if (existingEmailsInTenants.getOrDefault(tId, Collections.emptySet()).contains(email)) {
+                    businessErrors.add(
+                        new RowError(
+                            excelRowIndex,
+                            "email",
+                            "Email",
+                            isVietnamese
+                                ? "Email đã tồn tại trong các tổ chức liên quan"
+                                : "Email already exists in associated tenants",
+                            email
+                        )
+                    );
+                    hasError = true;
+                    break;
+                }
             }
+
+            if (hasError) continue;
+
             Boolean isActivated =
                 row.get("isActivated") != null && Boolean.parseBoolean(String.valueOf(row.get("isActivated")));
-
             User user = User.builder()
                 .username(username)
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .isActivated(isActivated)
                 .isLocked(false)
-                .tenantId(tenantId)
+                .tenants(
+                    targetTenantIds
+                        .stream()
+                        .map(allTenantsMap::get)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet())
+                )
                 .build();
             usersToSave.add(user);
-            existingUsernames.add(username);
-            existingEmails.add(email);
+            existingUsernamesInImport.add(username);
+            existingEmailsInImport.add(email);
         }
 
         if (!usersToSave.isEmpty()) {
-            usersByTenant = usersToSave
-                .stream()
-                .filter(u -> u.getTenantId() != null)
-                .collect(Collectors.groupingBy(User::getTenantId));
-            Set<Long> tenantIds = usersByTenant.keySet();
+            Map<Long, List<User>> usersPerTenant = new HashMap<>();
+            for (User u : usersToSave) {
+                for (Tenant t : u.getTenants()) {
+                    usersPerTenant.computeIfAbsent(t.getId(), k -> new ArrayList<>()).add(u);
+                }
+            }
+            Set<Long> tenantIds = usersPerTenant.keySet();
             Map<Long, Long> existingCounts = new HashMap<>();
-            for (Map<String, Object> row : userRepository.countByTenantIds(tenantIds)) {
-                Long id = ((Number) row.get("tenantId")).longValue();
-                Long cnt = ((Number) row.get("count")).longValue();
-                existingCounts.put(id, cnt);
+            for (Map<String, Object> countRow : userRepository.countByTenantIds(tenantIds)) {
+                existingCounts.put(
+                    ((Number) countRow.get("tenantId")).longValue(),
+                    ((Number) countRow.get("count")).longValue()
+                );
             }
-            Map<Long, Tenant> tenantMap = new HashMap<>();
-            for (Tenant t : tenantRepository.findAllByIdIn(tenantIds)) {
-                tenantMap.put(t.getId(), t);
-            }
-            for (Map.Entry<Long, List<User>> entry : usersByTenant.entrySet()) {
-                Long tenantId = entry.getKey();
-                int newCount = entry.getValue().size();
-                long existing = existingCounts.getOrDefault(tenantId, 0L);
-                Tenant tenant = tenantMap.get(tenantId);
+            for (Map.Entry<Long, List<User>> entry : usersPerTenant.entrySet()) {
+                Long tId = entry.getKey();
+                Tenant tenant = allTenantsMap.get(tId);
                 if (tenant != null && tenant.getPlan() != null && tenant.getPlan().getMaxUsers() > 0) {
-                    int max = tenant.getPlan().getMaxUsers();
-                    if (existing + newCount > max) {
-                        String detailVi = String.format(
-                            "Số người dùng hiện tại: %d, mới: %d, giới hạn: %d, gói: %s",
-                            existing,
-                            newCount,
-                            max,
-                            tenant.getPlan().getName()
-                        );
-                        String detailEn = String.format(
-                            "Current users: %d, new: %d, limit: %d, plan: %s",
-                            existing,
-                            newCount,
-                            max,
-                            tenant.getPlan().getName()
-                        );
+                    long currentCount = existingCounts.getOrDefault(tId, 0L);
+                    if (currentCount + entry.getValue().size() > tenant.getPlan().getMaxUsers()) {
+                        String detail = isVietnamese
+                            ? String.format(
+                                  "Tổ chức %s vượt giới hạn (%d/%d)",
+                                  tenant.getName(),
+                                  currentCount + entry.getValue().size(),
+                                  tenant.getPlan().getMaxUsers()
+                              )
+                            : String.format(
+                                  "Tenant %s exceeds limit (%d/%d)",
+                                  tenant.getName(),
+                                  currentCount + entry.getValue().size(),
+                                  tenant.getPlan().getMaxUsers()
+                              );
                         businessErrors.add(
-                            new RowError(
-                                0,
-                                "plan",
-                                isVietnamese ? "Giới hạn gói" : "Plan limit",
-                                isVietnamese ? detailVi : detailEn,
-                                null
-                            )
+                            new RowError(0, "plan", isVietnamese ? "Giới hạn gói" : "Plan limit", detail, null)
                         );
-                        entry.getValue().clear();
                     }
                 }
             }
         }
+
         if (!businessErrors.isEmpty()) {
             return getImportResponseDTO(businessErrors, result);
         }
-        List<User> finalUsersToSave = usersByTenant
-            .values()
-            .stream()
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-        userRepository.saveAll(finalUsersToSave);
-        ImportResponseDTO response = ImportResponseDTO.builder()
+        userRepository.saveAll(usersToSave);
+        return ImportResponseDTO.builder()
             .totalRows(result.getTotalRows())
             .successCount(usersToSave.size())
             .errorCount(0)
             .hasErrors(false)
+            .preview(
+                usersToSave
+                    .stream()
+                    .limit(5)
+                    .map(u -> {
+                        Map<String, Object> map = new LinkedHashMap<>();
+                        map.put("username", u.getUsername());
+                        map.put("email", u.getEmail());
+                        map.put("tenantIds", u.getTenants().stream().map(Tenant::getId).toList());
+                        map.put("isActivated", u.getIsActivated());
+                        return map;
+                    })
+                    .toList()
+            )
             .build();
-        if (!usersToSave.isEmpty()) {
-            List<Map<String, Object>> preview = usersToSave
-                .stream()
-                .limit(5)
-                .map(u -> {
-                    Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("username", u.getUsername());
-                    map.put("email", u.getEmail());
-                    map.put("tenantId", u.getTenantId());
-                    map.put("isActivated", u.getIsActivated());
-                    return map;
-                })
-                .toList();
-            response.setPreview(preview);
-        }
-        return response;
     }
 
     @Transactional(readOnly = true)
@@ -461,11 +558,16 @@ public class UserService {
             List.of(new EmailRule<>(), new FullnameRule<>(), new PasswordRule<>(), new UsernameRule<>())
         );
         validator.validate(request);
-        Long tenantId = SecurityUtils.getCurrentTenantId();
-        if (tenantId != null && userRepository.existsByUsernameAndTenantId(request.getUsername(), tenantId)) {
-            throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
+        List<Long> targetTenantIds = request.getTenantIds();
+        if (targetTenantIds == null || targetTenantIds.isEmpty()) {
+            targetTenantIds = SecurityUtils.getCurrentTenantIds();
         }
-        if (tenantId != null && userRepository.existsByEmailAndTenantId(request.getEmail(), tenantId)) {
+        if (targetTenantIds != null && !targetTenantIds.isEmpty()) {
+            if (userRepository.existsByUsernameAndTenantIds(request.getUsername(), targetTenantIds)) {
+                throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
+            }
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
         }
     }
@@ -655,8 +757,8 @@ public class UserService {
     private Specification<User> createUserSpecification(SearchRequest<UserDTO> req) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
             boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
-            Long currentTenantId = SecurityUtils.getCurrentTenantId();
             if (req.getFilter() != null) {
                 UserDTO filter = req.getFilter();
                 if (StringUtils.isNotBlank(filter.getUsername())) {
@@ -673,10 +775,12 @@ public class UserService {
                 if (filter.getIsLocked() != null) {
                     predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
                 }
-                if (filter.getTenantId() != null && isSuperAdmin) {
-                    predicates.add(cb.equal(root.get("tenantId"), filter.getTenantId()));
+                if (filter.getTenantIds() != null && !filter.getTenantIds().isEmpty() && isSuperAdmin) {
+                    Join<User, Tenant> tenantJoin = root.join("tenants");
+                    predicates.add(tenantJoin.get("id").in(filter.getTenantIds()));
                 } else if (!isSuperAdmin) {
-                    predicates.add(cb.equal(root.get("tenantId"), currentTenantId));
+                    Join<User, Tenant> tenantJoin = root.join("tenants");
+                    predicates.add(tenantJoin.get("id").in(currentTenantIds));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));

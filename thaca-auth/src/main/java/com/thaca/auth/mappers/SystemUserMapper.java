@@ -4,6 +4,7 @@ import com.thaca.auth.domains.*;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.enums.PermissionEffect;
 import com.thaca.framework.core.utils.DateUtils;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -11,11 +12,13 @@ public class SystemUserMapper {
 
     private SystemUserMapper() {}
 
-    public static SystemUserDTO toSearchDTO(SystemCredential sc, SystemUser su, Tenant tenant) {
+    public static SystemUserDTO toSearchDTO(SystemCredential sc, SystemUser su, List<Tenant> tenants) {
         return SystemUserDTO.builder()
             .id(su.getId())
-            .tenantId(su.getTenantId())
-            .tenantInfo(TenantMapper.fromEntity(tenant))
+            .tenantIds(su.getTenants().stream().map(Tenant::getId).collect(Collectors.toList()))
+            .tenants(
+                tenants != null ? tenants.stream().map(TenantMapper::fromEntity).collect(Collectors.toList()) : null
+            )
             .username(sc.getUsername())
             .email(su.getEmail())
             .fullname(su.getFullname())
@@ -30,7 +33,7 @@ public class SystemUserMapper {
             .build();
     }
 
-    public static SystemUserDTO toFullDTO(SystemCredential sc, SystemUser su, Tenant tenant) {
+    public static SystemUserDTO toFullDTO(SystemCredential sc, SystemUser su, List<Tenant> tenants) {
         Map<String, PermissionEffect> overrides = sc
             .getCredentialPermissions()
             .stream()
@@ -44,8 +47,10 @@ public class SystemUserMapper {
 
         return SystemUserDTO.builder()
             .id(su.getId())
-            .tenantId(su.getTenantId())
-            .tenantInfo(TenantMapper.fromEntity(tenant))
+            .tenantIds(su.getTenants().stream().map(Tenant::getId).collect(Collectors.toList()))
+            .tenants(
+                tenants != null ? tenants.stream().map(TenantMapper::fromEntity).collect(Collectors.toList()) : null
+            )
             .username(sc.getUsername())
             .email(su.getEmail())
             .fullname(su.getFullname())

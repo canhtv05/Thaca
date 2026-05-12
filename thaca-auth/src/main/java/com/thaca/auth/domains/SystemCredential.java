@@ -20,12 +20,16 @@ import lombok.experimental.SuperBuilder;
 public class SystemCredential extends BaseEntityAudit {
 
     @Id
-    @Column(name = "username", nullable = false)
-    private String username;
+    @Column(name = "system_user_id")
+    private Long id;
 
     @OneToOne
+    @MapsId
     @JoinColumn(name = "system_user_id", referencedColumnName = "id", nullable = false)
     private SystemUser systemUser;
+
+    @Column(name = "username", nullable = false)
+    private String username;
 
     @JsonIgnore
     @Column(name = "password", nullable = false)
@@ -34,7 +38,7 @@ public class SystemCredential extends BaseEntityAudit {
     @ManyToMany
     @JoinTable(
         name = "system_credential_roles",
-        joinColumns = { @JoinColumn(name = "credential_id", referencedColumnName = "username") },
+        joinColumns = { @JoinColumn(name = "system_user_id") },
         inverseJoinColumns = { @JoinColumn(name = "role_code", referencedColumnName = "code") }
     )
     @Builder.Default
