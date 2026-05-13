@@ -5,20 +5,17 @@
 
 .selection-container {
   width: 100%;
-  max-width: 900px;
-  max-height: 100vh;
+  max-height: 85vh;
   margin: 0 auto;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  background-color: transparent;
   border: none;
-  border-radius: 0;
   box-shadow: none;
 
   @media (min-width: 768px) {
     background-color: var(--card);
-    max-height: 90vh;
+    max-height: 80vh;
     padding: 24px;
     border: none;
     border-radius: 20px;

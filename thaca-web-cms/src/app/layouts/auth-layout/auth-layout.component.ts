@@ -37,4 +37,8 @@ export class AuthLayoutComponent {
   onSelectSuperAdmin(): void {
     this.router.navigate(['/auth/login'], { state: { type: 'SUPER_ADMIN' } });
   }
+
+  isShowRegisterWorkspace(): boolean {
+    return this.router.url !== '/auth/platform';
+  }
 }

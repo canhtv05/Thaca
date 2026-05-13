@@ -2,7 +2,7 @@
   <ng-template #layout>
     <div
       id="sing-in-card"
-      class="h-full rounded-xl p-10 w-full lg:min-w-md max-w-md flex flex-col justify-center"
+      class="w-full h-full md:h-auto md:min-w-[600px] md:max-w-md p-8 sm:p-10 flex flex-col justify-center gap-6 bg-card rounded-2xl md:rounded-xl shadow-sm md:shadow-md border border-border/50"
     >
       <thaca-button variant="outline" size="sm" (click)="onBackToType()" class="mb-2 border-none!">
         <i class="pi pi-arrow-left mr-2 text-xs"></i>
@@ -86,7 +86,7 @@
               {{ 'auth.captchaLabel' | translate }} <span class="thaca-required">(*)</span>
             </label>
             <div class="flex items-stretch gap-3">
-              <div class="form-control">
+              <div class="form-control flex-1">
                 <thaca-input
                   [id]="captchaInputId"
                   placeholder="{{ 'auth.captchaPlaceholder' | translate }}"
