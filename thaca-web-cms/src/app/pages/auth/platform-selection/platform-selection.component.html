@@ -2,7 +2,11 @@
   <div class="flex flex-col w-full h-full items-center justify-center">
     <div class="selection-container lg:min-w-3xl">
       <div class="header">
-        <h1 class="page-title">
+        <div class="mb-6 flex items-center justify-center gap-3">
+          <img src="assets/images/thaca_icon_v1.png" alt="ThaCa" class="size-8 object-contain" />
+          <span class="text-xl font-black tracking-tighter text-foreground">ThaCa</span>
+        </div>
+        <h1 class="page-title text-3xl">
           {{ 'auth.selectTenant' | translate }}
         </h1>
         <p class="page-sub">{{ 'auth.selectTenantDesc' | translate }}</p>
@@ -111,11 +115,6 @@
           <span class="text-white">{{ 'auth.continue' | translate }}</span>
           <i class="pi pi-arrow-right ml-2 text-white"></i>
         </thaca-button>
-
-        <div class="super-admin-link">
-          {{ 'auth.isSuperAdmin?' | translate }}
-          <a (click)="onSelectSuperAdmin()">{{ 'auth.superAdminLogin' | translate }}</a>
-        </div>
       </div>
     </div>
   </div>

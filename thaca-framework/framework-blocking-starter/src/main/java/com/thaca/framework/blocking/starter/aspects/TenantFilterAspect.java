@@ -1,6 +1,5 @@
 package com.thaca.framework.blocking.starter.aspects;
 
-import com.thaca.framework.core.context.TenantContext;
 import jakarta.persistence.EntityManager;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;

@@ -40,6 +40,11 @@ export class PlatformSelectionComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const state = history.state;
+    if (!state || !state.email) {
+      this.router.navigate(['/auth/verify']);
+      return;
+    }
     this.loadTenants();
   }
 
@@ -64,7 +69,6 @@ export class PlatformSelectionComponent implements OnInit {
     const tenant = this.tenants().find((t) => t.id === id);
     if (id && tenant) {
       this.router.navigate(['/auth/login'], {
-        queryParams: { tenantId: id },
         state: {
           tenant,
         },
@@ -73,6 +77,6 @@ export class PlatformSelectionComponent implements OnInit {
   }
 
   onSelectSuperAdmin(): void {
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/auth/login'], { state: { type: 'SUPER_ADMIN' } });
   }
 }

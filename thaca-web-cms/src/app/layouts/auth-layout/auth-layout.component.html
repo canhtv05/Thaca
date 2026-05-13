@@ -47,8 +47,26 @@
   </div>
   <div class="order-1 w-full lg:w-auto h-full lg:h-auto flex justify-center items-center">
     @if (contentTemplate) {
-      <div class="w-full h-full lg:h-auto flex items-center justify-center">
+      <div class="w-full h-full lg:h-auto flex flex-col items-center justify-center">
         <ng-container *ngTemplateOutlet="contentTemplate"></ng-container>
+        @if (showFooter) {
+          <div class="footer-links w-full max-w-md md:min-w-[448px] px-8 sm:px-10">
+            @if (showSuperAdmin) {
+              <div class="link-item">
+                {{ 'auth.isSuperAdmin?' | translate }}
+                <a (click)="onSelectSuperAdmin()" class="font-bold text-primary cursor-pointer">{{
+                  'auth.superAdminLogin' | translate
+                }}</a>
+              </div>
+            }
+            <div class="link-item">
+              {{ 'auth.noTenantPrompt' | translate }}
+              <a class="text-primary font-bold cursor-pointer">{{
+                'auth.registerWorkspace' | translate
+              }}</a>
+            </div>
+          </div>
+        }
       </div>
     } @else {
       <ng-content></ng-content>

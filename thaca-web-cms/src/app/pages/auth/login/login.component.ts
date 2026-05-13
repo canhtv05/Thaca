@@ -72,14 +72,10 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.generateCaptcha();
-    this.route.queryParams.subscribe((params) => {
-      if (params['tenantId']) {
-        this.tenantId.set(+params['tenantId']);
-      }
-    });
     const state = history.state;
     if (state && state.tenant) {
       this.tenantState.set(state.tenant);
+      this.tenantId.set(state.tenant.id);
     }
   }
 
@@ -118,6 +114,6 @@ export class LoginComponent implements OnInit {
   }
 
   onBackToType(): void {
-    this.router.navigate(['/auth/platform']);
+    this.router.navigate(['/auth/verify']);
   }
 }

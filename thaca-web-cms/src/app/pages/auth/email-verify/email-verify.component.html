@@ -1,0 +1,101 @@
+<app-auth-layout [contentTemplate]="verifyLayout">
+  <ng-template #verifyLayout>
+    <div
+      class="w-full md:max-w-md md:min-w-[448px] p-8 sm:p-10 flex flex-col gap-8 bg-transparent md:bg-card md:rounded-[20px] md:shadow-md"
+    >
+      <div class="flex flex-col gap-2 text-center">
+        <div class="mb-6 flex items-center justify-center gap-3">
+          <img src="assets/images/thaca_icon_v1.png" alt="ThaCa" class="size-8 object-contain" />
+          <span class="text-xl font-black tracking-tighter text-foreground">ThaCa</span>
+        </div>
+        <h1 class="text-3xl font-bold tracking-tight text-foreground">
+          {{ (isCodeSent() ? 'auth.emailVerify.otpTitle' : 'auth.emailVerify.title') | translate }}
+        </h1>
+        <p class="text-sm text-muted-foreground">
+          {{
+            (isCodeSent() ? 'auth.emailVerify.otpSubTitle' : 'auth.emailVerify.subTitle')
+              | translate
+          }}
+        </p>
+      </div>
+
+      <form [formGroup]="form" class="flex flex-col gap-6">
+        <thaca-input
+          formControlName="email"
+          [label]="'auth.emailVerify.emailLabel' | translate"
+          [placeholder]="'example@company.com'"
+          [startIcon]="APP_CONFIG_ICONS['solarEnvelopeBoldDuotone']"
+          [readonly]="isCodeSent()"
+        />
+
+        @if (isCodeSent()) {
+          <div class="flex flex-col gap-2">
+            <thaca-input
+              formControlName="code"
+              [label]="'auth.emailVerify.otpLabel' | translate"
+              [placeholder]="'······'"
+              [startIcon]="APP_CONFIG_ICONS['solarKeyBoldDuotone']"
+              maxlength="6"
+            />
+            <div class="flex justify-between items-center px-1">
+              <span class="text-xs text-muted-foreground">
+                {{ 'auth.emailVerify.resendPrompt' | translate }}
+                <span class="text-primary font-bold">{{ formatTime(countdown()) }}</span>
+              </span>
+              <button
+                type="button"
+                (click)="onSendCode()"
+                [disabled]="countdown() > 0"
+                class="text-xs font-bold text-primary disabled:opacity-50 **:text-white"
+              >
+                {{ 'auth.emailVerify.resendBtn' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+
+        <div class="mt-2">
+          @if (!isCodeSent()) {
+            <thaca-button
+              variant="primary"
+              class="w-full **:text-white"
+              [disabled]="form.get('email')?.invalid || isLoading()"
+              (click)="onSendCode()"
+            >
+              <div class="flex items-center justify-center gap-2">
+                <span>{{
+                  (isLoading() ? 'auth.emailVerify.sending' : 'auth.emailVerify.sendCodeBtn')
+                    | translate
+                }}</span>
+                @if (!isLoading()) {
+                  <i class="pi pi-send text-xs"></i>
+                } @else {
+                  <i class="pi pi-spin pi-spinner text-xs"></i>
+                }
+              </div>
+            </thaca-button>
+          } @else {
+            <thaca-button
+              variant="primary"
+              class="w-full **:text-white"
+              [disabled]="form.invalid || isLoading()"
+              (click)="onVerify()"
+            >
+              <div class="flex items-center justify-center gap-2">
+                <span>{{
+                  (isLoading() ? 'auth.emailVerify.verifying' : 'auth.emailVerify.verifyBtn')
+                    | translate
+                }}</span>
+                @if (!isLoading()) {
+                  <i class="pi pi-check-circle text-xs"></i>
+                } @else {
+                  <i class="pi pi-spin pi-spinner text-xs"></i>
+                }
+              </div>
+            </thaca-button>
+          }
+        </div>
+      </form>
+    </div>
+  </ng-template>
+</app-auth-layout>

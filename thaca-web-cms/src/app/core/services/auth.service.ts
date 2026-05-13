@@ -1,4 +1,5 @@
 import { inject, Injectable, computed, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { AppConfigService } from '../configs/app-config.service';
 import { GlobalHttp } from '../global/global-http';
 import { IAuthenticateRes, IAuthUserDTO, ILoginReq } from '../models/auth.model';
@@ -11,6 +12,7 @@ type AuthState = 'unknown' | 'authenticated' | 'unauthenticated' | 'logged-out';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly config = inject(AppConfigService);
+  private readonly router = inject(Router);
 
   private readonly authState = signal<AuthState>('unknown');
   private profilePromise: Promise<boolean> | null = null;
@@ -59,6 +61,7 @@ export class AuthService {
     currentUser.set(null);
     this.profilePromise = null;
     this.authState.set('logged-out');
+    this.router.navigate(['/auth/verify']);
   }
 
   async logoutAsync(): Promise<void> {
