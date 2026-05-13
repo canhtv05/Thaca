@@ -10,6 +10,7 @@ import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.auth.repositories.UserLockHistoryRepository;
 import com.thaca.auth.repositories.projection.DuplicateCheckPrj;
+import com.thaca.auth.utils.TenantEnrichmentHelper;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.UserDTO;
@@ -93,7 +94,7 @@ public class SystemUserService {
         List<SystemUserDTO> data = result
             .getContent()
             .stream()
-            .map(sc -> SystemUserMapper.toSearchDTO(sc, sc.getSystemUser()))
+            .map(sc -> SystemUserMapper.toFullDTO(sc, sc.getSystemUser()))
             .toList();
 
         Map<Long, TenantInfoPrj> tenantMap = tenantHelper.fetchTenantMap(tenantHelper.collectTenantIds(data));
@@ -297,14 +298,14 @@ public class SystemUserService {
         List<SystemCredential> result = systemCredentialRepository.findAll(spec, sort);
         List<SystemUserDTO> data = result
             .stream()
-            .map(sc -> SystemUserMapper.toFullDTO(sc, sc.getSystemUser()))
+            .map(sc -> SystemUserMapper.toSearchDTO(sc, sc.getSystemUser()))
             .toList();
 
         Map<Long, TenantInfoPrj> tenantMap = tenantHelper.fetchTenantMap(tenantHelper.collectTenantIds(data));
         if (!tenantMap.isEmpty()) {
             data.forEach(d -> tenantHelper.enrichTenantFull(d, tenantMap));
         }
-
+        boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
         List<Map<String, Object>> rows = new ArrayList<>();
         for (SystemUserDTO user : data) {
             Map<String, Object> row = new LinkedHashMap<>();
@@ -316,11 +317,10 @@ public class SystemUserService {
                     ? user
                           .getTenants()
                           .stream()
-                          .map(com.thaca.common.dtos.internal.TenantDTO::getName)
+                          .map(t -> t.getCode() + " - " + t.getName())
                           .collect(Collectors.joining(", "))
                     : "";
             row.put("tenantName", tenantNames);
-            row.put("roles", user.getRoles() != null ? String.join(", ", user.getRoles().keySet()) : "");
             row.put(
                 "isActivated",
                 Boolean.TRUE.equals(user.getIsActivated())
@@ -333,12 +333,24 @@ public class SystemUserService {
                     ? (isVietnamese ? "Đã khóa" : "Locked")
                     : (isVietnamese ? "Bình thường" : "Normal")
             );
+            if (isSuperAdmin) {
+                row.put(
+                    "isSuperAdmin",
+                    Boolean.TRUE.equals(user.getIsSuperAdmin())
+                        ? (isVietnamese ? "Có" : "Yes")
+                        : (isVietnamese ? "Không" : "No")
+                );
+            }
+            row.put("createdAt", user.getCreatedAt());
+            row.put("createdBy", user.getCreatedBy());
+            row.put("updatedAt", user.getUpdatedAt());
+            row.put("updatedBy", user.getUpdatedBy());
             rows.add(row);
         }
-        return ExcelEngine.exportData(buildSchema(isVietnamese), rows);
+        return ExcelEngine.exportData(buildSchema(isVietnamese, isSuperAdmin), rows);
     }
 
-    private ExcelSchema buildSchema(boolean isVietnamese) {
+    private ExcelSchema buildSchema(boolean isVietnamese, boolean isSuperAdmin) {
         return ExcelSchema.builder()
             .sheetName(isVietnamese ? "Danh sách quản trị viên" : "System Users")
             .addColumn(
@@ -360,16 +372,44 @@ public class SystemUserService {
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("roles", isVietnamese ? "Vai trò" : "Roles").dataType(ExcelDataType.STRING).build()
-            )
-            .addColumn(
-                ExcelColumn.builder("isActivated", isVietnamese ? "Trạng thái kích hoạt" : "Activation Status")
+                ExcelColumn.builder("isActivated", isVietnamese ? "Đã kích hoạt" : "Activated")
                     .dataType(ExcelDataType.STRING)
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("isLocked", isVietnamese ? "Trạng thái khóa" : "Lock Status")
+                ExcelColumn.builder("isLocked", isVietnamese ? "Bị khóa" : "Locked")
                     .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumnCondition(
+                isSuperAdmin,
+                6,
+                ExcelColumn.builder("isSuperAdmin", isVietnamese ? "Quản trị tối cao" : "Super Admin")
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("createdAt", isVietnamese ? "Ngày tạo" : "Created At")
+                    .dataType(ExcelDataType.DATE)
+                    .comment(isVietnamese ? "Ngày tạo" : "Created At")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("createdBy", isVietnamese ? "Người tạo" : "Created By")
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Người tạo" : "Created By")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("updatedAt", isVietnamese ? "Ngày cập nhật" : "Updated At")
+                    .dataType(ExcelDataType.DATE)
+                    .comment(isVietnamese ? "Ngày cập nhật" : "Updated At")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("updatedBy", isVietnamese ? "Người cập nhật" : "Updated By")
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Người cập nhật" : "Updated By")
                     .build()
             )
             .build();

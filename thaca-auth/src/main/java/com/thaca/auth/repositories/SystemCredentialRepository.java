@@ -22,11 +22,29 @@ public interface SystemCredentialRepository
     extends JpaRepository<SystemCredential, Long>, JpaSpecificationExecutor<SystemCredential>
 {
     @Override
-    @EntityGraph(attributePaths = { "systemUser", "roles", "roles.permissions" })
+    @EntityGraph(
+        attributePaths = {
+            "systemUser",
+            "systemUser.tenantIds",
+            "roles",
+            "roles.permissions",
+            "credentialPermissions",
+            "credentialPermissions.permission"
+        }
+    )
     Page<SystemCredential> findAll(Specification<SystemCredential> spec, Pageable pageable);
 
     @Override
-    @EntityGraph(attributePaths = { "systemUser", "roles", "roles.permissions" })
+    @EntityGraph(
+        attributePaths = {
+            "systemUser",
+            "systemUser.tenantIds",
+            "roles",
+            "roles.permissions",
+            "credentialPermissions",
+            "credentialPermissions.permission"
+        }
+    )
     List<SystemCredential> findAll(Specification<SystemCredential> spec, Sort sort);
 
     @Query(
@@ -41,7 +59,11 @@ public interface SystemCredentialRepository
     )
     List<String> findDeniedPermissionCodes(@Param("systemUserId") Long systemUserId);
 
-    @EntityGraph(attributePaths = { "roles", "roles.permissions", "credentialPermissions.permission", "systemUser" })
+    @EntityGraph(
+        attributePaths = {
+            "roles", "roles.permissions", "credentialPermissions.permission", "systemUser", "systemUser.tenantIds"
+        }
+    )
     Optional<SystemCredential> findByUsername(String username);
 
     @Query(

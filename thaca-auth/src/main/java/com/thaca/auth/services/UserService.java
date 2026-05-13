@@ -12,6 +12,7 @@ import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.mappers.UserMapper;
 import com.thaca.auth.repositories.UserLockHistoryRepository;
 import com.thaca.auth.repositories.UserRepository;
+import com.thaca.auth.utils.TenantEnrichmentHelper;
 import com.thaca.common.dtos.internal.ImportResponseDTO;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.TenantDTO;
@@ -117,11 +118,14 @@ public class UserService {
             row.put("email", user.getEmail());
             String tenantNames = "";
             if (user.getTenantInfos() != null) {
-                tenantNames = user
-                    .getTenantInfos()
-                    .stream()
-                    .map(TenantInfoPrj::getName)
-                    .collect(Collectors.joining(", "));
+                tenantNames =
+                    user.getTenantInfos() != null
+                        ? user
+                              .getTenantInfos()
+                              .stream()
+                              .map(t -> t.getCode() + " - " + t.getName())
+                              .collect(Collectors.joining(", "))
+                        : "";
             }
             row.put("tenantName", tenantNames);
             row.put(
@@ -242,6 +246,12 @@ public class UserService {
             allTenantsPrj != null
                 ? allTenantsPrj.stream().collect(Collectors.toMap(TenantInfoPrj::getCode, TenantInfoPrj::getId))
                 : Collections.emptyMap();
+        Map<Long, String> tenantIdToLabel =
+            allTenantsPrj != null
+                ? allTenantsPrj
+                      .stream()
+                      .collect(Collectors.toMap(TenantInfoPrj::getId, t -> t.getCode() + " - " + t.getName()))
+                : Collections.emptyMap();
 
         List<User> usersToSave = new ArrayList<>();
         List<RowError> businessErrors = new ArrayList<>();
@@ -310,14 +320,15 @@ public class UserService {
 
             for (Long tId : targetTenantIds) {
                 if (existingUsernamesInTenants.getOrDefault(tId, Collections.emptySet()).contains(username)) {
+                    String label = tenantIdToLabel.getOrDefault(tId, String.valueOf(tId));
                     businessErrors.add(
                         new RowError(
                             excelRowIndex,
                             "username",
                             isVietnamese ? "Tên đăng nhập" : "Username",
                             isVietnamese
-                                ? "Tên đăng nhập đã tồn tại trong các tổ chức liên quan"
-                                : "Username already exists in associated tenants",
+                                ? "Tên đăng nhập đã tồn tại trong tổ chức: " + label
+                                : "Username already exists in tenant: " + label,
                             username
                         )
                     );
@@ -325,14 +336,15 @@ public class UserService {
                     break;
                 }
                 if (existingEmailsInTenants.getOrDefault(tId, Collections.emptySet()).contains(email)) {
+                    String label = tenantIdToLabel.getOrDefault(tId, String.valueOf(tId));
                     businessErrors.add(
                         new RowError(
                             excelRowIndex,
                             "email",
                             "Email",
                             isVietnamese
-                                ? "Email đã tồn tại trong các tổ chức liên quan"
-                                : "Email already exists in associated tenants",
+                                ? "Email đã tồn tại trong tổ chức: " + label
+                                : "Email already exists in tenant: " + label,
                             email
                         )
                     );
@@ -373,9 +385,18 @@ public class UserService {
                     ((Number) countRow.get("count")).longValue()
                 );
             }
+
+            List<TenantDTO> tenants = cmsClient.getTenantsFullByIds(
+                TenantDTO.builder().tenantIds(new ArrayList<>(tenantIdsToBatch)).build()
+            );
+            if (tenants == null) {
+                tenants = Collections.emptyList();
+            }
+            Map<Long, TenantDTO> tenantInfoMap = tenants.stream().collect(Collectors.toMap(TenantDTO::getId, t -> t));
+
             for (Map.Entry<Long, List<User>> entry : usersPerTenant.entrySet()) {
                 Long tId = entry.getKey();
-                TenantDTO tenant = cmsClient.getTenant(TenantDTO.builder().id(tId).build());
+                TenantDTO tenant = tenantInfoMap.get(tId);
                 if (tenant != null && tenant.getPlanInfo() != null && tenant.getPlanInfo().getMaxUsers() > 0) {
                     long currentCount = existingCounts.getOrDefault(tId, 0L);
                     if (currentCount + entry.getValue().size() > tenant.getPlanInfo().getMaxUsers()) {
@@ -781,6 +802,20 @@ public class UserService {
                     })
                     .build()
             )
+            .addColumnCondition(
+                isSuperAdmin,
+                2,
+                ExcelColumn.builder("tenantId", isVietnamese ? "Mã Tổ chức" : "Tenant ID")
+                    .required()
+                    .dataType(ExcelDataType.STRING)
+                    .allowedValues(tenantIds)
+                    .comment(
+                        isVietnamese
+                            ? "Chọn Tổ chức từ danh sách thả xuống. Hệ thống sẽ tự động ánh xạ từ mã (CODE)."
+                            : "Select Tenant from dropdown. System will auto-map from code (CODE)."
+                    )
+                    .build()
+            )
             .addColumn(
                 ExcelColumn.builder("password", isVietnamese ? "Mật khẩu" : "Password")
                     .required()
@@ -796,20 +831,6 @@ public class UserService {
                         validator.validate(UserDTO.builder().password(String.valueOf(val)).build());
                         return null;
                     })
-                    .build()
-            )
-            .addColumnCondition(
-                isSuperAdmin,
-                3,
-                ExcelColumn.builder("tenantId", isVietnamese ? "Mã Tổ chức" : "Tenant ID")
-                    .required()
-                    .dataType(ExcelDataType.STRING)
-                    .allowedValues(tenantIds)
-                    .comment(
-                        isVietnamese
-                            ? "Chọn Tổ chức từ danh sách thả xuống. Hệ thống sẽ tự động ánh xạ từ mã (CODE)."
-                            : "Select Tenant from dropdown. System will auto-map from code (CODE)."
-                    )
                     .build()
             )
             .addColumn(

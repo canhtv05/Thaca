@@ -12,6 +12,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SystemUserRepository extends JpaRepository<SystemUser, Long>, JpaSpecificationExecutor<SystemUser> {
+    @Override
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "tenantIds" })
+    java.util.Optional<SystemUser> findById(Long id);
+
     boolean existsByEmail(String email);
 
     @Query(

@@ -8,6 +8,7 @@ import com.thaca.framework.core.dtos.ApiBody;
 import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.dtos.ApiPayload;
 import com.thaca.framework.core.enums.ChannelType;
+import com.thaca.framework.core.security.UserPrincipal;
 import com.thaca.framework.core.utils.JsonF;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -243,7 +244,14 @@ public class FwFilter extends OncePerRequestFilter {
 
     private String extractUsername() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null ? auth.getName() : "ANONYMOUS";
+        if (auth == null) {
+            return "ANONYMOUS";
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof UserPrincipal up) {
+            return up.getUsername();
+        }
+        return auth.getName();
     }
 
     private String resolveTraceId(HttpServletRequest request) {

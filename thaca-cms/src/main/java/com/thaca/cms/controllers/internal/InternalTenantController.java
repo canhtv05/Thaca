@@ -37,4 +37,10 @@ public class InternalTenantController {
     public ResponseEntity<List<TenantInfoPrj>> getTenantsByIds(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
+
+    @PostMapping("/cms/tenants/get-full-by-ids")
+    @FwRequest(name = ServiceMethod.CMS_GET_TENANTS_FULL_BY_IDS, type = RequestType.INTERNAL)
+    public ResponseEntity<List<TenantDTO>> getFullTenantsByIds(TenantDTO request) {
+        return ResponseEntity.ok(process.process(request));
+    }
 }

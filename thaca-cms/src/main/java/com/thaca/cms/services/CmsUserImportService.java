@@ -12,7 +12,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -42,15 +42,10 @@ public class CmsUserImportService {
 
     private static MultiValueMap<String, Object> getStringObjectMultiValueMap(MultipartFile file) throws IOException {
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-        InputStreamResource resource = new InputStreamResource(file.getInputStream()) {
+        ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
             @Override
             public String getFilename() {
                 return file.getOriginalFilename() != null ? file.getOriginalFilename() : "upload.xlsx";
-            }
-
-            @Override
-            public long contentLength() {
-                return file.getSize();
             }
         };
         parts.add("file", resource);

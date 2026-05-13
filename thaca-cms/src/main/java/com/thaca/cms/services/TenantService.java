@@ -188,11 +188,13 @@ public class TenantService {
         return result;
     }
 
+    @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.CMS_GET_ALL_TENANTS, type = ModeType.HANDLE)
     public List<TenantInfoPrj> getAllTenants() {
         return tenantRepository.findAllTenants().stream().map(TenantMapper::fromPrj).toList();
     }
 
+    @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.CMS_GET_TENANTS_BY_IDS, type = ModeType.HANDLE)
     public List<TenantInfoPrj> getTenantsByIds(TenantDTO dto) {
         if (dto.getTenantIds().isEmpty()) {
@@ -201,6 +203,24 @@ public class TenantService {
         return tenantRepository.findTenantsByIds(dto.getTenantIds()).stream().map(TenantMapper::fromPrj).toList();
     }
 
+    @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.CMS_GET_TENANTS_FULL_BY_IDS, type = ModeType.HANDLE)
+    public List<TenantDTO> getFullTenantsByIds(TenantDTO dto) {
+        if (dto.getTenantIds() == null || dto.getTenantIds().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return tenantRepository
+            .findAllByIdIn(dto.getTenantIds())
+            .stream()
+            .map(t -> {
+                var res = TenantMapper.fromEntity(t);
+                res.setPlanInfo(PlanMapper.fromEntity(t.getPlan()));
+                return res;
+            })
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.CMS_EXPORT_TENANT, type = ModeType.HANDLE)
     public byte[] exportTenant(SearchRequest<TenantDTO> request) throws IOException {
         Specification<Tenant> spec = createTenantSpecification(request);

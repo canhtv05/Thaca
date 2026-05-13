@@ -73,7 +73,7 @@ export class UserListComponent implements OnInit {
     email: '',
     isActivated: null,
     isLocked: null,
-    tenantId: null,
+    tenantIds: [],
   });
 
   importResult = signal<IImportResult | null>(null);

@@ -1,4 +1,4 @@
-package com.thaca.auth.services;
+package com.thaca.auth.utils;
 
 import com.thaca.auth.clients.CmsClient;
 import com.thaca.common.dtos.internal.TenantDTO;

@@ -43,11 +43,12 @@
         @if (this.authService.user()?.isSuperAdmin) {
           <thaca-dropdown
             class="w-full"
-            [(ngModel)]="filter().tenantId"
+            [(ngModel)]="filter().tenantIds"
             [placeholder]="'user.tenant_placeholder' | translate"
             (onChange)="onSearch()"
             [label]="'user.tenant' | translate"
             [options]="tenantOptions()"
+            [multiple]="true"
           />
         }
         <thaca-button class="w-full" variant="primary" (clicked)="onSearch()">

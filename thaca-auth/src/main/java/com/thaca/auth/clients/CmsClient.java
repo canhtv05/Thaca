@@ -13,6 +13,9 @@ public interface CmsClient {
     @FwInternalApi(path = "/cms/tenants/get-by-ids", name = ServiceMethod.CMS_GET_TENANTS_BY_IDS)
     List<TenantInfoPrj> getTenantsByIds(TenantDTO request);
 
+    @FwInternalApi(path = "/cms/tenants/get-full-by-ids", name = ServiceMethod.CMS_GET_TENANTS_FULL_BY_IDS)
+    List<TenantDTO> getTenantsFullByIds(TenantDTO request);
+
     @FwInternalApi(path = "/cms/tenants/get", name = ServiceMethod.CMS_GET_TENANT)
     TenantDTO getTenant(TenantDTO tenant);
 }

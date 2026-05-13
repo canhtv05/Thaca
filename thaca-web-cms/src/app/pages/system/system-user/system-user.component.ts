@@ -30,6 +30,7 @@ import { ITenantInfoPrj } from '../tenant/tenant.model';
 import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
 import { IPermissionDTO } from '../permission/permission.model';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-system-user',
@@ -59,6 +60,7 @@ export class SystemUserComponent implements OnInit {
   private fb = inject(FormBuilder);
   readonly isLoading = isLoading;
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   private originalValue: any;
   roleOptions = signal<IDropdownOption[]>([]);
@@ -158,7 +160,7 @@ export class SystemUserComponent implements OnInit {
         render: (row: ISystemUserDTO) => {
           const variant = row.isLocked ? 'danger' : 'success';
           const label = this.translate.instant(
-            row.isLocked ? 'common.status.lock' : 'common.status.unlock',
+            row.isLocked ? 'common.status.lock' : 'common.status.normal',
           );
           return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
         },
@@ -170,6 +172,7 @@ export class SystemUserComponent implements OnInit {
         render: (row: ISystemUserDTO) => {
           return row.isSuperAdmin ? `<i class="pi pi-check-circle text-primary"></i>` : '';
         },
+        condition: () => this.auth.user()?.isSuperAdmin! ?? false,
       },
     ],
     actions: [

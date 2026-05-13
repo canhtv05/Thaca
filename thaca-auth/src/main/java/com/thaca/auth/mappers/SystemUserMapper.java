@@ -4,6 +4,7 @@ import com.thaca.auth.domains.*;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.enums.PermissionEffect;
 import com.thaca.framework.core.utils.DateUtils;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,7 @@ public class SystemUserMapper {
     public static SystemUserDTO toSearchDTO(SystemCredential sc, SystemUser su) {
         return SystemUserDTO.builder()
             .id(su.getId())
-            .tenantIds(new java.util.ArrayList<>(su.getTenantIds()))
+            .tenantIds(new ArrayList<>(su.getTenantIds()))
             .username(sc.getUsername())
             .email(su.getEmail())
             .fullname(su.getFullname())
@@ -43,7 +44,7 @@ public class SystemUserMapper {
 
         return SystemUserDTO.builder()
             .id(su.getId())
-            .tenantIds(new java.util.ArrayList<>(su.getTenantIds()))
+            .tenantIds(new ArrayList<>(su.getTenantIds()))
             .username(sc.getUsername())
             .email(su.getEmail())
             .fullname(su.getFullname())
