@@ -17,6 +17,7 @@ public final class JwtUserPrincipal implements UserPrincipal {
     private final boolean superAdmin;
     private final boolean cmsUser;
     private final List<Long> tenantIds;
+    private final Long tenantId;
 
     private JwtUserPrincipal(
         String username,
@@ -24,7 +25,8 @@ public final class JwtUserPrincipal implements UserPrincipal {
         String channel,
         boolean superAdmin,
         boolean cmsUser,
-        List<Long> tenantIds
+        List<Long> tenantIds,
+        Long tenantId
     ) {
         this.username = username;
         this.role = role;
@@ -32,6 +34,7 @@ public final class JwtUserPrincipal implements UserPrincipal {
         this.superAdmin = superAdmin;
         this.cmsUser = cmsUser;
         this.tenantIds = tenantIds;
+        this.tenantId = tenantId;
     }
 
     public static JwtUserPrincipal fromClaims(Claims claims, Collection<? extends GrantedAuthority> authorities) {
@@ -42,11 +45,15 @@ public final class JwtUserPrincipal implements UserPrincipal {
         Integer c = claims.get("c", Integer.class);
         Object tenantObjects = claims.get("tenantIds");
         List<Long> tenantIds = FwUtils.extractTenantIds(tenantObjects);
+        Long tenantId = claims.get("tid", Long.class);
+        if (tenantId == null && !tenantIds.isEmpty()) {
+            tenantId = tenantIds.getFirst();
+        }
         boolean superAdmin = authorities
             .stream()
             .anyMatch(a -> AuthoritiesConstants.SUPER_ADMIN.equals(a.getAuthority()));
         boolean cmsUser = c != null && c == 1;
-        return new JwtUserPrincipal(username, role, channel, superAdmin, cmsUser, tenantIds);
+        return new JwtUserPrincipal(username, role, channel, superAdmin, cmsUser, tenantIds, tenantId);
     }
 
     @Override
@@ -67,6 +74,11 @@ public final class JwtUserPrincipal implements UserPrincipal {
     @Override
     public List<Long> getTenantIds() {
         return tenantIds;
+    }
+
+    @Override
+    public Long getTenantId() {
+        return tenantId;
     }
 
     @Override

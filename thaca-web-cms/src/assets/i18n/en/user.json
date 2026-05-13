@@ -15,6 +15,7 @@
     "safe": "Activated",
     "username_placeholder": "Enter username",
     "tenant_placeholder": "Select Tenant",
+    "tenant": "Tenant",
     "email_placeholder": "Enter email",
     "status_placeholder": "Select status",
     "locked_placeholder": "Select lock status",

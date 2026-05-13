@@ -7,8 +7,6 @@
   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
   <changeSet id="init-sequences" author="CanhPC">
-    <createSequence sequenceName="plan_seq" schemaName="auth" startValue="5" incrementBy="1"/>
-    <createSequence sequenceName="tenant_seq" schemaName="auth" startValue="3" incrementBy="1"/>
     <createSequence sequenceName="user_seq" schemaName="auth" startValue="1000" incrementBy="1"/>
     <createSequence sequenceName="system_user_seq" schemaName="auth" startValue="1000" incrementBy="1"/>
     <createSequence sequenceName="user_login_seq" schemaName="auth" startValue="1" incrementBy="1"/>
@@ -16,36 +14,7 @@
   </changeSet>
 
   <changeSet id="init-tables" author="CanhPC">
-    <createTable tableName="plans" schemaName="auth">
-        <column name="id" type="BIGINT"><constraints primaryKey="true" nullable="false"/></column>
-        <column name="code" type="VARCHAR(255)"><constraints unique="true" nullable="false"/></column>
-        <column name="name" type="VARCHAR(255)"><constraints nullable="false"/></column>
-        <column name="type" type="VARCHAR(50)"/>
-        <column name="max_users" type="INTEGER"/>
-        <column name="status" type="VARCHAR(50)" defaultValue="ACTIVE"/>
-        <column name="created_by" type="VARCHAR(50)"/>
-        <column name="created_at" type="TIMESTAMP"/>
-        <column name="updated_by" type="VARCHAR(50)"/>
-        <column name="updated_at" type="TIMESTAMP"/>
-    </createTable>
 
-    <createTable tableName="tenants" schemaName="auth">
-        <column name="id" type="BIGINT"><constraints primaryKey="true" nullable="false"/></column>
-        <column name="code" type="VARCHAR(255)"><constraints unique="true" nullable="false"/></column>
-        <column name="name" type="VARCHAR(255)"><constraints nullable="false"/></column>
-        <column name="domain" type="VARCHAR(255)"/>
-        <column name="status" type="VARCHAR(50)" defaultValue="ACTIVE"/>
-        <column name="plan_id" type="BIGINT"/>
-        <column name="expires_at" type="DATE"/>
-        <column name="contact_email" type="VARCHAR(255)"/>
-        <column name="logo_url" type="VARCHAR(255)"/>
-        <column name="deleted_at" type="TIMESTAMP"/>
-        <column name="version" type="BIGINT" defaultValueNumeric="0"/>
-        <column name="created_by" type="VARCHAR(50)"/>
-        <column name="created_at" type="TIMESTAMP"/>
-        <column name="updated_by" type="VARCHAR(50)"/>
-        <column name="updated_at" type="TIMESTAMP"/>
-    </createTable>
 
     <createTable schemaName="auth" tableName="permissions">
       <column name="code" type="VARCHAR(50)"><constraints nullable="false" primaryKey="true" primaryKeyName="pk_permissions"/></column>
@@ -187,16 +156,13 @@
   <changeSet id="init-constraints" author="CanhPC">
     <addUniqueConstraint columnNames="system_user_id" constraintName="uc_system_credentials_system_user" schemaName="auth" tableName="system_credentials"/>
 
-    <addForeignKeyConstraint baseColumnNames="plan_id" baseTableName="tenants" baseTableSchemaName="auth" constraintName="fk_tenants_plan_id" referencedColumnNames="id" referencedTableName="plans" referencedTableSchemaName="auth"/>
-    <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="roles" baseTableSchemaName="auth" constraintName="fk_roles_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
-    <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="permissions" baseTableSchemaName="auth" constraintName="fk_permissions_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
+
 
     <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="system_user_tenants" baseColumnNames="system_user_id" constraintName="fk_sut_user" referencedTableSchemaName="auth" referencedTableName="system_users" referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="system_user_tenants" baseColumnNames="tenant_id" constraintName="fk_sut_tenant" referencedTableSchemaName="auth" referencedTableName="tenants" referencedColumnNames="id"/>
+
     
     <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="user_tenants" baseColumnNames="user_id" constraintName="fk_ut_user" referencedTableSchemaName="auth" referencedTableName="users" referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="user_tenants" baseColumnNames="tenant_id" constraintName="fk_ut_tenant" referencedTableSchemaName="auth" referencedTableName="tenants" referencedColumnNames="id"/>
-    <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="fk_login_hist_tenant_id" referencedColumnNames="id" referencedTableName="tenants" referencedTableSchemaName="auth"/>
+
 
     <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="FK_LOGIN_HISTORY_ON_USER" referencedColumnNames="id" referencedTableName="users" referencedTableSchemaName="auth"/>
     <addForeignKeyConstraint baseColumnNames="system_user_id" baseTableName="login_history" baseTableSchemaName="auth" constraintName="FK_LOGIN_HISTORY_ON_SYSTEM_USER" referencedColumnNames="id" referencedTableName="system_users" referencedTableSchemaName="auth"/>

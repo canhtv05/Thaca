@@ -46,13 +46,9 @@ public class User extends BaseEntityAudit {
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     String refreshToken;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "user_tenants",
-        schema = "auth",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "tenant_id")
-    )
+    @ElementCollection
+    @CollectionTable(name = "user_tenants", schema = "auth", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "tenant_id")
     @Builder.Default
-    private Set<Tenant> tenants = new HashSet<>();
+    private Set<Long> tenantIds = new HashSet<>();
 }

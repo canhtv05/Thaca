@@ -1,6 +1,7 @@
 package com.thaca.auth.domains;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.thaca.framework.blocking.starter.domains.BaseTenantEntity;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;

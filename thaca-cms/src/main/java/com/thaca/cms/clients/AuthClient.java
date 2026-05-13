@@ -2,8 +2,6 @@ package com.thaca.cms.clients;
 
 import com.thaca.cms.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.*;
-import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
-import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.req.RoleCodesReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
@@ -96,52 +94,4 @@ public interface AuthClient {
 
     @FwInternalApi(path = "/cms/permissions/export", name = ServiceMethod.CMS_EXPORT_PERMISSIONS)
     byte[] exportPermissions(SearchRequest<PermissionDTO> request);
-
-    // ==========================================
-    // TENANT MANAGEMENT
-    // ==========================================
-    @FwInternalApi(path = "/cms/tenants/search", name = ServiceMethod.CMS_SEARCH_TENANTS)
-    SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> search);
-
-    @FwInternalApi(path = "/cms/tenants/get", name = ServiceMethod.CMS_GET_TENANT)
-    TenantDTO getTenant(TenantDTO tenant);
-
-    @FwInternalApi(path = "/cms/tenants/all", name = ServiceMethod.CMS_GET_ALL_TENANTS)
-    List<TenantInfoPrj> getAllTenants();
-
-    @FwInternalApi(path = "/cms/tenants/create", name = ServiceMethod.CMS_CREATE_TENANT)
-    TenantDTO createTenant(TenantDTO tenant);
-
-    @FwInternalApi(path = "/cms/tenants/update", name = ServiceMethod.CMS_UPDATE_TENANT)
-    TenantDTO updateTenant(TenantDTO tenant);
-
-    @FwInternalApi(path = "/cms/tenants/lock-unlock", name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT)
-    Void lockUnlockTenant(TenantDTO tenant);
-
-    @FwInternalApi(path = "/cms/tenants/export", name = ServiceMethod.CMS_EXPORT_TENANT)
-    byte[] exportTenants(SearchRequest<TenantDTO> request);
-
-    // ==========================================
-    // PLAN MANAGEMENT
-    // ==========================================
-    @FwInternalApi(path = "/cms/plans/search", name = ServiceMethod.CMS_SEARCH_PLANS)
-    SearchResponse<PlanDTO> searchPlans(SearchRequest<PlanDTO> search);
-
-    @FwInternalApi(path = "/cms/plans/get", name = ServiceMethod.CMS_GET_PLAN)
-    PlanDTO getPlan(PlanDTO plan);
-
-    @FwInternalApi(path = "/cms/plans/all", name = ServiceMethod.CMS_GET_ALL_PLANS)
-    List<PlanInfoPrj> getAllPlans();
-
-    @FwInternalApi(path = "/cms/plans/create", name = ServiceMethod.CMS_CREATE_PLAN)
-    PlanDTO createPlan(PlanDTO plan);
-
-    @FwInternalApi(path = "/cms/plans/update", name = ServiceMethod.CMS_UPDATE_PLAN)
-    PlanDTO updatePlan(PlanDTO plan);
-
-    @FwInternalApi(path = "/cms/plans/lock-unlock", name = ServiceMethod.CMS_LOCK_UNLOCK_PLAN)
-    Void lockUnlockPlan(PlanDTO plan);
-
-    @FwInternalApi(path = "/cms/plans/export", name = ServiceMethod.CMS_EXPORT_PLAN)
-    byte[] exportPlan(SearchRequest<PlanDTO> request);
 }

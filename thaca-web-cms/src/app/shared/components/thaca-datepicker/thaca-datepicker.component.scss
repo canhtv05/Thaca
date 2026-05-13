@@ -8,6 +8,29 @@
   gap: 6px;
   width: 100%;
   transition: none !important;
+
+  // Default size (matches TS default 'lg' or fallback to 'md')
+  --thaca-control-h: var(--thaca-control-md-h);
+  --thaca-control-fs: var(--thaca-control-md-fs);
+  --thaca-control-px: var(--thaca-control-md-px);
+
+  &.thd--sm {
+    --thaca-control-h: var(--thaca-control-sm-h);
+    --thaca-control-fs: var(--thaca-control-sm-fs);
+    --thaca-control-px: var(--thaca-control-sm-px);
+  }
+
+  &.thd--md {
+    --thaca-control-h: var(--thaca-control-md-h);
+    --thaca-control-fs: var(--thaca-control-md-fs);
+    --thaca-control-px: var(--thaca-control-md-px);
+  }
+
+  &.thd--lg {
+    --thaca-control-h: var(--thaca-control-lg-h);
+    --thaca-control-fs: var(--thaca-control-lg-fs);
+    --thaca-control-px: var(--thaca-control-lg-px);
+  }
 }
 
 :host ::ng-deep .p-datepicker-input {

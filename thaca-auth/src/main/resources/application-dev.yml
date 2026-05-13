@@ -6,19 +6,14 @@ logging:
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/auth?options=-c%20timezone=UTC}
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/thaca?options=-c%20timezone=UTC}
     username: ${POSTGRES_USERNAME:root}
     password: ${POSTGRES_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
     hikari:
-      connection-init-sql: CREATE SCHEMA IF NOT EXISTS auth
+      connection-init-sql: CREATE SCHEMA IF NOT EXISTS auth; CREATE SCHEMA IF NOT EXISTS cms;
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    # consumer:
-    #   group-id: auth-group
-    #   key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    #   value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:auth-group}

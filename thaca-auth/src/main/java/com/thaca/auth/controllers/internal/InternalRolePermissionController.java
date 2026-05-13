@@ -1,6 +1,6 @@
 package com.thaca.auth.controllers.internal;
 
-import com.thaca.common.constants.InternalMethod;
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.PermissionDTO;
 import com.thaca.common.dtos.internal.RoleDTO;
 import com.thaca.common.dtos.internal.req.RoleCodesReq;
@@ -27,43 +27,43 @@ public class InternalRolePermissionController {
     private final FwApiProcess process;
 
     @PostMapping("/cms/roles/search")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_ROLES, type = RequestType.INTERNAL)
+    @FwRequest(name = ServiceMethod.CMS_SEARCH_ROLES, type = RequestType.INTERNAL)
     public ResponseEntity<SearchResponse<RoleDTO>> searchRoles(SearchRequest<RoleDTO> criteria) {
         return ResponseEntity.ok(process.process(criteria));
     }
 
     @PostMapping("/cms/roles/all")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_ALL_ROLES, type = RequestType.INTERNAL)
+    @FwRequest(name = ServiceMethod.CMS_GET_ALL_ROLES, type = RequestType.INTERNAL)
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/cms/permissions/search")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_SEARCH_PERMISSIONS, type = RequestType.INTERNAL)
+    @FwRequest(name = ServiceMethod.CMS_SEARCH_PERMISSIONS, type = RequestType.INTERNAL)
     public ResponseEntity<SearchResponse<PermissionDTO>> searchPermissions(SearchRequest<PermissionDTO> criteria) {
         return ResponseEntity.ok(process.process(criteria));
     }
 
     @PostMapping("/cms/permissions/all")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_ALL_PERMISSIONS, type = RequestType.INTERNAL)
+    @FwRequest(name = ServiceMethod.CMS_GET_ALL_PERMISSIONS, type = RequestType.INTERNAL)
     public ResponseEntity<List<PermissionDTO>> getAllPermissions() {
         return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/cms/permissions/by-roles")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_GET_PERMISSIONS_BY_ROLES, type = RequestType.INTERNAL)
+    @FwRequest(name = ServiceMethod.CMS_GET_PERMISSIONS_BY_ROLES, type = RequestType.INTERNAL)
     public ResponseEntity<List<PermissionDTO>> getPermissionsByRoles(RoleCodesReq request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/cms/roles/export")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_EXPORT_ROLES, type = RequestType.INTERNAL, isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_ROLES, type = RequestType.INTERNAL, isSuperAdmin = true)
     public void exportRoles(SearchRequest<RoleDTO> request, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(request), "thaca-roles-export-{{date}}.xlsx");
     }
 
     @PostMapping("/cms/permissions/export")
-    @FwRequest(name = InternalMethod.INTERNAL_CMS_EXPORT_PERMISSIONS, type = RequestType.INTERNAL, isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_PERMISSIONS, type = RequestType.INTERNAL, isSuperAdmin = true)
     public void exportPermissions(SearchRequest<PermissionDTO> request, HttpServletResponse response)
         throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(request), "thaca-permissions-export-{{date}}.xlsx");

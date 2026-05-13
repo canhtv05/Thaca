@@ -84,6 +84,16 @@
       "name": "app.api-prefix",
       "type": "java.lang.String",
       "description": "A description for 'app.api-prefix'"
+    },
+    {
+      "name": "application.routes.cmsService",
+      "type": "java.lang.String",
+      "description": "A description for 'application.routes.cmsService'"
+    },
+    {
+      "name": "spring.kafka.consumer.group-id",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.kafka.consumer.group-id'"
     }
   ]
 }

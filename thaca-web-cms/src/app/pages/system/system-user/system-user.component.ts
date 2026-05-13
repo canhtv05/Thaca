@@ -30,6 +30,7 @@ import { ITenantInfoPrj } from '../tenant/tenant.model';
 import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
 import { IPermissionDTO } from '../permission/permission.model';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-system-user',
@@ -59,6 +60,7 @@ export class SystemUserComponent implements OnInit {
   private fb = inject(FormBuilder);
   readonly isLoading = isLoading;
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   private originalValue: any;
   roleOptions = signal<IDropdownOption[]>([]);
@@ -104,7 +106,7 @@ export class SystemUserComponent implements OnInit {
     email: ['', [Validators.required, Validators.email]],
     fullname: ['', [Validators.required]],
     password: [''],
-    tenantId: [null, [Validators.required]],
+    tenantIds: [[], [Validators.required]],
     isActivated: [true],
     isLocked: [false],
     isSuperAdmin: [false],
@@ -132,8 +134,12 @@ export class SystemUserComponent implements OnInit {
         header: 'system_user.tenant',
         center: true,
         render: (row: ISystemUserDTO) => {
-          return row.tenantInfo
-            ? `<span class="thaca-badge thaca-badge-primary"><span class="thb-dot"></span>${row.tenantInfo.code} - ${row.tenantInfo.name}</span>`
+          return row.tenantInfos?.length
+            ? row.tenantInfos
+                .map((t, i) => {
+                  return `<span class="thaca-badge ${i > 0 ? 'mt-[2px]' : ''} thaca-badge-primary"><span class="thb-dot"></span>${t.code} - ${t.name}</span>`;
+                })
+                .join('')
             : '';
         },
       },
@@ -154,7 +160,7 @@ export class SystemUserComponent implements OnInit {
         render: (row: ISystemUserDTO) => {
           const variant = row.isLocked ? 'danger' : 'success';
           const label = this.translate.instant(
-            row.isLocked ? 'common.status.lock' : 'common.status.unlock',
+            row.isLocked ? 'common.status.lock' : 'common.status.normal',
           );
           return `<span class="thaca-badge thaca-badge-${variant}"><span class="thb-dot"></span>${label}</span>`;
         },
@@ -166,6 +172,7 @@ export class SystemUserComponent implements OnInit {
         render: (row: ISystemUserDTO) => {
           return row.isSuperAdmin ? `<i class="pi pi-check-circle text-primary"></i>` : '';
         },
+        condition: () => this.auth.user()?.isSuperAdmin! ?? false,
       },
     ],
     actions: [
@@ -319,7 +326,7 @@ export class SystemUserComponent implements OnInit {
       username: 'test',
       email: 'test@gmail.com',
       fullname: 'test',
-      tenantId: 1 as any,
+      tenantIds: [1] as any,
       password: 'Thaca@2026',
     });
     this.userModal.show();

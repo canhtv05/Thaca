@@ -5,7 +5,6 @@ import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.SystemCredential;
 import com.thaca.auth.domains.SystemCredentialPermission;
 import com.thaca.auth.domains.SystemUser;
-import com.thaca.auth.domains.Tenant;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.services.AuthService;
@@ -65,7 +64,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             password = user.getPassword();
             isLocked = user.getIsLocked();
             isActivated = user.getIsActivated();
-            tenantIds = user.getTenants().stream().map(Tenant::getId).toList();
+            tenantIds = new java.util.ArrayList<>(user.getTenantIds());
             grantedAuthorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
         } else if (userObj instanceof SystemCredential sc) {
             SystemUser su = sc.getSystemUser();
@@ -73,7 +72,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             password = sc.getPassword();
             isLocked = su.getIsLocked();
             isActivated = su.getIsActivated();
-            tenantIds = su.getTenants().stream().map(Tenant::getId).toList();
+            tenantIds = new java.util.ArrayList<>(su.getTenantIds());
             isSuperAdmin = su.getIsSuperAdmin();
 
             Set<Role> roles = sc.getRoles();
@@ -132,7 +131,8 @@ public class DomainUserDetailsService implements UserDetailsService {
             StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
             isSuperAdmin,
             cmsUser,
-            tenantIds
+            tenantIds,
+            (tenantIds != null && !tenantIds.isEmpty()) ? tenantIds.getFirst() : null
         );
     }
 }

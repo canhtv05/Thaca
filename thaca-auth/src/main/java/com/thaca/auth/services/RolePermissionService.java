@@ -1,5 +1,6 @@
 package com.thaca.auth.services;
 
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.Permission;
 import com.thaca.auth.domains.Role;
 import com.thaca.auth.domains.SystemCredential;
@@ -10,7 +11,6 @@ import com.thaca.auth.mappers.RoleMapper;
 import com.thaca.auth.repositories.PermissionRepository;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
-import com.thaca.common.constants.InternalMethod;
 import com.thaca.common.dtos.internal.PermissionDTO;
 import com.thaca.common.dtos.internal.RoleDTO;
 import com.thaca.common.dtos.internal.req.RoleCodesReq;
@@ -52,7 +52,7 @@ public class RolePermissionService {
     public static final String REDIS_ROLE_PERM_PREFIX = "auth:role-permissions:";
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_ROLES, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_ROLES, type = ModeType.HANDLE)
     public SearchResponse<RoleDTO> searchRoles(SearchRequest<RoleDTO> request) {
         Specification<Role> spec = createRoleSpecification(request);
         Page<Role> roles = roleRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
@@ -63,13 +63,13 @@ public class RolePermissionService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_ROLES, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_GET_ALL_ROLES, type = ModeType.HANDLE)
     public List<RoleDTO> getAllRoles() {
         return roleRepository.findAll().stream().map(RoleMapper::fromEntity).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_PERMISSIONS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_PERMISSIONS, type = ModeType.HANDLE)
     public SearchResponse<PermissionDTO> searchPermissions(SearchRequest<PermissionDTO> request) {
         String roleCode = request.getFilter() != null ? request.getFilter().getRoleCode() : null;
         String roleDescription;
@@ -92,7 +92,7 @@ public class RolePermissionService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_ALL_PERMISSIONS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_GET_ALL_PERMISSIONS, type = ModeType.HANDLE)
     public List<PermissionDTO> getAllPermissions() {
         return permissionRepository
             .findAll()
@@ -102,7 +102,7 @@ public class RolePermissionService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_PERMISSIONS_BY_ROLES, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_GET_PERMISSIONS_BY_ROLES, type = ModeType.HANDLE)
     public List<PermissionDTO> getPermissionsByRoles(RoleCodesReq request) {
         if (request == null || request.getRoleCodes() == null || request.getRoleCodes().isEmpty()) {
             return new ArrayList<>();
@@ -191,7 +191,7 @@ public class RolePermissionService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_ROLES, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_EXPORT_ROLES, type = ModeType.HANDLE)
     public byte[] exportRoles(SearchRequest<RoleDTO> request) throws IOException {
         boolean isVietnamese = "vi".equalsIgnoreCase(FwContextHeader.get().getLanguage());
         Specification<Role> spec = createRoleSpecification(request);
@@ -215,7 +215,7 @@ public class RolePermissionService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_PERMISSIONS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_EXPORT_PERMISSIONS, type = ModeType.HANDLE)
     public byte[] exportPermissions(SearchRequest<PermissionDTO> request) throws IOException {
         boolean isVietnamese = "vi".equalsIgnoreCase(FwContextHeader.get().getLanguage());
 

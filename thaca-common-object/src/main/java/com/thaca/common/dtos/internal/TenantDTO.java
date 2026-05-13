@@ -3,6 +3,7 @@ package com.thaca.common.dtos.internal;
 import com.thaca.common.dtos.BaseAuditResponse;
 import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
 import com.thaca.common.enums.TenantStatus;
+import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -26,4 +27,5 @@ public class TenantDTO extends BaseAuditResponse {
 
     private PlanInfoPrj plan;
     private PlanDTO planInfo;
+    private List<Long> tenantIds;
 }

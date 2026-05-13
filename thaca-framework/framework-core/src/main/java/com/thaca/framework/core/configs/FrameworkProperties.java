@@ -41,8 +41,8 @@ public class FrameworkProperties {
     public static class HttpClientConfig {
 
         private String apiKey;
-        private Integer connectTimeout = 10000;
-        private Integer readTimeout = 10000;
+        private Integer connectTimeout = 60000;
+        private Integer readTimeout = 60000;
     }
 
     @Getter
@@ -50,6 +50,6 @@ public class FrameworkProperties {
     public static class RoutesConfig {
 
         private String authService;
-        private String adminService;
+        private String cmsService;
     }
 }

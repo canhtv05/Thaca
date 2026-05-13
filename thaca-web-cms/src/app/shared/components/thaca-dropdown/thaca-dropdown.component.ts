@@ -143,7 +143,7 @@ export class ThacaDropdownComponent implements ControlValueAccessor, OnDestroy, 
       position: 'fixed',
       left: `${rect.left}px`,
       minWidth: `${rect.width}px`,
-      zIndex: '99999',
+      zIndex: '9997',
     };
 
     if (openUp) {

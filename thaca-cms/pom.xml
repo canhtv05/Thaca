@@ -43,9 +43,20 @@
     </dependency>
 
     <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.thaca</groupId>
       <artifactId>thaca-common-object</artifactId>
       <version>1.0.0</version>
+    </dependency>
+
+    <!-- Liquibase starter -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-liquibase</artifactId>
     </dependency>
 
     <dependency>

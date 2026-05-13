@@ -10,4 +10,7 @@ public class EventConstants {
 
     public static final String USER_CREATED_TOPIC = "user-created-topic";
     public static final String USER_CREATED_GROUP_ID = "user-created-group-id";
+
+    public static final String TENANT_DELETED_TOPIC = "tenant-deleted-topic";
+    public static final String TENANT_DELETED_GROUP_ID = "tenant-deleted-group-id";
 }

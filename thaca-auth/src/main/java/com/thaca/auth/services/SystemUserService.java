@@ -1,18 +1,20 @@
 package com.thaca.auth.services;
 
+import com.thaca.auth.clients.CmsClient;
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
 import com.thaca.auth.enums.ErrorMessage;
 import com.thaca.auth.mappers.SystemUserMapper;
 import com.thaca.auth.repositories.RoleRepository;
 import com.thaca.auth.repositories.SystemCredentialRepository;
 import com.thaca.auth.repositories.SystemUserRepository;
-import com.thaca.auth.repositories.TenantRepository;
 import com.thaca.auth.repositories.UserLockHistoryRepository;
-import com.thaca.auth.validators.core.Validator;
-import com.thaca.auth.validators.rules.*;
-import com.thaca.common.constants.InternalMethod;
+import com.thaca.auth.repositories.projection.DuplicateCheckPrj;
+import com.thaca.auth.utils.TenantEnrichmentHelper;
 import com.thaca.common.dtos.internal.SystemUserDTO;
+import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.UserDTO;
+import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -28,6 +30,8 @@ import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
+import com.thaca.framework.core.validations.Validator;
+import com.thaca.framework.core.validations.rules.*;
 import jakarta.persistence.criteria.*;
 import java.io.IOException;
 import java.util.*;
@@ -51,23 +55,24 @@ public class SystemUserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserLockHistoryRepository userLockHistoryRepository;
-    private final TenantRepository tenantRepository;
+    private final CmsClient cmsClient;
+    private final TenantEnrichmentHelper tenantHelper;
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_PROFILE, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_GET_PROFILE, type = ModeType.HANDLE)
     public SystemUserDTO getSystemProfile() {
         String username = SecurityUtils.getCurrentUsername();
         return systemCredentialRepository
             .findByUsername(username)
             .map(sc -> {
-                List<Tenant> userTenants = new ArrayList<>(sc.getSystemUser().getTenants());
-                return SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), userTenants);
+                SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, sc.getSystemUser());
+                return tenantHelper.enrichTenantFull(dto);
             })
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_SEARCH_SYSTEM_USERS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_SEARCH_SYSTEM_USERS, type = ModeType.HANDLE)
     public SearchResponse<SystemUserDTO> searchSystemUsers(SearchRequest<SystemUserDTO> request) {
         Specification<SystemCredential> spec = createSpecification(request);
 
@@ -89,16 +94,19 @@ public class SystemUserService {
         List<SystemUserDTO> data = result
             .getContent()
             .stream()
-            .map(sc -> {
-                List<Tenant> userTenants = new ArrayList<>(sc.getSystemUser().getTenants());
-                return SystemUserMapper.toSearchDTO(sc, sc.getSystemUser(), userTenants);
-            })
+            .map(sc -> SystemUserMapper.toFullDTO(sc, sc.getSystemUser()))
             .toList();
+
+        Map<Long, TenantInfoPrj> tenantMap = tenantHelper.fetchTenantMap(tenantHelper.collectTenantIds(data));
+        if (!tenantMap.isEmpty()) {
+            data.forEach(d -> tenantHelper.enrichTenantInfo(d, tenantMap));
+        }
+
         return new SearchResponse<>(data, PaginationResponse.of(result));
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_GET_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_GET_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO getSystemUserById(SystemUserDTO request) {
         if (request.getId() == null) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -109,25 +117,21 @@ public class SystemUserService {
         SystemCredential sc = systemCredentialRepository
             .findBySystemUser(su)
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
-        List<Tenant> userTenants = new ArrayList<>(su.getTenants());
-        return SystemUserMapper.toFullDTO(sc, su, userTenants);
+        SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, su);
+        return tenantHelper.enrichTenantFull(dto);
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
     public void validateCreate(SystemUserDTO request) {
         validateRequest(request, true);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_CREATE_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_CREATE_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO create(SystemUserDTO request) {
         boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
         SystemUser su = SystemUser.builder()
-            .tenants(
-                request.getTenantIds() != null
-                    ? new HashSet<>(tenantRepository.findAllById(request.getTenantIds()))
-                    : new HashSet<>()
-            )
+            .tenantIds(request.getTenantIds() != null ? new HashSet<>(request.getTenantIds()) : new HashSet<>())
             .fullname(request.getFullname())
             .email(request.getEmail())
             .isActivated(!isSuperAdmin || Boolean.TRUE.equals(request.getIsActivated()))
@@ -156,18 +160,17 @@ public class SystemUserService {
                     .build()
             );
         }
-
-        List<Tenant> userTenants = new ArrayList<>(su.getTenants());
-        return SystemUserMapper.toFullDTO(sc, su, userTenants);
+        SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, su);
+        return tenantHelper.enrichTenantFull(dto);
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.CMS_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
     public void validateUpdate(SystemUserDTO request) {
         validateRequest(request, false);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_UPDATE_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_UPDATE_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO update(SystemUserDTO request) {
         SystemUser su = systemUserRepository
             .findById(request.getId())
@@ -180,7 +183,7 @@ public class SystemUserService {
         su.setEmail(request.getEmail());
         su.setAvatarUrl(request.getAvatarUrl());
         if (isSuperAdmin && request.getTenantIds() != null) {
-            su.setTenants(new HashSet<>(tenantRepository.findAllById(request.getTenantIds())));
+            su.setTenantIds(new HashSet<>(request.getTenantIds()));
         }
         if (isSuperAdmin) {
             if (request.getIsActivated() != null) su.setIsActivated(request.getIsActivated());
@@ -219,13 +222,12 @@ public class SystemUserService {
                     .build()
             );
         }
-
-        List<Tenant> userTenants = new ArrayList<>(su.getTenants());
-        return SystemUserMapper.toFullDTO(sc, su, userTenants);
+        SystemUserDTO dto = SystemUserMapper.toFullDTO(sc, su);
+        return tenantHelper.enrichTenantFull(dto);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = InternalMethod.INTERNAL_CMS_LOCK_UNLOCK_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_LOCK_UNLOCK_SYSTEM_USER, type = ModeType.HANDLE)
     public void lockUnlock(SystemUserDTO request) {
         if (request.getId() == null || StringUtils.isBlank(request.getLockReason())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -254,11 +256,9 @@ public class SystemUserService {
             if (request.getFilter() != null) {
                 SystemUserDTO f = request.getFilter();
                 if (!CollectionUtils.isEmpty(f.getTenantIds()) && isSuperAdmin) {
-                    Join<SystemUser, Tenant> tenantJoin = userJoin.join("tenants");
-                    predicates.add(tenantJoin.get("id").in(f.getTenantIds()));
+                    predicates.add(userJoin.join("tenantIds").in(f.getTenantIds()));
                 } else if (!isSuperAdmin) {
-                    Join<SystemUser, Tenant> tenantJoin = userJoin.join("tenants");
-                    predicates.add(tenantJoin.get("id").in(currentTenantIds));
+                    predicates.add(userJoin.join("tenantIds").in(currentTenantIds));
                 }
                 if (StringUtils.isNotBlank(f.getEmail())) predicates.add(
                     cb.like(cb.lower(userJoin.get("email")), "%" + f.getEmail().toLowerCase() + "%")
@@ -279,7 +279,7 @@ public class SystemUserService {
         };
     }
 
-    @FwMode(name = InternalMethod.INTERNAL_CMS_EXPORT_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.CMS_EXPORT_SYSTEM_USER, type = ModeType.HANDLE)
     public byte[] exportSystemUsers(SearchRequest<SystemUserDTO> request) throws IOException {
         boolean isVietnamese = "vi".equalsIgnoreCase(FwContextHeader.get().getLanguage());
         Specification<SystemCredential> spec = createSpecification(request);
@@ -298,12 +298,14 @@ public class SystemUserService {
         List<SystemCredential> result = systemCredentialRepository.findAll(spec, sort);
         List<SystemUserDTO> data = result
             .stream()
-            .map(sc -> {
-                List<Tenant> userTenants = new ArrayList<>(sc.getSystemUser().getTenants());
-                return SystemUserMapper.toFullDTO(sc, sc.getSystemUser(), userTenants);
-            })
+            .map(sc -> SystemUserMapper.toSearchDTO(sc, sc.getSystemUser()))
             .toList();
 
+        Map<Long, TenantInfoPrj> tenantMap = tenantHelper.fetchTenantMap(tenantHelper.collectTenantIds(data));
+        if (!tenantMap.isEmpty()) {
+            data.forEach(d -> tenantHelper.enrichTenantFull(d, tenantMap));
+        }
+        boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
         List<Map<String, Object>> rows = new ArrayList<>();
         for (SystemUserDTO user : data) {
             Map<String, Object> row = new LinkedHashMap<>();
@@ -315,11 +317,10 @@ public class SystemUserService {
                     ? user
                           .getTenants()
                           .stream()
-                          .map(com.thaca.common.dtos.internal.TenantDTO::getName)
+                          .map(t -> t.getCode() + " - " + t.getName())
                           .collect(Collectors.joining(", "))
                     : "";
             row.put("tenantName", tenantNames);
-            row.put("roles", user.getRoles() != null ? String.join(", ", user.getRoles().keySet()) : "");
             row.put(
                 "isActivated",
                 Boolean.TRUE.equals(user.getIsActivated())
@@ -332,12 +333,24 @@ public class SystemUserService {
                     ? (isVietnamese ? "Đã khóa" : "Locked")
                     : (isVietnamese ? "Bình thường" : "Normal")
             );
+            if (isSuperAdmin) {
+                row.put(
+                    "isSuperAdmin",
+                    Boolean.TRUE.equals(user.getIsSuperAdmin())
+                        ? (isVietnamese ? "Có" : "Yes")
+                        : (isVietnamese ? "Không" : "No")
+                );
+            }
+            row.put("createdAt", user.getCreatedAt());
+            row.put("createdBy", user.getCreatedBy());
+            row.put("updatedAt", user.getUpdatedAt());
+            row.put("updatedBy", user.getUpdatedBy());
             rows.add(row);
         }
-        return ExcelEngine.exportData(buildSchema(isVietnamese), rows);
+        return ExcelEngine.exportData(buildSchema(isVietnamese, isSuperAdmin), rows);
     }
 
-    private ExcelSchema buildSchema(boolean isVietnamese) {
+    private ExcelSchema buildSchema(boolean isVietnamese, boolean isSuperAdmin) {
         return ExcelSchema.builder()
             .sheetName(isVietnamese ? "Danh sách quản trị viên" : "System Users")
             .addColumn(
@@ -359,16 +372,44 @@ public class SystemUserService {
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("roles", isVietnamese ? "Vai trò" : "Roles").dataType(ExcelDataType.STRING).build()
-            )
-            .addColumn(
-                ExcelColumn.builder("isActivated", isVietnamese ? "Trạng thái kích hoạt" : "Activation Status")
+                ExcelColumn.builder("isActivated", isVietnamese ? "Đã kích hoạt" : "Activated")
                     .dataType(ExcelDataType.STRING)
                     .build()
             )
             .addColumn(
-                ExcelColumn.builder("isLocked", isVietnamese ? "Trạng thái khóa" : "Lock Status")
+                ExcelColumn.builder("isLocked", isVietnamese ? "Bị khóa" : "Locked")
                     .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumnCondition(
+                isSuperAdmin,
+                6,
+                ExcelColumn.builder("isSuperAdmin", isVietnamese ? "Quản trị tối cao" : "Super Admin")
+                    .dataType(ExcelDataType.STRING)
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("createdAt", isVietnamese ? "Ngày tạo" : "Created At")
+                    .dataType(ExcelDataType.DATE)
+                    .comment(isVietnamese ? "Ngày tạo" : "Created At")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("createdBy", isVietnamese ? "Người tạo" : "Created By")
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Người tạo" : "Created By")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("updatedAt", isVietnamese ? "Ngày cập nhật" : "Updated At")
+                    .dataType(ExcelDataType.DATE)
+                    .comment(isVietnamese ? "Ngày cập nhật" : "Updated At")
+                    .build()
+            )
+            .addColumn(
+                ExcelColumn.builder("updatedBy", isVietnamese ? "Người cập nhật" : "Updated By")
+                    .dataType(ExcelDataType.STRING)
+                    .comment(isVietnamese ? "Người cập nhật" : "Updated By")
                     .build()
             )
             .build();
@@ -376,6 +417,14 @@ public class SystemUserService {
 
     @SuppressWarnings("null")
     private void validateRequest(SystemUserDTO request, boolean isCreate) {
+        if (
+            request != null &&
+            (request.getTenantIds() == null || request.getTenantIds().isEmpty()) &&
+            request.getTenantId() != null
+        ) {
+            request.setTenantIds(Collections.singletonList(request.getTenantId()));
+        }
+
         boolean invalid =
             request == null ||
             StringUtils.isBlank(request.getUsername()) ||
@@ -390,24 +439,26 @@ public class SystemUserService {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         if (isCreate) {
-            if (
-                systemCredentialRepository.existsByUsernameAndTenantIds(request.getUsername(), request.getTenantIds())
-            ) {
-                throw new FwException(ErrorMessage.USERNAME_ALREADY_EXISTS);
-            }
-            if (systemUserRepository.existsByEmailAndTenantIds(request.getEmail(), request.getTenantIds())) {
-                throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
-            }
+            throwIfConflicts(
+                systemCredentialRepository.findConflictingTenantsByUsername(
+                    request.getUsername(),
+                    request.getTenantIds()
+                ),
+                ErrorMessage.USERNAME_ALREADY_EXISTS
+            );
+            throwIfConflicts(
+                systemUserRepository.findConflictingTenantsByEmail(request.getEmail(), request.getTenantIds()),
+                ErrorMessage.EMAIL_ALREADY_EXITS
+            );
         } else {
-            if (
-                systemUserRepository.existsByEmailAndTenantIdsAndIdNot(
+            throwIfConflicts(
+                systemUserRepository.findConflictingTenantsByEmailAndIdNot(
                     request.getEmail(),
                     request.getTenantIds(),
                     request.getId()
-                )
-            ) {
-                throw new FwException(ErrorMessage.EMAIL_ALREADY_EXITS);
-            }
+                ),
+                ErrorMessage.EMAIL_ALREADY_EXITS
+            );
         }
         Validator<UserDTO> validator = new Validator<>(
             new ArrayList<>(List.of(new UsernameRule<>(), new EmailRule<>(), new FullnameRule<>()))
@@ -451,6 +502,53 @@ public class SystemUserService {
                 scp.setEffect(grantedSet.contains(p.getCode()) ? PermissionEffect.GRANT : PermissionEffect.DENY);
                 sc.getCredentialPermissions().add(scp);
             }
+        }
+    }
+
+    private record ConflictTenantResult(String label, List<Map<String, Object>> details) {}
+
+    private void throwIfConflicts(List<DuplicateCheckPrj> conflicts, ErrorMessage errorMessage) {
+        if (conflicts.isEmpty()) return;
+        List<Long> conflictIds = conflicts.stream().map(DuplicateCheckPrj::getTenantId).distinct().toList();
+        ConflictTenantResult conflict = buildConflictingTenantInfo(conflictIds);
+        Map<String, Object> errorData = new HashMap<>();
+        errorData.put("conflictingTenants", conflict.label());
+        errorData.put("conflictingTenantsData", conflict.details());
+        throw new FwException(errorMessage, errorData);
+    }
+
+    private ConflictTenantResult buildConflictingTenantInfo(List<Long> tenantIds) {
+        if (tenantIds.isEmpty()) return new ConflictTenantResult("", Collections.emptyList());
+        try {
+            List<TenantInfoPrj> tenants = cmsClient.getTenantsByIds(
+                TenantDTO.builder().tenantIds(new ArrayList<>(tenantIds)).build()
+            );
+            List<Map<String, Object>> details = tenants
+                .stream()
+                .map(t -> {
+                    Map<String, Object> info = new LinkedHashMap<>();
+                    info.put("id", t.getId());
+                    info.put("code", t.getCode());
+                    info.put("name", t.getName());
+                    return info;
+                })
+                .toList();
+            String label = tenants
+                .stream()
+                .map(t -> t.getCode() + " - " + t.getName())
+                .collect(Collectors.joining(", "));
+            return new ConflictTenantResult(label, details);
+        } catch (Exception e) {
+            String label = tenantIds.stream().map(String::valueOf).collect(Collectors.joining(", "));
+            List<Map<String, Object>> details = tenantIds
+                .stream()
+                .map(id -> {
+                    Map<String, Object> info = new LinkedHashMap<>();
+                    info.put("id", id);
+                    return info;
+                })
+                .toList();
+            return new ConflictTenantResult(label, details);
         }
     }
 }

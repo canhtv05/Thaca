@@ -42,7 +42,7 @@ export interface ITableColumn {
   sortable?: boolean;
   width?: string;
   fixed?: boolean;
-  condition?: (row: any) => boolean;
+  condition?: (data?: any) => boolean;
   render?: (row: any) => string;
   center?: boolean;
 }
@@ -115,7 +115,7 @@ export class DataTableComponent implements AfterViewInit, OnInit, OnDestroy, OnC
   ];
 
   displayColumns = computed(() => {
-    let cols = [...this.config.columns];
+    let cols = [...this.config.columns].filter((c) => !c.condition || c.condition());
     if (this.config.withAudit) {
       cols = [...cols, ...this.auditColumns];
     }
