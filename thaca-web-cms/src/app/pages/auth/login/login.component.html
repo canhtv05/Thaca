@@ -2,19 +2,19 @@
   <ng-template #layout>
     <div
       id="sing-in-card"
-      class="w-full h-full md:h-auto md:min-w-[600px] md:max-w-md p-8 sm:p-10 flex flex-col justify-center gap-6 bg-card rounded-2xl md:rounded-xl shadow-sm md:shadow-md border border-border/50"
+      class="w-full h-full md:h-auto md:min-w-[400px] md:max-w-sm p-5 sm:p-6 flex flex-col justify-center gap-3 bg-card rounded-2xl md:rounded-xl shadow-sm md:shadow-md border border-border/50"
     >
-      <thaca-button variant="outline" size="sm" (click)="onBackToType()" class="mb-2 border-none!">
-        <i class="pi pi-arrow-left mr-2 text-xs"></i>
-        {{ 'common.button.back' | translate }}
+      <thaca-button variant="outline" size="sm" (click)="onBackToType()" class="mb-0 border-none!">
+        <i class="pi pi-arrow-left mr-1 text-[9px]"></i>
+        <span class="text-[11px]">{{ 'common.button.back' | translate }}</span>
       </thaca-button>
-      <div class="mb-6 flex items-center justify-center gap-3">
-        <img src="assets/images/thaca_icon_v1.png" alt="ThaCa" class="size-8 object-contain" />
-        <span class="text-xl font-black tracking-tighter text-foreground">ThaCa</span>
+      <div class="mb-2 flex items-center justify-center gap-2">
+        <img src="assets/images/thaca_icon_v1.png" alt="ThaCa" class="size-5 object-contain" />
+        <span class="text-base font-black tracking-tighter text-foreground">ThaCa</span>
       </div>
-      <div id="logo-section" class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-foreground mb-2">{{ 'auth.greeting' | translate }}</h1>
-        <p class="text-foreground text-sm">{{ 'auth.description' | translate }}</p>
+      <div id="logo-section" class="text-center mb-1">
+        <h1 class="text-xl font-bold text-foreground mb-0">{{ 'auth.greeting' | translate }}</h1>
+        <p class="text-foreground text-[11px] opacity-70">{{ 'auth.description' | translate }}</p>
       </div>
       @if (tenantState(); as tenant) {
         <div class="selected-tenant-card">
