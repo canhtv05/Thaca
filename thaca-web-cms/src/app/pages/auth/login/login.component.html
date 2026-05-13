@@ -4,7 +4,7 @@
       id="sing-in-card"
       class="h-full rounded-xl p-10 w-full lg:min-w-md max-w-md flex flex-col justify-center"
     >
-      <thaca-button variant="outline" size="sm" (click)="onBackToType()" class="mb-2">
+      <thaca-button variant="outline" size="sm" (click)="onBackToType()" class="mb-2 border-none!">
         <i class="pi pi-arrow-left mr-2 text-xs"></i>
         {{ 'common.button.back' | translate }}
       </thaca-button>
@@ -26,17 +26,19 @@
               <div class="tenant-top-row">
                 <span class="tenant-code">{{ tenant.code }}</span>
                 @if (tenant.planInfo) {
-                  <span
-                    class="plan-tag"
-                    [class]="'plan-' + tenant.planInfo.type.toLowerCase()"
-                  >
+                  <span class="plan-tag" [class]="'plan-' + tenant.planInfo.type.toLowerCase()">
                     {{ 'plan.plans.' + tenant.planInfo.type.toLowerCase() | translate }}
                   </span>
                 }
               </div>
               <div class="tenant-name">{{ tenant.name }}</div>
             </div>
-            <button type="button" class="change-action" (click)="onBackToType()" [title]="'auth.changeTenant' | translate">
+            <button
+              type="button"
+              class="change-action"
+              (click)="onBackToType()"
+              [title]="'auth.changeTenant' | translate"
+            >
               <i class="pi pi-sync"></i>
             </button>
           </div>
