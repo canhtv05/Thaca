@@ -721,7 +721,7 @@ public class UserService {
     private Specification<User> createUserSpecification(SearchRequest<UserDTO> req) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            List<Long> currentTenantIds = SecurityUtils.getCurrentTenantIds();
+            Long currentTenantId = SecurityUtils.getCurrentTenantId();
             boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
             if (req.getFilter() != null) {
                 UserDTO filter = req.getFilter();
@@ -739,12 +739,26 @@ public class UserService {
                 if (filter.getIsLocked() != null) {
                     predicates.add(cb.equal(root.get("isLocked"), filter.getIsLocked()));
                 }
-                if (filter.getTenantIds() != null && !filter.getTenantIds().isEmpty() && isSuperAdmin) {
+
+                if (isSuperAdmin) {
+                    if (filter.getTenantIds() != null && !filter.getTenantIds().isEmpty()) {
+                        Join<User, Long> tenantJoin = root.join("tenantIds");
+                        predicates.add(tenantJoin.in(filter.getTenantIds()));
+                    }
+                } else {
+                    if (currentTenantId != null) {
+                        Join<User, Long> tenantJoin = root.join("tenantIds");
+                        predicates.add(cb.equal(tenantJoin, currentTenantId));
+                    } else {
+                        predicates.add(cb.disjunction());
+                    }
+                }
+            } else if (!isSuperAdmin) {
+                if (currentTenantId != null) {
                     Join<User, Long> tenantJoin = root.join("tenantIds");
-                    predicates.add(tenantJoin.in(filter.getTenantIds()));
-                } else if (!isSuperAdmin) {
-                    Join<User, Long> tenantJoin = root.join("tenantIds");
-                    predicates.add(tenantJoin.in(currentTenantIds));
+                    predicates.add(cb.equal(tenantJoin, currentTenantId));
+                } else {
+                    predicates.add(cb.disjunction());
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));

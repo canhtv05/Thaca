@@ -10,6 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 @Getter
 @Setter
@@ -17,6 +20,11 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "system_users", schema = "auth")
+@FilterDef(name = "tenantFilter", parameters = { @ParamDef(name = "tenantIds", type = Long.class) })
+@Filter(
+    name = "tenantFilter",
+    condition = "exists (select 1 from auth.system_user_tenants sut where sut.system_user_id = id and sut.tenant_id in (:tenantIds))"
+)
 public class SystemUser extends BaseEntityAudit {
 
     @Id
