@@ -16,7 +16,7 @@ export const routes: Routes = [
   {
     path: 'auth',
     resolve: { i18n: I18nResolver },
-    data: { i18n: ['auth'] },
+    data: { i18n: ['auth', 'plan'] },
     canActivate: [GuestGuard],
     loadChildren: () => import('./pages/auth/auth.routes').then((m) => m.authRoutes),
   },

@@ -23,4 +23,5 @@ public class TenantInfoPrj {
     private String contactEmail;
     private String logoUrl;
     private Long version;
+    private PlanInfoPrj plan;
 }

@@ -21,6 +21,13 @@ export interface ITenantDTO {
   planInfo?: IPlanDTO;
 }
 
+export interface IPlanInfoPrj {
+  id: number;
+  name: string;
+  code: string;
+  type: string;
+}
+
 export interface ITenantInfoPrj {
   id: number;
   code: string;
@@ -29,6 +36,7 @@ export interface ITenantInfoPrj {
   domain?: string;
   status?: string;
   planId?: number;
+  plan?: IPlanInfoPrj;
   expiresAt?: string;
   contactEmail?: string;
   version?: number;

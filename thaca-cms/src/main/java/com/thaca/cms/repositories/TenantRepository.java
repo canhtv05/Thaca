@@ -22,7 +22,8 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     @Query(
         nativeQuery = true,
         value = """
-        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version FROM cms.tenants t
+        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version, p.name as planName, p.code as planCode, p.type as planType FROM cms.tenants t
+        LEFT JOIN cms.plans p ON t.plan_id = p.id
         WHERE t.status = 'ACTIVE' AND t.deleted_at IS NULL
         ORDER BY t.updated_at DESC
         """
@@ -32,7 +33,8 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     @Query(
         nativeQuery = true,
         value = """
-        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version FROM cms.tenants t
+        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version, p.name as planName, p.code as planCode, p.type as planType FROM cms.tenants t
+        LEFT JOIN cms.plans p ON t.plan_id = p.id
         WHERE t.deleted_at IS NULL
         ORDER BY t.updated_at DESC
         """
@@ -48,7 +50,8 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     @Query(
         nativeQuery = true,
         value = """
-        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version FROM cms.tenants t
+        SELECT t.id, t.name, t.code, t.domain, t.status, t.plan_id as planId, t.expires_at as expiresAt, t.contact_email as contactEmail, t.logo_url as logoUrl, t.version, p.name as planName, p.code as planCode, p.type as planType FROM cms.tenants t
+        LEFT JOIN cms.plans p ON t.plan_id = p.id
         WHERE t.id IN :ids AND t.deleted_at IS NULL
         """
     )

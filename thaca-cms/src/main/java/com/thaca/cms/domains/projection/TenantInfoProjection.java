@@ -22,4 +22,10 @@ public interface TenantInfoProjection {
     String getLogoUrl();
 
     Long getVersion();
+
+    String getPlanName();
+
+    String getPlanCode();
+
+    String getPlanType();
 }

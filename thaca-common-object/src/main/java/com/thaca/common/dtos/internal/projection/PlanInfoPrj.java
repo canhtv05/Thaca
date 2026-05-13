@@ -1,5 +1,6 @@
 package com.thaca.common.dtos.internal.projection;
 
+import com.thaca.common.enums.PlanType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,4 +17,5 @@ public class PlanInfoPrj {
     private Long id;
     private String name;
     private String code;
+    private PlanType type;
 }

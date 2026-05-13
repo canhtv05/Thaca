@@ -27,7 +27,7 @@ export class AuthService {
         return Promise.resolve(false);
       case 'unknown':
       default:
-        if (window.location.pathname.includes('/auth/platform')) {
+        if (window.location.pathname.includes('/auth/')) {
           return Promise.resolve(false);
         }
         if (!this.profilePromise) {

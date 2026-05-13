@@ -1,3 +1,152 @@
 :host ::ng-deep .pi {
   font-size: var(--thaca-fs-sm);
 }
+
+#sing-in-card {
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  max-width: 100%;
+  background-color: transparent;
+
+  @media (min-width: 1024px) {
+    background-color: var(--card);
+    height: auto;
+    max-width: 448px; // max-w-md
+    min-width: 448px; // min-w-md
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.selected-tenant-card {
+  margin-bottom: 24px;
+  border-radius: 16px;
+  background-color: color-mix(in srgb, var(--primary), transparent 94%);
+  border: 1px solid color-mix(in srgb, var(--primary), transparent 85%);
+  padding: 12px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--primary), transparent 90%);
+    border-color: color-mix(in srgb, var(--primary), transparent 75%);
+  }
+
+  .card-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tenant-logo {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background-color: color-mix(in srgb, var(--primary), transparent 85%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--primary), transparent 80%);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .logo-placeholder {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+  }
+
+  .tenant-details {
+    flex: 1;
+    min-width: 0;
+
+    .tenant-top-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+
+      .tenant-code {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted-foreground);
+      }
+
+      .plan-tag {
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        background-color: color-mix(in srgb, var(--primary), transparent 85%);
+        color: var(--primary);
+        border: 1px solid color-mix(in srgb, var(--primary), transparent 80%);
+
+        &.plan-free {
+          background-color: color-mix(in srgb, #94a3b8, transparent 85%);
+          color: #64748b;
+          border-color: color-mix(in srgb, #94a3b8, transparent 70%);
+        }
+        &.plan-basic {
+          background-color: color-mix(in srgb, #3b82f6, transparent 85%);
+          color: #3b82f6;
+          border-color: color-mix(in srgb, #3b82f6, transparent 70%);
+        }
+        &.plan-pro {
+          background-color: color-mix(in srgb, #8b5cf6, transparent 85%);
+          color: #8b5cf6;
+          border-color: color-mix(in srgb, #8b5cf6, transparent 70%);
+        }
+        &.plan-enterprise {
+          background-color: color-mix(in srgb, #f59e0b, transparent 85%);
+          color: #f59e0b;
+          border-color: color-mix(in srgb, #f59e0b, transparent 70%);
+        }
+      }
+    }
+
+    .tenant-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--foreground);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .change-action {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--primary), transparent 85%);
+      color: var(--primary);
+    }
+
+    i {
+      font-size: 14px;
+    }
+  }
+}

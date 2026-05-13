@@ -3,8 +3,11 @@ package com.thaca.cms.mappers;
 import com.thaca.cms.domains.Tenant;
 import com.thaca.cms.domains.projection.TenantInfoProjection;
 import com.thaca.common.dtos.internal.TenantDTO;
+import com.thaca.common.dtos.internal.projection.PlanInfoPrj;
 import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
+import com.thaca.common.enums.PlanType;
 import com.thaca.framework.core.utils.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class TenantMapper {
 
@@ -47,6 +50,14 @@ public class TenantMapper {
             .contactEmail(tenant.getContactEmail())
             .logoUrl(tenant.getLogoUrl())
             .version(tenant.getVersion())
+            .plan(
+                PlanInfoPrj.builder()
+                    .id(tenant.getPlanId())
+                    .name(tenant.getPlanName())
+                    .code(tenant.getPlanCode())
+                    .type(StringUtils.isNotBlank(tenant.getPlanType()) ? PlanType.valueOf(tenant.getPlanType()) : null)
+                    .build()
+            )
             .build();
     }
 }

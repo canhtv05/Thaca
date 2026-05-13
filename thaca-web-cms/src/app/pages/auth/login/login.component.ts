@@ -13,6 +13,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ILoginReq } from '../../../core/models/auth.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
+import { ITenantDTO } from '../../system/tenant/tenant.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +29,7 @@ import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
     ValidationMessageComponent,
     TranslateModule,
     ThacaButtonComponent,
+    CommonModule,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
@@ -63,6 +66,7 @@ export class LoginComponent implements OnInit {
   captchaImage = signal<string>('');
   captchaId = signal<string>('');
   tenantId = signal<number | null>(null);
+  tenantState = signal<ITenantDTO | null>(null);
 
   readonly captchaInputId = 'captcha-input-' + Math.random().toString(36).substring(2, 9);
 
@@ -73,6 +77,10 @@ export class LoginComponent implements OnInit {
         this.tenantId.set(+params['tenantId']);
       }
     });
+    const state = history.state;
+    if (state && state.tenant) {
+      this.tenantState.set(state.tenant);
+    }
   }
 
   async generateCaptcha(): Promise<void> {
