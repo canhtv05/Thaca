@@ -21,9 +21,17 @@ public class WebClientConfig {
     CorsWebFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("POST"));
-        configuration.setAllowedHeaders(List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE));
+        configuration.setAllowedOrigins(
+            List.of(
+                "http://localhost:4200",
+                "http://localhost:3000",
+                "https://unspilt-enthusedly-shantell.ngrok-free.dev"
+            )
+        );
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(
+            List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, "Origin", "Accept", "X-Requested-With")
+        );
         configuration.setExposedHeaders(List.of(HttpHeaders.AUTHORIZATION));
         configuration.setMaxAge(3600L);
 
