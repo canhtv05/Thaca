@@ -7,6 +7,7 @@ import { AuthLayoutComponent } from '../../../layouts/auth-layout/auth-layout.co
 import { ITenantInfoPrj } from '../../system/tenant/tenant.model';
 import { TenantService } from '../../system/tenant/tenant.service';
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-platform-selection',
@@ -25,6 +26,7 @@ import { ThacaButtonComponent } from '../../../shared/components/thaca-button/th
 export class PlatformSelectionComponent implements OnInit {
   private readonly tenantService = inject(TenantService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   tenants = signal<ITenantInfoPrj[]>([]);
   isLoadingTenants = signal<boolean>(false);
@@ -41,7 +43,8 @@ export class PlatformSelectionComponent implements OnInit {
 
   ngOnInit(): void {
     const state = history.state;
-    if (!state || !state.email) {
+    const email = state?.email || this.authService.verifiedEmail();
+    if (!email) {
       this.router.navigate(['/auth/verify']);
       return;
     }

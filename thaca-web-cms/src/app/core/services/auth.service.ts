@@ -16,6 +16,7 @@ export class AuthService {
 
   private readonly authState = signal<AuthState>('unknown');
   private profilePromise: Promise<boolean> | null = null;
+  readonly verifiedEmail = signal<string | null>(null);
 
   readonly user = computed(() => currentUser());
   readonly isAuthenticated = computed(() => this.authState() === 'authenticated');

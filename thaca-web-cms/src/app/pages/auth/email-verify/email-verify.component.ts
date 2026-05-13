@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormsModule,
@@ -13,6 +13,7 @@ import { AuthLayoutComponent } from '../../../layouts/auth-layout/auth-layout.co
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
 import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-email-verify',
@@ -35,6 +36,8 @@ export class EmailVerifyComponent {
   countdown = signal(600);
   timer: any;
   APP_CONFIG_ICONS = APP_CONFIG_ICONS;
+
+  private readonly authService = inject(AuthService);
 
   constructor(
     private fb: FormBuilder,
@@ -85,9 +88,10 @@ export class EmailVerifyComponent {
     // Simulate verification
     setTimeout(() => {
       this.isLoading.set(false);
-      // Navigate to platform selection with email state if needed
+      const email = this.form.get('email')?.value;
+      this.authService.verifiedEmail.set(email);
       this.router.navigate(['/auth/platform'], {
-        state: { email: this.form.get('email')?.value },
+        state: { email },
       });
     }, 1500);
   }

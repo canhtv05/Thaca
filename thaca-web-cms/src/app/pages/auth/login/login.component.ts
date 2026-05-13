@@ -114,6 +114,10 @@ export class LoginComponent implements OnInit {
   }
 
   onBackToType(): void {
-    this.router.navigate(['/auth/verify']);
+    if (this.tenantId()) {
+      this.router.navigate(['/auth/platform']);
+    } else {
+      this.router.navigate(['/auth/verify']);
+    }
   }
 }
