@@ -14,7 +14,6 @@ import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;
-import com.thaca.framework.core.constants.CommonConstants;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
 import lombok.RequiredArgsConstructor;
@@ -49,10 +48,8 @@ public class UserAuthController {
 
     @PostMapping("/refresh-token")
     @FwRequest(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = RequestType.INTERNAL)
-    public ResponseEntity<RefreshTokenRes> refreshToken(
-        @CookieValue(name = CommonConstants.COOKIE_NAME, required = false) String cookieValue
-    ) {
-        return ResponseEntity.ok(fwApiProcess.process(cookieValue));
+    public ResponseEntity<RefreshTokenRes> refreshToken() {
+        return ResponseEntity.ok(fwApiProcess.process(null));
     }
 
     @PostMapping("/change-password")

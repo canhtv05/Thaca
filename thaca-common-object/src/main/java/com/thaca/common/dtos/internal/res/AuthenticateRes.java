@@ -12,4 +12,5 @@ public class AuthenticateRes {
 
     private Boolean isAuthenticate;
     private SystemUserDTO info;
+    private String accessToken;
 }

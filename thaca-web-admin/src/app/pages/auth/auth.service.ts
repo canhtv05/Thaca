@@ -52,6 +52,7 @@ export class AuthService {
       payload,
     );
     if (res.body.status === 'OK' && res.body.data.isAuthenticate) {
+      localStorage.setItem('accessToken', res.body.data.accessToken);
       currentUser.set(res.body.data.info);
       this.authState.set('authenticated');
     }
@@ -59,6 +60,7 @@ export class AuthService {
   }
 
   logout(): void {
+    localStorage.removeItem('accessToken');
     currentUser.set(null);
     this.profilePromise = null;
     this.authState.set('logged-out');

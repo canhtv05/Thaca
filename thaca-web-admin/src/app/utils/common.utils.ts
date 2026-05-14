@@ -1,7 +1,7 @@
 import { IApiHeader, IApiBody } from '../core/models/common.model';
 import { currentLang, currentUser } from '../core/stores/app.store';
 
-const DEVICE_ID_STORAGE_KEY = 'thaca_device_id';
+const DEVICE_ID_STORAGE_KEY = 'thaca-device-id';
 
 const generateDeviceId = (): string => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -24,7 +24,7 @@ export const createHeader = (payload: Partial<IApiHeader> = {}): IApiHeader => {
   const defaultPayload: IApiHeader = {
     username: currentUser()?.username || 'GUEST',
     location: window.location.hostname,
-    channel: 'admin',
+    channel: 'ADMIN',
     language: currentLang() || 'vi',
     deviceId: getDeviceId(),
     apiKey: '',

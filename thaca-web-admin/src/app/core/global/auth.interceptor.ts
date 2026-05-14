@@ -24,9 +24,17 @@ export const authInterceptor: HttpInterceptorFn = (
 
   const skipLoading = req.context.get(SKIP_LOADING) || req.url.includes('/assets/');
 
-  const authReq = req.clone({
+  const token = localStorage.getItem('thaca-access-token');
+  let authReq = req.clone({
     withCredentials: true,
   });
+  if (token) {
+    authReq = authReq.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
 
   if (!skipLoading) {
     isLoading.set(true);

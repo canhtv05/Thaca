@@ -1,6 +1,5 @@
 package com.thaca.gateway.config;
 
-import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.framework.core.configs.FrameworkProperties;
@@ -8,11 +7,8 @@ import com.thaca.framework.core.constants.CommonConstants;
 import com.thaca.framework.core.dtos.ApiBody;
 import com.thaca.framework.core.dtos.ApiHeader;
 import com.thaca.framework.core.dtos.ApiPayload;
-import com.thaca.framework.core.utils.CommonUtils;
 import com.thaca.framework.core.utils.JsonF;
 import com.thaca.framework.reactive.starter.utils.JwtUtils;
-import com.thaca.framework.reactive.starter.utils.ReactiveCookieUtils;
-import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
@@ -40,7 +37,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private final FrameworkProperties frameworkProperties;
     private final JwtUtils jwtUtil;
-    private final ReactiveCookieUtils reactiveCookieUtils;
 
     @Override
     public int getOrder() {
@@ -49,31 +45,29 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull GatewayFilterChain chain) {
-        TokenPair tokens = resolveTokens(exchange);
-        String accessToken = tokens.accessToken();
-        String refreshToken = tokens.refreshToken();
-
-        if (!StringUtils.hasText(accessToken)) {
-            if (!StringUtils.hasText(refreshToken)) {
-                return chain.filter(exchange);
-            }
+        String accessToken = resolveAccessToken(exchange);
+        if (StringUtils.hasText(accessToken)) {
+            return jwtUtil
+                .validateToken(accessToken)
+                .flatMap(status -> {
+                    if (status.equals(TokenStatus.VALID)) {
+                        return chain.filter(withAuthHeader(exchange, accessToken));
+                    }
+                    if (status.equals(TokenStatus.EXPIRED)) {
+                        String refreshToken = resolveRefreshToken(exchange);
+                        if (StringUtils.hasText(refreshToken)) {
+                            return refreshAndContinue(exchange, chain, refreshToken);
+                        }
+                    }
+                    return chain.filter(exchange);
+                })
+                .onErrorResume(e -> chain.filter(exchange));
+        }
+        String refreshToken = resolveRefreshToken(exchange);
+        if (StringUtils.hasText(refreshToken)) {
             return refreshAndContinue(exchange, chain, refreshToken);
         }
-
-        return jwtUtil
-            .validateToken(accessToken)
-            .flatMap(status -> {
-                if (status.equals(TokenStatus.VALID)) {
-                    return chain.filter(withAuthHeader(exchange, accessToken));
-                }
-                if (status.equals(TokenStatus.EXPIRED) && StringUtils.hasText(refreshToken)) {
-                    return refreshAndContinue(exchange, chain, refreshToken);
-                }
-                return chain.filter(exchange);
-            })
-            .onErrorResume(e -> {
-                return chain.filter(exchange);
-            });
+        return chain.filter(exchange);
     }
 
     private Mono<Void> refreshAndContinue(ServerWebExchange exchange, GatewayFilterChain chain, String refreshToken) {
@@ -86,25 +80,35 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             .build()
             .post()
             .uri(authServiceUrl + "/internal/refresh-token")
-            .cookie(CommonConstants.COOKIE_NAME, refreshToken)
+            .cookie(CommonConstants.REFRESH_COOKIE_NAME, refreshToken)
             .header(HttpHeaders.AUTHORIZATION, "Basic " + frameworkProperties.getHttpClient().getApiKey())
             .bodyValue(reqBody)
             .retrieve()
             .bodyToMono(RefreshResponse.class)
             .flatMap(res -> {
-                if (res == null || res.getData() == null) {
+                if (res == null || res.getData() == null || res.getData().getAccessToken() == null) {
                     return unauthenticated(exchange.getResponse());
                 }
-                TokenPair newTokens = res.getData();
-                exchange
-                    .getResponse()
-                    .addCookie(reactiveCookieUtils.setTokenCookie(newTokens.accessToken(), newTokens.refreshToken()));
-                return chain.filter(withAuthHeader(exchange, newTokens.accessToken()));
+                String newAccessToken = res.getData().getAccessToken();
+                return chain.filter(withAuthHeader(exchange, newAccessToken));
             })
             .onErrorResume(e -> {
                 log.error("Failed to refresh token", e);
                 return unauthenticated(exchange.getResponse());
             });
+    }
+
+    private String resolveAccessToken(ServerWebExchange exchange) {
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
+
+    private String resolveRefreshToken(ServerWebExchange exchange) {
+        HttpCookie cookie = exchange.getRequest().getCookies().getFirst(CommonConstants.REFRESH_COOKIE_NAME);
+        return cookie != null ? cookie.getValue() : null;
     }
 
     private ServerWebExchange withAuthHeader(ServerWebExchange exchange, String accessToken) {
@@ -120,28 +124,31 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         String body = JsonF.toJson(ApiPayload.error(CommonErrorMessage.UNAUTHORIZED));
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        response.addCookie(reactiveCookieUtils.deleteCookie());
+        response.addCookie(
+            ResponseCookie.from(CommonConstants.REFRESH_COOKIE_NAME, "")
+                .httpOnly(true)
+                .maxAge(0)
+                .path("/")
+                .secure(false)
+                .sameSite("Strict")
+                .build()
+        );
         return response.writeWith(
             Mono.just(response.bufferFactory().wrap(body != null ? body.getBytes() : new byte[0]))
         );
-    }
-
-    private TokenPair resolveTokens(ServerWebExchange exchange) {
-        List<String> authHeaders = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
-
-        if (!CollectionUtils.isEmpty(authHeaders)) {
-            String bearer = authHeaders.getFirst().replace("Bearer ", "");
-            return new TokenPair(bearer, null);
-        }
-
-        String cookieHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.COOKIE);
-        return CommonUtils.tokenFromCookie(cookieHeader).orElseGet(() -> new TokenPair(null, null));
     }
 
     @Getter
     @Setter
     public static class RefreshResponse {
 
-        private TokenPair data;
+        private RefreshData data;
+    }
+
+    @Getter
+    @Setter
+    public static class RefreshData {
+
+        private String accessToken;
     }
 }

@@ -6,11 +6,9 @@ import com.thaca.auth.domains.SystemCredential;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.dtos.res.RefreshTokenRes;
 import com.thaca.auth.enums.ErrorMessage;
-import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.services.AuthService;
 import com.thaca.common.dtos.UserSession;
-import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.PermissionEffect;
 import com.thaca.common.enums.WsType;
@@ -25,7 +23,6 @@ import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
-import com.thaca.framework.core.utils.CookieUtils;
 import com.thaca.framework.core.utils.FwUtils;
 import com.thaca.framework.core.utils.JsonF;
 import io.jsonwebtoken.Claims;
@@ -44,7 +41,6 @@ import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -58,28 +54,23 @@ public class TokenProvider {
 
     private final SecretKey key;
     private final JwtParser jwtParser;
-    private final UserRepository userRepository;
     private final Long tokenValidityDuration;
     private final Long adminTokenValidityDuration;
     private final Long refreshTokenValidityDuration;
     private final RedisPubService redisPubService;
     private final UserSessionService userSessionService;
-    private final CookieUtils cookieUtils;
     private final AuthService authService;
+    private final String cookieDomain;
 
     public TokenProvider(
-        UserRepository userRepository,
         FrameworkProperties frameworkProperties,
         RedisPubService redisPubService,
         UserSessionService userSessionService,
-        @Lazy AuthService authService,
-        CookieUtils cookieUtils
+        @Lazy AuthService authService
     ) {
-        this.userRepository = userRepository;
         String secret = frameworkProperties.getSecurity().getBase64Secret();
         this.redisPubService = redisPubService;
         this.userSessionService = userSessionService;
-        this.cookieUtils = cookieUtils;
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         key = Keys.hmacShaKeyFor(keyBytes);
         jwtParser = Jwts.parser().verifyWith(key).build();
@@ -87,6 +78,7 @@ public class TokenProvider {
         this.tokenValidityDuration = frameworkProperties.getSecurity().getValidDurationInSeconds();
         this.adminTokenValidityDuration = frameworkProperties.getSecurity().getAdminValidDurationInSeconds();
         this.refreshTokenValidityDuration = frameworkProperties.getSecurity().getRefreshDurationInSeconds();
+        this.cookieDomain = frameworkProperties.getSecurity().getCookieDomain();
     }
 
     public String createToken(Authentication authentication, HttpServletResponse response) {
@@ -109,60 +101,36 @@ public class TokenProvider {
         String sessionId = UUID.randomUUID().toString();
 
         long validity = (c == 1) ? this.adminTokenValidityDuration : this.tokenValidityDuration;
-        String token = this.generateToken(authentication, validity, channel, sessionId);
+        String token = this.generateAccessToken(authentication, validity, channel, sessionId);
 
         if (StringUtils.isNotBlank(oldToken)) {
             Thread.startVirtualThread(() -> this.handleKickOldSessionAsync(name, token, oldToken, channel));
         }
-
-        // For admin/Admin (c=1), refreshToken is null. For others (c=0), check channel.
-        String refreshToken = null;
-        if (c == 0 && channel != ChannelType.WEB) {
-            refreshToken = this.generateToken(authentication, this.refreshTokenValidityDuration, channel, sessionId);
+        if (c == 0) {
+            String refreshToken = this.generateRefreshToken(name, userDetails.getTenantId(), sessionId);
+            setRefreshCookie(response, refreshToken);
         }
-
         this.cacheUserToken(name, channel, sessionId, token);
-
-        Cookie cookie = cookieUtils.setTokenCookie(token, refreshToken);
-        response.addCookie(cookie);
-
-        if (refreshToken != null) {
-            Optional<User> user = userRepository.findByUsername(name);
-            if (user.isPresent()) {
-                user.get().setRefreshToken(FwUtils.hexString(refreshToken));
-                userRepository.save(user.get());
-            }
-        }
         return token;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public RefreshTokenRes refreshToken(
-        String cookieValue,
-        HttpServletRequest request,
-        HttpServletResponse response,
-        String channel
-    ) {
-        String refreshToken = this.extractRefreshToken(cookieValue, request);
-        RefreshTokenRes res = this.doRefresh(refreshToken, ChannelType.valueOf(channel), true);
-        Cookie cookie = cookieUtils.setTokenCookie(res.getAccessToken(), res.getRefreshToken());
-        response.addCookie(cookie);
-        return res;
+    public RefreshTokenRes refreshToken(HttpServletRequest request, HttpServletResponse response, String channel) {
+        String refreshToken = extractRefreshTokenFromCookie(request);
+        RefreshTokenRes res = this.doRefresh(refreshToken, ChannelType.valueOf(channel));
+        setRefreshCookie(response, res.getRefreshToken());
+        return RefreshTokenRes.builder().accessToken(res.getAccessToken()).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
     public RefreshTokenRes processRefreshInternal(String refreshToken, ChannelType channel) {
-        return this.doRefresh(refreshToken, channel, false);
+        return this.doRefresh(refreshToken, channel);
     }
 
-    public void revokeToken(ChannelType channel) {
+    public void revokeToken(ChannelType channel, HttpServletResponse response) {
         String username = SecurityUtils.getCurrentUsername();
         if (StringUtils.isNotBlank(username)) {
-            Optional<User> user = userRepository.findByUsername(username);
-            if (user.isPresent()) {
-                user.get().setRefreshToken(null);
-                userRepository.save(user.get());
-            }
+            deleteRefreshCookie(response);
             Thread.startVirtualThread(() -> {
                 try {
                     userSessionService.removeOldSessionByChanelType(username, channel);
@@ -173,28 +141,22 @@ public class TokenProvider {
         }
     }
 
-    public void revokeAllTokens() {
+    public void revokeAllTokens(HttpServletResponse response) {
         String username = SecurityUtils.getCurrentUsername();
-        Optional<User> user = userRepository.findByUsername(username);
-        if (user.isPresent()) {
-            user.get().setRefreshToken(null);
-            userRepository.save(user.get());
-        }
-        // to sent notification to all devices
+        deleteRefreshCookie(response);
         Thread.startVirtualThread(() -> {
             userSessionService.removeOldSessionByChanelType(username, ChannelType.WEB);
             userSessionService.removeOldSessionByChanelType(username, ChannelType.MOBILE);
         });
     }
 
-    private String generateToken(
+    private String generateAccessToken(
         Authentication authentication,
         long validityTimeInSeconds,
         ChannelType channel,
         String sessionId
     ) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
         long now = System.currentTimeMillis();
         long validityMillis = validityTimeInSeconds * 1000L;
         Date validity = new Date(now + validityMillis);
@@ -220,6 +182,58 @@ public class TokenProvider {
             .compact();
     }
 
+    private String generateRefreshToken(String username, Long tenantId, String sessionId) {
+        long now = System.currentTimeMillis();
+        long validityMillis = this.refreshTokenValidityDuration * 1000L;
+        Date validity = new Date(now + validityMillis);
+        return Jwts.builder()
+            .id(sessionId)
+            .subject(username)
+            .claim("tid", tenantId)
+            .claim("type", "refresh")
+            .issuedAt(new Date(now))
+            .expiration(validity)
+            .signWith(key, Jwts.SIG.HS512)
+            .compact();
+    }
+
+    public void setRefreshCookie(HttpServletResponse response, String refreshToken) {
+        Cookie cookie = new Cookie(CommonConstants.REFRESH_COOKIE_NAME, refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // false for localhost, true for production
+        cookie.setPath("/");
+        cookie.setMaxAge(this.refreshTokenValidityDuration.intValue());
+        if (org.springframework.util.StringUtils.hasText(cookieDomain)) {
+            cookie.setDomain(cookieDomain);
+        }
+        cookie.setAttribute("SameSite", "Strict");
+        response.addCookie(cookie);
+    }
+
+    public void deleteRefreshCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie(CommonConstants.REFRESH_COOKIE_NAME, "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        if (org.springframework.util.StringUtils.hasText(cookieDomain)) {
+            cookie.setDomain(cookieDomain);
+        }
+        cookie.setAttribute("SameSite", "Strict");
+        response.addCookie(cookie);
+    }
+
+    private String extractRefreshTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (CommonConstants.REFRESH_COOKIE_NAME.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
+    }
+
     private void cacheUserToken(String username, ChannelType channel, String sessionId, String token) {
         UserSession userSessionDTO = UserSession.builder()
             .username(username)
@@ -241,48 +255,35 @@ public class TokenProvider {
         redisPubService.publish(wsMessage);
     }
 
-    private RefreshTokenRes doRefresh(String refreshToken, ChannelType channel, boolean isGenerateNewSession) {
+    private RefreshTokenRes doRefresh(String refreshToken, ChannelType channel) {
         if (StringUtils.isBlank(refreshToken)) {
             throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
         }
         try {
             Claims claims = jwtParser.parseSignedClaims(refreshToken).getPayload();
             String username = claims.getSubject();
-            String sessionId = isGenerateNewSession ? UUID.randomUUID().toString() : claims.getId();
+            String sessionId = UUID.randomUUID().toString();
 
-            // Read claim c (1: admin, 0: User)
-            Integer cClaim = claims.get("c", Integer.class);
-            if (cClaim != null && cClaim == 1) {
+            // Refresh token must have type=refresh
+            String type = claims.get("type", String.class);
+            if (!"refresh".equals(type)) {
                 throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
             }
-
+            Long tenantId = claims.get("tid", Long.class);
             Object userObj = authService.findOneByUsername(username);
             if (userObj == null) {
                 throw new FwException(ErrorMessage.USER_NOT_FOUND);
             }
-
-            String userRefreshToken = null;
-            if (userObj instanceof User u) {
-                userRefreshToken = u.getRefreshToken();
-            }
-
-            if (
-                StringUtils.isBlank(userRefreshToken) ||
-                !Objects.equals(userRefreshToken, FwUtils.hexString(refreshToken))
-            ) {
+            // Admin users cannot refresh
+            if (userObj instanceof SystemCredential) {
                 throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
             }
-
             Authentication authentication = getAuthentication(channel, userObj);
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             if (userDetails == null) throw new FwException(CommonErrorMessage.UNAUTHORIZED);
 
-            String newAccessToken = generateToken(authentication, tokenValidityDuration, channel, sessionId);
-            String newRefreshToken = generateToken(authentication, refreshTokenValidityDuration, channel, sessionId);
-
-            User u = (User) userObj;
-            u.setRefreshToken(FwUtils.hexString(newRefreshToken));
-            userRepository.save(u);
+            String newAccessToken = generateAccessToken(authentication, tokenValidityDuration, channel, sessionId);
+            String newRefreshToken = generateRefreshToken(username, tenantId, sessionId);
 
             cacheUserToken(username, channel, sessionId, newAccessToken);
             return RefreshTokenRes.builder().accessToken(newAccessToken).refreshToken(newRefreshToken).build();
@@ -347,26 +348,5 @@ public class TokenProvider {
             tenantId
         );
         return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-    }
-
-    private String extractRefreshToken(String cookieValue, HttpServletRequest request) {
-        String refreshToken = null;
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, String> tokenData = JsonF.jsonToObject(cookieValue, Map.class);
-            if (Objects.nonNull(tokenData)) {
-                refreshToken = tokenData.get(AuthKey.REFRESH_TOKEN.getKey());
-            }
-        } catch (Exception ignored) {}
-        if (StringUtils.isBlank(refreshToken)) {
-            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-            if (StringUtils.isNotBlank(authHeader) && authHeader.startsWith("Bearer ")) {
-                refreshToken = authHeader.substring(7);
-            }
-        }
-        if (StringUtils.isBlank(refreshToken)) {
-            throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
-        }
-        return refreshToken;
     }
 }

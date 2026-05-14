@@ -16,7 +16,6 @@ import com.thaca.auth.repositories.UserRepository;
 import com.thaca.auth.security.CustomUserDetails;
 import com.thaca.auth.security.jwt.TokenProvider;
 import com.thaca.auth.utils.CaptchaUtils;
-import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
@@ -26,7 +25,6 @@ import com.thaca.common.dtos.search.PaginationRequest;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
-import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
 import com.thaca.common.events.SendOtpEvent;
@@ -40,10 +38,7 @@ import com.thaca.framework.core.enums.ChannelType;
 import com.thaca.framework.core.enums.ModeType;
 import com.thaca.framework.core.exceptions.FwException;
 import com.thaca.framework.core.security.SecurityUtils;
-import com.thaca.framework.core.utils.CommonUtils;
-import com.thaca.framework.core.utils.CookieUtils;
 import com.thaca.framework.core.utils.FwUtils;
-import com.thaca.framework.core.utils.JsonF;
 import com.thaca.framework.core.validations.Validator;
 import com.thaca.framework.core.validations.rules.PasswordRule;
 import com.thaca.framework.core.validations.rules.UsernameRule;
@@ -60,7 +55,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.json.JsonParseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -73,7 +67,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -81,7 +74,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final CookieUtils cookieUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final SystemCredentialRepository systemCredentialRepository;
@@ -170,13 +162,13 @@ public class AuthService {
     }
 
     @FwMode(name = ServiceMethod.ADMIN_AUTHENTICATE, type = ModeType.VALIDATE)
-    public void validateAuthenticateadmin(LoginReq loginReq) {
+    public void validateAuthenticateAdmin(LoginReq loginReq) {
         validateAuthenticate(loginReq);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.ADMIN_AUTHENTICATE, type = ModeType.HANDLE)
-    public AuthenticateRes authenticateadmin(LoginReq loginReq) {
+    public AuthenticateRes authenticateAdmin(LoginReq loginReq) {
         HttpServletRequest httpServletRequest = (
             (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
         ).getRequest();
@@ -278,8 +270,9 @@ public class AuthService {
     }
 
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.VALIDATE)
-    public void validateRefreshToken(String cookieValue, String channel) {
-        if (StringUtils.isBlank(cookieValue) || StringUtils.isBlank(channel)) {
+    public void validateRefreshToken() {
+        String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : null;
+        if (StringUtils.isBlank(channel)) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         if (!ChannelType.MOBILE.name().equals(channel) && !ChannelType.WEB.name().equals(channel)) {
@@ -289,7 +282,7 @@ public class AuthService {
 
     @Transactional(rollbackFor = Exception.class)
     @FwMode(name = ServiceMethod.AUTH_REFRESH_TOKEN, type = ModeType.HANDLE)
-    public RefreshTokenRes refreshToken(String cookieValue) {
+    public RefreshTokenRes refreshToken() {
         HttpServletRequest httpServletRequest = (
             (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
         ).getRequest();
@@ -300,7 +293,7 @@ public class AuthService {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
         }
         String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : null;
-        return tokenProvider.refreshToken(cookieValue, httpServletRequest, httpServletResponse, channel);
+        return tokenProvider.refreshToken(httpServletRequest, httpServletResponse, channel);
     }
 
     @Transactional(readOnly = true)
@@ -362,36 +355,13 @@ public class AuthService {
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
-    @SuppressWarnings("unchecked")
-    @Transactional(readOnly = true)
-    public TokenPair getTokenPair(String cookieValueOrTokenString, boolean isInternal) {
-        if (StringUtils.isBlank(cookieValueOrTokenString) || isInternal) {
-            return new TokenPair(cookieValueOrTokenString, null);
-        }
-        try {
-            Map<String, String> tokenData = JsonF.jsonToObject(cookieValueOrTokenString, Map.class);
-            if (CollectionUtils.isEmpty(tokenData)) {
-                return new TokenPair(cookieValueOrTokenString, null);
-            }
-            String accessToken = tokenData.get(AuthKey.ACCESS_TOKEN.getKey());
-            String refreshToken = tokenData.get(AuthKey.REFRESH_TOKEN.getKey());
-            if (CommonUtils.isEmpty(accessToken, refreshToken)) {
-                throw new FwException(ErrorMessage.TOKEN_PAIR_INVALID);
-            }
-            return new TokenPair(accessToken, refreshToken);
-        } catch (JsonParseException e) {
-            return new TokenPair(cookieValueOrTokenString, null);
-        }
-    }
-
     @Transactional
     @FwMode(name = ServiceMethod.AUTH_LOGOUT_ALL_DEVICES, type = ModeType.HANDLE)
     public void logoutAllDevices() {
         HttpServletResponse response = (
             (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
         ).getResponse();
-        tokenProvider.revokeAllTokens();
-        cookieUtils.deleteCookie(response);
+        tokenProvider.revokeAllTokens(response);
         SecurityUtils.clear();
     }
 
@@ -433,7 +403,7 @@ public class AuthService {
             isAdmin,
             loginReq.getTenantId()
         );
-        return new AuthenticateRes(true, userInfoDTO);
+        return AuthenticateRes.builder().isAuthenticate(true).info(userInfoDTO).accessToken(token).build();
     }
 
     public static String getRoleString(SystemCredential sc, List<GrantedAuthority> authorities) {
@@ -533,8 +503,7 @@ public class AuthService {
         HttpServletResponse response = (
             (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
         ).getResponse();
-        tokenProvider.revokeToken(ChannelType.valueOf(channel));
-        cookieUtils.deleteCookie(response);
+        tokenProvider.revokeToken(ChannelType.valueOf(channel), response);
         SecurityUtils.clear();
     }
 }

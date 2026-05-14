@@ -50,10 +50,6 @@ public class User extends BaseEntityAudit {
     @Builder.Default
     private Boolean isLocked = false;
 
-    @JsonIgnore
-    @Column(name = "refresh_token", columnDefinition = "TEXT")
-    String refreshToken;
-
     @ElementCollection
     @CollectionTable(name = "user_tenants", schema = "auth", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "tenant_id")

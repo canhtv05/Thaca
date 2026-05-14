@@ -43,9 +43,9 @@
         <column name="updated_at" type="TIMESTAMP"/>
     </createTable>
 
-    <addForeignKeyConstraint baseColumnNames="plan_id" baseTableschemaName="admin" baseTableName="tenants"
+    <addForeignKeyConstraint baseColumnNames="plan_id" baseTableSchemaName="admin" baseTableName="tenants"
                              constraintName="fk_tenants_plan"
-                             referencedColumnNames="id" referencedTableschemaName="admin" referencedTableName="plans"/>
+                             referencedColumnNames="id" referencedTableSchemaName="admin" referencedTableName="plans"/>
   </changeSet>
 
 </databaseChangeLog>

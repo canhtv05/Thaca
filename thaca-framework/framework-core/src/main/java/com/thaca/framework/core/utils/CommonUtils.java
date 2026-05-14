@@ -1,17 +1,11 @@
 package com.thaca.framework.core.utils;
 
-import com.thaca.common.dtos.TokenPair;
-import com.thaca.common.enums.AuthKey;
-import com.thaca.framework.core.constants.CommonConstants;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpHeaders;
 
@@ -70,40 +64,6 @@ public class CommonUtils {
     public static <T> void updateIfNotNull(T value, Consumer<T> setter) {
         if (isNotEmpty(value)) {
             setter.accept(value);
-        }
-    }
-
-    public static Optional<TokenPair> tokenFromCookie(String cookieHeader) {
-        if (cookieHeader == null) {
-            return Optional.empty();
-        }
-        String prefix = CommonConstants.COOKIE_NAME + "=";
-        Optional<String> encodedOpt = Stream.of(cookieHeader.split(";"))
-            .map(String::trim)
-            .filter(s -> s.startsWith(prefix))
-            .map(s -> s.substring(prefix.length()))
-            .findFirst();
-
-        if (encodedOpt.isEmpty()) {
-            return Optional.empty();
-        }
-
-        try {
-            String decoded = URLDecoder.decode(encodedOpt.get(), StandardCharsets.UTF_8);
-            @SuppressWarnings("unchecked")
-            Map<String, String> data = JsonF.jsonToObject(decoded, Map.class);
-            if (data == null) {
-                return Optional.empty();
-            }
-            String accessToken = data.get(AuthKey.ACCESS_TOKEN.getKey());
-            String refreshToken = data.get(AuthKey.REFRESH_TOKEN.getKey());
-
-            if (isNotEmpty(accessToken)) {
-                return Optional.of(new TokenPair(accessToken, refreshToken));
-            }
-            return Optional.empty();
-        } catch (Exception e) {
-            return Optional.empty();
         }
     }
 

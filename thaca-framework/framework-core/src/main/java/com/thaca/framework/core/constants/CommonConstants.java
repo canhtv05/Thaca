@@ -49,7 +49,7 @@ public class CommonConstants {
         .flatMap(Arrays::stream)
         .toArray(String[]::new);
 
-    public static final String COOKIE_NAME = "THACA_COOKIE";
+    public static final String REFRESH_COOKIE_NAME = "THACA_REFRESH";
     public static final String CHANNEL_KEY = "channel";
     public static final String REDIS_ROLE_PERM_PREFIX = "auth:role-permissions:";
 }

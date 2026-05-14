@@ -39,6 +39,10 @@ export class GlobalHttp {
   ): Promise<T> {
     const client = this.httpClient;
     if (client) {
+      const token = localStorage.getItem('thaca-access-token');
+      if (token) {
+        options.headers = { ...options.headers, Authorization: `Bearer ${token}` };
+      }
       const httpHeaders = new HttpHeaders(options.headers || {});
       const context = new HttpContext().set(SKIP_LOADING, !!options.skipLoading);
       let requestBody = body;
@@ -79,7 +83,11 @@ export class GlobalHttp {
           ),
       );
     }
+    const token = localStorage.getItem('thaca-access-token');
     const headersWithApi = { ...options.headers };
+    if (token) {
+      headersWithApi['Authorization'] = `Bearer ${token}`;
+    }
     let requestBody = body;
     if (body instanceof FormData) {
       const fd = body as FormData;

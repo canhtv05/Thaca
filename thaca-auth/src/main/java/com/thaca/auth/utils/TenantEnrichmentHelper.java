@@ -1,6 +1,6 @@
 package com.thaca.auth.utils;
 
-import com.thaca.auth.clients.adminClient;
+import com.thaca.auth.clients.AdminClient;
 import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.contracts.TenantAwareDTO;
 import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
@@ -16,7 +16,7 @@ import org.springframework.util.CollectionUtils;
 @RequiredArgsConstructor
 public class TenantEnrichmentHelper {
 
-    private final adminClient adminClient;
+    private final AdminClient adminClient;
 
     public TenantDTO fromTenantInfoPrj(TenantInfoPrj t) {
         return TenantDTO.builder()

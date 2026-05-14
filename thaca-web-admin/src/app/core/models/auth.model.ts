@@ -22,4 +22,5 @@ export interface IAuthUserDTO {
 export interface IAuthenticateRes {
   isAuthenticate: boolean;
   info: IAuthUserDTO;
+  accessToken: string;
 }

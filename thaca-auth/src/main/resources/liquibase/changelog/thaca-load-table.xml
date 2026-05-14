@@ -52,7 +52,6 @@
       <column name="password" type="VARCHAR(255)"><constraints nullable="false"/></column>
       <column name="is_activated" type="BOOLEAN"><constraints nullable="false"/></column>
       <column name="is_locked" type="BOOLEAN"><constraints nullable="false"/></column>
-      <column name="refresh_token" type="TEXT"/>
     </createTable>
 
     <createTable schemaName="auth" tableName="user_tenants">
