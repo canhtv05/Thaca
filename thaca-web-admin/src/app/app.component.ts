@@ -19,7 +19,7 @@ export class App {
   private readonly escapeStack = inject(EscapeStackService);
 
   constructor() {
-    pageTitle.set('Thaca Web CMS');
+    pageTitle.set('Thaca Web admin');
   }
 
   @HostListener('document:keydown.escape')

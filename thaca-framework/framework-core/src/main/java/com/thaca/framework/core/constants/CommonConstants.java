@@ -18,14 +18,14 @@ public class CommonConstants {
     public static final String[] PROFILE_PUBLIC_ENDPOINTS = { "/profile/**" };
     public static final String[] GRAPHQL_PUBLIC_ENDPOINTS = { "/graphiql/**", "/graphiql", "" };
 
-    public static final String[] CMS_PUBLIC_ENDPOINTS = { "/login" };
+    public static final String[] ADMIN_PUBLIC_ENDPOINTS = { "/login" };
 
     public static final String[] PREFIX_AUTH_PUBLIC_ENDPOINTS = Arrays.stream(AUTH_PUBLIC_ENDPOINTS)
         .map(res -> "/auth" + res)
         .toArray(String[]::new);
 
-    public static final String[] PREFIX_CMS_PUBLIC_ENDPOINTS = Arrays.stream(CMS_PUBLIC_ENDPOINTS)
-        .map(res -> "/cms" + res)
+    public static final String[] PREFIX_ADMIN_PUBLIC_ENDPOINTS = Arrays.stream(ADMIN_PUBLIC_ENDPOINTS)
+        .map(res -> "/admin" + res)
         .toArray(String[]::new);
 
     public static final String[] PREFIX_NOTIFICATION_PUBLIC_ENDPOINTS = Arrays.stream(NOTIFICATION_PUBLIC_ENDPOINTS)
@@ -42,7 +42,7 @@ public class CommonConstants {
 
     public static final String[] PREFIX_PUBLIC_ENDPOINTS = Stream.of(
         PREFIX_AUTH_PUBLIC_ENDPOINTS,
-        PREFIX_CMS_PUBLIC_ENDPOINTS,
+        PREFIX_ADMIN_PUBLIC_ENDPOINTS,
         PREFIX_NOTIFICATION_PUBLIC_ENDPOINTS,
         PREFIX_PROFILE_PUBLIC_ENDPOINTS
     )

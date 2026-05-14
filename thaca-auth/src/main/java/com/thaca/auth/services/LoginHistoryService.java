@@ -36,7 +36,7 @@ public class LoginHistoryService {
         HttpServletRequest request,
         LoginStatus status,
         String failureReason,
-        boolean isCms,
+        boolean isAdmin,
         Long tenantId
     ) {
         String ip = commonService.extractIpAddress(request);
@@ -47,11 +47,11 @@ public class LoginHistoryService {
 
         GeoInfoDTO geo = commonService.lookup(ip);
         DeviceInfoDTO device = commonService.parse(ua);
-        boolean isNewDevice = isNewDevice(userDTO.getId(), isCms, deviceId, status);
+        boolean isNewDevice = isNewDevice(userDTO.getId(), isAdmin, deviceId, status);
 
         LoginHistory history = LoginHistory.builder()
-            .user(isCms ? null : userRepository.getReferenceById(userDTO.getId()))
-            .systemUser(isCms ? SystemUser.builder().id(userDTO.getId()).build() : null)
+            .user(isAdmin ? null : userRepository.getReferenceById(userDTO.getId()))
+            .systemUser(isAdmin ? SystemUser.builder().id(userDTO.getId()).build() : null)
             .ipAddress(ip)
             .userAgent(ua)
             .browser(device.getBrowser())
@@ -82,11 +82,11 @@ public class LoginHistoryService {
         loginHistoryRepository.save(history);
     }
 
-    private boolean isNewDevice(Long userId, boolean isCms, String deviceId, LoginStatus status) {
+    private boolean isNewDevice(Long userId, boolean isAdmin, String deviceId, LoginStatus status) {
         if (userId == null || StringUtils.isBlank(deviceId) || !LoginStatus.SUCCESS.equals(status)) {
             return false;
         }
-        if (isCms) {
+        if (isAdmin) {
             return !loginHistoryRepository.existsBySystemUser_IdAndDeviceIdAndStatus(
                 userId,
                 deviceId,

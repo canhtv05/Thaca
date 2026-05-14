@@ -66,9 +66,9 @@
       "description": "A description for 'application.security.base64-secret'"
     },
     {
-      "name": "application.security.cmsValidDurationInSeconds",
+      "name": "application.security.adminValidDurationInSeconds",
       "type": "java.lang.String",
-      "description": "A description for 'application.security.cmsValidDurationInSeconds'"
+      "description": "A description for 'application.security.adminValidDurationInSeconds'"
     },
     {
       "name": "application.httpClient.api-key",
@@ -86,9 +86,9 @@
       "description": "A description for 'app.api-prefix'"
     },
     {
-      "name": "application.routes.cmsService",
+      "name": "application.routes.adminService",
       "type": "java.lang.String",
-      "description": "A description for 'application.routes.cmsService'"
+      "description": "A description for 'application.routes.adminService'"
     },
     {
       "name": "spring.kafka.consumer.group-id",

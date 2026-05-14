@@ -1,6 +1,6 @@
 package com.thaca.auth.services;
 
-import com.thaca.auth.clients.CmsClient;
+import com.thaca.auth.clients.AdminClient;
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.User;
 import com.thaca.auth.domains.UserLockHistory;
@@ -78,12 +78,12 @@ public class UserService {
     private final RedisCacheService redisService;
     private final SessionStore sessionStore;
     private final UserLockHistoryRepository userLockHistoryRepository;
-    private final CmsClient cmsClient;
+    private final AdminClient adminClient;
     private final TenantEnrichmentHelper tenantHelper;
 
     @Transactional(readOnly = true)
     @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
-    @FwMode(name = ServiceMethod.CMS_SEARCH_USERS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_USERS, type = ModeType.HANDLE)
     public SearchResponse<UserDTO> searchUsers(SearchRequest<UserDTO> request) {
         Specification<User> spec = createUserSpecification(request);
         Page<User> users = userRepository.findAll(spec, request.getPage().toPageable(Sort.Direction.DESC, "updatedAt"));
@@ -98,7 +98,7 @@ public class UserService {
     }
 
     @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
-    @FwMode(name = ServiceMethod.CMS_EXPORT_USERS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_EXPORT_USERS, type = ModeType.HANDLE)
     public byte[] exportUsers(SearchRequest<UserDTO> request) throws IOException {
         Specification<User> spec = createUserSpecification(request);
         List<User> userPage = userRepository.findAll(spec);
@@ -149,7 +149,7 @@ public class UserService {
         return ExcelEngine.exportData(buildExportSchema(isVietnamese), rows);
     }
 
-    @FwMode(name = ServiceMethod.CMS_DETAIL_USER, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.ADMIN_DETAIL_USER, type = ModeType.VALIDATE)
     public void validateDetailUser(UserDTO request) {
         if (StringUtils.isBlank(request.getUsername())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -158,7 +158,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
-    @FwMode(name = ServiceMethod.CMS_DETAIL_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_DETAIL_USER, type = ModeType.HANDLE)
     public UserDTO detailUser(UserDTO request) {
         User user = userRepository
             .findByUsername(request.getUsername())
@@ -170,7 +170,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     @CheckPermission(value = { "USER_MAKER" })
-    @FwMode(name = ServiceMethod.CMS_DOWNLOAD_USER_TEMPLATE, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_DOWNLOAD_USER_TEMPLATE, type = ModeType.HANDLE)
     public byte[] downloadTemplate() throws IOException {
         ApiHeader header = FwContextHeader.get();
         boolean isVietnamese = "vi".equals(header.getLanguage());
@@ -180,7 +180,7 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @CheckPermission(value = { "USER_MAKER" })
-    @FwMode(name = ServiceMethod.CMS_IMPORT_USERS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_IMPORT_USERS, type = ModeType.HANDLE)
     public ImportResponseDTO importUsers(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -241,7 +241,7 @@ public class UserService {
             }
         }
 
-        List<TenantInfoPrj> allTenantsPrj = cmsClient.getAllTenants();
+        List<TenantInfoPrj> allTenantsPrj = adminClient.getAllTenants();
         Map<String, Long> tenantCodeToId =
             allTenantsPrj != null
                 ? allTenantsPrj.stream().collect(Collectors.toMap(TenantInfoPrj::getCode, TenantInfoPrj::getId))
@@ -386,7 +386,7 @@ public class UserService {
                 );
             }
 
-            List<TenantDTO> tenants = cmsClient.getTenantsFullByIds(
+            List<TenantDTO> tenants = adminClient.getTenantsFullByIds(
                 TenantDTO.builder().tenantIds(new ArrayList<>(tenantIdsToBatch)).build()
             );
             if (tenants == null) {
@@ -449,7 +449,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     @CheckPermission(value = { "USER_MAKER" })
-    @FwMode(name = ServiceMethod.CMS_EXPORT_USER_FILE_ERROR, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_EXPORT_USER_FILE_ERROR, type = ModeType.HANDLE)
     public byte[] exportUserImportError(ImportResponseDTO importResult) throws IOException {
         if (importResult == null || importResult.getErrors() == null || importResult.getErrors().isEmpty()) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -485,11 +485,11 @@ public class UserService {
 
     @Transactional(readOnly = true)
     @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
-    @FwMode(name = ServiceMethod.CMS_GET_USER_BY_ID, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_GET_USER_BY_ID, type = ModeType.HANDLE)
     public UserDTO findById(Long id) {
         return userRepository
             .findById(id)
-            .map(u -> tenantHelper.enrichTenantFull(UserMapper.fromEntityWithCms(u, true)))
+            .map(u -> tenantHelper.enrichTenantFull(UserMapper.fromEntityWithadmin(u, true)))
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
     }
 
@@ -668,7 +668,7 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @CheckPermission(value = { "USER_MAKER" })
-    @FwMode(name = ServiceMethod.CMS_LOCK_UNLOCK_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_LOCK_UNLOCK_USER, type = ModeType.HANDLE)
     public void lockUnlock(SystemUserDTO request) {
         if (request.getId() == null || StringUtils.isBlank(request.getLockReason())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -772,7 +772,7 @@ public class UserService {
 
     private ExcelSchema buildImportSchema(boolean isVietnamese, boolean isSuperAdmin) {
         List<String> tenantIds = isSuperAdmin
-            ? cmsClient
+            ? adminClient
                   .getAllTenants()
                   .stream()
                   .map(t -> t.getCode() + " - " + t.getName())

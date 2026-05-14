@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "thaca-web-cms": {
+    "thaca-web-admin": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -64,10 +64,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "thaca-web-cms:build:production"
+              "buildTarget": "thaca-web-admin:build:production"
             },
             "development": {
-              "buildTarget": "thaca-web-cms:build:development",
+              "buildTarget": "thaca-web-admin:build:development",
               "proxyConfig": "proxy.conf.json"
             }
           },

@@ -4,7 +4,7 @@ Tài liệu này mô tả kiến trúc xử lý import dữ liệu từ file Exc
 
 ## 1. Vấn đề của luồng truyền thống (Direct Transfer)
 
-Trong luồng truyền thống, file được truyền từ `Frontend` -> `CMS` -> `Auth` qua giao thức HTTP Multipart.
+Trong luồng truyền thống, file được truyền từ `Frontend` -> `admin. -> `Auth` qua giao thức HTTP Multipart.
 
 - **Băng thông**: File lớn làm nghẽn đường truyền giữa các microservices.
 - **Bộ nhớ (RAM)**: Các service phải nạp file vào RAM để xử lý, dễ gây lỗi `OutOfMemory` nếu nhiều người dùng cùng import.
@@ -19,20 +19,20 @@ Sử dụng **MinIO** (hoặc S3) làm kho lưu trữ trung gian và cơ chế *
 ```mermaid
 sequenceDiagram
     participant FE as Frontend
-    participant CMS as CMS Service
+    participant admin.as admin.Service
     participant MINIO as MinIO Storage
     participant AUTH as Auth Service (Worker)
     participant DB as Database
 
-    FE->>CMS: Upload File (Multipart)
-    Note over CMS: validate file format
-    CMS->>MINIO: Upload File to 'temp-imports/'
-    MINIO-->>CMS: Return fileKey (path)
+    FE->>admin. Upload File (Multipart)
+    Note over admin. validate file format
+    admin.>>MINIO: Upload File to 'temp-imports/'
+    MINIO-->>admin. Return fileKey (path)
 
-    CMS->>AUTH: POST /internal/import (fileKey)
+    admin.>>AUTH: POST /internal/import (fileKey)
     Note over AUTH: Async Execution Started
-    AUTH-->>CMS: 202 Accepted (trackingId)
-    CMS-->>FE: 200 OK (trackingId)
+    AUTH-->>admin. 202 Accepted (trackingId)
+    admin.->>FE: 200 OK (trackingId)
 
     Note over FE: User sees "Processing..."
 
@@ -48,9 +48,9 @@ sequenceDiagram
 
 ## 3. Các bước triển khai
 
-### Bước 1: Tại CMS Service
+### Bước 1: Tại admin.Service
 
-Thay vì truyền `MultipartFile` sang Auth, CMS thực hiện:
+Thay vì truyền `MultipartFile` sang Auth, admin.thực hiện:
 
 1. Lưu file vào MinIO.
 2. Chỉ truyền `fileKey` sang Auth Service qua một API nội bộ.

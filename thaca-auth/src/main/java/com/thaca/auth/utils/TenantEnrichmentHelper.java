@@ -1,6 +1,6 @@
 package com.thaca.auth.utils;
 
-import com.thaca.auth.clients.CmsClient;
+import com.thaca.auth.clients.adminClient;
 import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.contracts.TenantAwareDTO;
 import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
@@ -16,7 +16,7 @@ import org.springframework.util.CollectionUtils;
 @RequiredArgsConstructor
 public class TenantEnrichmentHelper {
 
-    private final CmsClient cmsClient;
+    private final adminClient adminClient;
 
     public TenantDTO fromTenantInfoPrj(TenantInfoPrj t) {
         return TenantDTO.builder()
@@ -47,7 +47,7 @@ public class TenantEnrichmentHelper {
         if (!CollectionUtils.isEmpty(dto.getTenantIds())) {
             List<Long> visibleTenantIds = getVisibleTenantIds(dto.getTenantIds());
             if (!visibleTenantIds.isEmpty()) {
-                List<TenantInfoPrj> tenants = cmsClient.getTenantsByIds(
+                List<TenantInfoPrj> tenants = adminClient.getTenantsByIds(
                     TenantDTO.builder().tenantIds(new ArrayList<>(visibleTenantIds)).build()
                 );
                 dto.setTenants(tenants.stream().map(this::fromTenantInfoPrj).collect(Collectors.toList()));
@@ -102,7 +102,7 @@ public class TenantEnrichmentHelper {
 
         if (filteredIds.isEmpty()) return Collections.emptyMap();
 
-        List<TenantInfoPrj> tenants = cmsClient.getTenantsByIds(
+        List<TenantInfoPrj> tenants = adminClient.getTenantsByIds(
             TenantDTO.builder().tenantIds(new ArrayList<>(filteredIds)).build()
         );
         return tenants.stream().collect(Collectors.toMap(TenantInfoPrj::getId, t -> t));

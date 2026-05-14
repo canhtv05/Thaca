@@ -60,7 +60,7 @@ public class TokenProvider {
     private final JwtParser jwtParser;
     private final UserRepository userRepository;
     private final Long tokenValidityDuration;
-    private final Long cmsTokenValidityDuration;
+    private final Long adminTokenValidityDuration;
     private final Long refreshTokenValidityDuration;
     private final RedisPubService redisPubService;
     private final UserSessionService userSessionService;
@@ -85,7 +85,7 @@ public class TokenProvider {
         jwtParser = Jwts.parser().verifyWith(key).build();
         this.authService = authService;
         this.tokenValidityDuration = frameworkProperties.getSecurity().getValidDurationInSeconds();
-        this.cmsTokenValidityDuration = frameworkProperties.getSecurity().getCmsValidDurationInSeconds();
+        this.adminTokenValidityDuration = frameworkProperties.getSecurity().getAdminValidDurationInSeconds();
         this.refreshTokenValidityDuration = frameworkProperties.getSecurity().getRefreshDurationInSeconds();
     }
 
@@ -102,20 +102,20 @@ public class TokenProvider {
         }
         String name = userDetails.getUsername();
 
-        // c = 1 là CMS, c = 0 là User
-        int c = userDetails.isCmsUser() ? 1 : 0;
+        // c = 1 là admin, c = 0 là User
+        int c = userDetails.isAdminUser() ? 1 : 0;
 
         String oldToken = userSessionService.isUserOnline(name, channel);
         String sessionId = UUID.randomUUID().toString();
 
-        long validity = (c == 1) ? this.cmsTokenValidityDuration : this.tokenValidityDuration;
+        long validity = (c == 1) ? this.adminTokenValidityDuration : this.tokenValidityDuration;
         String token = this.generateToken(authentication, validity, channel, sessionId);
 
         if (StringUtils.isNotBlank(oldToken)) {
             Thread.startVirtualThread(() -> this.handleKickOldSessionAsync(name, token, oldToken, channel));
         }
 
-        // For CMS/Admin (c=1), refreshToken is null. For others (c=0), check channel.
+        // For admin/Admin (c=1), refreshToken is null. For others (c=0), check channel.
         String refreshToken = null;
         if (c == 0 && channel != ChannelType.WEB) {
             refreshToken = this.generateToken(authentication, this.refreshTokenValidityDuration, channel, sessionId);
@@ -211,7 +211,7 @@ public class TokenProvider {
                     .collect(Collectors.joining(","))
             )
             .claim(CommonConstants.CHANNEL_KEY, channel)
-            .claim("c", userDetails.isCmsUser() ? 1 : 0)
+            .claim("c", userDetails.isAdminUser() ? 1 : 0)
             .claim("tenantIds", userDetails.getTenantIds())
             .claim("tid", userDetails.getTenantId())
             .issuedAt(new Date(now))
@@ -250,7 +250,7 @@ public class TokenProvider {
             String username = claims.getSubject();
             String sessionId = isGenerateNewSession ? UUID.randomUUID().toString() : claims.getId();
 
-            // Read claim c (1: CMS, 0: User)
+            // Read claim c (1: admin, 0: User)
             Integer cClaim = claims.get("c", Integer.class);
             if (cClaim != null && cClaim == 1) {
                 throw new FwException(ErrorMessage.REFRESH_TOKEN_INVALID);
@@ -334,7 +334,7 @@ public class TokenProvider {
             throw new FwException(ErrorMessage.USER_NOT_FOUND);
         }
 
-        boolean cmsUser = userObj instanceof SystemCredential;
+        boolean adminUser = userObj instanceof SystemCredential;
         CustomUserDetails userDetails = new CustomUserDetails(
             username,
             password,
@@ -342,7 +342,7 @@ public class TokenProvider {
             rolesString,
             channel.name(),
             isSuperAdmin,
-            cmsUser,
+            adminUser,
             tenantIds,
             tenantId
         );

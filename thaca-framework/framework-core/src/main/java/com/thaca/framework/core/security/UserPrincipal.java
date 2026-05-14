@@ -11,7 +11,7 @@ public interface UserPrincipal {
 
     boolean isSuperAdmin();
 
-    boolean isCmsUser();
+    boolean isAdminUser();
 
     List<Long> getTenantIds();
 

@@ -96,7 +96,7 @@ public class AuthService {
     private final SessionStore sessionStore;
     private final OtpService otpService;
 
-    @FwMode(name = ServiceMethod.CMS_SEND_AUTHENTICATE_OTP, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_SEND_AUTHENTICATE_OTP, type = ModeType.HANDLE)
     public void sendOtp(SendOtpReq req) {
         var systemUser = systemUserRepository
             .findByEmail(req.getEmail())
@@ -169,14 +169,14 @@ public class AuthService {
         }
     }
 
-    @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.VALIDATE)
-    public void validateAuthenticateCms(LoginReq loginReq) {
+    @FwMode(name = ServiceMethod.ADMIN_AUTHENTICATE, type = ModeType.VALIDATE)
+    public void validateAuthenticateadmin(LoginReq loginReq) {
         validateAuthenticate(loginReq);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_AUTHENTICATE, type = ModeType.HANDLE)
-    public AuthenticateRes authenticateCms(LoginReq loginReq) {
+    @FwMode(name = ServiceMethod.ADMIN_AUTHENTICATE, type = ModeType.HANDLE)
+    public AuthenticateRes authenticateadmin(LoginReq loginReq) {
         HttpServletRequest httpServletRequest = (
             (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())
         ).getRequest();
@@ -333,9 +333,9 @@ public class AuthService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_LOGOUT, type = ModeType.HANDLE)
-    public void logoutCms() {
-        String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : ChannelType.CMS.name();
+    @FwMode(name = ServiceMethod.ADMIN_LOGOUT, type = ModeType.HANDLE)
+    public void logoutadmin() {
+        String channel = FwContextHeader.get() != null ? FwContextHeader.get().getChannel() : ChannelType.ADMIN.name();
         logoutWithChannel(channel);
     }
 
@@ -415,14 +415,14 @@ public class AuthService {
         HttpServletRequest httpServletRequest,
         HttpServletResponse httpServletResponse,
         Authentication authentication,
-        boolean isCms
+        boolean isAdmin
     ) {
         String token = tokenProvider.createToken(authentication, httpServletResponse);
         if (StringUtils.isBlank(token)) {
             throw new FwException(ErrorMessage.ACCESS_TOKEN_INVALID);
         }
 
-        SystemUserDTO userInfoDTO = isCms
+        SystemUserDTO userInfoDTO = isAdmin
             ? systemUserService.getSystemProfile()
             : getUserProfile(loginReq.getUsername());
         loginHistoryService.saveLoginHistory(
@@ -430,7 +430,7 @@ public class AuthService {
             httpServletRequest,
             LoginStatus.SUCCESS,
             null,
-            isCms,
+            isAdmin,
             loginReq.getTenantId()
         );
         return new AuthenticateRes(true, userInfoDTO);
@@ -472,8 +472,8 @@ public class AuthService {
             }
 
             if (filter != null) {
-                if (filter.getIsCms() != null) {
-                    if (filter.getIsCms()) {
+                if (filter.getIsAdmin() != null) {
+                    if (filter.getIsAdmin()) {
                         predicates.add(cb.isNotNull(root.get("systemUser")));
                     } else {
                         predicates.add(cb.isNotNull(root.get("user")));

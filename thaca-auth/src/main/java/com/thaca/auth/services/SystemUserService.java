@@ -1,6 +1,6 @@
 package com.thaca.auth.services;
 
-import com.thaca.auth.clients.CmsClient;
+import com.thaca.auth.clients.AdminClient;
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
 import com.thaca.auth.enums.ErrorMessage;
@@ -55,11 +55,11 @@ public class SystemUserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserLockHistoryRepository userLockHistoryRepository;
-    private final CmsClient cmsClient;
+    private final AdminClient adminClient;
     private final TenantEnrichmentHelper tenantHelper;
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_GET_PROFILE, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_GET_PROFILE, type = ModeType.HANDLE)
     public SystemUserDTO getSystemProfile() {
         String username = SecurityUtils.getCurrentUsername();
         return systemCredentialRepository
@@ -72,7 +72,7 @@ public class SystemUserService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_SEARCH_SYSTEM_USERS, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_SYSTEM_USERS, type = ModeType.HANDLE)
     public SearchResponse<SystemUserDTO> searchSystemUsers(SearchRequest<SystemUserDTO> request) {
         Specification<SystemCredential> spec = createSpecification(request);
 
@@ -106,7 +106,7 @@ public class SystemUserService {
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_GET_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_GET_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO getSystemUserById(SystemUserDTO request) {
         if (request.getId() == null) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -121,13 +121,13 @@ public class SystemUserService {
         return tenantHelper.enrichTenantFull(dto);
     }
 
-    @FwMode(name = ServiceMethod.CMS_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.ADMIN_CREATE_SYSTEM_USER, type = ModeType.VALIDATE)
     public void validateCreate(SystemUserDTO request) {
         validateRequest(request, true);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_CREATE_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_CREATE_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO create(SystemUserDTO request) {
         boolean isSuperAdmin = SecurityUtils.isSuperAdmin();
         SystemUser su = SystemUser.builder()
@@ -164,13 +164,13 @@ public class SystemUserService {
         return tenantHelper.enrichTenantFull(dto);
     }
 
-    @FwMode(name = ServiceMethod.CMS_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.ADMIN_UPDATE_SYSTEM_USER, type = ModeType.VALIDATE)
     public void validateUpdate(SystemUserDTO request) {
         validateRequest(request, false);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_UPDATE_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_UPDATE_SYSTEM_USER, type = ModeType.HANDLE)
     public SystemUserDTO update(SystemUserDTO request) {
         SystemUser su = systemUserRepository
             .findById(request.getId())
@@ -227,7 +227,7 @@ public class SystemUserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.CMS_LOCK_UNLOCK_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_LOCK_UNLOCK_SYSTEM_USER, type = ModeType.HANDLE)
     public void lockUnlock(SystemUserDTO request) {
         if (request.getId() == null || StringUtils.isBlank(request.getLockReason())) {
             throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
@@ -292,7 +292,7 @@ public class SystemUserService {
         };
     }
 
-    @FwMode(name = ServiceMethod.CMS_EXPORT_SYSTEM_USER, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_EXPORT_SYSTEM_USER, type = ModeType.HANDLE)
     public byte[] exportSystemUsers(SearchRequest<SystemUserDTO> request) throws IOException {
         boolean isVietnamese = "vi".equalsIgnoreCase(FwContextHeader.get().getLanguage());
         Specification<SystemCredential> spec = createSpecification(request);
@@ -533,7 +533,7 @@ public class SystemUserService {
     private ConflictTenantResult buildConflictingTenantInfo(List<Long> tenantIds) {
         if (tenantIds.isEmpty()) return new ConflictTenantResult("", Collections.emptyList());
         try {
-            List<TenantInfoPrj> tenants = cmsClient.getTenantsByIds(
+            List<TenantInfoPrj> tenants = adminClient.getTenantsByIds(
                 TenantDTO.builder().tenantIds(new ArrayList<>(tenantIds)).build()
             );
             List<Map<String, Object>> details = tenants

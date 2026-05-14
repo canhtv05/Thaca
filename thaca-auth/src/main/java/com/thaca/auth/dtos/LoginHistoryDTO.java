@@ -47,7 +47,7 @@ public class LoginHistoryDTO {
     private LoginStatus status;
     private String failureReason;
 
-    private Boolean isCms;
+    private Boolean isAdmin;
     private Instant fromDate;
     private Instant toDate;
 

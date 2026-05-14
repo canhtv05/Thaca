@@ -22,25 +22,25 @@ public class AdminAuthController {
     private final FwApiProcess process;
 
     @PostMapping("/sign-in")
-    @FwRequest(name = ServiceMethod.CMS_AUTHENTICATE, type = RequestType.PUBLIC)
+    @FwRequest(name = ServiceMethod.ADMIN_AUTHENTICATE, type = RequestType.PUBLIC)
     public ResponseEntity<AuthenticateRes> signIn(LoginReq loginReq) {
         return ResponseEntity.ok(process.process(loginReq));
     }
 
     @PostMapping("/sign-out")
-    @FwRequest(name = ServiceMethod.CMS_LOGOUT, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.ADMIN_LOGOUT, type = RequestType.PROTECTED)
     public ResponseEntity<Void> signOut() {
         return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/send-authenticate-otp")
-    @FwRequest(name = ServiceMethod.CMS_SEND_AUTHENTICATE_OTP, type = RequestType.PUBLIC)
+    @FwRequest(name = ServiceMethod.ADMIN_SEND_AUTHENTICATE_OTP, type = RequestType.PUBLIC)
     public ResponseEntity<Void> sendAuthenticateOtp(SendOtpReq req) {
         return ResponseEntity.ok(process.process(req));
     }
 
     @PostMapping("/profile")
-    @FwRequest(name = ServiceMethod.CMS_GET_PROFILE, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.ADMIN_GET_PROFILE, type = RequestType.PROTECTED)
     public ResponseEntity<SystemUserDTO> getProfile() {
         return ResponseEntity.ok(process.process(null));
     }

@@ -133,7 +133,7 @@ public class FwFilter extends OncePerRequestFilter {
             requestBody.length > 0 &&
             !ChannelType.WEB.name().equals(apiPayload.getHeader().getChannel()) &&
             !ChannelType.MOBILE.name().equals(apiPayload.getHeader().getChannel()) &&
-            !ChannelType.CMS.name().equals(apiPayload.getHeader().getChannel())
+            !ChannelType.ADMIN.name().equals(apiPayload.getHeader().getChannel())
         ) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);

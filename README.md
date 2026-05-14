@@ -15,9 +15,9 @@ The project is organized into a deep multi-module structure:
 
 - 📂 **`thaca-framework`**: The Core Engine providing AOP Security, Dynamic Tenant Filtering, Auditing, and Centralized Exception Handling.
 - 📂 **`thaca-auth`**: Central Identity & Access Management (IAM) service handling multi-channel authentication and Tenant/Role/Permission management.
-- 📂 **`thaca-cms`**: Admin-facing backend, integrated with an automatic handler system (`FwModeRegistry`) for interacting with other microservices.
+- 📂 **`thaca-admin`**: Admin-facing backend, integrated with an automatic handler system (`FwModeRegistry`) for interacting with other microservices.
 - 📂 **`thaca-gateway`**: The system's single entry point, handling routing, edge security, and request orchestration.
-- 📂 **`thaca-web-cms`**: A modern, flicker-free Single Page Application (SPA) admin interface.
+- 📂 **`thaca-web-admin`**: A modern, flicker-free Single Page Application (SPA) admin interface.
 - 📂 **`thaca-common-object`**: Shared library containing DTOs and Domain Objects to ensure data consistency across services.
 
 ---
@@ -71,7 +71,7 @@ Manages users and data within a specific Tenant (e.g., Apple Tenant).
 2. **Database Setup**: Liquibase will automatically create the `auth` schema and required tables when `thaca-auth` starts.
 3. **Startup Order**:
    - `thaca-auth` — Authentication & Tenant APIs
-   - `thaca-cms` — Admin API layer
+   - `thaca-admin` — Admin API layer
    - `thaca-gateway` — Routing
 
 ---
@@ -101,9 +101,9 @@ Dự án được tổ chức theo cấu trúc multi-module chuyên sâu:
 
 - 📂 **`thaca-framework`**: Nhân lõi (Core Engine) cung cấp các giải pháp AOP Security, Dynamic Tenant Filtering, Auditing và Centralized Exception Handling.
 - 📂 **`thaca-auth`**: Dịch vụ Identity & Access Management (IAM) trung tâm, xử lý xác thực đa kênh và quản lý Tenant/Role/Permission.
-- 📂 **`thaca-cms`**: Backend dành riêng cho quản trị viên, tích hợp hệ thống handler tự động (FwModeRegistry) để tương tác với các microservices khác.
+- 📂 **`thaca-admin`**: Backend dành riêng cho quản trị viên, tích hợp hệ thống handler tự động (FwModeRegistry) để tương tác với các microservices khác.
 - 📂 **`thaca-gateway`**: Cửa ngõ duy nhất của hệ thống, xử lý định tuyến, bảo mật biên và điều phối request.
-- 📂 **`thaca-web-cms`**: Giao diện quản trị Single Page Application (SPA) hiện đại, flicker-free.
+- 📂 **`thaca-web-admin`**: Giao diện quản trị Single Page Application (SPA) hiện đại, flicker-free.
 - 📂 **`thaca-common-object`**: Thư viện chứa các DTO và Domain Object dùng chung để đảm bảo tính nhất quán dữ liệu.
 
 ---
@@ -157,7 +157,7 @@ Quản lý người dùng và dữ liệu trong phạm vi một Tenant (ví dụ
 2. **Khởi động Database**: Liquibase sẽ tự động tạo schema `auth` và các bảng cần thiết khi chạy `thaca-auth`.
 3. **Thứ tự khởi động**:
    - `thaca-auth` — API xác thực & Tenant
-   - `thaca-cms` — API quản trị
+   - `thaca-admin` — API quản trị
    - `thaca-gateway` — Routing
 
 ---

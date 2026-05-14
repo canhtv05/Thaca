@@ -24,7 +24,7 @@ export const createHeader = (payload: Partial<IApiHeader> = {}): IApiHeader => {
   const defaultPayload: IApiHeader = {
     username: currentUser()?.username || 'GUEST',
     location: window.location.hostname,
-    channel: 'CMS',
+    channel: 'admin',
     language: currentLang() || 'vi',
     deviceId: getDeviceId(),
     apiKey: '',

@@ -15,7 +15,7 @@ public final class JwtUserPrincipal implements UserPrincipal {
     private final String role;
     private final String channel;
     private final boolean superAdmin;
-    private final boolean cmsUser;
+    private final boolean adminUser;
     private final List<Long> tenantIds;
     private final Long tenantId;
 
@@ -24,7 +24,7 @@ public final class JwtUserPrincipal implements UserPrincipal {
         String role,
         String channel,
         boolean superAdmin,
-        boolean cmsUser,
+        boolean adminUser,
         List<Long> tenantIds,
         Long tenantId
     ) {
@@ -32,7 +32,7 @@ public final class JwtUserPrincipal implements UserPrincipal {
         this.role = role;
         this.channel = channel;
         this.superAdmin = superAdmin;
-        this.cmsUser = cmsUser;
+        this.adminUser = adminUser;
         this.tenantIds = tenantIds;
         this.tenantId = tenantId;
     }
@@ -52,8 +52,8 @@ public final class JwtUserPrincipal implements UserPrincipal {
         boolean superAdmin = authorities
             .stream()
             .anyMatch(a -> AuthoritiesConstants.SUPER_ADMIN.equals(a.getAuthority()));
-        boolean cmsUser = c != null && c == 1;
-        return new JwtUserPrincipal(username, role, channel, superAdmin, cmsUser, tenantIds, tenantId);
+        boolean adminUser = c != null && c == 1;
+        return new JwtUserPrincipal(username, role, channel, superAdmin, adminUser, tenantIds, tenantId);
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class JwtUserPrincipal implements UserPrincipal {
     }
 
     @Override
-    public boolean isCmsUser() {
-        return cmsUser;
+    public boolean isAdminUser() {
+        return adminUser;
     }
 }

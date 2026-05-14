@@ -27,43 +27,43 @@ public class AdminRolePermissionController {
     private final FwApiProcess process;
 
     @PostMapping("/roles/search")
-    @FwRequest(name = ServiceMethod.CMS_SEARCH_ROLES, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.ADMIN_SEARCH_ROLES, type = RequestType.PROTECTED)
     public ResponseEntity<SearchResponse<RoleDTO>> searchRoles(SearchRequest<RoleDTO> criteria) {
         return ResponseEntity.ok(process.process(criteria));
     }
 
     @PostMapping("/roles/all")
-    @FwRequest(name = ServiceMethod.CMS_GET_ALL_ROLES, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.ADMIN_GET_ALL_ROLES, type = RequestType.PROTECTED)
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/permissions/search")
-    @FwRequest(name = ServiceMethod.CMS_SEARCH_PERMISSIONS, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.ADMIN_SEARCH_PERMISSIONS, type = RequestType.PROTECTED)
     public ResponseEntity<SearchResponse<PermissionDTO>> searchPermissions(SearchRequest<PermissionDTO> criteria) {
         return ResponseEntity.ok(process.process(criteria));
     }
 
     @PostMapping("/permissions/all")
-    @FwRequest(name = ServiceMethod.CMS_GET_ALL_PERMISSIONS, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.ADMIN_GET_ALL_PERMISSIONS, type = RequestType.PROTECTED)
     public ResponseEntity<List<PermissionDTO>> getAllPermissions() {
         return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/permissions/by-roles")
-    @FwRequest(name = ServiceMethod.CMS_GET_PERMISSIONS_BY_ROLES, type = RequestType.PROTECTED)
+    @FwRequest(name = ServiceMethod.ADMIN_GET_PERMISSIONS_BY_ROLES, type = RequestType.PROTECTED)
     public ResponseEntity<List<PermissionDTO>> getPermissionsByRoles(RoleCodesReq request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/roles/export")
-    @FwRequest(name = ServiceMethod.CMS_EXPORT_ROLES, type = RequestType.PROTECTED, isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.ADMIN_EXPORT_ROLES, type = RequestType.PROTECTED, isSuperAdmin = true)
     public void exportRoles(SearchRequest<RoleDTO> request, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(request), "thaca-roles-export-{{date}}.xlsx");
     }
 
     @PostMapping("/permissions/export")
-    @FwRequest(name = ServiceMethod.CMS_EXPORT_PERMISSIONS, type = RequestType.PROTECTED, isSuperAdmin = true)
+    @FwRequest(name = ServiceMethod.ADMIN_EXPORT_PERMISSIONS, type = RequestType.PROTECTED, isSuperAdmin = true)
     public void exportPermissions(SearchRequest<PermissionDTO> request, HttpServletResponse response)
         throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(request), "thaca-permissions-export-{{date}}.xlsx");

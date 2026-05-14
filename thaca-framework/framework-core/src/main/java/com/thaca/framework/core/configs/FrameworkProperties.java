@@ -20,7 +20,7 @@ public class FrameworkProperties {
 
         private String base64Secret;
         private Long validDurationInSeconds;
-        private Long cmsValidDurationInSeconds;
+        private Long adminValidDurationInSeconds;
         private Long refreshDurationInSeconds;
         private String cookieDomain;
     }
@@ -50,6 +50,6 @@ public class FrameworkProperties {
     public static class RoutesConfig {
 
         private String authService;
-        private String cmsService;
+        private String adminService;
     }
 }

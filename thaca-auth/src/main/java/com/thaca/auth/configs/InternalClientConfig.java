@@ -1,6 +1,6 @@
 package com.thaca.auth.configs;
 
-import com.thaca.auth.clients.CmsClient;
+import com.thaca.auth.clients.AdminClient;
 import com.thaca.framework.blocking.starter.services.InternalApiProxyFactory;
 import com.thaca.framework.core.configs.FrameworkProperties;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ public class InternalClientConfig {
     private final FrameworkProperties frameworkProperties;
 
     @Bean
-    CmsClient cmsClient() {
-        return proxyFactory.create(CmsClient.class, frameworkProperties.getRoutes().getCmsService() + "/internal");
+    AdminClient adminClient() {
+        return proxyFactory.create(AdminClient.class, frameworkProperties.getRoutes().getAdminService() + "/internal");
     }
 }

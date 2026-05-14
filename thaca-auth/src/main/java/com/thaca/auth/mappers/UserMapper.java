@@ -10,10 +10,10 @@ public class UserMapper {
     private UserMapper() {}
 
     public static UserDTO fromEntity(User user) {
-        return fromEntityWithCms(user, false);
+        return fromEntityWithadmin(user, false);
     }
 
-    public static UserDTO fromEntityWithCms(User user, boolean isCms) {
+    public static UserDTO fromEntityWithadmin(User user, boolean isAdmin) {
         if (user == null) return null;
         UserDTO dto = UserDTO.builder()
             .id(user.getId())
@@ -24,7 +24,7 @@ public class UserMapper {
             .isLocked(user.getIsLocked())
             .build();
 
-        if (isCms) {
+        if (isAdmin) {
             dto.setCreatedAt(DateUtils.dateToString(user.getCreatedAt()));
             dto.setUpdatedAt(DateUtils.dateToString(user.getUpdatedAt()));
             dto.setCreatedBy(user.getCreatedBy());

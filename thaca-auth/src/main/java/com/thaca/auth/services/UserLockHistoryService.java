@@ -30,13 +30,13 @@ public class UserLockHistoryService {
 
     private final UserLockHistoryRepository userLockHistoryRepository;
 
-    @FwMode(name = ServiceMethod.CMS_SEARCH_USER_LOCK_HISTORY, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_USER_LOCK_HISTORY, type = ModeType.VALIDATE)
     public void validateSearchUserLockHistory(SearchRequest<Void> request) {
         CommonService.validateSearchRequest(request);
     }
 
     @Transactional(readOnly = true)
-    @FwMode(name = ServiceMethod.CMS_SEARCH_USER_LOCK_HISTORY, type = ModeType.HANDLE)
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_USER_LOCK_HISTORY, type = ModeType.HANDLE)
     public SearchResponse<UserLockHistoryDTO> searchUserLockHistory(SearchRequest<UserLockHistoryDTO> request) {
         Specification<UserLockHistory> spec = createSpecification(request);
         if (request.getFilter().getTargetUserId() != null) {

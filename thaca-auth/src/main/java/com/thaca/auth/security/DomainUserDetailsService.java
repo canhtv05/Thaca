@@ -121,7 +121,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             throw new FwException(ErrorMessage.USER_NOT_ACTIVATED);
         }
 
-        boolean cmsUser = userObj instanceof SystemCredential;
+        boolean adminUser = userObj instanceof SystemCredential;
 
         return new CustomUserDetails(
             username,
@@ -130,7 +130,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             rolesString,
             StringUtils.defaultIfBlank(FwContextHeader.get().getChannel(), ChannelType.WEB.name()),
             isSuperAdmin,
-            cmsUser,
+            adminUser,
             tenantIds,
             (tenantIds != null && !tenantIds.isEmpty()) ? tenantIds.getFirst() : null
         );

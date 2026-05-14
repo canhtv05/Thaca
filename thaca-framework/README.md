@@ -36,7 +36,7 @@ Gắn lên **Controller method** để khai báo loại request và tên service
 
 ```java
 @PostMapping("/search")
-@FwRequest(name = "cms.searchTenants", type = RequestType.PROTECTED)
+@FwRequest(name = "admin.searchTenants", type = RequestType.PROTECTED)
 public ResponseEntity<SearchResponse<TenantDTO>> search(SearchRequest<TenantDTO> request) {
   return ResponseEntity.ok(process.process(request));
 }
@@ -56,12 +56,12 @@ public ResponseEntity<SearchResponse<TenantDTO>> search(SearchRequest<TenantDTO>
 Gắn lên **Service method** để đăng ký handler xử lý business logic.
 
 ```java
-@FwMode(name = "internal.cmsSearchTenants", type = ModeType.HANDLE)
+@FwMode(name = "internal.admin.earchTenants", type = ModeType.HANDLE)
 public SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> request) {
   // logic
 }
 
-@FwMode(name = "internal.cmsSearchTenants", type = ModeType.VALIDATE)
+@FwMode(name = "internal.admin.earchTenants", type = ModeType.VALIDATE)
 public void validateSearchTenants(SearchRequest<TenantDTO> request) {
   // validate
 }
@@ -83,7 +83,7 @@ Gắn lên Controller method để kiểm tra request type.
 | `isSuperAdmin` | `false` (default) — nếu `true` chỉ super admin mới được truy cập |
 
 ```java
-@FwRequest(name = ServiceMethod.CMS_CREATE_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
+@FwRequest(name = ServiceMethod.admin.CREATE_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
 public ResponseEntity<TenantDTO> create(TenantDTO request) { ... }
 ```
 
@@ -106,7 +106,7 @@ public ResponseEntity<TenantDTO> save(TenantDTO request) { ... }
 Gắn lên **method trong interface** để khai báo endpoint nội bộ. Framework sẽ dựa vào các method này để thực hiện gọi API và tự động đăng ký handler vào `FwModeRegistry`.
 
 ```java
-@FwInternalApi(path = "/cms/tenants/search", name = ServiceMethod.CMS_SEARCH_TENANTS)
+@FwInternalApi(path = "/admin.tenants/search", name = ServiceMethod.admin.SEARCH_TENANTS)
 SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> search);
 ```
 
@@ -138,7 +138,7 @@ Service (@FwMode HANDLE)             ← thực thi business logic
 ## Luồng gọi Internal API (giữa microservices)
 
 ```
-thaca-cms                                    thaca-auth
+thaca-admin                                    thaca-auth
 ─────────                                    ──────────
 Controller (@FwRequest)
     │
@@ -172,10 +172,10 @@ Thay vì viết boilerplate class cho mỗi service call, chỉ cần khai báo 
 
 ```java
 public interface AuthClient {
-  @FwInternalApi(path = "/cms/tenants/search", name = ServiceMethod.CMS_SEARCH_TENANTS)
+  @FwInternalApi(path = "/admin.tenants/search", name = ServiceMethod.admin.SEARCH_TENANTS)
   SearchResponse<TenantDTO> searchTenants(SearchRequest<TenantDTO> search);
 
-  @FwInternalApi(path = "/cms/tenants/export", name = ServiceMethod.CMS_EXPORT_TENANT)
+  @FwInternalApi(path = "/admin.tenants/export", name = ServiceMethod.admin.EXPORT_TENANT)
   byte[] exportTenants(SearchRequest<TenantDTO> request);
 }
 ```
@@ -214,7 +214,7 @@ Framework tự động:
 Chỉ cần thêm 2 dòng vào interface:
 
 ```java
-@FwInternalApi(path = "/cms/new-endpoint", name = ServiceMethod.CMS_NEW_METHOD)
+@FwInternalApi(path = "/admin.new-endpoint", name = ServiceMethod.admin.NEW_METHOD)
 NewDTO newMethod(NewRequest request);
 ```
 
@@ -271,7 +271,7 @@ application:
   security:
     base64-secret: '...'
     valid-duration-in-seconds: 3600
-    cms-valid-duration-in-seconds: 28800
+    admin.valid-duration-in-seconds: 28800
     refresh-duration-in-seconds: 86400
     cookie-domain: 'localhost'
 

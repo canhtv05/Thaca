@@ -237,7 +237,7 @@
           "name": "admin",
           "item": [
             {
-              "name": "http://localhost:1001/api/cms/sign-in",
+              "name": "http://localhost:1001/api/admin/sign-in",
               "request": {
                 "method": "POST",
                 "header": [],
@@ -251,11 +251,11 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:1001/api/cms/sign-in",
+                  "raw": "http://localhost:1001/api/admin/sign-in",
                   "protocol": "http",
                   "host": ["localhost"],
                   "port": "1001",
-                  "path": ["api", "cms", "sign-in"]
+                  "path": ["api", "admin", "sign-in"]
                 }
               },
               "response": []

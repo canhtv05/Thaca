@@ -32,8 +32,8 @@ spring:
               filters:
                 - StripPrefix=2
 
-            - id: cms-service
-              uri: ${APPLICATION_ROUTES_CMS_SERVICE:http://localhost:1002}
+            - id: admin-service
+              uri: ${APPLICATION_ROUTES_ADMIN_SERVICE:http://localhost:1002}
               predicates:
                 - Path=${app.api-prefix}/admin/**
               filters:

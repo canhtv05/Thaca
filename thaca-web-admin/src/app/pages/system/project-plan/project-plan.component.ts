@@ -246,7 +246,7 @@ export class ProjectPlanComponent {
           priority: 'high',
           status: 'pending',
           description:
-            'Module quản lý bài viết, bình luận, media. CMS admin duyệt/xóa nội dung vi phạm.',
+            'Module quản lý bài viết, bình luận, media. admin admin duyệt/xóa nội dung vi phạm.',
           flows: [
             {
               label: 'Bước 1: Tạo domain models',
@@ -261,12 +261,12 @@ export class ProjectPlanComponent {
             {
               label: 'Bước 3: Tạo Internal API trong Auth',
               detail:
-                'Thêm `internal.cmsSearchPosts`, `internal.cmsApprovePost`, `internal.cmsDeletePost` vào Auth microservice. CMS gọi qua InternalApiClient.',
+                'Thêm `internal.adminSearchPosts`, `internal.adminApprovePost`, `internal.adminDeletePost` vào Auth microservice. admin gọi qua InternalApiClient.',
             },
             {
-              label: 'Bước 4: Tạo CMS Controller',
+              label: 'Bước 4: Tạo admin Controller',
               detail:
-                'Tạo PostController, CommentController, MediaController trong thaca-cms. Dùng @FwRequest, @FwMode pattern.',
+                'Tạo PostController, CommentController, MediaController trong thaca-admin. Dùng @FwRequest, @FwMode pattern.',
             },
             {
               label: 'Bước 5: Tạo Frontend pages',
@@ -326,7 +326,7 @@ export class ProjectPlanComponent {
             {
               label: 'Bước 1: Tạo Analytics API trong Auth',
               detail:
-                'Thêm các internal APIs: `cmsGetDashboardStats` (total users, tenants, logins today), `cmsGetLoginTrend` (logins 30 ngày), `cmsGetTenantGrowth` (tenants theo tháng).',
+                'Thêm các internal APIs: `adminGetDashboardStats` (total users, tenants, logins today), `adminGetLoginTrend` (logins 30 ngày), `adminGetTenantGrowth` (tenants theo tháng).',
             },
             {
               label: 'Bước 2: Implement aggregation queries',
@@ -388,12 +388,12 @@ export class ProjectPlanComponent {
             {
               label: 'Bước 1: Tạo Dockerfile cho mỗi service',
               detail:
-                'Tạo `thaca-auth/Dockerfile` (multi-stage: build Maven → copy JRE 21). Tương tự cho thaca-cms, thaca-gateway. Frontend: `thaca-web-cms/Dockerfile` (build Angular → serve Nginx).',
+                'Tạo `thaca-auth/Dockerfile` (multi-stage: build Maven → copy JRE 21). Tương tự cho thaca-admin, thaca-gateway. Frontend: `thaca-web-admin/Dockerfile` (build Angular → serve Nginx).',
             },
             {
               label: 'Bước 2: Tạo docker-compose.yml',
               detail:
-                'Define services: postgres, redis, zookeeper, kafka, thaca-auth, thaca-cms, thaca-gateway, thaca-web-cms. Config networks, volumes, health checks.',
+                'Define services: postgres, redis, zookeeper, kafka, thaca-auth, thaca-admin, thaca-gateway, thaca-web-admin. Config networks, volumes, health checks.',
             },
             {
               label: 'Bước 3: Config environment variables',
@@ -438,7 +438,7 @@ export class ProjectPlanComponent {
           priority: 'medium',
           status: 'pending',
           description:
-            'Hiện tại traceId chỉ sinh trong 1 service. Cần propagate qua Gateway → Auth → CMS để trace toàn bộ request.',
+            'Hiện tại traceId chỉ sinh trong 1 service. Cần propagate qua Gateway → Auth → admin để trace toàn bộ request.',
           flows: [
             {
               label: 'Bước 1: Thêm OpenTelemetry dependencies',
@@ -510,7 +510,7 @@ export class ProjectPlanComponent {
             {
               label: 'Bước 1: Tạo root pom.xml',
               detail:
-                'Tạo `pom.xml` ở root Thaca/. Packaging: pom. Khai báo `<modules>`: thaca-common-object, thaca-framework, thaca-auth, thaca-cms, thaca-gateway.',
+                'Tạo `pom.xml` ở root Thaca/. Packaging: pom. Khai báo `<modules>`: thaca-common-object, thaca-framework, thaca-auth, thaca-admin, thaca-gateway.',
             },
             {
               label: 'Bước 2: Centralize dependency versions',
@@ -607,7 +607,7 @@ export class ProjectPlanComponent {
             {
               label: 'Bước 2: Backend upload API',
               detail:
-                'Tạo FileController trong thaca-cms: POST `/files/upload` nhận MultipartFile. Lưu vào storage (local/S3). Trả về URL.',
+                'Tạo FileController trong thaca-admin: POST `/files/upload` nhận MultipartFile. Lưu vào storage (local/S3). Trả về URL.',
             },
             {
               label: 'Bước 3: Image crop & resize',
@@ -687,7 +687,7 @@ export class ProjectPlanComponent {
           priority: 'low',
           status: 'pending',
           description:
-            'Hiện tại i18n tĩnh (JSON files). Cần dynamic: admin có thể edit translations trên CMS, thêm ngôn ngữ mới không cần deploy.',
+            'Hiện tại i18n tĩnh (JSON files). Cần dynamic: admin có thể edit translations trên admin, thêm ngôn ngữ mới không cần deploy.',
           flows: [
             {
               label: 'Bước 1: Tạo Translation entity',
@@ -734,12 +734,12 @@ export class ProjectPlanComponent {
             {
               label: 'Bước 2: Ingress configuration',
               detail:
-                'Tạo Ingress resource với Nginx Ingress Controller. Route: `api.thaca.com/auth/*` → thaca-auth, `api.thaca.com/admin/*` → thaca-cms.',
+                'Tạo Ingress resource với Nginx Ingress Controller. Route: `api.thaca.com/auth/*` → thaca-auth, `api.thaca.com/admin/*` → thaca-admin.',
             },
             {
               label: 'Bước 3: HPA (Horizontal Pod Autoscaler)',
               detail:
-                'Config HPA cho thaca-auth và thaca-cms: scale up khi CPU > 70%, min 2 replicas, max 10.',
+                'Config HPA cho thaca-auth và thaca-admin: scale up khi CPU > 70%, min 2 replicas, max 10.',
             },
             {
               label: 'Bước 4: Helm Chart',
