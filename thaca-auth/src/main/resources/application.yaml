@@ -9,8 +9,8 @@ spring:
     name: thaca-auth
 
   profiles:
-    active: dev
-    include: core,blocking
+    active: core
+    include: blocking,dev
 
   output:
     ansi:

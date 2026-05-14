@@ -115,7 +115,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange
             .getRequest()
             .mutate()
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+            .headers(httpHeaders -> httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
             .build();
         return exchange.mutate().request(request).build();
     }

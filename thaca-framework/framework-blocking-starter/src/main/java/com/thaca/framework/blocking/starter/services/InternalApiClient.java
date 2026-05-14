@@ -79,6 +79,9 @@ public class InternalApiClient {
             if (header == null) {
                 header = ApiHeader.builder().build();
             }
+            if (StringUtils.isBlank(header.getApiKey())) {
+                header.setApiKey(frameworkProperties.getHttpClient().getApiKey());
+            }
             parts.add("header", JsonF.toJson(header));
         }
         if (!parts.containsKey("body")) {
@@ -128,6 +131,9 @@ public class InternalApiClient {
         ApiHeader header = FwContextHeader.get();
         if (header == null) {
             header = ApiHeader.builder().build();
+        }
+        if (StringUtils.isBlank(header.getApiKey())) {
+            header.setApiKey(frameworkProperties.getHttpClient().getApiKey());
         }
 
         Object safeData = (requestData != null) ? requestData : new HashMap<>();

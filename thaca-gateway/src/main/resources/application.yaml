@@ -14,7 +14,8 @@ spring:
     name: thaca-gateway
 
   profiles:
-    include: framework
+    active: core
+    include: reactive,dev
 
   output:
     ansi:

@@ -81,7 +81,7 @@ export class LoginComponent implements OnInit {
 
   async generateCaptcha(): Promise<void> {
     const captcha = await this.authService.generateCaptcha();
-    if (captcha.body.status === 'OK') {
+    if (captcha?.body?.status === 'OK') {
       this.captchaImage.set(captcha.body.data.image);
       this.captchaId.set(captcha.body.data.captchaId);
     }

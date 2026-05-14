@@ -33,9 +33,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FwException.class)
     public ResponseEntity<ApiPayload<ErrorData>> handleFwException(FwException ex) {
         log.error("[GlobalExceptionHandler] FwException]:: ", ex);
-        HttpStatus status = ex.getErrorMessage().code().equalsIgnoreCase(CommonErrorMessage.UNAUTHORIZED.code())
-            ? HttpStatus.UNAUTHORIZED
-            : HttpStatus.BAD_REQUEST;
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        if (ex.getErrorMessage().code().equalsIgnoreCase(CommonErrorMessage.UNAUTHORIZED.code())) {
+            status = HttpStatus.UNAUTHORIZED;
+        } else if (ex.getErrorMessage().code().equalsIgnoreCase(CommonErrorMessage.FORBIDDEN.code())) {
+            status = HttpStatus.FORBIDDEN;
+        }
 
         return ResponseEntity.status(status).body(ApiPayload.error(ex.getErrorMessage(), ex.getData()));
     }
