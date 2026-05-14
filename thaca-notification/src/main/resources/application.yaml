@@ -1,3 +1,17 @@
+server:
+  port: 1003
+
+  servlet:
+    context-path:
+
 spring:
   application:
-    name: notification
+    name: thaca-notification
+
+  profiles:
+    active: dev
+    include: core,blocking
+
+  output:
+    ansi:
+      enabled: always

@@ -30,14 +30,15 @@
 
         @if (isCodeSent()) {
           <div class="flex flex-col gap-2">
-            <thaca-input
-              formControlName="code"
-              [label]="'auth.emailVerify.otpLabel' | translate"
-              [placeholder]="'······'"
-              [startIcon]="APP_CONFIG_ICONS['solarKeyBoldDuotone']"
-              maxlength="6"
-            />
-            <div class="flex justify-between items-center px-1">
+            <div class="[&_.thaca-input-wrap]:justify-start!">
+              <thaca-input-otp
+                formControlName="code"
+                [label]="'auth.emailVerify.otpLabel' | translate"
+                [length]="6"
+                [integerOnly]="true"
+              />
+            </div>
+            <div class="flex justify-between items-center px-1 mt-2">
               <span class="text-xs text-muted-foreground">
                 {{ 'auth.emailVerify.resendPrompt' | translate }}
                 <span class="text-primary font-bold">{{ formatTime(countdown()) }}</span>

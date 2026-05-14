@@ -1,0 +1,11 @@
+logging:
+  level:
+    '[root]': WARN
+    '[com.thaca]': INFO
+    '[org.springframework]': WARN
+
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_NOTIFICATION_CONSUMER_GROUP_ID:thaca-notification-group}

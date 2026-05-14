@@ -14,6 +14,7 @@ import { ThacaButtonComponent } from '../../../shared/components/thaca-button/th
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
 import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThacaInputOtpComponent } from '../../../shared/components/thaca-input-otp/thaca-input-otp.component';
 
 @Component({
   selector: 'app-email-verify',
@@ -26,6 +27,7 @@ import { AuthService } from '../../../core/services/auth.service';
     AuthLayoutComponent,
     ThacaButtonComponent,
     ThacaInputComponent,
+    ThacaInputOtpComponent,
   ],
   templateUrl: './email-verify.component.html',
 })

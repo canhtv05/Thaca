@@ -1,0 +1,32 @@
+@if (label) {
+  <label class="thaca-label" [for]="id">
+    {{ label }}
+    @if (required) {
+      <span class="thaca-required">(*)</span>
+    }
+  </label>
+}
+
+<div class="thaca-input-wrap" [class.is-error]="hasError()" [class.is-disabled]="disabled">
+  <p-inputotp
+    [ngModel]="value()"
+    (ngModelChange)="onModelChange($event)"
+    [length]="length"
+    [integerOnly]="integerOnly"
+    [mask]="mask"
+    [disabled]="disabled"
+  >
+    <ng-template #input let-token let-events="events" let-index="index">
+      <input
+        class="thaca-input"
+        [type]="mask ? 'password' : 'text'"
+        (keydown)="events.keydown($event)"
+        (input)="events.input($event)"
+        [attr.value]="token"
+        [maxLength]="1"
+        [disabled]="disabled"
+        (blur)="onTouched()"
+      />
+    </ng-template>
+  </p-inputotp>
+</div>
