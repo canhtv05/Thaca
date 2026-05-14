@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
   <groupId>com.thaca</groupId>
-  <artifactId>thaca-cms</artifactId>
+  <artifactId>thaca-admin</artifactId>
   <version>1.0.0</version>
-  <name>thaca-cms</name>
-  <description>Thaca cms for Spring Boot</description>
+  <name>thaca-admin</name>
+  <description>Thaca admin for Spring Boot</description>
   <url/>
   <licenses>
     <license/>

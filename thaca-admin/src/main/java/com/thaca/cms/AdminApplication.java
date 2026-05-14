@@ -7,10 +7,10 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "com.thaca")
-public class CmsApplication {
+public class AdminApplication {
 
     public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        SpringApplication.run(CmsApplication.class, args);
+        SpringApplication.run(AdminApplication.class, args);
     }
 }
