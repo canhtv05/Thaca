@@ -7,7 +7,7 @@ import { AuthLayoutComponent } from '../../../layouts/auth-layout/auth-layout.co
 import { ITenantInfoPrj } from '../../system/tenant/tenant.model';
 import { TenantService } from '../../system/tenant/tenant.service';
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-platform-selection',

@@ -16,6 +16,7 @@ application:
   routes:
     authService: ${APPLICATION_ROUTES_AUTH_SERVICE:http://localhost:1001}
     cmsService: ${APPLICATION_ROUTES_CMS_SERVICE:http://localhost:1002}
+    notificationService: ${APPLICATION_ROUTES_NOTIFICATION_SERVICE:http://localhost:1003}
 
 logging:
   level:

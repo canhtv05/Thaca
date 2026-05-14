@@ -20,6 +20,7 @@ import com.thaca.common.dtos.TokenPair;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
+import com.thaca.common.dtos.internal.req.SendOtpReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.PaginationRequest;
 import com.thaca.common.dtos.search.PaginationResponse;
@@ -28,6 +29,7 @@ import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.common.enums.AuthKey;
 import com.thaca.common.enums.CommonErrorMessage;
 import com.thaca.common.enums.TokenStatus;
+import com.thaca.common.events.SendOtpEvent;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
 import com.thaca.framework.blocking.starter.services.SessionStore;
 import com.thaca.framework.blocking.starter.utils.JwtUtils;
@@ -92,6 +94,19 @@ public class AuthService {
     private final LoginHistoryService loginHistoryService;
     private final RedisCacheService redisCacheService;
     private final SessionStore sessionStore;
+    private final OtpService otpService;
+
+    @FwMode(name = ServiceMethod.CMS_SEND_AUTHENTICATE_OTP, type = ModeType.HANDLE)
+    public void sendOtp(SendOtpReq req) {
+        var systemUser = systemUserRepository
+            .findByEmail(req.getEmail())
+            .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+        SendOtpEvent event = SendOtpEvent.builder()
+            .objectId(systemUser.getId().toString())
+            .email(systemUser.getEmail())
+            .build();
+        otpService.sendOtp(event);
+    }
 
     @FwMode(name = ServiceMethod.AUTH_GENERATE_CAPTCHA, type = ModeType.HANDLE)
     public CaptchaDTO generateCaptcha() {

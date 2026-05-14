@@ -3,6 +3,7 @@ package com.thaca.cms.controllers.external;
 import com.thaca.cms.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
+import com.thaca.common.dtos.internal.req.SendOtpReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.enums.RequestType;
@@ -30,6 +31,12 @@ public class CmsAuthController {
     @FwRequest(name = ServiceMethod.CMS_LOGOUT, type = RequestType.PROTECTED)
     public ResponseEntity<Void> signOut() {
         return ResponseEntity.ok(process.process(null));
+    }
+
+    @PostMapping("/send-authenticate-otp")
+    @FwRequest(name = ServiceMethod.CMS_SEND_AUTHENTICATE_OTP, type = RequestType.PUBLIC)
+    public ResponseEntity<Void> sendAuthenticateOtp(SendOtpReq req) {
+        return ResponseEntity.ok(process.process(req));
     }
 
     @PostMapping("/profile")

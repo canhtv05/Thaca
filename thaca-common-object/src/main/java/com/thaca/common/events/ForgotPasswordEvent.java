@@ -2,27 +2,47 @@ package com.thaca.common.events;
 
 import com.thaca.common.events.base.ExportableEvent;
 import java.time.Instant;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 @Builder
-public record ForgotPasswordEvent(
-    String objectId,
-    String to,
-    String username,
-    Instant timestamp
-) implements ExportableEvent {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ForgotPasswordEvent implements ExportableEvent {
+
+    private String objectId;
+    private String to;
+    private String username;
+
+    @Builder.Default
+    private String objectType = "users";
+
+    @Builder.Default
+    private String eventType = "FORGOT_PASSWORD";
+
+    @Builder.Default
+    private Instant timestamp = Instant.now();
+
+    @Override
+    public String objectId() {
+        return objectId;
+    }
+
     @Override
     public String objectType() {
-        return "users";
+        return objectType;
     }
 
     @Override
     public String eventType() {
-        return "FORGOT_PASSWORD";
+        return eventType;
     }
 
     @Override
     public Instant timestamp() {
-        return timestamp != null ? timestamp : Instant.now();
+        return timestamp;
     }
 }

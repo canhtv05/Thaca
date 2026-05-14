@@ -9,7 +9,7 @@ import { ɵInternalFormsSharedModule } from '@angular/forms';
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../auth.service';
 import { ILoginReq } from '../../../core/models/auth.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';

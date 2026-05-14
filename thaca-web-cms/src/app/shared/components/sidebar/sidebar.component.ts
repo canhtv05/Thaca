@@ -5,7 +5,7 @@ import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from '../menu-item/menu-item.component';
 import { LayoutService } from './sidebar.service';
 import { filter, Subject, takeUntil } from 'rxjs';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../pages/auth/auth.service';
 import { MenuService } from '../menu-item/menu-item.service';
 
 @Component({

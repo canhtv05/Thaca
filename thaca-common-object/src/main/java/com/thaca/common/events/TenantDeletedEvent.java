@@ -2,22 +2,46 @@ package com.thaca.common.events;
 
 import com.thaca.common.events.base.ExportableEvent;
 import java.time.Instant;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 @Builder
-public record TenantDeletedEvent(String objectId, Long tenantId, Instant timestamp) implements ExportableEvent {
+@NoArgsConstructor
+@AllArgsConstructor
+public class TenantDeletedEvent implements ExportableEvent {
+
+    private String objectId;
+    private Long tenantId;
+
+    @Builder.Default
+    private String objectType = "tenants";
+
+    @Builder.Default
+    private String eventType = "TENANT_DELETED";
+
+    @Builder.Default
+    private Instant timestamp = Instant.now();
+
+    @Override
+    public String objectId() {
+        return objectId;
+    }
+
     @Override
     public String objectType() {
-        return "tenants";
+        return objectType;
     }
 
     @Override
     public String eventType() {
-        return "TENANT_DELETED";
+        return eventType;
     }
 
     @Override
     public Instant timestamp() {
-        return timestamp != null ? timestamp : Instant.now();
+        return timestamp;
     }
 }

@@ -27,7 +27,7 @@ import { ThacaTextareaComponent } from '../../../shared/components/thaca-textare
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { Popup } from '../../../core/global/popup-notify';
 import { CheckPermissionDirective } from '../../../shared/directives/check-permission.directive';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-user-list',

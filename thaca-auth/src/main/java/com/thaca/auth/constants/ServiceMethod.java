@@ -28,6 +28,7 @@ public class ServiceMethod {
     public static final String CMS_AUTHENTICATE = "cms.authenticate";
     public static final String CMS_LOGOUT = "cms.logout";
     public static final String CMS_GET_PROFILE = "cms.getProfile";
+    public static final String CMS_SEND_AUTHENTICATE_OTP = "cms.sendAuthenticateOtp";
 
     // ==========================================
     // END USER MANAGEMENT (called by CMS via internal API)

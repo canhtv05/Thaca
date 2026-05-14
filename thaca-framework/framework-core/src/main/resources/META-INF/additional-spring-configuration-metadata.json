@@ -99,6 +99,11 @@
       "name": "outbox.scheduler.delay",
       "type": "java.lang.String",
       "description": "A description for 'outbox.scheduler.delay'"
+    },
+    {
+      "name": "application.routes.notificationService",
+      "type": "java.lang.String",
+      "description": "A description for 'application.routes.notificationService'"
     }
   ]
 }

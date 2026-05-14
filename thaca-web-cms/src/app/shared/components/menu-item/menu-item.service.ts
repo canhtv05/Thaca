@@ -1,6 +1,6 @@
 import { Injectable, inject, effect, signal, computed } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../pages/auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {

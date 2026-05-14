@@ -9,7 +9,7 @@ import { ClickOutsideDirective } from '../../shared/directives/click-outside.dir
 import { HeaderSearchComponent } from './header-search/header-search.component';
 import { APP_CONFIG_ICONS } from '../../core/configs/app-config.icon';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../pages/auth/auth.service';
 
 @Component({
   selector: 'app-header-layout',

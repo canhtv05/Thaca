@@ -34,7 +34,7 @@ import {
 } from '../thaca-dropdown/thaca-dropdown.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../pages/auth/auth.service';
 
 export interface ITableColumn {
   field: string;

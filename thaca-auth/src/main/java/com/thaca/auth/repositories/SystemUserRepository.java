@@ -4,6 +4,8 @@ import com.thaca.auth.domains.SystemUser;
 import com.thaca.auth.repositories.projection.DuplicateCheckPrj;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -13,10 +15,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SystemUserRepository extends JpaRepository<SystemUser, Long>, JpaSpecificationExecutor<SystemUser> {
     @Override
-    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "tenantIds" })
-    java.util.Optional<SystemUser> findById(Long id);
+    @EntityGraph(attributePaths = { "tenantIds" })
+    Optional<SystemUser> findById(Long id);
 
     boolean existsByEmail(String email);
+
+    Optional<SystemUser> findByEmail(String email);
 
     @Query(
         value = "SELECT CASE WHEN COUNT(su) > 0 THEN true ELSE false END FROM auth.system_users su JOIN auth.system_user_tenants sut ON su.id = sut.system_user_id WHERE su.email = :email AND sut.tenant_id = :tenantId",

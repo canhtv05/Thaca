@@ -1,11 +1,11 @@
 import { inject, Injectable, computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AppConfigService } from '../configs/app-config.service';
-import { GlobalHttp } from '../global/global-http';
-import { IAuthenticateRes, IAuthUserDTO, ILoginReq } from '../models/auth.model';
-import { IApiPayload } from '../models/common.model';
+import { AppConfigService } from '../../core/configs/app-config.service';
+import { GlobalHttp } from '../../core/global/global-http';
+import { IAuthenticateRes, IAuthUserDTO, ILoginReq } from '../../core/models/auth.model';
+import { IApiPayload } from '../../core/models/common.model';
 import { createBody, createHeader } from '../../utils/common.utils';
-import { currentUser } from '../stores/app.store';
+import { currentUser } from '../../core/stores/app.store';
 
 type AuthState = 'unknown' | 'authenticated' | 'unauthenticated' | 'logged-out';
 
@@ -79,6 +79,13 @@ export class AuthService {
     return GlobalHttp.post<IApiPayload<{ image: string; captchaId: string }>>(
       `${this.config.getApiUrl()}/auth/generate-captcha`,
       { header: createHeader(), body: createBody({}) },
+    );
+  }
+
+  async sendAuthenticateOtp(email: string): Promise<IApiPayload<void>> {
+    return GlobalHttp.post<IApiPayload<void>>(
+      `${this.config.getApiUrl()}/cms/send-authenticate-otp`,
+      { header: createHeader(), body: createBody({ email }) },
     );
   }
 

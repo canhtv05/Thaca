@@ -2,16 +2,36 @@ package com.thaca.common.events;
 
 import com.thaca.common.events.base.ExportableEvent;
 import java.time.Instant;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 @Builder
-public record VerificationEmailEvent(
-    String objectId,
-    String to,
-    String username,
-    String fullName,
-    Instant timestamp
-) implements ExportableEvent {
+@NoArgsConstructor
+@AllArgsConstructor
+public class VerificationEmailEvent implements ExportableEvent {
+
+    private String objectId;
+    private String to;
+    private String username;
+    private String fullName;
+
+    @Builder.Default
+    private String objectType = "users";
+
+    @Builder.Default
+    private String eventType = "VERIFICATION_EMAIL";
+
+    @Builder.Default
+    private Instant timestamp = Instant.now();
+
+    @Override
+    public String objectId() {
+        return objectId;
+    }
+
     @Override
     public String objectType() {
         return "users";
@@ -19,11 +39,11 @@ public record VerificationEmailEvent(
 
     @Override
     public String eventType() {
-        return "VERIFICATION_EMAIL";
+        return eventType;
     }
 
     @Override
     public Instant timestamp() {
-        return timestamp != null ? timestamp : Instant.now();
+        return timestamp;
     }
 }

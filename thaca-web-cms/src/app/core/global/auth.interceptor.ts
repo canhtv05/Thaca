@@ -9,7 +9,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { from, Observable, throwError } from 'rxjs';
 import { catchError, finalize, switchMap } from 'rxjs/operators';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../pages/auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { currentLang, isLoading } from '../stores/app.store';
 import { SKIP_LOADING } from './http-context';

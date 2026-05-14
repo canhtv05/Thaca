@@ -4,6 +4,7 @@ import com.thaca.cms.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.*;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.req.RoleCodesReq;
+import com.thaca.common.dtos.internal.req.SendOtpReq;
 import com.thaca.common.dtos.internal.res.AuthenticateRes;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
@@ -22,6 +23,9 @@ public interface AuthClient {
 
     @FwInternalApi(path = "/cms/profile", name = ServiceMethod.CMS_GET_PROFILE)
     SystemUserDTO getProfile();
+
+    @FwInternalApi(path = "/cms/send-authenticate-otp", name = ServiceMethod.CMS_SEND_AUTHENTICATE_OTP)
+    Void sendAuthenticateOtp(SendOtpReq req);
 
     // ==========================================
     // END USER MANAGEMENT

@@ -28,8 +28,18 @@ public class DateUtils {
 
     public static Instant stringToDate(String dateString) {
         if (Strings.isBlank(dateString)) return null;
-        LocalDateTime ldt = LocalDateTime.parse(dateString, dtf);
-        return ldt.atZone(resolveZone()).toInstant();
+        try {
+            LocalDateTime ldt = LocalDateTime.parse(dateString, dtf);
+            return ldt.atZone(resolveZone()).toInstant();
+        } catch (Exception e) {
+            try {
+                DateTimeFormatter flexibleFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                LocalDateTime ldt = LocalDateTime.parse(dateString, flexibleFormatter);
+                return ldt.atZone(resolveZone()).toInstant();
+            } catch (Exception e2) {
+                return null;
+            }
+        }
     }
 
     public static LocalDate stringToLocalDate(String dateString) {

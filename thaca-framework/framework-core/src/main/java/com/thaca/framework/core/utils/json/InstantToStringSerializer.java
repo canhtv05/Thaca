@@ -9,7 +9,7 @@ import tools.jackson.databind.ser.std.StdSerializer;
 
 public class InstantToStringSerializer extends StdSerializer<Instant> {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss").withZone(
         ZoneId.systemDefault()
     );
 

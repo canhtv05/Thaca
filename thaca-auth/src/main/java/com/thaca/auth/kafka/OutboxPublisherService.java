@@ -21,7 +21,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class OutboxPublisherService {
 
     private final OutboxEventRepository outboxEventRepository;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOutboxSavedEvent(OutboxSavedEvent event) {

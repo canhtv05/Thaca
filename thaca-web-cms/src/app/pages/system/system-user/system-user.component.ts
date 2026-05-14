@@ -30,7 +30,7 @@ import { ITenantInfoPrj } from '../tenant/tenant.model';
 import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
 import { IPermissionDTO } from '../permission/permission.model';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-system-user',

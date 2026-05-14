@@ -13,7 +13,7 @@ import { AuthLayoutComponent } from '../../../layouts/auth-layout/auth-layout.co
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
 import { APP_CONFIG_ICONS } from '../../../core/configs/app-config.icon';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../auth.service';
 import { ThacaInputOtpComponent } from '../../../shared/components/thaca-input-otp/thaca-input-otp.component';
 
 @Component({
@@ -51,18 +51,20 @@ export class EmailVerifyComponent {
     });
   }
 
-  onSendCode() {
+  async onSendCode() {
     if (this.form.get('email')?.invalid) return;
 
     this.isLoading.set(true);
-    // Simulate API call
-    setTimeout(() => {
+    const res = await this.authService.sendAuthenticateOtp(this.form.get('email')?.value);
+    if (res.body.status === 'OK') {
       this.isLoading.set(false);
       this.isCodeSent.set(true);
       this.startTimer();
       this.form.get('code')?.setValidators([Validators.required, Validators.minLength(6)]);
       this.form.get('code')?.updateValueAndValidity();
-    }, 1500);
+    } else {
+      this.isLoading.set(false);
+    }
   }
 
   startTimer() {
@@ -87,7 +89,6 @@ export class EmailVerifyComponent {
     if (this.form.invalid) return;
 
     this.isLoading.set(true);
-    // Simulate verification
     setTimeout(() => {
       this.isLoading.set(false);
       const email = this.form.get('email')?.value;
