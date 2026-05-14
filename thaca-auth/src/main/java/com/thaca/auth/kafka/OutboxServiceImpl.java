@@ -2,7 +2,7 @@ package com.thaca.auth.kafka;
 
 import com.thaca.auth.domains.OutboxEvent;
 import com.thaca.auth.repositories.OutboxEventRepository;
-import com.thaca.common.events.DomainEvent;
+import com.thaca.common.events.base.DomainEvent;
 import com.thaca.framework.blocking.starter.events.OutboxSavedEvent;
 import com.thaca.framework.blocking.starter.services.OutboxService;
 import com.thaca.framework.core.utils.JsonF;

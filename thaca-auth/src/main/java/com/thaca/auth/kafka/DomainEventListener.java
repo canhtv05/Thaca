@@ -1,6 +1,6 @@
 package com.thaca.auth.kafka;
 
-import com.thaca.common.events.ExportableEvent;
+import com.thaca.common.events.base.ExportableEvent;
 import com.thaca.framework.blocking.starter.services.OutboxService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
