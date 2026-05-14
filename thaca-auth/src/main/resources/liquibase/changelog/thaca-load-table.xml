@@ -179,5 +179,33 @@
     <addForeignKeyConstraint baseColumnNames="permission_code" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_permission" referencedColumnNames="code" referencedTableName="permissions" referencedTableSchemaName="auth"/>
   </changeSet>
 
+  <changeSet id="2" author="thaca">
+    <createSequence sequenceName="outbox_events_seq" schemaName="auth" startValue="1" incrementBy="1"/>
+
+    <createTable tableName="outbox_events" schemaName="auth">
+      <column name="id" type="bigint">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="object_type" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="object_id" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="event_type" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="payload" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="status" type="varchar(50)" defaultValue="PENDING">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
 </databaseChangeLog>
 

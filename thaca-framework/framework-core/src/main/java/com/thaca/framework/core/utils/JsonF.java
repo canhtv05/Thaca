@@ -86,4 +86,14 @@ public class JsonF {
             return null;
         }
     }
+
+    public static JsonNode readTree(String str) {
+        if (str == null || str.isEmpty()) return null;
+        try {
+            return objectMapper.readTree(str);
+        } catch (Exception e) {
+            log.error("[JsonF] readTree(String)]:: ", e);
+            return null;
+        }
+    }
 }

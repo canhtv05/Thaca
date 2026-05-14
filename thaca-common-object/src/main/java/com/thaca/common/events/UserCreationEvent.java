@@ -1,3 +1,3 @@
-package com.thaca.common.dtos.events;
+package com.thaca.common.events;
 
 public record UserCreationEvent(String userId, String fullName) {}

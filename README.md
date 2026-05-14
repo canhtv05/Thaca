@@ -162,7 +162,14 @@ Quản lý người dùng và dữ liệu trong phạm vi một Tenant (ví dụ
 
 ---
 
-## 📂 Tài Liệu API
+## 📂 Tài Liệu
+
+- **Debezium**:
+
+```bash
+cd .devcontainer
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-connector.json
+```
 
 - **Swagger UI**: `http://localhost:1001/swagger-ui.html`
 - **Postman**: Import file `Thaca.postman_collection.json` tại thư mục gốc

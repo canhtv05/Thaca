@@ -89,7 +89,7 @@ public class ExampleController {
                 response.put("preview", result.getSuccessRows().stream().limit(5).toList());
             }
 
-            HttpStatus status = result.hasErrors() ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK;
+            HttpStatus status = result.hasErrors() ? HttpStatus.OK : HttpStatus.OK;
             return ResponseEntity.status(status).body(response);
         } catch (ExcelSecurityException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -120,7 +120,7 @@ public class ExampleController {
                         .toList()
                 );
             }
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ExcelFormatException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 Map.of("error", "FORMAT_ERROR", "message", e.getMessage())
