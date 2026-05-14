@@ -20,25 +20,25 @@ public class InternalTenantController {
 
     private final FwApiProcess process;
 
-    @PostMapping("/cms/tenants/get")
+    @PostMapping("/admin/tenants/get")
     @FwRequest(name = ServiceMethod.CMS_GET_TENANT, type = RequestType.INTERNAL)
     public ResponseEntity<TenantDTO> getTenant(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
-    @PostMapping("/cms/tenants/all")
+    @PostMapping("/admin/tenants/all")
     @FwRequest(name = ServiceMethod.CMS_GET_ALL_TENANTS, type = RequestType.INTERNAL)
     public ResponseEntity<List<TenantInfoPrj>> getAllTenants() {
         return ResponseEntity.ok(process.process(null));
     }
 
-    @PostMapping("/cms/tenants/get-by-ids")
+    @PostMapping("/admin/tenants/get-by-ids")
     @FwRequest(name = ServiceMethod.CMS_GET_TENANTS_BY_IDS, type = RequestType.INTERNAL)
     public ResponseEntity<List<TenantInfoPrj>> getTenantsByIds(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
-    @PostMapping("/cms/tenants/get-full-by-ids")
+    @PostMapping("/admin/tenants/get-full-by-ids")
     @FwRequest(name = ServiceMethod.CMS_GET_TENANTS_FULL_BY_IDS, type = RequestType.INTERNAL)
     public ResponseEntity<List<TenantDTO>> getFullTenantsByIds(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));

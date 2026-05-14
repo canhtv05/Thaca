@@ -1,6 +1,6 @@
-package com.thaca.cms.controllers.external;
+package com.thaca.auth.controllers.external;
 
-import com.thaca.cms.constants.ServiceMethod;
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserLockHistoryDTO;
 import com.thaca.common.dtos.search.SearchRequest;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/cms/system-users")
+@RequestMapping("/auth/admin/system-users")
 @RequiredArgsConstructor
-public class SystemUserController {
+public class AdminSystemUserController {
 
     private final FwApiProcess process;
 
@@ -40,31 +40,32 @@ public class SystemUserController {
 
     @PostMapping("/get")
     @FwRequest(name = ServiceMethod.CMS_GET_SYSTEM_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<SystemUserDTO> get(SystemUserDTO request) {
+    public ResponseEntity<SystemUserDTO> getSystemUser(SystemUserDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/create")
     @FwRequest(name = ServiceMethod.CMS_CREATE_SYSTEM_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<SystemUserDTO> create(SystemUserDTO request) {
+    public ResponseEntity<SystemUserDTO> createSystemUser(SystemUserDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/update")
     @FwRequest(name = ServiceMethod.CMS_UPDATE_SYSTEM_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<SystemUserDTO> update(SystemUserDTO request) {
+    public ResponseEntity<SystemUserDTO> updateSystemUser(SystemUserDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/lock-unlock")
     @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_SYSTEM_USER, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public ResponseEntity<Void> lockUnlock(SystemUserDTO request) {
+    public ResponseEntity<Void> lockUnlockSystemUser(SystemUserDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/export")
-    @FwRequest(name = ServiceMethod.CMS_EXPORT_SYSTEM_USER, type = RequestType.PROTECTED)
-    public void export(SearchRequest<SystemUserDTO> request, HttpServletResponse response) throws IOException {
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_SYSTEM_USER, type = RequestType.PROTECTED, isSuperAdmin = true)
+    public void exportSystemUsers(SearchRequest<SystemUserDTO> request, HttpServletResponse response)
+        throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(request), "thaca-system-user-export-{{date}}.xlsx");
     }
 }

@@ -49,7 +49,7 @@ export class RoleComponent {
   });
 
   tableConfig: ITableConfig = {
-    url: `${this.configService.getApiUrl()}/cms/roles/search`,
+    url: `${this.configService.getApiUrl()}/auth/admin/roles/search`,
     rows: 10,
     showStt: true,
     columns: [

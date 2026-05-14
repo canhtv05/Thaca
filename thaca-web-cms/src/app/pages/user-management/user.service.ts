@@ -14,7 +14,7 @@ export class UserService {
   private readonly commonService = inject(CommonService);
 
   async getUser(req: Pick<IUserDTO, 'username'>): Promise<IApiPayload<IUserDTO>> {
-    const url = `${this.config.getApiUrl()}/cms/users/detail`;
+    const url = `${this.config.getApiUrl()}/auth/admin/users/detail`;
     const payload: IApiPayload<Pick<IUserDTO, 'username'>> = {
       header: createHeader(),
       body: createBody(req),
@@ -23,24 +23,24 @@ export class UserService {
   }
 
   async downloadTemplate(): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/users/download-template`;
+    const url = `${this.config.getApiUrl()}/auth/admin/users/download-template`;
     await this.commonService.downloadFile(url, 'thaca-users-template-{{date}}.xlsx');
   }
 
   async exportUsers(request: ISearchRequest<IUserDTO>): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/users/export`;
+    const url = `${this.config.getApiUrl()}/auth/admin/users/export`;
     return this.commonService.downloadFile(url, 'thaca-users-export-{{date}}.xlsx', request);
   }
 
   async importUsers(file: File): Promise<IApiPayload<IImportResult>> {
     const formData = new FormData();
     formData.append('file', file);
-    const url = `${this.config.getApiUrl()}/cms/users/import`;
+    const url = `${this.config.getApiUrl()}/auth/admin/users/import`;
     return await GlobalHttp.post<IApiPayload<IImportResult>>(url, formData);
   }
 
   async downloadFileError(importResult: IImportResult): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/users/file-error`;
+    const url = `${this.config.getApiUrl()}/auth/admin/users/file-error`;
     await this.commonService.downloadFile(
       url,
       'thaca-users-file-error-{{date}}.xlsx',
@@ -54,7 +54,7 @@ export class UserService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<any>>(
-      `${this.config.getApiUrl()}/cms/users/lock-unlock`,
+      `${this.config.getApiUrl()}/auth/admin/users/lock-unlock`,
       payload,
     );
   }

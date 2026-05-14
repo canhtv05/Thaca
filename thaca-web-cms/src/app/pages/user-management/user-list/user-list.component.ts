@@ -115,7 +115,7 @@ export class UserListComponent implements OnInit {
   });
 
   tableConfig: ITableConfig = {
-    url: `${this.configService.getApiUrl()}/cms/users/search`,
+    url: `${this.configService.getApiUrl()}/auth/admin/users/search`,
     rows: 10,
     withAudit: true,
     actionFixed: true,

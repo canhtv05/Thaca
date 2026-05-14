@@ -120,7 +120,7 @@ export class SystemUserComponent implements OnInit {
   });
 
   tableConfig: ITableConfig = {
-    url: `${this.configService.getApiUrl()}/cms/system-users/search`,
+    url: `${this.configService.getApiUrl()}/auth/admin/system-users/search`,
     rows: 10,
     showStt: true,
     withAudit: true,

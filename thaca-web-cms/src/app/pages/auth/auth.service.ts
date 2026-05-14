@@ -48,7 +48,7 @@ export class AuthService {
       body: createBody(req),
     };
     const res = await GlobalHttp.post<IApiPayload<IAuthenticateRes>>(
-      `${this.config.getApiUrl()}/cms/sign-in`,
+      `${this.config.getApiUrl()}/auth/admin/sign-in`,
       payload,
     );
     if (res.body.status === 'OK' && res.body.data.isAuthenticate) {
@@ -67,7 +67,7 @@ export class AuthService {
 
   async logoutAsync(): Promise<void> {
     const res = await GlobalHttp.post<IApiPayload<void>>(
-      `${this.config.getApiUrl()}/cms/sign-out`,
+      `${this.config.getApiUrl()}/auth/admin/sign-out`,
       { header: createHeader(), body: createBody({}) },
     );
     if (res.body.status === 'OK') {
@@ -84,7 +84,7 @@ export class AuthService {
 
   async sendAuthenticateOtp(email: string): Promise<IApiPayload<void>> {
     return GlobalHttp.post<IApiPayload<void>>(
-      `${this.config.getApiUrl()}/cms/send-authenticate-otp`,
+      `${this.config.getApiUrl()}/auth/admin/send-authenticate-otp`,
       { header: createHeader(), body: createBody({ email }) },
     );
   }
@@ -95,7 +95,7 @@ export class AuthService {
 
   private async loadProfile(): Promise<boolean> {
     const res = await GlobalHttp.post<IApiPayload<IAuthUserDTO>>(
-      `${this.config.getApiUrl()}/cms/profile`,
+      `${this.config.getApiUrl()}/auth/admin/profile`,
       { header: createHeader(), body: createBody({}) },
     );
     if (res?.body?.status === 'OK' && res.body.data) {

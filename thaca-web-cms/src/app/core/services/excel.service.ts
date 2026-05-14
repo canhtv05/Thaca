@@ -20,7 +20,7 @@ export class ExcelService {
     const formData = new FormData();
     formData.append('file', file);
 
-    const url = `${this.config.getApiUrl()}/cms/example/excel/import`;
+    const url = `${this.config.getApiUrl()}/admin/example/excel/import`;
     return await GlobalHttp.post<IApiPayload<any>>(url, formData);
   }
 
@@ -28,7 +28,7 @@ export class ExcelService {
    * Tải template qua POST
    */
   async downloadTemplate(): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/example/excel/template`;
+    const url = `${this.config.getApiUrl()}/admin/example/excel/template`;
     await this.postForBlob(url, 'thaca-employees-template.xlsx');
   }
 
@@ -36,7 +36,7 @@ export class ExcelService {
    * Xuất dữ liệu qua POST
    */
   async exportData(): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/example/excel/export`;
+    const url = `${this.config.getApiUrl()}/admin/example/excel/export`;
     await this.postForBlob(url, 'thaca-employees-export.xlsx');
   }
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/cms/tenants")
+@RequestMapping("/admin/tenants")
 @RequiredArgsConstructor
 public class TenantController {
 
@@ -27,55 +27,43 @@ public class TenantController {
 
     @PostMapping("/search")
     @FwRequest(name = ServiceMethod.CMS_SEARCH_TENANTS, type = RequestType.PROTECTED)
-    public ResponseEntity<SearchResponse<TenantDTO>> search(SearchRequest<TenantDTO> request) {
-        return ResponseEntity.ok(process.process(request));
+    public ResponseEntity<SearchResponse<TenantDTO>> searchTenants(SearchRequest<TenantDTO> criteria) {
+        return ResponseEntity.ok(process.process(criteria));
+    }
+
+    @PostMapping("/all")
+    @FwRequest(name = ServiceMethod.CMS_GET_ALL_TENANTS, type = RequestType.PROTECTED)
+    public ResponseEntity<List<TenantInfoPrj>> getAllTenants() {
+        return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/get")
     @FwRequest(name = ServiceMethod.CMS_GET_TENANT, type = RequestType.PROTECTED)
-    public ResponseEntity<TenantDTO> get(TenantDTO request) {
+    public ResponseEntity<TenantDTO> getTenant(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
-    }
-
-    @PostMapping("/all")
-    @FwRequest(name = ServiceMethod.CMS_GET_ALL_TENANTS, type = RequestType.PUBLIC)
-    public ResponseEntity<List<TenantInfoPrj>> getAll() {
-        return ResponseEntity.ok(process.process(null));
     }
 
     @PostMapping("/create")
     @FwRequest(name = ServiceMethod.CMS_CREATE_TENANT, type = RequestType.PROTECTED)
-    public ResponseEntity<TenantDTO> create(TenantDTO request) {
+    public ResponseEntity<TenantDTO> createTenant(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/update")
     @FwRequest(name = ServiceMethod.CMS_UPDATE_TENANT, type = RequestType.PROTECTED)
-    public ResponseEntity<TenantDTO> update(TenantDTO request) {
+    public ResponseEntity<TenantDTO> updateTenant(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/lock-unlock")
-    @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public ResponseEntity<Void> lockUnlock(TenantDTO request) {
-        return ResponseEntity.ok(process.process(request));
-    }
-
-    @PostMapping("/delete")
-    @FwRequest(name = ServiceMethod.CMS_DELETE_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public ResponseEntity<Void> delete(TenantDTO request) {
-        return ResponseEntity.ok(process.process(request));
-    }
-
-    @PostMapping("/restore")
-    @FwRequest(name = ServiceMethod.CMS_RESTORE_TENANT, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public ResponseEntity<Void> restore(TenantDTO request) {
+    @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_TENANT, type = RequestType.PROTECTED)
+    public ResponseEntity<Void> lockUnlockTenant(TenantDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/export")
     @FwRequest(name = ServiceMethod.CMS_EXPORT_TENANT, type = RequestType.PROTECTED)
-    public void export(SearchRequest<TenantDTO> request, HttpServletResponse response) throws IOException {
-        CommonUtils.writeExcelResponse(response, process.process(request), "thaca-tenants-export-{{date}}.xlsx");
+    public void exportTenants(SearchRequest<TenantDTO> request, HttpServletResponse response) throws IOException {
+        CommonUtils.writeExcelResponse(response, process.process(request), "thaca-tenants-{{date}}.xlsx");
     }
 }

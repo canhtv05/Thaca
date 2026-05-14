@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/cms/plans")
+@RequestMapping("/admin/plans")
 @RequiredArgsConstructor
 public class PlanController {
 
@@ -27,43 +27,43 @@ public class PlanController {
 
     @PostMapping("/search")
     @FwRequest(name = ServiceMethod.CMS_SEARCH_PLANS, type = RequestType.PROTECTED)
-    public ResponseEntity<SearchResponse<PlanDTO>> search(SearchRequest<PlanDTO> request) {
-        return ResponseEntity.ok(process.process(request));
-    }
-
-    @PostMapping("/get")
-    @FwRequest(name = ServiceMethod.CMS_GET_PLAN, type = RequestType.PROTECTED)
-    public ResponseEntity<PlanDTO> get(PlanDTO plan) {
-        return ResponseEntity.ok(process.process(plan));
+    public ResponseEntity<SearchResponse<PlanDTO>> searchPlans(SearchRequest<PlanDTO> criteria) {
+        return ResponseEntity.ok(process.process(criteria));
     }
 
     @PostMapping("/all")
     @FwRequest(name = ServiceMethod.CMS_GET_ALL_PLANS, type = RequestType.PROTECTED)
-    public ResponseEntity<List<PlanInfoPrj>> getAll() {
+    public ResponseEntity<List<PlanInfoPrj>> getAllPlans() {
         return ResponseEntity.ok(process.process(null));
     }
 
+    @PostMapping("/get")
+    @FwRequest(name = ServiceMethod.CMS_GET_PLAN, type = RequestType.PROTECTED)
+    public ResponseEntity<PlanDTO> getPlan(PlanDTO request) {
+        return ResponseEntity.ok(process.process(request));
+    }
+
     @PostMapping("/create")
-    @FwRequest(name = ServiceMethod.CMS_CREATE_PLAN, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public ResponseEntity<PlanDTO> create(PlanDTO plan) {
-        return ResponseEntity.ok(process.process(plan));
+    @FwRequest(name = ServiceMethod.CMS_CREATE_PLAN, type = RequestType.PROTECTED)
+    public ResponseEntity<PlanDTO> createPlan(PlanDTO request) {
+        return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/update")
-    @FwRequest(name = ServiceMethod.CMS_UPDATE_PLAN, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public ResponseEntity<PlanDTO> update(PlanDTO plan) {
-        return ResponseEntity.ok(process.process(plan));
+    @FwRequest(name = ServiceMethod.CMS_UPDATE_PLAN, type = RequestType.PROTECTED)
+    public ResponseEntity<PlanDTO> updatePlan(PlanDTO request) {
+        return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/lock-unlock")
-    @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_PLAN, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public ResponseEntity<Void> lockUnlock(PlanDTO plan) {
-        return ResponseEntity.ok(process.process(plan));
+    @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_PLAN, type = RequestType.PROTECTED)
+    public ResponseEntity<Void> lockUnlockPlan(PlanDTO request) {
+        return ResponseEntity.ok(process.process(request));
     }
 
     @PostMapping("/export")
-    @FwRequest(name = ServiceMethod.CMS_EXPORT_PLAN, type = RequestType.PROTECTED, isSuperAdmin = true)
-    public void export(SearchRequest<PlanDTO> request, HttpServletResponse response) throws IOException {
-        CommonUtils.writeExcelResponse(response, process.process(request), "thaca-plans-export-{{date}}.xlsx");
+    @FwRequest(name = ServiceMethod.CMS_EXPORT_PLAN, type = RequestType.PROTECTED)
+    public void exportPlans(SearchRequest<PlanDTO> request, HttpServletResponse response) throws IOException {
+        CommonUtils.writeExcelResponse(response, process.process(request), "thaca-plans-{{date}}.xlsx");
     }
 }

@@ -67,7 +67,7 @@ export class LockHistoryComponent implements OnInit {
   ];
 
   tableConfig: ITableConfig = {
-    url: `${this.configService.getApiUrl()}/cms/system-users/search-lock-histories`,
+    url: `${this.configService.getApiUrl()}/auth/admin/system-users/search-lock-histories`,
     rows: 10,
     showStt: true,
     withAudit: true,

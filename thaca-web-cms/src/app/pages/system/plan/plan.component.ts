@@ -88,7 +88,7 @@ export class PlanComponent {
   });
 
   tableConfig: ITableConfig = {
-    url: `${this.configService.getApiUrl()}/cms/plans/search`,
+    url: `${this.configService.getApiUrl()}/admin/plans/search`,
     rows: 10,
     showStt: true,
     withAudit: true,

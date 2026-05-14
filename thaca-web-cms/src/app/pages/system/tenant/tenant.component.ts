@@ -98,7 +98,7 @@ export class TenantComponent implements OnInit {
   });
 
   tableConfig: ITableConfig = {
-    url: `${this.configService.getApiUrl()}/cms/tenants/search`,
+    url: `${this.configService.getApiUrl()}/admin/tenants/search`,
     rows: 10,
     showStt: true,
     withAudit: true,

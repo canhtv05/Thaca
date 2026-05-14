@@ -21,7 +21,7 @@ export class RoleService {
     };
 
     return await GlobalHttp.post<IApiPayload<IRoleDTO[]>>(
-      `${this.config.getApiUrl()}/cms/roles/all`,
+      `${this.config.getApiUrl()}/auth/admin/roles/all`,
       payload,
     );
   }
@@ -33,13 +33,13 @@ export class RoleService {
     };
 
     return await GlobalHttp.post<IApiPayload<IPermissionDTO[]>>(
-      `${this.config.getApiUrl()}/cms/permissions/by-roles`,
+      `${this.config.getApiUrl()}/auth/admin/permissions/by-roles`,
       payload,
     );
   }
 
   async exportRoles(req?: ISearchRequest<IRoleDTO>): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/roles/export`;
+    const url = `${this.config.getApiUrl()}/auth/admin/roles/export`;
     await this.commonService.downloadFile(url, 'thaca-roles-export-{{date}}.xlsx', req || {});
   }
 }

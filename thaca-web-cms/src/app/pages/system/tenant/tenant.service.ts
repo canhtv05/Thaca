@@ -19,7 +19,7 @@ export class TenantService {
       body: createBody({}),
     };
     return await GlobalHttp.post<IApiPayload<ITenantInfoPrj[]>>(
-      `${this.config.getApiUrl()}/cms/tenants/all`,
+      `${this.config.getApiUrl()}/admin/tenants/all`,
       payload,
     );
   }
@@ -30,7 +30,7 @@ export class TenantService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<ITenantDTO>>(
-      `${this.config.getApiUrl()}/cms/tenants/get`,
+      `${this.config.getApiUrl()}/admin/tenants/get`,
       payload,
     );
   }
@@ -41,7 +41,7 @@ export class TenantService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<any>>(
-      `${this.config.getApiUrl()}/cms/tenants/lock-unlock`,
+      `${this.config.getApiUrl()}/admin/tenants/lock-unlock`,
       payload,
     );
   }
@@ -52,7 +52,7 @@ export class TenantService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<any>>(
-      `${this.config.getApiUrl()}/cms/tenants/update`,
+      `${this.config.getApiUrl()}/admin/tenants/update`,
       payload,
     );
   }
@@ -63,13 +63,13 @@ export class TenantService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<any>>(
-      `${this.config.getApiUrl()}/cms/tenants/create`,
+      `${this.config.getApiUrl()}/admin/tenants/create`,
       payload,
     );
   }
 
   async exportData(req?: ISearchRequest<ITenantDTO>): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/tenants/export`;
+    const url = `${this.config.getApiUrl()}/admin/tenants/export`;
     await this.commonService.downloadFile(url, 'thaca-tenants-export-{{date}}.xlsx', req || {});
   }
 }

@@ -20,13 +20,13 @@ export class PermissionService {
     };
 
     return await GlobalHttp.post<IApiPayload<IPermissionDTO[]>>(
-      `${this.config.getApiUrl()}/cms/permissions/all`,
+      `${this.config.getApiUrl()}/auth/admin/permissions/all`,
       payload,
     );
   }
 
   async exportPermissions(req?: ISearchRequest<IPermissionDTO>): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/permissions/export`;
+    const url = `${this.config.getApiUrl()}/auth/admin/permissions/export`;
     await this.commonService.downloadFile(url, 'thaca-permissions-export-{{date}}.xlsx', req || {});
   }
 }

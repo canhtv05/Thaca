@@ -1,6 +1,6 @@
-package com.thaca.cms.controllers.external;
+package com.thaca.auth.controllers.external;
 
-import com.thaca.cms.constants.ServiceMethod;
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.ImportResponseDTO;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.UserDTO;
@@ -21,52 +21,51 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/cms")
+@RequestMapping("/auth/admin/users")
 @RequiredArgsConstructor
-public class UserController {
+public class AdminUserController {
 
     private final FwApiProcess process;
 
-    @PostMapping("/users/search")
+    @PostMapping("/search")
     @FwRequest(name = ServiceMethod.CMS_SEARCH_USERS, type = RequestType.PROTECTED)
-    public ResponseEntity<SearchResponse<UserDTO>> search(SearchRequest<UserDTO> criteria) {
-        return ResponseEntity.ok(process.process(criteria));
+    public ResponseEntity<SearchResponse<UserDTO>> searchUsers(SearchRequest<UserDTO> request) {
+        return ResponseEntity.ok(process.process(request));
     }
 
-    @PostMapping("/users/detail")
-    @FwRequest(name = ServiceMethod.CMS_DETAIL_USER, type = RequestType.PUBLIC)
+    @PostMapping("/detail")
+    @FwRequest(name = ServiceMethod.CMS_DETAIL_USER, type = RequestType.PROTECTED)
     public ResponseEntity<UserDTO> detailUser(UserDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 
-    @PostMapping("/users/download-template")
+    @PostMapping("/download-template")
     @FwRequest(name = ServiceMethod.CMS_DOWNLOAD_USER_TEMPLATE, type = RequestType.PROTECTED)
-    public void downloadUserTemplate(HttpServletResponse response) throws IOException {
+    public void downloadTemplate(HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(null), "thaca-users-template-{{date}}.xlsx");
     }
 
-    @PostMapping("/users/export")
+    @PostMapping("/export")
     @FwRequest(name = ServiceMethod.CMS_EXPORT_USERS, type = RequestType.PROTECTED)
     public void exportUsers(SearchRequest<UserDTO> request, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(request), "thaca-users-{{date}}.xlsx");
     }
 
-    @PostMapping(value = "/users/import", consumes = "multipart/form-data")
+    @PostMapping(value = "/import", consumes = "multipart/form-data")
     @FwRequest(name = ServiceMethod.CMS_IMPORT_USERS, type = RequestType.PROTECTED)
     public ResponseEntity<ImportResponseDTO> importUsers(@RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(process.process(file));
     }
 
-    @PostMapping("/users/file-error")
+    @PostMapping("/file-error")
     @FwRequest(name = ServiceMethod.CMS_EXPORT_USER_FILE_ERROR, type = RequestType.PROTECTED)
     public void exportUserFileError(ImportResponseDTO importResult, HttpServletResponse response) throws IOException {
         CommonUtils.writeExcelResponse(response, process.process(importResult), "thaca-users-file-error-{{date}}.xlsx");
     }
 
-    // sau này checkpermission chỉ cho phép lock tenant thuộc tenant quản lý
-    @PostMapping("/users/lock-unlock")
+    @PostMapping("/lock-unlock")
     @FwRequest(name = ServiceMethod.CMS_LOCK_UNLOCK_USER, type = RequestType.PROTECTED)
-    public ResponseEntity<Void> lockUnlock(SystemUserDTO request) {
+    public ResponseEntity<Void> lockUnlockUser(SystemUserDTO request) {
         return ResponseEntity.ok(process.process(request));
     }
 }

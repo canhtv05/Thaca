@@ -734,7 +734,7 @@ export class ProjectPlanComponent {
             {
               label: 'Bước 2: Ingress configuration',
               detail:
-                'Tạo Ingress resource với Nginx Ingress Controller. Route: `api.thaca.com/auth/*` → thaca-auth, `api.thaca.com/cms/*` → thaca-cms.',
+                'Tạo Ingress resource với Nginx Ingress Controller. Route: `api.thaca.com/auth/*` → thaca-auth, `api.thaca.com/admin/*` → thaca-cms.',
             },
             {
               label: 'Bước 3: HPA (Horizontal Pod Autoscaler)',

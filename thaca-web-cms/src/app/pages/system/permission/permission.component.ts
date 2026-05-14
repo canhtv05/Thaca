@@ -67,7 +67,7 @@ export class PermissionComponent implements OnInit {
   });
 
   tableConfig: ITableConfig = {
-    url: `${this.configService.getApiUrl()}/cms/permissions/search`,
+    url: `${this.configService.getApiUrl()}/auth/admin/permissions/search`,
     rows: 10,
     showStt: true,
     columns: [

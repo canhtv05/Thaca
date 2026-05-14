@@ -19,7 +19,7 @@ export class PlanService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<any>>(
-      `${this.config.getApiUrl()}/cms/plans/lock-unlock`,
+      `${this.config.getApiUrl()}/admin/plans/lock-unlock`,
       payload,
     );
   }
@@ -30,7 +30,7 @@ export class PlanService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<any>>(
-      `${this.config.getApiUrl()}/cms/plans/update`,
+      `${this.config.getApiUrl()}/admin/plans/update`,
       payload,
     );
   }
@@ -41,13 +41,13 @@ export class PlanService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<any>>(
-      `${this.config.getApiUrl()}/cms/plans/create`,
+      `${this.config.getApiUrl()}/admin/plans/create`,
       payload,
     );
   }
 
   async exportData(req?: ISearchRequest<IPlanDTO>): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/plans/export`;
+    const url = `${this.config.getApiUrl()}/admin/plans/export`;
     await this.commonService.downloadFile(url, 'thaca-plans-export-{{date}}.xlsx', req || {});
   }
 
@@ -57,7 +57,7 @@ export class PlanService {
       body: createBody({}),
     };
     return await GlobalHttp.post<IApiPayload<IPlanInfoPrj[]>>(
-      `${this.config.getApiUrl()}/cms/plans/all`,
+      `${this.config.getApiUrl()}/admin/plans/all`,
       payload,
     );
   }

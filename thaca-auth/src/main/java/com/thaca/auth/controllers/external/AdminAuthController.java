@@ -1,6 +1,6 @@
-package com.thaca.cms.controllers.external;
+package com.thaca.auth.controllers.external;
 
-import com.thaca.cms.constants.ServiceMethod;
+import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.common.dtos.internal.SystemUserDTO;
 import com.thaca.common.dtos.internal.req.LoginReq;
 import com.thaca.common.dtos.internal.req.SendOtpReq;
@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/cms")
+@RequestMapping("/auth/admin")
 @RequiredArgsConstructor
-public class CmsAuthController {
+public class AdminAuthController {
 
     private final FwApiProcess process;
 

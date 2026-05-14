@@ -19,7 +19,7 @@ export class SystemUserService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<ISystemUserDTO>>(
-      `${this.config.getApiUrl()}/cms/system-users/get`,
+      `${this.config.getApiUrl()}/auth/admin/system-users/get`,
       payload,
     );
   }
@@ -30,7 +30,7 @@ export class SystemUserService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<any>>(
-      `${this.config.getApiUrl()}/cms/system-users/lock-unlock`,
+      `${this.config.getApiUrl()}/auth/admin/system-users/lock-unlock`,
       payload,
     );
   }
@@ -41,7 +41,7 @@ export class SystemUserService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<ISystemUserDTO>>(
-      `${this.config.getApiUrl()}/cms/system-users/update`,
+      `${this.config.getApiUrl()}/auth/admin/system-users/update`,
       payload,
     );
   }
@@ -52,13 +52,13 @@ export class SystemUserService {
       body: createBody(req),
     };
     return await GlobalHttp.post<IApiPayload<ISystemUserDTO>>(
-      `${this.config.getApiUrl()}/cms/system-users/create`,
+      `${this.config.getApiUrl()}/auth/admin/system-users/create`,
       payload,
     );
   }
 
   async exportData(req?: ISearchRequest<ISystemUserDTO>): Promise<void> {
-    const url = `${this.config.getApiUrl()}/cms/system-users/export`;
+    const url = `${this.config.getApiUrl()}/auth/admin/system-users/export`;
     await this.commonService.downloadFile(url, 'thaca-system-user-export-{{date}}.xlsx', req || {});
   }
 }
