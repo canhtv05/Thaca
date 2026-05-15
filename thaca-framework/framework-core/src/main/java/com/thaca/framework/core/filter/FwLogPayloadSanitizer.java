@@ -84,11 +84,7 @@ final class FwLogPayloadSanitizer {
         return payload.substring(0, MAX_LOG_PAYLOAD_LENGTH) + "... [truncated " + payload.length() + " chars]";
     }
 
-    private static String maskLongJsonFields(
-        String payload,
-        Pattern pattern,
-        java.util.function.Function<String, String> replacer
-    ) {
+    private static String maskLongJsonFields(String payload, Pattern pattern, Function<String, String> replacer) {
         Matcher matcher = pattern.matcher(payload);
         StringBuffer result = new StringBuffer();
         while (matcher.find()) {
