@@ -26,19 +26,6 @@ public class DynamicMailSenderService {
     @Autowired(required = false)
     private JavaMailSender defaultMailSender;
 
-    /**
-     * Lấy cấu hình mail mặc định từ file .env / application.yml
-     */
-    public JavaMailSender getLocalMailSender() {
-        if (defaultMailSender == null) {
-            throw new FwException(
-                NotificationErrorMessage.MAIL_CONFIG_MISSING,
-                "Local mail configuration (env) is not defined."
-            );
-        }
-        return defaultMailSender;
-    }
-
     @Transactional(readOnly = true)
     public List<MailConfig> getAllConfigs() {
         return mailConfigRepository.findAll();
@@ -48,9 +35,7 @@ public class DynamicMailSenderService {
     public MailConfig getConfigById(Long id) {
         return mailConfigRepository
             .findById(id)
-            .orElseThrow(() ->
-                new FwException(NotificationErrorMessage.MAIL_CONFIG_NOT_FOUND, "Mail configuration " + "not found.")
-            );
+            .orElseThrow(() -> new FwException(NotificationErrorMessage.MAIL_CONFIG_NOT_FOUND));
     }
 
     @Transactional
@@ -83,10 +68,6 @@ public class DynamicMailSenderService {
         mailConfigRepository.delete(existing);
     }
 
-    /**
-     * Lấy cấu hình gửi mail dựa trên mã cấu hình cụ thể (configCode). Dùng cho các trường hợp muốn chỉ định đích danh
-     * Sender (VD: gửi bằng Gmail cá nhân).
-     */
     public JavaMailSender getMailSender(String configCode) {
         MailConfig config = mailConfigRepository
             .findFirstByConfigCodeAndStatus(configCode, CommonStatus.ACTIVE)
@@ -95,18 +76,13 @@ public class DynamicMailSenderService {
         return createMailSenderInstance(config);
     }
 
-    /**
-     * Lấy cấu hình gửi mail cho ngữ cảnh hiện tại. Tự động lấy định danh từ SecurityContext.
-     */
     public JavaMailSender getMailSender() {
         String tenantId = String.valueOf(SecurityUtils.getCurrentTenantId());
         MailConfig config = resolveMailConfig(tenantId);
-
         if (config == null) {
             if (defaultMailSender == null) {
                 throw new FwException(NotificationErrorMessage.MAIL_CONFIG_MISSING);
             }
-            log.debug(">>>> Using DEFAULT external MailSender configuration");
             return defaultMailSender;
         }
 
@@ -114,13 +90,11 @@ public class DynamicMailSenderService {
     }
 
     private JavaMailSender createMailSenderInstance(MailConfig config) {
-        log.debug(">>>> Using MailSender configuration: host={}, user={}", config.getHost(), config.getUsername());
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(config.getHost());
         mailSender.setPort(config.getPort());
         mailSender.setUsername(config.getUsername());
         mailSender.setPassword(config.getPassword());
-
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", config.getIsAuth() != null ? config.getIsAuth().toString() : "true");
@@ -128,13 +102,9 @@ public class DynamicMailSenderService {
             "mail.smtp.starttls.enable",
             config.getIsStarttls() != null ? config.getIsStarttls().toString() : "true"
         );
-
         return mailSender;
     }
 
-    /**
-     * Hàm dùng để lấy thông tin tài khoản người gửi (from address)
-     */
     public String getSenderAddress() {
         String tenantId = String.valueOf(SecurityUtils.getCurrentTenantId());
         MailConfig config = resolveMailConfig(tenantId);
@@ -156,5 +126,12 @@ public class DynamicMailSenderService {
             }
         }
         return mailConfigRepository.findFirstByTenantIdIsNullAndStatus(CommonStatus.ACTIVE).orElse(null);
+    }
+
+    public JavaMailSender getLocalMailSender() {
+        if (defaultMailSender == null) {
+            throw new FwException(NotificationErrorMessage.MAIL_CONFIG_MISSING);
+        }
+        return defaultMailSender;
     }
 }

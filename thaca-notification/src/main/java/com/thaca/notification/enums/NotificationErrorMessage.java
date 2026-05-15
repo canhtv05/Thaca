@@ -5,6 +5,20 @@ import lombok.Getter;
 
 @Getter
 public enum NotificationErrorMessage implements ErrorMessageRule {
+    EVENT_TYPE_CANNOT_BLANK(
+        "EVENT.TYPE.CANNOT_BLANK",
+        "Loại sự kiện không được để trống",
+        "Không thể xử lý vì loại sự kiện không được hệ thống hỗ trợ",
+        "Event type cannot be blank",
+        "Cannot process event because event type is not supported"
+    ),
+    EVENT_TYPE_NOT_FOUND(
+        "EVENT.TYPE.NOT_FOUND",
+        "Loại sự kiện không tồn tại",
+        "Không thể xử lý vì loại sự kiện không được hệ thống hỗ trợ",
+        "Event type not found",
+        "Cannot process event because event type is not supported"
+    ),
     MAIL_CONFIG_NOT_FOUND(
         "MAIL.CONFIG.NOT_FOUND",
         "Cấu hình mail không tồn tại",

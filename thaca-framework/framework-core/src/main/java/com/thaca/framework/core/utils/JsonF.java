@@ -96,4 +96,20 @@ public class JsonF {
             return null;
         }
     }
+
+    public static String getFieldValue(String json, String fieldName) {
+        JsonNode node = readTree(json);
+        if (node != null && node.has(fieldName)) {
+            return node.get(fieldName).asString();
+        }
+        return null;
+    }
+
+    public static JsonNode getNode(String json, String fieldName) {
+        JsonNode node = readTree(json);
+        if (node != null) {
+            return node.get(fieldName);
+        }
+        return null;
+    }
 }

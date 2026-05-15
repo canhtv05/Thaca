@@ -21,3 +21,10 @@ spring:
     change-log: liquibase/changelog-master.xml
     default-schema: notification
     liquibase-schema: notification
+
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+
+app:
+  base-url: http://localhost:1003

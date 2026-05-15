@@ -111,7 +111,7 @@ export class UserListComponent implements OnInit {
   ];
 
   lockReasonForm = this.fb.group({
-    lockReason: ['', [Validators.required]],
+    lockReason: ['', [Validators.required, Validators.maxLength(500)]],
   });
 
   tableConfig: ITableConfig = {

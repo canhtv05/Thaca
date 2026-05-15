@@ -1,8 +1,8 @@
 package com.thaca.notification.services.impl;
 
 import com.thaca.common.enums.NotificationChannel;
+import com.thaca.common.events.base.DomainEvent;
 import com.thaca.notification.services.NotificationSender;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 public class SmsNotificationSender implements NotificationSender {
 
     @Override
-    public void send(String recipient, String content, Map<String, Object> metadata) {
-        log.info(">>>> [SMS SENDER] Sending SMS to [{}]. Content: [{}]", recipient, content);
-        // Actual SMS sending logic (e.g., Twilio, Infobip) would go here
-    }
+    public <T extends DomainEvent> void send(String recipient, String content, T event) {}
 
     @Override
     public NotificationChannel getChannel() {

@@ -3,6 +3,7 @@ package com.thaca.auth.services;
 import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.common.events.SendOtpEvent;
 import java.time.Instant;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class OtpService {
                     .email(user.getEmail())
                     .otpCode(otp)
                     .timestamp(Instant.now())
+                    .metadata(Map.of("useDefaultConfig", true))
                     .build();
                 eventPublisher.publishEvent(newEvent);
             });

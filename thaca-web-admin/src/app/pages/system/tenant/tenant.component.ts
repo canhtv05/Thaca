@@ -86,14 +86,22 @@ export class TenantComponent implements OnInit {
 
   tenantForm = this.fb.group({
     id: [null],
-    code: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9-_]+$/)]],
-    name: ['', [Validators.required]],
-    domain: [''],
+    code: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(255),
+        Validators.pattern(/^[a-zA-Z0-9-_]+$/),
+      ],
+    ],
+    name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
+    domain: ['', [Validators.minLength(3), Validators.maxLength(255)]],
     status: [{ value: 'ACTIVE', disabled: true }, [Validators.required]],
     planId: [null, [Validators.required]],
     expiresAt: [null],
-    contactEmail: ['', [Validators.email]],
-    logoUrl: [''],
+    contactEmail: ['', [Validators.email, Validators.maxLength(255)]],
+    logoUrl: ['', [Validators.maxLength(255)]],
     version: [null],
   });
 

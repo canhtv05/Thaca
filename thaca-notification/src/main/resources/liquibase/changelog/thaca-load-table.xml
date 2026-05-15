@@ -12,6 +12,7 @@
       </column>
       <column name="tenant_id" type="VARCHAR(255)"/>
       <column name="config_code" type="VARCHAR(255)"/>
+      <column name="description" type="VARCHAR(255)"/>
       <column name="host" type="VARCHAR(255)">
         <constraints nullable="false"/>
       </column>

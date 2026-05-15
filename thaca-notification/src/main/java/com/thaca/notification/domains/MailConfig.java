@@ -25,6 +25,9 @@ public class MailConfig extends BaseEntityAudit {
     @Column(name = "config_code")
     private String configCode;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(nullable = false)
     private String host;
 

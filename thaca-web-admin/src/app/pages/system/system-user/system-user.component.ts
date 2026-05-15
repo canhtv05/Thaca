@@ -102,21 +102,21 @@ export class SystemUserComponent implements OnInit {
 
   userForm = this.fb.group({
     id: [null],
-    username: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    fullname: ['', [Validators.required]],
-    password: [''],
+    username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+    fullname: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
+    password: ['', [Validators.minLength(6), Validators.maxLength(255)]],
     tenantIds: [[], [Validators.required]],
     isActivated: [true],
     isLocked: [false],
     isSuperAdmin: [false],
-    avatarUrl: [''],
+    avatarUrl: ['', [Validators.maxLength(1000)]],
     roleCodes: [[] as string[], [Validators.required, Validators.minLength(1)]],
-    lockReason: [''],
+    lockReason: ['', [Validators.maxLength(500)]],
   });
 
   lockReasonForm = this.fb.group({
-    lockReason: ['', [Validators.required]],
+    lockReason: ['', [Validators.required, Validators.maxLength(500)]],
   });
 
   tableConfig: ITableConfig = {
