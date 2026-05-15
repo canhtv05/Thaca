@@ -39,6 +39,12 @@ public class MailConfig extends BaseEntityAudit {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "from_name")
+    private String fromName;
+
+    @Column(name = "from_email")
+    private String fromEmail;
+
     @Column(nullable = false)
     private String host;
 
@@ -63,4 +69,8 @@ public class MailConfig extends BaseEntityAudit {
     @Builder.Default
     @Column(name = "status")
     private CommonStatus status = CommonStatus.ACTIVE;
+
+    @Column(name = "is_default")
+    @Builder.Default
+    private Boolean isDefault = false;
 }

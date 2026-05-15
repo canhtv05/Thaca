@@ -46,12 +46,18 @@ public class DynamicMailSenderService {
         if (config.getStatus() == null) {
             config.setStatus(CommonStatus.ACTIVE);
         }
-        return mailConfigRepository.save(config);
+        MailConfig saved = mailConfigRepository.save(config);
+        normalizeDefault(saved);
+        return saved;
     }
 
     @Transactional
     public MailConfig updateConfig(Long id, MailConfig req) {
         MailConfig existing = getConfigById(id);
+        existing.setConfigCode(req.getConfigCode());
+        existing.setDescription(req.getDescription());
+        existing.setFromName(req.getFromName());
+        existing.setFromEmail(req.getFromEmail());
         existing.setHost(req.getHost());
         existing.setPort(req.getPort());
         existing.setUsername(req.getUsername());
@@ -59,7 +65,10 @@ public class DynamicMailSenderService {
         existing.setIsAuth(req.getIsAuth());
         existing.setIsStarttls(req.getIsStarttls());
         existing.setStatus(req.getStatus());
-        return mailConfigRepository.save(existing);
+        existing.setIsDefault(req.getIsDefault());
+        MailConfig saved = mailConfigRepository.save(existing);
+        normalizeDefault(saved);
+        return saved;
     }
 
     @Transactional
@@ -77,7 +86,10 @@ public class DynamicMailSenderService {
     }
 
     public JavaMailSender getMailSender() {
-        String tenantId = String.valueOf(SecurityUtils.getCurrentTenantId());
+        return getTenantMailSender(String.valueOf(SecurityUtils.getCurrentTenantId()));
+    }
+
+    public JavaMailSender getTenantMailSender(String tenantId) {
         MailConfig config = resolveMailConfig(tenantId);
         if (config == null) {
             if (defaultMailSender == null) {
@@ -86,6 +98,11 @@ public class DynamicMailSenderService {
             return defaultMailSender;
         }
 
+        return createMailSenderInstance(config);
+    }
+
+    public JavaMailSender getMailSender(String tenantId, String configCode) {
+        MailConfig config = resolveMailConfigByCode(tenantId, configCode);
         return createMailSenderInstance(config);
     }
 
@@ -106,26 +123,68 @@ public class DynamicMailSenderService {
     }
 
     public String getSenderAddress() {
-        String tenantId = String.valueOf(SecurityUtils.getCurrentTenantId());
+        return getTenantSenderAddress(String.valueOf(SecurityUtils.getCurrentTenantId()));
+    }
+
+    public String getTenantSenderAddress(String tenantId) {
         MailConfig config = resolveMailConfig(tenantId);
-        return (config != null && config.getUsername() != null) ? config.getUsername() : "no-reply@thaca.com";
+        if (config == null) {
+            return getLocalSenderAddress();
+        }
+        return resolveSenderAddress(config);
     }
 
     public String getSenderAddress(String configCode) {
         return mailConfigRepository
             .findFirstByConfigCodeAndStatus(configCode, CommonStatus.ACTIVE)
-            .map(MailConfig::getUsername)
-            .orElse("no-reply@thaca.com");
+            .map(this::resolveSenderAddress)
+            .orElse(getLocalSenderAddress());
+    }
+
+    public String getSenderAddress(String tenantId, String configCode) {
+        return resolveSenderAddress(resolveMailConfigByCode(tenantId, configCode));
     }
 
     private MailConfig resolveMailConfig(String tenantId) {
-        if (!"null".equals(tenantId)) {
-            var tenantConfig = mailConfigRepository.findFirstByTenantIdAndStatus(tenantId, CommonStatus.ACTIVE);
+        if (!isNullTenant(tenantId)) {
+            var tenantDefault = mailConfigRepository.findFirstByTenantIdAndIsDefaultTrueAndStatus(
+                tenantId,
+                CommonStatus.ACTIVE
+            );
+            if (tenantDefault.isPresent()) {
+                return tenantDefault.get();
+            }
+            var tenantConfig = mailConfigRepository.findFirstByTenantIdAndStatusOrderByIsDefaultDescIdAsc(
+                tenantId,
+                CommonStatus.ACTIVE
+            );
             if (tenantConfig.isPresent()) {
                 return tenantConfig.get();
             }
         }
-        return mailConfigRepository.findFirstByTenantIdIsNullAndStatus(CommonStatus.ACTIVE).orElse(null);
+        return mailConfigRepository
+            .findFirstByTenantIdIsNullAndIsDefaultTrueAndStatus(CommonStatus.ACTIVE)
+            .orElseGet(() ->
+                mailConfigRepository
+                    .findFirstByTenantIdIsNullAndStatusOrderByIsDefaultDescIdAsc(CommonStatus.ACTIVE)
+                    .orElse(null)
+            );
+    }
+
+    private MailConfig resolveMailConfigByCode(String tenantId, String configCode) {
+        if (!isNullTenant(tenantId)) {
+            var tenantConfig = mailConfigRepository.findFirstByTenantIdAndConfigCodeAndStatus(
+                tenantId,
+                configCode,
+                CommonStatus.ACTIVE
+            );
+            if (tenantConfig.isPresent()) {
+                return tenantConfig.get();
+            }
+        }
+        return mailConfigRepository
+            .findFirstByConfigCodeAndStatus(configCode, CommonStatus.ACTIVE)
+            .orElseThrow(() -> new FwException(NotificationErrorMessage.MAIL_CONFIG_NOT_FOUND));
     }
 
     public JavaMailSender getLocalMailSender() {
@@ -143,5 +202,30 @@ public class DynamicMailSenderService {
             }
         }
         return "no-reply@thaca.com";
+    }
+
+    private String resolveSenderAddress(MailConfig config) {
+        if (config.getFromEmail() != null && !config.getFromEmail().isBlank()) {
+            return config.getFromEmail();
+        }
+        if (config.getUsername() != null && !config.getUsername().isBlank()) {
+            return config.getUsername();
+        }
+        return getLocalSenderAddress();
+    }
+
+    private boolean isNullTenant(String tenantId) {
+        return tenantId == null || tenantId.isBlank() || "null".equalsIgnoreCase(tenantId);
+    }
+
+    private void normalizeDefault(MailConfig config) {
+        if (!Boolean.TRUE.equals(config.getIsDefault())) {
+            return;
+        }
+        if (isNullTenant(config.getTenantId())) {
+            mailConfigRepository.clearDefaultForSystem(config.getId());
+            return;
+        }
+        mailConfigRepository.clearDefaultForTenant(config.getTenantId(), config.getId());
     }
 }

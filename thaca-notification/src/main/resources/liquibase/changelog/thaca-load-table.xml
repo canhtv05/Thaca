@@ -38,6 +38,56 @@
     <createIndex tableName="mail_configs" indexName="idx_mail_configs_tenant">
       <column name="tenant_id"/>
     </createIndex>
+
+  </changeSet>
+
+  <changeSet id="2" author="CanhPC">
+    <addColumn tableName="mail_configs" schemaName="notification">
+      <column name="from_name" type="VARCHAR(255)"/>
+      <column name="from_email" type="VARCHAR(255)"/>
+      <column name="is_default" type="BOOLEAN" defaultValueBoolean="false"/>
+    </addColumn>
+
+    <createIndex tableName="mail_configs" indexName="idx_mail_configs_code" schemaName="notification">
+      <column name="config_code"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="3" author="CanhPC">
+    <createTable tableName="notification_routing_configs" schemaName="notification">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="tenant_id" type="VARCHAR(255)"/>
+      <column name="notification_type" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="channel" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="mail_config_code" type="VARCHAR(255)"/>
+      <column name="template_code" type="VARCHAR(255)"/>
+      <column name="enabled" type="BOOLEAN" defaultValueBoolean="true"/>
+      <column name="priority" type="INT" defaultValueNumeric="100"/>
+      <column name="is_default" type="BOOLEAN" defaultValueBoolean="false"/>
+
+      <column name="created_by" type="VARCHAR(255)"/>
+      <column name="updated_by" type="VARCHAR(255)"/>
+      <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+      <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+    </createTable>
+
+    <createIndex tableName="notification_routing_configs" indexName="idx_noti_route_tenant_type_channel">
+      <column name="tenant_id"/>
+      <column name="notification_type"/>
+      <column name="channel"/>
+    </createIndex>
+
+    <createIndex tableName="notification_routing_configs" indexName="idx_noti_route_default">
+      <column name="tenant_id"/>
+      <column name="channel"/>
+      <column name="is_default"/>
+    </createIndex>
   </changeSet>
 
 </databaseChangeLog>
