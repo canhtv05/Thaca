@@ -2,6 +2,7 @@ package com.thaca.common.events;
 
 import com.thaca.common.events.base.ExportableEvent;
 import java.time.Instant;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,6 +41,11 @@ public class VerificationEmailEvent implements ExportableEvent {
     @Override
     public String eventType() {
         return eventType;
+    }
+
+    @Override
+    public Map<String, Object> metadata() {
+        return Map.of();
     }
 
     @Override

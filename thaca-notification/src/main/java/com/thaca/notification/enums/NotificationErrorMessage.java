@@ -5,6 +5,13 @@ import lombok.Getter;
 
 @Getter
 public enum NotificationErrorMessage implements ErrorMessageRule {
+    EVENT_PAYLOAD_CANNOT_BE_NULL(
+        "EVENT.PAYLOAD.CANNOT_BE_NULL",
+        "Payload sự kiện không tồn tại",
+        "Không thể xử lý vì payload sự kiện bị thiếu.",
+        "Event payload cannot be null",
+        "Cannot process because event payload is missing."
+    ),
     EVENT_TYPE_CANNOT_BLANK(
         "EVENT.TYPE.CANNOT_BLANK",
         "Loại sự kiện không được để trống",

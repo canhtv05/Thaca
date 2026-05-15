@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +15,7 @@ import org.thymeleaf.dialect.AbstractDialect;
 import org.thymeleaf.dialect.IExpressionObjectDialect;
 import org.thymeleaf.expression.IExpressionObjectFactory;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.spring6.messageresolver.SpringMessageResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
@@ -36,9 +38,13 @@ public class EmailTemplateConfig {
     }
 
     @Bean
-    SpringTemplateEngine emailTemplateEngine() {
+    SpringTemplateEngine emailTemplateEngine(MessageSource messageSource) {
+        SpringMessageResolver messageResolver = new SpringMessageResolver();
+        messageResolver.setMessageSource(messageSource);
+
         SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.setTemplateResolver(emailTemplateResolver());
+        engine.setMessageResolver(messageResolver);
         engine.addDialect(new GlobalVariableDialect(appBaseUrl));
         return engine;
     }
@@ -70,8 +76,7 @@ public class EmailTemplateConfig {
                     if ("app".equals(expressionObjectName)) {
                         Map<String, Object> app = new HashMap<>();
                         app.put("baseUrl", baseUrl);
-                        app.put("logoUrl", baseUrl + "/assets/images/logo.png");
-                        app.put("systemName", "ThaCa");
+                        app.put("systemName", "THACA");
                         return app;
                     }
                     return null;

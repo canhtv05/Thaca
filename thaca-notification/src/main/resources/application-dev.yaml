@@ -4,7 +4,17 @@ logging:
     '[com.thaca]': INFO
     '[org.springframework]': WARN
 
+management:
+  health:
+    mail:
+      enabled: false
+
 spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:thaca-notification/.env[.properties]
+
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/thaca?options=-c%20timezone=UTC}
@@ -22,8 +32,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -35,12 +45,3 @@ spring:
     change-log: classpath:liquibase/changelog-master.xml
     default-schema: notification
     enabled: true
-
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        '[default_schema]': notification
-        dialect: org.hibernate.dialect.PostgreSQLDialect

@@ -1,3 +1,9 @@
+spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:thaca-framework/framework-core/.env[.properties]
+
 application:
   security:
     base64Secret: ${APPLICATION_SECURITY_BASE64SECRET:ASyTTcIvfHA8QsI2c1Fvc8vZUcaeUgRlHH1VhsElDSYHsJ0CS5N0y5/yvKte+WDvYS3lL0oBzPK+1E83ACSdvA==}

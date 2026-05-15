@@ -5,6 +5,11 @@ logging:
     '[org.springframework]': WARN
 
 spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:thaca-admin/.env[.properties]
+
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/thaca?options=-c%20timezone=UTC}

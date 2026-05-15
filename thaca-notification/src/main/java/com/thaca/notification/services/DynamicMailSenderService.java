@@ -134,4 +134,14 @@ public class DynamicMailSenderService {
         }
         return defaultMailSender;
     }
+
+    public String getLocalSenderAddress() {
+        if (defaultMailSender instanceof JavaMailSenderImpl impl) {
+            String username = impl.getUsername();
+            if (username != null && !username.isBlank()) {
+                return username;
+            }
+        }
+        return "no-reply@thaca.com";
+    }
 }

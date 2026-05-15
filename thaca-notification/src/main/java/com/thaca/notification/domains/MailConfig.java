@@ -2,17 +2,28 @@ package com.thaca.notification.domains;
 
 import com.thaca.common.enums.CommonStatus;
 import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "mail_configs")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@Table(name = "mail_configs", schema = "notification")
 public class MailConfig extends BaseEntityAudit {
 
     @Id
@@ -49,7 +60,7 @@ public class MailConfig extends BaseEntityAudit {
     private Boolean isStarttls = true;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
     @Builder.Default
+    @Column(name = "status")
     private CommonStatus status = CommonStatus.ACTIVE;
 }

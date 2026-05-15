@@ -1,220 +1,113 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xác thực OTP - Thaca</title>
-    <style>
-        /* Sử dụng Font nội bộ thay vì Google Fonts */
-        @font-face {
-            font-family: 'Nunito';
-            src: url('[[${appBaseUrl}]]/assets/fonts/Nunito-Regular.ttf') format('truetype');
-            font-weight: 400;
-            font-style: normal;
-        }
-        @font-face {
-            font-family: 'Nunito';
-            src: url('[[${appBaseUrl}]]/assets/fonts/Nunito-Bold.ttf') format('truetype');
-            font-weight: 700;
-            font-style: normal;
-        }
-        @font-face {
-            font-family: 'Nunito';
-            src: url('[[${appBaseUrl}]]/assets/fonts/Nunito-ExtraBold.ttf') format('truetype');
-            font-weight: 800;
-            font-style: normal;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #f8fafc;
-            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        .wrapper {
-            width: 100%;
-            padding: 48px 0;
-            background-color: #f8fafc;
-        }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e2e8f0;
-        }
-        .header {
-            background-color: #5b51d8; /* --primary */
-            padding: 40px 24px;
-            text-align: center;
-        }
-        .header-logo {
-            margin-bottom: 12px;
-        }
-        .header-badge {
-            display: inline-flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            padding: 8px 16px;
-            color: white;
-            font-size: 16px;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            text-decoration: none;
-        }
-        .header-sub {
-            color: rgba(255, 255, 255, 0.85);
-            font-size: 14px;
-            margin: 8px 0 0;
-            font-weight: 400;
-        }
-        .body {
-            padding: 48px 40px;
-            text-align: center;
-        }
-        .icon-wrap {
-            width: 64px;
-            height: 64px;
-            background: #f1f5f9;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-        }
-        .title {
-            font-size: 22px;
-            font-weight: 800;
-            color: #1e293b;
-            margin: 0 0 12px;
-        }
-        .intro {
-            font-size: 15px;
-            color: #64748b;
-            line-height: 1.6;
-            margin: 0 0 32px;
-        }
-        .otp-box {
-            background: #f8fafc;
-            border: 2px dashed #5b51d8;
-            border-radius: 12px;
-            padding: 32px;
-            margin-bottom: 32px;
-        }
-        .otp-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #5b51d8;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin: 0 0 16px;
-        }
-        .otp-code {
-            font-size: 42px;
-            font-weight: 800;
-            color: #5b51d8;
-            letter-spacing: 8px;
-            margin: 0;
-            font-family: 'Courier New', Courier, monospace; /* Đảm bảo các con số thẳng hàng */
-        }
-        .validity {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .warning-box {
-            background: #fff1f2;
-            border-left: 4px solid #f43f5e;
-            padding: 16px;
-            text-align: left;
-            border-radius: 4px 8px 8px 4px;
-        }
-        .warning-text {
-            font-size: 13px;
-            color: #9f1239;
-            margin: 0;
-            line-height: 1.5;
-        }
-        .footer {
-            padding: 32px 40px;
-            background-color: #f8fafc;
-            border-top: 1px solid #e2e8f0;
-            text-align: center;
-        }
-        .footer-copy {
-            font-size: 12px;
-            color: #94a3b8;
-            margin: 0 0 12px;
-        }
-        .footer-links {
-            font-size: 13px;
-        }
-        .footer-links a {
-            color: #5b51d8;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .footer-links span {
-            color: #cbd5e1;
-            margin: 0 12px;
-        }
-    </style>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title th:text="#{email.otp.subject}">Xác thực OTP - Thaca</title>
 </head>
-<body>
-<div class="wrapper">
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-logo">
-                <a th:href="${#app.baseUrl}" class="header-badge">
-                    <img th:src="${#app.logoUrl}" 
-                         alt="Logo" width="24" height="24" style="margin-right: 8px; vertical-align: middle;">
-                    <span th:text="${#app.systemName}">ThaCa</span>
-                </a>
-            </div>
-            <p class="header-sub" th:text="#{email.otp.greeting}">Xác thực tài khoản của bạn</p>
-        </div>
+<body style="margin:0;padding:0;background-color:#f0f1f5;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f0f1f5;">
+    <tr>
+        <td align="center" style="padding:40px 16px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:480px;width:100%;">
 
-        <!-- Body -->
-        <div class="body">
-            <div class="icon-wrap">
-                <img src="https://img.icons8.com/fluency/48/000000/shield.png" width="32" height="32" alt="Shield">
-            </div>
-            <h2 class="title" th:text="#{email.otp.title}">Mã xác thực OTP</h2>
-            <p class="intro" th:text="#{email.otp.intro}">Chúng tôi nhận được yêu cầu xác thực từ tài khoản của bạn. Vui lòng sử dụng mã bảo mật bên dưới để hoàn tất.</p>
+                <tr>
+                    <td style="background-color:#5b51d8;border-radius:12px 12px 0 0;padding:32px 24px;text-align:center;">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 10px;">
+                            <tr>
+                                <td style="background:rgba(255,255,255,0.15);border-radius:10px;padding:8px 16px;">
+                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                        <tr>
+                                            <td style="vertical-align:middle;padding-right:8px;">
+                                                <img src="cid:logo" width="22" height="22" alt="Logo" style="display:block;border:0;"/>
+                                            </td>
+                                            <td style="vertical-align:middle;color:#ffffff;font-size:15px;font-weight:700;letter-spacing:0.05em;" th:text="${#app.systemName}">THACA</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        <p style="margin:0;color:rgba(255,255,255,0.75);font-size:13px;line-height:1.5;" th:text="#{email.otp.greeting}">Xác thực tài khoản</p>
+                    </td>
+                </tr>
 
-            <div class="otp-box">
-                <p class="otp-label" th:text="#{email.otp.label}">Mã OTP của bạn là</p>
-                <div class="otp-code" th:text="${otpCode}">123456</div>
-                <div class="validity">
-                    <img src="https://img.icons8.com/ios/50/64748b/clock--v1.png" width="14" height="14" style="margin-right: 6px; vertical-align: middle;">
-                    <span th:text="#{email.otp.validity}">Có hiệu lực trong 5 phút.</span>
-                </div>
-            </div>
+                <tr>
+                    <td style="background:#ffffff;padding:40px 36px;border-left:1px solid #e8e9ef;border-right:1px solid #e8e9ef;">
 
-            <div class="warning-box">
-                <p class="warning-text" th:text="#{email.otp.warning}">
-                    ⚠️ Tuyệt đối không chia sẻ mã này với bất kỳ ai để tránh rủi ro mất tài khoản.
-                </p>
-            </div>
-        </div>
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:28px;">
+                            <tr>
+                                <td align="center">
+                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                        <tr>
+                                            <td align="center" style="width:52px;height:52px;background:#f0f1f5;border-radius:26px;">
+                                                <img src="cid:shield" width="28" height="28" alt="" style="display:block;margin:12px auto;border:0;"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <h2 style="margin:16px 0 8px;font-size:18px;font-weight:700;color:#1e1f2e;text-align:center;" th:text="#{email.otp.title}">Mã xác thực OTP</h2>
+                                    <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6;text-align:center;" th:text="#{email.otp.intro}">Bạn vừa yêu cầu mã xác thực OTP.</p>
+                                </td>
+                            </tr>
+                        </table>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p class="footer-copy">© 2026 <span th:text="${#app.systemName}">ThaCa</span> Platform. <span th:text="#{email.common.footer}">Tất cả quyền được bảo lưu.</span></p>
-            <div class="footer-links">
-                <a th:href="${#app.baseUrl}" th:text="#{email.common.home}">Trang chủ</a>
-                <span>|</span>
-                <a th:href="${#app.baseUrl + '/support'}" th:text="#{email.common.support}">Hỗ trợ</a>
-            </div>
-        </div>
-    </div>
-</div>
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f8f9fc;border:1px solid #e8e9ef;border-radius:10px;margin-bottom:24px;">
+                            <tr>
+                                <td style="padding:24px;text-align:center;">
+                                    <p style="margin:0 0 14px;font-size:11px;font-weight:600;color:#5b51d8;letter-spacing:0.1em;text-transform:uppercase;" th:text="#{email.otp.label}">Mã của bạn</p>
+
+                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 14px;" th:if="${otpDigits != null and !#lists.isEmpty(otpDigits)}">
+                                        <tr>
+                                            <td th:each="digit : ${otpDigits}" style="padding:0 4px;">
+                                                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                                    <tr>
+                                                        <td align="center" style="width:42px;height:50px;background:#ffffff;border:1.5px solid #5b51d8;border-radius:8px;font-size:22px;font-weight:800;color:#5b51d8;font-family:Consolas,Courier New,monospace;" th:text="${digit}">0</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p th:if="${otpDigits == null or #lists.isEmpty(otpDigits)}"
+                                       style="margin:0 0 14px;font-size:36px;font-weight:800;color:#5b51d8;letter-spacing:10px;font-family:Consolas,Courier New,monospace;"
+                                       th:text="${otpCode}">123456</p>
+
+                                    <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5;">
+                                        <img src="cid:clock" width="13" height="13" alt="" style="vertical-align:middle;margin-right:4px;border:0;"/>
+                                        <span th:text="#{email.otp.validity}">Có hiệu lực trong 5 phút</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f8f9fc;border-left:3px solid #5b51d8;border-radius:0 8px 8px 0;">
+                            <tr>
+                                <td style="padding:12px 16px;">
+                                    <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.5;" th:text="#{email.otp.warning}">Không chia sẻ mã này.</p>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="background:#f0f1f5;border:1px solid #e8e9ef;border-radius:0 0 12px 12px;padding:20px 36px;text-align:center;">
+                        <p style="margin:0 0 8px;font-size:12px;color:#6b7280;">
+                            © 2026 <span th:text="${#app.systemName}">Thaca</span> Platform.
+                            <span th:text="#{email.common.footer}">Tất cả quyền được bảo lưu.</span>
+                        </p>
+                        <p style="margin:0;font-size:12px;">
+                            <a th:href="${#app.baseUrl}" style="color:#5b51d8;text-decoration:none;font-weight:500;" th:text="#{email.common.home}">Trang chủ</a>
+                            <span style="color:#e8e9ef;margin:0 8px;">|</span>
+                            <a th:href="${#app.baseUrl + '/support'}" style="color:#5b51d8;text-decoration:none;font-weight:500;" th:text="#{email.common.support}">Hỗ trợ</a>
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
 </body>
 </html>

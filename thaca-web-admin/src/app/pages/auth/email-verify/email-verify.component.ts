@@ -35,7 +35,7 @@ export class EmailVerifyComponent {
   form: FormGroup;
   isLoading = signal(false);
   isCodeSent = signal(false);
-  countdown = signal(600);
+  countdown = signal(300);
   timer: any;
   APP_CONFIG_ICONS = APP_CONFIG_ICONS;
 

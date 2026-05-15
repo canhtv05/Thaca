@@ -45,6 +45,15 @@ public class JsonF {
         }
     }
 
+    public static <T> T convertObject(Object obj, Class<T> clazz) {
+        try {
+            return objectMapper.convertValue(obj, clazz);
+        } catch (Exception e) {
+            log.error("[JsonF] convertObject()]:: ", e);
+            return null;
+        }
+    }
+
     public static <T> T jsonToObject(byte[] bytes, Class<T> clazz) {
         if (bytes == null || bytes.length == 0) return null;
         try {
