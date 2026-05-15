@@ -1,11 +1,10 @@
 package com.thaca.framework.blocking.starter.domains;
 
-import com.thaca.framework.core.utils.JsonF;
+import com.thaca.framework.blocking.starter.configs.audit.BaseEntityAudit;
 import jakarta.persistence.*;
 import java.time.Instant;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import tools.jackson.databind.JsonNode;
 
 @Getter
 @Setter
@@ -13,7 +12,7 @@ import tools.jackson.databind.JsonNode;
 @NoArgsConstructor
 @AllArgsConstructor
 @MappedSuperclass
-public abstract class AbstractOutboxEvent {
+public abstract class AbstractOutboxEvent extends BaseEntityAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "outbox_events_seq")
@@ -33,15 +32,9 @@ public abstract class AbstractOutboxEvent {
     @Column(name = "payload", nullable = false)
     private String payload;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
     @Column(name = "status", nullable = false)
     @Builder.Default
     private String status = "PENDING";
-
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 
     @Column(name = "processing_started_at")
     private Instant processingStartedAt;
@@ -56,19 +49,4 @@ public abstract class AbstractOutboxEvent {
     @Lob
     @Column(name = "last_error")
     private String lastError;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = Instant.now();
-    }
-
-    public JsonNode getPayloadAsJson() {
-        return JsonF.readTree(this.payload);
-    }
 }

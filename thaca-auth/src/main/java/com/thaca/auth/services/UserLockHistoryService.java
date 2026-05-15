@@ -2,9 +2,9 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.constants.ServiceMethod;
 import com.thaca.auth.domains.*;
+import com.thaca.auth.dtos.UserLockHistoryDTO;
 import com.thaca.auth.mappers.UserLockHistoryMapper;
 import com.thaca.auth.repositories.UserLockHistoryRepository;
-import com.thaca.common.dtos.internal.UserLockHistoryDTO;
 import com.thaca.common.dtos.search.PaginationResponse;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;

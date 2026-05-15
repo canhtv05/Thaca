@@ -1,6 +1,7 @@
 package com.thaca.notification.services.impl;
 
 import com.thaca.common.enums.NotificationChannel;
+import com.thaca.notification.services.DynamicMailSenderService;
 import com.thaca.notification.services.NotificationSender;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Map;
@@ -18,15 +19,37 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @RequiredArgsConstructor
 public class EmailNotificationSender implements NotificationSender {
 
-    private final JavaMailSender mailSender;
+    private final DynamicMailSenderService dynamicMailSenderService;
     private final SpringTemplateEngine templateEngine;
 
     @Override
     public void send(String recipient, String content, Map<String, Object> metadata) {
         try {
-            String lang = Optional.ofNullable(com.thaca.framework.core.context.FwContextHeader.get())
+            var apiHeader = com.thaca.framework.core.context.FwContextHeader.get();
+            String lang = Optional.ofNullable(apiHeader)
                 .map(com.thaca.framework.core.dtos.ApiHeader::getLanguage)
                 .orElse("vi");
+
+            // Kiểm tra các tùy chọn gửi mail từ metadata
+            String configCode = (String) metadata.get("configCode");
+            Boolean useLocalConfig = (Boolean) metadata.getOrDefault("useLocalConfig", false);
+
+            JavaMailSender mailSender;
+            String senderAddress;
+
+            if (Boolean.TRUE.equals(useLocalConfig)) {
+                // Ép buộc dùng cấu hình local từ .env
+                mailSender = dynamicMailSenderService.getLocalMailSender();
+                senderAddress = "no-reply@thaca.com"; // Hoặc lấy từ biến môi trường nếu cần
+            } else if (configCode != null && !configCode.isEmpty()) {
+                // Dùng cấu hình chỉ định từ DB
+                mailSender = dynamicMailSenderService.getMailSender(configCode);
+                senderAddress = dynamicMailSenderService.getSenderAddress(configCode);
+            } else {
+                // Tự động tìm cấu hình phù hợp (DB -> Local Fallback)
+                mailSender = dynamicMailSenderService.getMailSender();
+                senderAddress = dynamicMailSenderService.getSenderAddress();
+            }
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -75,7 +98,7 @@ public class EmailNotificationSender implements NotificationSender {
             helper.setTo(recipient);
             helper.setSubject((String) context.getVariable("t_subject"));
             helper.setText(htmlContent, true);
-            helper.setFrom("no-reply@thaca.com");
+            helper.setFrom(senderAddress);
 
             mailSender.send(message);
             log.info(">>>> [EMAIL SENDER] HTML Email ({}) sent successfully to [{}]", lang, recipient);

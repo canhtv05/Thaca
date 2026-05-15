@@ -1,7 +1,7 @@
 package com.thaca.auth.mappers;
 
 import com.thaca.auth.domains.Permission;
-import com.thaca.common.dtos.internal.PermissionDTO;
+import com.thaca.auth.dtos.PermissionDTO;
 import com.thaca.common.enums.PermissionEffect;
 
 public class PermissionMapper {

@@ -1,4 +1,4 @@
-package com.thaca.common.dtos.internal;
+package com.thaca.auth.dtos;
 
 import com.thaca.common.enums.PermissionEffect;
 import lombok.*;

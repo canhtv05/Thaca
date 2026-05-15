@@ -1,7 +1,8 @@
-package com.thaca.common.dtos.internal;
+package com.thaca.auth.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thaca.common.dtos.BaseAuditResponse;
+import com.thaca.common.dtos.internal.TenantDTO;
 import com.thaca.common.dtos.internal.contracts.TenantAwareDTO;
 import com.thaca.common.dtos.internal.projection.TenantInfoPrj;
 import com.thaca.common.enums.PermissionEffect;

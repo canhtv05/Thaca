@@ -19,7 +19,7 @@ public class UserNotificationHandler {
     private final NotificationSenderFactory senderFactory;
 
     public void handle(String message) {
-        Map<String, Object> payload = JsonF.jsonToObject(message, new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> payload = JsonF.jsonToObject(message, new TypeReference<>() {});
         String eventType = payload != null ? (String) payload.get("eventType") : null;
 
         if (eventType == null) {
@@ -38,7 +38,6 @@ public class UserNotificationHandler {
     }
 
     private void processOtp(SendOtpEvent event) {
-        // Default to EMAIL for OTP, but could be dynamic
         NotificationSender sender = senderFactory.getSender(NotificationChannel.EMAIL);
         String content = "Your OTP code is: " + event.getOtpCode();
         sender.send(event.getEmail(), content, Map.of("eventId", event.getObjectId()));

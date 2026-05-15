@@ -1,7 +1,7 @@
 package com.thaca.auth.mappers;
 
 import com.thaca.auth.domains.*;
-import com.thaca.common.dtos.internal.SystemUserDTO;
+import com.thaca.auth.dtos.SystemUserDTO;
 import com.thaca.common.enums.PermissionEffect;
 import com.thaca.framework.core.utils.DateUtils;
 import java.util.ArrayList;

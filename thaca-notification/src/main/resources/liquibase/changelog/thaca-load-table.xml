@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-5.0.xsd">
+
+  <changeSet id="1" author="CanhPC">
+    <createTable tableName="mail_configs">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="tenant_id" type="VARCHAR(255)"/>
+      <column name="config_code" type="VARCHAR(255)"/>
+      <column name="host" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="port" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="username" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="password" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_auth" type="BOOLEAN" defaultValueBoolean="true"/>
+      <column name="is_starttls" type="BOOLEAN" defaultValueBoolean="true"/>
+      <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE"/>
+
+      <column name="created_by" type="VARCHAR(255)"/>
+      <column name="updated_by" type="VARCHAR(255)"/>
+      <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+      <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+    </createTable>
+
+    <createIndex tableName="mail_configs" indexName="idx_mail_configs_tenant">
+      <column name="tenant_id"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

@@ -12,9 +12,35 @@ spring:
     password: ${POSTGRES_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
     hikari:
-      connection-init-sql: CREATE SCHEMA IF NOT EXISTS admin
+      connection-init-sql: CREATE SCHEMA IF NOT EXISTS notification
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: ${KAFKA_NOTIFICATION_CONSUMER_GROUP_ID:thaca-notification-group}
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  liquibase:
+    change-log: classpath:liquibase/db.changelog-master.xml
+    default-schema: notification
+    enabled: true
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        '[default_schema]': notification
+        dialect: org.hibernate.dialect.PostgreSQLDialect

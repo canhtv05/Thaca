@@ -1,4 +1,4 @@
-package com.thaca.common.dtos.internal.req;
+package com.thaca.auth.dtos.req;
 
 import lombok.Data;
 

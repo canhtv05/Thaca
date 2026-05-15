@@ -1,6 +1,6 @@
-package com.thaca.common.dtos.internal.res;
+package com.thaca.auth.dtos.res;
 
-import com.thaca.common.dtos.internal.SystemUserDTO;
+import com.thaca.auth.dtos.SystemUserDTO;
 import lombok.*;
 
 @Getter

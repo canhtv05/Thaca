@@ -1,9 +1,9 @@
 package com.thaca.auth.controllers.external;
 
 import com.thaca.auth.constants.ServiceMethod;
-import com.thaca.common.dtos.internal.PermissionDTO;
-import com.thaca.common.dtos.internal.RoleDTO;
-import com.thaca.common.dtos.internal.req.RoleCodesReq;
+import com.thaca.auth.dtos.PermissionDTO;
+import com.thaca.auth.dtos.RoleDTO;
+import com.thaca.auth.dtos.req.RoleCodesReq;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;

@@ -1,10 +1,10 @@
 package com.thaca.auth.controllers.external;
 
 import com.thaca.auth.constants.ServiceMethod;
-import com.thaca.common.dtos.internal.SystemUserDTO;
-import com.thaca.common.dtos.internal.req.LoginReq;
-import com.thaca.common.dtos.internal.req.SendOtpReq;
-import com.thaca.common.dtos.internal.res.AuthenticateRes;
+import com.thaca.auth.dtos.SystemUserDTO;
+import com.thaca.auth.dtos.req.LoginReq;
+import com.thaca.auth.dtos.req.SendOtpReq;
+import com.thaca.auth.dtos.res.AuthenticateRes;
 import com.thaca.framework.core.annotations.FwRequest;
 import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;

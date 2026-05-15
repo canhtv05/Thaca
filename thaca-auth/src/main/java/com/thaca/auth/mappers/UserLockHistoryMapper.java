@@ -1,7 +1,7 @@
 package com.thaca.auth.mappers;
 
 import com.thaca.auth.domains.UserLockHistory;
-import com.thaca.common.dtos.internal.UserLockHistoryDTO;
+import com.thaca.auth.dtos.UserLockHistoryDTO;
 import com.thaca.framework.core.utils.DateUtils;
 
 public class UserLockHistoryMapper {

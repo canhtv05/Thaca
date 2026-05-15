@@ -1,8 +1,8 @@
 package com.thaca.auth.controllers.external;
 
 import com.thaca.auth.constants.ServiceMethod;
-import com.thaca.common.dtos.internal.SystemUserDTO;
-import com.thaca.common.dtos.internal.UserLockHistoryDTO;
+import com.thaca.auth.dtos.SystemUserDTO;
+import com.thaca.auth.dtos.UserLockHistoryDTO;
 import com.thaca.common.dtos.search.SearchRequest;
 import com.thaca.common.dtos.search.SearchResponse;
 import com.thaca.framework.core.annotations.FwRequest;

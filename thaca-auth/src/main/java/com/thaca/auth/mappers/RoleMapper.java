@@ -1,7 +1,7 @@
 package com.thaca.auth.mappers;
 
 import com.thaca.auth.domains.Role;
-import com.thaca.common.dtos.internal.RoleDTO;
+import com.thaca.auth.dtos.RoleDTO;
 
 public class RoleMapper {
 

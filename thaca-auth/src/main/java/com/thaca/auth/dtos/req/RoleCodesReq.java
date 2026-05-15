@@ -1,4 +1,4 @@
-package com.thaca.common.dtos.internal.req;
+package com.thaca.auth.dtos.req;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

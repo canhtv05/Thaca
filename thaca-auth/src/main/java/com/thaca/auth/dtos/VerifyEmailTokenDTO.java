@@ -1,4 +1,4 @@
-package com.thaca.common.dtos.internal;
+package com.thaca.auth.dtos;
 
 import java.time.Instant;
 
