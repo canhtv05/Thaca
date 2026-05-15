@@ -1,15 +1,22 @@
 package com.thaca.notification.kafka.handlers;
 
+import com.thaca.common.enums.NotificationChannel;
 import com.thaca.common.events.SendOtpEvent;
 import com.thaca.framework.core.utils.JsonF;
+import com.thaca.notification.services.NotificationSender;
+import com.thaca.notification.services.NotificationSenderFactory;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserNotificationHandler {
+
+    private final NotificationSenderFactory senderFactory;
 
     public void handle(String message) {
         Map<String, Object> payload = JsonF.jsonToObject(message, new TypeReference<Map<String, Object>>() {});
@@ -31,6 +38,9 @@ public class UserNotificationHandler {
     }
 
     private void processOtp(SendOtpEvent event) {
-        log.info(">>>> [NOTIFICATION] Sending OTP [{}] to Email [{}]", event.getOtpCode(), event.getEmail());
+        // Default to EMAIL for OTP, but could be dynamic
+        NotificationSender sender = senderFactory.getSender(NotificationChannel.EMAIL);
+        String content = "Your OTP code is: " + event.getOtpCode();
+        sender.send(event.getEmail(), content, Map.of("eventId", event.getObjectId()));
     }
 }
