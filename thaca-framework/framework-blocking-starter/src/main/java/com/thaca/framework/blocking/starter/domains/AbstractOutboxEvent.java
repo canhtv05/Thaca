@@ -40,9 +40,32 @@ public abstract class AbstractOutboxEvent {
     @Builder.Default
     private String status = "PENDING";
 
+    @Column(name = "updated_at")
+    private Instant updatedAt;
+
+    @Column(name = "processing_started_at")
+    private Instant processingStartedAt;
+
+    @Column(name = "retry_count")
+    @Builder.Default
+    private Integer retryCount = 0;
+
+    @Column(name = "next_retry_at")
+    private Instant nextRetryAt;
+
+    @Lob
+    @Column(name = "last_error")
+    private String lastError;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
     }
 
     public JsonNode getPayloadAsJson() {

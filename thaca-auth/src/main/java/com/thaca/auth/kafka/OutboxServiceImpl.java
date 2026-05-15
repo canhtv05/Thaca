@@ -6,6 +6,8 @@ import com.thaca.common.events.base.DomainEvent;
 import com.thaca.framework.blocking.starter.events.OutboxSavedEvent;
 import com.thaca.framework.blocking.starter.services.OutboxService;
 import com.thaca.framework.core.utils.JsonF;
+import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -27,7 +29,11 @@ public class OutboxServiceImpl implements OutboxService {
             .objectType(event.objectType())
             .objectId(event.objectId())
             .eventType(event.eventType())
-            .payload(JsonF.toJson(event))
+            .payload(
+                JsonF.toJson(
+                    Map.of("eventId", UUID.randomUUID().toString(), "eventType", event.eventType(), "payload", event)
+                )
+            )
             .status("PENDING")
             .build();
         outboxEventRepository.save(entity);

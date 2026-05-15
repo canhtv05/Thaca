@@ -35,13 +35,17 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
         ServerHttpRequest request,
         ServerHttpResponse response
     ) {
-        if (body instanceof ApiPayload) {
+        if (body instanceof ApiPayload<?> payload) {
+            if (payload.getHeader() != null) {
+                payload.getHeader().setApiKey(null);
+            }
             return body;
         }
 
-        if (body != null) {
-            return ApiPayload.success(body);
+        ApiPayload<Object> payload = ApiPayload.success(body);
+        if (payload.getHeader() != null) {
+            payload.getHeader().setApiKey(null);
         }
-        return ApiPayload.success();
+        return payload;
     }
 }

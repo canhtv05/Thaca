@@ -178,7 +178,7 @@
     <addForeignKeyConstraint baseColumnNames="permission_code" baseTableName="system_credential_permissions" baseTableSchemaName="auth" constraintName="fk_scp_permission" referencedColumnNames="code" referencedTableName="permissions" referencedTableSchemaName="auth"/>
   </changeSet>
 
-  <changeSet id="2" author="thaca">
+  <changeSet id="2" author="CanhPC">
     <createSequence sequenceName="outbox_events_seq" schemaName="auth" startValue="1" incrementBy="1"/>
 
     <createTable tableName="outbox_events" schemaName="auth">
@@ -200,10 +200,31 @@
       <column name="created_at" type="timestamp">
         <constraints nullable="false"/>
       </column>
+      <column name="updated_at" type="timestamp"/>
+      <column name="processing_started_at" type="timestamp"/>
       <column name="status" type="varchar(50)" defaultValue="PENDING">
         <constraints nullable="false"/>
       </column>
+      <column name="retry_count" type="int" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="next_retry_at" type="timestamp"/>
+      <column name="last_error" type="text"/>
     </createTable>
+  </changeSet>
+
+  <changeSet id="3" author="CanhPC">
+    <createIndex tableName="outbox_events" schemaName="auth" indexName="idx_outbox_status_retry">
+      <column name="status"/>
+      <column name="next_retry_at"/>
+    </createIndex>
+    <createIndex tableName="outbox_events" schemaName="auth" indexName="idx_outbox_processing">
+      <column name="status"/>
+      <column name="processing_started_at"/>
+    </createIndex>
+    <createIndex tableName="outbox_events" schemaName="auth" indexName="idx_outbox_created_at">
+      <column name="created_at"/>
+    </createIndex>
   </changeSet>
 
 </databaseChangeLog>
