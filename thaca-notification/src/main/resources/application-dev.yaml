@@ -32,7 +32,7 @@ spring:
             enable: true
 
   liquibase:
-    change-log: classpath:liquibase/db.changelog-master.xml
+    change-log: classpath:liquibase/changelog-master.xml
     default-schema: notification
     enabled: true
 
