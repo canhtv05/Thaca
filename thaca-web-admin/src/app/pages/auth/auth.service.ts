@@ -33,6 +33,10 @@ export class AuthService {
         if (window.location.pathname.includes('/auth/')) {
           return Promise.resolve(false);
         }
+        if (!this.hasUsableAccessToken()) {
+          this.clearAuthState('unauthenticated');
+          return Promise.resolve(false);
+        }
         if (!this.profilePromise) {
           this.profilePromise = this.loadProfile().finally(() => {
             this.profilePromise = null;
@@ -60,10 +64,7 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('thaca-access-token');
-    currentUser.set(null);
-    this.profilePromise = null;
-    this.authState.set('logged-out');
+    this.clearAuthState('logged-out');
     this.router.navigate(['/auth/verify']);
   }
 
@@ -105,7 +106,47 @@ export class AuthService {
       this.authState.set('authenticated');
       return true;
     }
-    this.authState.set('unauthenticated');
+    this.clearAuthState('unauthenticated');
     return false;
+  }
+
+  private hasUsableAccessToken(): boolean {
+    const token = localStorage.getItem('thaca-access-token');
+    if (!token) {
+      return false;
+    }
+
+    const exp = this.readTokenExpiry(token);
+    if (!exp) {
+      return true;
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    return exp > nowInSeconds;
+  }
+
+  private readTokenExpiry(token: string): number | null {
+    try {
+      const [, payload] = token.split('.');
+      if (!payload) {
+        return null;
+      }
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(
+        normalized.length + ((4 - (normalized.length % 4)) % 4),
+        '=',
+      );
+      const decoded = JSON.parse(atob(padded)) as { exp?: unknown };
+      return typeof decoded.exp === 'number' ? decoded.exp : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private clearAuthState(state: AuthState): void {
+    localStorage.removeItem('thaca-access-token');
+    currentUser.set(null);
+    this.profilePromise = null;
+    this.authState.set(state);
   }
 }

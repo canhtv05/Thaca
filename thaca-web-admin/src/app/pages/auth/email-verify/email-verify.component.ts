@@ -68,7 +68,7 @@ export class EmailVerifyComponent {
   }
 
   startTimer() {
-    this.countdown.set(600);
+    this.countdown.set(300);
     if (this.timer) clearInterval(this.timer);
     this.timer = setInterval(() => {
       if (this.countdown() > 0) {

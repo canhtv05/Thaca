@@ -101,8 +101,11 @@ public class FwFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         String method = request.getMethod();
         String clientIp = request.getRemoteAddr();
-        String payload = new String(requestBody, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
-        payload = maskSensitiveData(payload);
+        String payload = FwLogPayloadSanitizer.sanitize(
+            uri,
+            new String(requestBody, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", ""),
+            false
+        );
         String username = extractUsername();
 
         log.info("IN - URI: '[{}] {}', User: [{}], IP: [{}], Payload: {}", method, uri, username, clientIp, payload);
@@ -177,7 +180,7 @@ public class FwFilter extends OncePerRequestFilter {
                 requestGuard.release(locked);
             }
             long duration = System.currentTimeMillis() - startTime;
-            String responseStr = getResponseString(responseWrapper);
+            String responseStr = FwLogPayloadSanitizer.sanitize(uri, getResponseString(responseWrapper), true);
 
             int status = responseWrapper.getStatus();
             String logMsg = "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}";
@@ -200,7 +203,6 @@ public class FwFilter extends OncePerRequestFilter {
 
         if (responseContentType != null && responseContentType.contains(MediaType.APPLICATION_JSON_VALUE)) {
             responseStr = new String(responseArray, StandardCharsets.UTF_8).replaceAll("[\\r\\n]+", "");
-            responseStr = maskSensitiveData(responseStr);
         } else {
             responseStr = "[BINARY DATA (" + responseArray.length + " bytes)]";
         }
@@ -227,7 +229,7 @@ public class FwFilter extends OncePerRequestFilter {
         response.getWriter().write(responseStr);
 
         long duration = System.currentTimeMillis() - startTime;
-        String logResponseStr = maskSensitiveData(responseStr.replaceAll("[\\r\\n]+", ""));
+        String logResponseStr = FwLogPayloadSanitizer.sanitize(uri, responseStr.replaceAll("[\\r\\n]+", ""), true);
         log.error(
             "OUT - URI: '[{}] {}', User: [{}], Status: [{}], Duration: [{}ms], Payload: {}",
             method,
@@ -267,12 +269,5 @@ public class FwFilter extends OncePerRequestFilter {
             return envelope.getBody().getTransId().trim();
         }
         return UUID.randomUUID().toString().replace("-", "") + "-" + System.currentTimeMillis();
-    }
-
-    private String maskSensitiveData(String payload) {
-        if (payload == null) {
-            return null;
-        }
-        return payload.replaceAll("\"password\"\\s*:\\s*\"[^\"]+\"", "\"password\":\"******\"");
     }
 }
