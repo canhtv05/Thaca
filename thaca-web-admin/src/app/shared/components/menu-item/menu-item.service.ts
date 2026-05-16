@@ -47,12 +47,12 @@ export class MenuService {
             {
               label: 'menu.system_user_management',
               icon: 'pi pi-id-card',
-              routerLink: ['/system/system-users'],
+              routerLink: ['/system/access-control/system-users'],
             },
             {
               label: 'menu.role_permission',
               icon: 'pi pi-key',
-              routerLink: ['/system/role-permission'],
+              routerLink: ['/system/access-control/role-permission'],
             },
           ],
         },

@@ -67,7 +67,12 @@ export class MailConfigComponent implements OnInit {
 
   breadcrumbItems: MenuItem[] = [
     { icon: 'pi pi-cog', label: 'menu.system_administration' },
-    { icon: 'pi pi-envelope', label: 'menu.mail_config' },
+    {
+      icon: 'pi pi-cog',
+      label: 'menu.global_configuration',
+      routerLink: ['/system/settings/mail-config'],
+    },
+    { icon: 'pi pi-envelope', label: 'menu.mail_settings' },
   ];
 
   @ViewChild(DataTableComponent) table!: DataTableComponent;

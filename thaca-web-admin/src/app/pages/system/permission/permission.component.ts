@@ -57,7 +57,11 @@ export class PermissionComponent implements OnInit {
   breadcrumbItems: MenuItem[] = [
     { icon: 'pi pi-cog', label: 'menu.system_administration' },
     { icon: 'pi pi-shield', label: 'menu.access_control' },
-    { icon: 'pi pi-key', label: 'menu.role_permission', routerLink: '/system/role-permission' },
+    {
+      icon: 'pi pi-key',
+      label: 'menu.role_permission',
+      routerLink: '/system/access-control/role-permission',
+    },
     { icon: 'pi pi-check-circle', label: 'menu.permission' },
   ];
 
@@ -85,7 +89,7 @@ export class PermissionComponent implements OnInit {
         'role_permission.toast.role_code_is_invalid',
         'role_permission.toast.error',
       );
-      this.router.navigate(['/system/role-permission']);
+      this.router.navigate(['/system/access-control/role-permission']);
     }
   }
 

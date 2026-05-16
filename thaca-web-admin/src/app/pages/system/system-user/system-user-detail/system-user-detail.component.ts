@@ -38,7 +38,7 @@ export class SystemUserDetailComponent implements OnInit {
     {
       icon: 'pi pi-id-card',
       label: 'menu.system_user_management',
-      routerLink: ['/system/system-users'],
+      routerLink: ['/system/access-control/system-users'],
     },
   ];
 
@@ -46,7 +46,7 @@ export class SystemUserDetailComponent implements OnInit {
     const userId = this.route.snapshot.paramMap.get('targetUserId');
     if (!userId) {
       GlobalToast.error('system_user.toast.user_id_is_invalid', 'system_user.toast.error');
-      this.router.navigate(['/system/system-users']);
+      this.router.navigate(['/system/access-control/system-users']);
       return;
     }
 
@@ -62,7 +62,7 @@ export class SystemUserDetailComponent implements OnInit {
       });
     } else {
       GlobalToast.error('system_user.toast.user_not_found', 'system_user.toast.error');
-      this.router.navigate(['/system/system-users']);
+      this.router.navigate(['/system/access-control/system-users']);
     }
   }
 

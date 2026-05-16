@@ -49,7 +49,7 @@ export class LockHistoryComponent implements OnInit {
     {
       icon: 'pi pi-id-card',
       label: 'menu.system_user_management',
-      routerLink: ['/system/system-users'],
+      routerLink: ['/system/access-control/system-users'],
     },
     { icon: 'pi pi-lock', label: 'menu.system_user_lock_history' },
   ];
@@ -112,7 +112,7 @@ export class LockHistoryComponent implements OnInit {
       this.filter.set({ ...this.filter(), targetUserId: targetUserId });
     } else {
       GlobalToast.error('system_user.toast.user_id_is_invalid', 'system_user.toast.error');
-      this.router.navigate(['/system/system-users']);
+      this.router.navigate(['/system/access-control/system-users']);
     }
   }
 

@@ -69,7 +69,7 @@ export class RoleComponent {
     if (event.key === 'view') {
       const roleCode = event.row?.code;
       if (roleCode) {
-        this.router.navigate(['/system/role-permission', roleCode, 'permissions']);
+        this.router.navigate(['/system/access-control/role-permission', roleCode, 'permissions']);
       }
     }
   }

@@ -8,7 +8,43 @@ import { systemUserRoutes } from './system-user/system-user.route';
 
 export const systemRoutes: Routes = [
   ...tenantRoutes,
-  ...systemUserRoutes,
+  {
+    path: 'access-control',
+    children: [
+      ...systemUserRoutes,
+      {
+        path: 'role-permission',
+        resolve: { i18n: I18nResolver },
+        data: { i18n: ['role_permission'] },
+        children: [
+          {
+            path: '',
+            component: RoleComponent,
+          },
+          {
+            path: ':roleCode/permissions',
+            component: PermissionComponent,
+          },
+        ],
+      },
+    ],
+  },
+  // Backward-compatible redirects from old flat paths
+  { path: 'system-users', redirectTo: 'access-control/system-users', pathMatch: 'full' },
+  {
+    path: 'system-users/:targetUserId/lock-history',
+    redirectTo: 'access-control/system-users/:targetUserId/lock-history',
+  },
+  {
+    path: 'system-users/:targetUserId/login-history',
+    redirectTo: 'access-control/system-users/:targetUserId/login-history',
+  },
+  { path: 'system-users/:targetUserId', redirectTo: 'access-control/system-users/:targetUserId' },
+  { path: 'role-permission', redirectTo: 'access-control/role-permission', pathMatch: 'full' },
+  {
+    path: 'role-permission/:roleCode/permissions',
+    redirectTo: 'access-control/role-permission/:roleCode/permissions',
+  },
   {
     path: 'settings',
     children: [
@@ -38,21 +74,6 @@ export const systemRoutes: Routes = [
     component: SystemSettingsComponent,
     resolve: { i18n: I18nResolver },
     data: { i18n: ['common'] },
-  },
-  {
-    path: 'role-permission',
-    resolve: { i18n: I18nResolver },
-    data: { i18n: ['role_permission'] },
-    children: [
-      {
-        path: '',
-        component: RoleComponent,
-      },
-      {
-        path: ':roleCode/permissions',
-        component: PermissionComponent,
-      },
-    ],
   },
   {
     path: 'plans',

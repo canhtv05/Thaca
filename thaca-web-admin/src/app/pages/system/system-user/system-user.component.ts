@@ -334,9 +334,13 @@ export class SystemUserComponent implements OnInit {
 
   handleAction(event: ITableActionEvent) {
     if (event.key === 'view') {
-      this.router.navigate(['/system/system-users', event.row.id]);
+      this.router.navigate(['/system/access-control/system-users', event.row.id]);
     } else if (event.key === 'view_login_history') {
-      this.router.navigate(['/system/system-users', event.row?.username, 'login-history']);
+      this.router.navigate([
+        '/system/access-control/system-users',
+        event.row?.username,
+        'login-history',
+      ]);
     } else if (event.key === 'edit') {
       const savedPermissions = new Map<string, Set<string>>();
       if (event.row.roles) {
@@ -362,7 +366,7 @@ export class SystemUserComponent implements OnInit {
       this.lockReasonForm.reset();
       this.reasonModal.show();
     } else if (event.key === 'view_lock_reason') {
-      this.router.navigate(['/system/system-users', event.row.id, 'lock-history']);
+      this.router.navigate(['/system/access-control/system-users', event.row.id, 'lock-history']);
     }
   }
 

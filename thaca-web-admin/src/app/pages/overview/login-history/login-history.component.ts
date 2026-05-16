@@ -169,7 +169,7 @@ export class LoginHistoryComponent implements OnInit {
         {
           icon: 'pi pi-id-card',
           label: 'menu.system_user_management',
-          routerLink: ['/system/system-users'],
+          routerLink: ['/system/access-control/system-users'],
         },
         { icon: 'pi pi-clock', label: 'menu.login_history' },
       ];
