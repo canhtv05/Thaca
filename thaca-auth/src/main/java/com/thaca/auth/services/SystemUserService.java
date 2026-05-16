@@ -25,6 +25,7 @@ import com.thaca.common.excel.ExcelEngine;
 import com.thaca.common.excel.schema.ExcelColumn;
 import com.thaca.common.excel.schema.ExcelDataType;
 import com.thaca.common.excel.schema.ExcelSchema;
+import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ModeType;
@@ -69,6 +70,11 @@ public class SystemUserService {
                 return tenantHelper.enrichTenantFull(dto);
             })
             .orElseThrow(() -> new FwException(ErrorMessage.USER_NOT_FOUND));
+    }
+
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_SYSTEM_USERS, type = ModeType.VALIDATE)
+    public void validateSearchSystemUsers(SearchRequest<SystemUserDTO> request) {
+        CommonService.validateSearchRequest(request);
     }
 
     @Transactional(readOnly = true)

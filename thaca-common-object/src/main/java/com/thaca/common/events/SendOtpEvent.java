@@ -1,9 +1,8 @@
 package com.thaca.common.events;
 
+import com.thaca.common.events.base.EventMetadata;
 import com.thaca.common.events.base.ExportableEvent;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,41 +17,39 @@ public class SendOtpEvent implements ExportableEvent {
     private String objectId;
     private String email;
     private String otpCode;
+    private EventMetadata metadata;
 
     @Builder.Default
     private String objectType = "users";
 
     @Builder.Default
-    private String eventType = "SEND_OTP";
+    private String notificationType = "SEND_OTP";
 
     @Builder.Default
     private Instant timestamp = Instant.now();
 
-    @Builder.Default
-    private Map<String, Object> metadata = new HashMap<>();
-
     @Override
-    public Map<String, Object> metadata() {
-        return metadata;
+    public EventMetadata metadata() {
+        return this.metadata;
     }
 
     @Override
     public String objectId() {
-        return objectId;
+        return this.objectId;
     }
 
     @Override
     public String objectType() {
-        return objectType;
+        return this.objectType;
     }
 
     @Override
-    public String eventType() {
-        return eventType;
+    public String notificationType() {
+        return this.notificationType;
     }
 
     @Override
     public Instant timestamp() {
-        return timestamp;
+        return this.timestamp;
     }
 }

@@ -4,12 +4,13 @@ import com.thaca.common.enums.CommonStatus;
 import com.thaca.notification.domains.MailConfig;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MailConfigRepository extends JpaRepository<MailConfig, Long> {
+public interface MailConfigRepository extends JpaRepository<MailConfig, Long>, JpaSpecificationExecutor<MailConfig> {
     Optional<MailConfig> findFirstByTenantIdAndConfigCodeAndStatus(
         String tenantId,
         String configCode,

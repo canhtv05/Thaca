@@ -2,8 +2,9 @@ package com.thaca.auth.services;
 
 import com.thaca.auth.repositories.SystemUserRepository;
 import com.thaca.common.events.SendOtpEvent;
+import com.thaca.common.events.base.EventMetadata;
+import com.thaca.framework.core.security.SecurityUtils;
 import java.time.Instant;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,13 @@ public class OtpService {
                     .objectId(user.getId().toString())
                     .email(user.getEmail())
                     .otpCode(otp)
+                    .metadata(
+                        EventMetadata.builder()
+                            .useDefaultConfig(true)
+                            .tenantId(String.valueOf(SecurityUtils.getCurrentTenantId()))
+                            .build()
+                    )
                     .timestamp(Instant.now())
-                    .metadata(Map.of("useDefaultConfig", true))
                     .build();
                 eventPublisher.publishEvent(newEvent);
             });

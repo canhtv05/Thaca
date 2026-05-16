@@ -23,6 +23,7 @@ import com.thaca.common.excel.schema.ExcelColumn;
 import com.thaca.common.excel.schema.ExcelDataType;
 import com.thaca.common.excel.schema.ExcelSchema;
 import com.thaca.framework.blocking.starter.configs.TaskExecutor;
+import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.dtos.ApiHeader;
@@ -58,6 +59,11 @@ public class TenantService {
     private final TenantRepository tenantRepository;
     private final PlanRepository planRepository;
     private final TaskExecutor taskExecutor;
+
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_TENANTS, type = ModeType.VALIDATE)
+    public void validateSearchTenants(SearchRequest<TenantDTO> request) {
+        CommonService.validateSearchRequest(request);
+    }
 
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.ADMIN_SEARCH_TENANTS, type = ModeType.HANDLE)

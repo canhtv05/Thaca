@@ -35,14 +35,14 @@ public class OutboxServiceImpl implements OutboxService {
         String kafkaMessage = JsonF.toJson(
             EventPayload.builder()
                 .eventId(UUID.randomUUID().toString())
-                .eventType(event.eventType())
+                .eventType(event.notificationType())
                 .payload(payloadMap)
                 .build()
         );
         OutboxEvent entity = OutboxEvent.builder()
             .objectType(event.objectType())
             .objectId(event.objectId())
-            .eventType(event.eventType())
+            .eventType(event.notificationType())
             .payload(kafkaMessage)
             .status("PENDING")
             .build();

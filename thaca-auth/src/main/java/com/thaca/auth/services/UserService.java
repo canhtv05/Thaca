@@ -81,6 +81,11 @@ public class UserService {
     private final AdminClient adminClient;
     private final TenantEnrichmentHelper tenantHelper;
 
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_USERS, type = ModeType.VALIDATE)
+    public void validateSearchUsers(SearchRequest<UserDTO> request) {
+        CommonService.validateSearchRequest(request);
+    }
+
     @Transactional(readOnly = true)
     @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
     @FwMode(name = ServiceMethod.ADMIN_SEARCH_USERS, type = ModeType.HANDLE)

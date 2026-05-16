@@ -2,9 +2,10 @@ package com.thaca.notification.services;
 
 import com.thaca.common.enums.NotificationChannel;
 import com.thaca.common.events.base.DomainEvent;
+import com.thaca.common.events.base.EventMetadata;
 import com.thaca.notification.domains.NotificationRoutingConfig;
 import com.thaca.notification.repositories.NotificationRoutingConfigRepository;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +22,12 @@ public class NotificationRoutingService {
     private final DynamicMailSenderService dynamicMailSenderService;
 
     public ResolvedEmailDispatch resolveEmailDispatch(DomainEvent event) {
-        Map<String, Object> metadata = Optional.ofNullable(event.metadata()).orElse(Map.of());
-        String tenantId = extractTenantId(metadata);
-        String explicitConfigCode = trimToNull(asString(metadata.get("configCode")));
-        String templateCode = trimToNull(asString(metadata.get("templateCode")));
-        boolean useSystemDefault = Boolean.TRUE.equals(metadata.get("useDefaultConfig"));
-        String notificationType = event.eventType();
+        EventMetadata metadata = event.metadata();
+        String tenantId = metadata.getTenantId();
+        String explicitConfigCode = metadata.getMailConfigCode();
+        String templateCode = metadata.getTemplateCode();
+        boolean useSystemDefault = metadata.getUseDefaultConfig();
+        String notificationType = event.notificationType();
 
         if (useSystemDefault) {
             return new ResolvedEmailDispatch(
@@ -51,8 +52,8 @@ public class NotificationRoutingService {
         Optional<NotificationRoutingConfig> route = resolveRoute(tenantId, notificationType, NotificationChannel.EMAIL);
         if (route.isPresent()) {
             NotificationRoutingConfig config = route.get();
-            String routeConfigCode = trimToNull(config.getMailConfigCode());
-            String routeTemplateCode = defaultTemplate(trimToNull(config.getTemplateCode()), templateCode);
+            String routeConfigCode = config.getMailConfigCode();
+            String routeTemplateCode = defaultTemplate(config.getTemplateCode(), templateCode);
             if (routeConfigCode != null) {
                 return new ResolvedEmailDispatch(
                     dynamicMailSenderService.getMailSender(tenantId, routeConfigCode),
@@ -120,14 +121,6 @@ public class NotificationRoutingService {
         );
     }
 
-    private String extractTenantId(Map<String, Object> metadata) {
-        String tenantId = trimToNull(asString(metadata.get("tenantId")));
-        if (tenantId != null) {
-            return tenantId;
-        }
-        return trimToNull(asString(metadata.get("tenant_id")));
-    }
-
     private String defaultTemplate(String primaryTemplate) {
         return defaultTemplate(primaryTemplate, null);
     }
@@ -136,21 +129,6 @@ public class NotificationRoutingService {
         if (primaryTemplate != null) {
             return primaryTemplate;
         }
-        if (fallbackTemplate != null) {
-            return fallbackTemplate;
-        }
-        return DEFAULT_TEMPLATE_CODE;
-    }
-
-    private String asString(Object value) {
-        return value != null ? String.valueOf(value) : null;
-    }
-
-    private String trimToNull(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
+        return Objects.requireNonNullElse(fallbackTemplate, DEFAULT_TEMPLATE_CODE);
     }
 }

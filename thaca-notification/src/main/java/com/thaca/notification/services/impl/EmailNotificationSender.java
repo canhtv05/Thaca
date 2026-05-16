@@ -46,7 +46,10 @@ public class EmailNotificationSender implements NotificationSender {
     public <T extends DomainEvent> void send(String recipient, String content, T event) {
         try {
             if (recipient == null || recipient.isBlank()) {
-                log.warn("[EmailNotificationSender] Recipient is blank, skip sending for event {}", event.eventType());
+                log.warn(
+                    "[EmailNotificationSender] Recipient is blank, skip sending for event {}",
+                    event.notificationType()
+                );
                 return;
             }
             String lang = Optional.ofNullable(FwContextHeader.get()).map(ApiHeader::getLanguage).orElse("vi");

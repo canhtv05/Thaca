@@ -23,6 +23,7 @@ import com.thaca.common.excel.schema.ExcelColumn;
 import com.thaca.common.excel.schema.ExcelDataType;
 import com.thaca.common.excel.schema.ExcelSchema;
 import com.thaca.framework.blocking.starter.configs.cache.RedisCacheService;
+import com.thaca.framework.blocking.starter.services.CommonService;
 import com.thaca.framework.core.annotations.FwMode;
 import com.thaca.framework.core.context.FwContextHeader;
 import com.thaca.framework.core.enums.ModeType;
@@ -51,6 +52,11 @@ public class RolePermissionService {
     private final RedisCacheService redisService;
     public static final String REDIS_ROLE_PERM_PREFIX = "auth:role-permissions:";
 
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_ROLES, type = ModeType.VALIDATE)
+    public void validateSearchRoles(SearchRequest<RoleDTO> request) {
+        CommonService.validateSearchRequest(request);
+    }
+
     @Transactional(readOnly = true)
     @FwMode(name = ServiceMethod.ADMIN_SEARCH_ROLES, type = ModeType.HANDLE)
     public SearchResponse<RoleDTO> searchRoles(SearchRequest<RoleDTO> request) {
@@ -66,6 +72,11 @@ public class RolePermissionService {
     @FwMode(name = ServiceMethod.ADMIN_GET_ALL_ROLES, type = ModeType.HANDLE)
     public List<RoleDTO> getAllRoles() {
         return roleRepository.findAll().stream().map(RoleMapper::fromEntity).collect(Collectors.toList());
+    }
+
+    @FwMode(name = ServiceMethod.ADMIN_SEARCH_PERMISSIONS, type = ModeType.VALIDATE)
+    public void validateSearchPermissions(SearchRequest<PermissionDTO> request) {
+        CommonService.validateSearchRequest(request);
     }
 
     @Transactional(readOnly = true)
