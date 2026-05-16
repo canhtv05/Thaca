@@ -85,13 +85,13 @@ public class DynamicMailSenderService {
         normalizeDefault(saved);
     }
 
-    @FwMode(name = ServiceMethod.MAIL_CONFIG_CREATE, type = ModeType.VALIDATE)
+    @FwMode(name = ServiceMethod.MAIL_CONFIG_UPDATE, type = ModeType.VALIDATE)
     public void validateUpdate(MailConfigDTO request) {
         this.validate(request, false);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @FwMode(name = ServiceMethod.MAIL_CONFIG_CREATE)
+    @FwMode(name = ServiceMethod.MAIL_CONFIG_UPDATE)
     public void updateConfig(MailConfigDTO request) {
         MailConfig existing = getConfigById(request.getId());
         mappingMailConfig(existing, request);
