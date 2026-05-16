@@ -13,8 +13,11 @@ import com.thaca.framework.core.security.SecurityUtils;
 import com.thaca.notification.constants.ServiceMethod;
 import com.thaca.notification.domains.MailConfig;
 import com.thaca.notification.dtos.MailConfigDTO;
+import com.thaca.notification.dtos.req.TestConnectionReq;
+import com.thaca.notification.dtos.res.TestConnectionRes;
 import com.thaca.notification.enums.NotificationErrorMessage;
 import com.thaca.notification.repositories.MailConfigRepository;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +52,7 @@ public class DynamicMailSenderService {
     }
 
     @Transactional(readOnly = true)
-    //    @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
+    // @CheckPermission(value = { "USER_MAKER", "USER_VIEWER" })
     @FwMode(name = ServiceMethod.MAIL_CONFIG_SEARCH, type = ModeType.HANDLE)
     public SearchResponse<MailConfigDTO> searchMailConfig(SearchRequest<MailConfigDTO> request) {
         Specification<MailConfig> spec = createMailConfigSpecification(request);
@@ -325,5 +328,90 @@ public class DynamicMailSenderService {
             if (f.getPort() != null) p.add(cb.equal(root.get("port"), f.getPort()));
             return cb.and(p.toArray(new Predicate[0]));
         };
+    }
+
+    @FwMode(name = ServiceMethod.MAIL_CONFIG_GET, type = ModeType.VALIDATE)
+    public void validateGet(Long id) {
+        if (id == null || id <= 0) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @FwMode(name = ServiceMethod.MAIL_CONFIG_GET, type = ModeType.HANDLE)
+    public MailConfigDTO getMailConfigById(Long id) {
+        MailConfig config = getConfigById(id);
+        return MailConfigDTO.fromEntity(config);
+    }
+
+    @FwMode(name = ServiceMethod.MAIL_CONFIG_DELETE, type = ModeType.VALIDATE)
+    public void validateDelete(Long id) {
+        if (id == null || id <= 0) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        MailConfig config = getConfigById(id);
+        // Check permission only for tenant configs
+        if (
+            config.getTenantId() != null &&
+            !config.getTenantId().equals(String.valueOf(SecurityUtils.getCurrentTenantId()))
+        ) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @FwMode(name = ServiceMethod.MAIL_CONFIG_DELETE, type = ModeType.HANDLE)
+    public void deleteMailConfig(Long id) {
+        deleteConfig(id);
+    }
+
+    @FwMode(name = ServiceMethod.MAIL_CONFIG_TEST_CONNECTION, type = ModeType.VALIDATE)
+    public void validateTestConnection(TestConnectionReq request) {
+        if (
+            request == null || StringUtils.isAnyBlank(request.getHost(), request.getUsername(), request.getPassword())
+        ) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+        if (
+            request.getPort() == null ||
+            (request.getPort() != 587 && request.getPort() != 465 && request.getPort() != 25)
+        ) {
+            throw new FwException(CommonErrorMessage.REQUEST_INVALID_PARAMS);
+        }
+    }
+
+    @FwMode(name = ServiceMethod.MAIL_CONFIG_TEST_CONNECTION, type = ModeType.HANDLE)
+    public TestConnectionRes testSmtpConnection(TestConnectionReq request) {
+        try {
+            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+            mailSender.setHost(request.getHost());
+            mailSender.setPort(request.getPort());
+            mailSender.setUsername(request.getUsername());
+            mailSender.setPassword(request.getPassword());
+
+            Properties props = mailSender.getJavaMailProperties();
+            props.put("mail.transport.protocol", "smtp");
+            props.put("mail.smtp.auth", request.getIsAuth() != null ? request.getIsAuth().toString() : "true");
+            props.put(
+                "mail.smtp.starttls.enable",
+                request.getIsStarttls() != null ? request.getIsStarttls().toString() : "true"
+            );
+            props.put("mail.smtp.connectiontimeout", 10000);
+            props.put("mail.smtp.timeout", 10000);
+
+            mailSender.testConnection();
+            log.info(
+                "[DynamicMailSenderService] SMTP connection test successful: {}:{}",
+                request.getHost(),
+                request.getPort()
+            );
+            return new TestConnectionRes(true, "SMTP connection successful");
+        } catch (MessagingException e) {
+            log.warn("[DynamicMailSenderService] SMTP connection test failed: {}", e.getMessage());
+            return new TestConnectionRes(false, "Connection failed: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("[DynamicMailSenderService] SMTP connection test error: ", e);
+            return new TestConnectionRes(false, "Error: " + e.getMessage());
+        }
     }
 }

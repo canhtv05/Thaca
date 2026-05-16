@@ -38,11 +38,41 @@ export class AppMenuitem {
 
   isActive = computed(() => {
     const activePath = this.layoutService.layoutState().activePath;
-    if (this.item()?.path) {
-      return activePath?.startsWith(this.fullPath() ?? '') ?? false;
-    }
-    return false;
+    const menuPath = this.fullPath();
+    if (!this.item()?.path || !activePath || !menuPath) return false;
+
+    // User toggled this section manually
+    if (activePath === menuPath) return true;
+
+    // Current URL belongs to a child route of this section
+    return this.matchesDescendantRoute(activePath);
   });
+
+  private matchesDescendantRoute(url: string): boolean {
+    return this.collectRouterLinks(this.item()).some((route) => this.urlMatchesRoute(url, route));
+  }
+
+  private collectRouterLinks(item: any): string[] {
+    if (!item) return [];
+
+    const links: string[] = [];
+    if (item.routerLink) {
+      const route = Array.isArray(item.routerLink)
+        ? item.routerLink.join('')
+        : String(item.routerLink);
+      links.push(route.startsWith('/') ? route : `/${route}`);
+    }
+    if (item.items) {
+      for (const child of item.items) {
+        links.push(...this.collectRouterLinks(child));
+      }
+    }
+    return links;
+  }
+
+  private urlMatchesRoute(url: string, route: string): boolean {
+    return url === route || url.startsWith(`${route}/`);
+  }
 
   initialized = signal<boolean>(false);
 
@@ -70,19 +100,19 @@ export class AppMenuitem {
     const item = this.item();
     if (!item?.routerLink) return;
 
-    const isRouteActive = this.router.isActive(item.routerLink[0], {
-      paths: 'exact',
-      queryParams: 'ignored',
-      matrixParams: 'ignored',
-      fragment: 'ignored',
-    });
+    const route = Array.isArray(item.routerLink)
+      ? item.routerLink.join('')
+      : String(item.routerLink);
+    const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
+    const currentUrl = this.router.url.split('?')[0];
+    const isRouteActive = this.urlMatchesRoute(currentUrl, normalizedRoute);
 
     if (isRouteActive) {
-      const parentPath = this.parentPath();
-      if (parentPath) {
+      const parentMenuPath = this.parentPath();
+      if (parentMenuPath) {
         this.layoutService.layoutState.update((val) => ({
           ...val,
-          activePath: parentPath,
+          activePath: parentMenuPath,
         }));
       }
     }

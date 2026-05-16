@@ -1,0 +1,69 @@
+{
+  "mail_config": {
+    "title": "SMTP — Mail Server",
+    "description": "Configure email authentication and system alerts",
+    "tab": {
+      "system": "System (SuperAdmin)",
+      "tenant": "By Tenant"
+    },
+    "badge": {
+      "system": "System config — used for System Alerts & Default Fallback"
+    },
+    "notice": {
+      "fallback": "This config is used as <strong>default fallback</strong> when tenants don't have their own SMTP configuration, and for <strong>System Alerts</strong> from SuperAdmin."
+    },
+    "tenant": {
+      "label": "Select tenant",
+      "placeholder": "— Select a tenant to view config —"
+    },
+    "card": {
+      "smtp_title": "SMTP Connection",
+      "smtp_subtitle": "System mail server information",
+      "tenant_config_title": "SMTP — Tenant Config",
+      "tenant_config_subtitle": "Custom configuration for this tenant",
+      "create_tenant_config_title": "SMTP — Create Custom Config",
+      "create_tenant_config_subtitle": "Create a custom SMTP config for this tenant"
+    },
+    "form": {
+      "create_title": "Create SMTP Config",
+      "edit_title": "Edit SMTP Config",
+      "host": "SMTP Host",
+      "port": "Port",
+      "username": "Username",
+      "password": "Password / App Secret",
+      "sender_name": "Sender Name",
+      "sender_email": "Sender Address",
+      "tls_toggle": "Enable TLS / SSL",
+      "tls_desc": "Encrypt SMTP connection",
+      "default_fallback_toggle": "Use as Default Fallback",
+      "default_fallback_desc": "Tenants without their own config will use this system config",
+      "override_default_toggle": "Override Default Fallback",
+      "override_default_desc": "Use this custom config instead of system config",
+      "enable_auth": "Enable Authentication",
+      "enable_auth_desc": "Require username and password"
+    },
+    "button": {
+      "test_connection": "Test Connection",
+      "create_config": "Create Config",
+      "create_tenant_config": "Create Custom Config",
+      "reset_to_default": "Reset to Default"
+    },
+    "state": {
+      "configured": "Configured",
+      "custom_config": "Custom Config",
+      "using_default": "Using Default",
+      "no_system_config": "No system configuration yet",
+      "select_tenant": "Select a tenant to view SMTP configuration",
+      "tenant_config_independent": "Each tenant's config is independent and doesn't affect the system",
+      "no_tenant_config": "This tenant doesn't have a custom SMTP config — using",
+      "using_default_fallback": "Default Fallback (System)"
+    },
+    "message": {
+      "confirm_reset_to_default": "Reset to Default Fallback? This tenant's custom config will be deleted.",
+      "reset_to_default_success": "Reset complete — tenant will use system config."
+    },
+    "error": {
+      "invalid_host_port": "Please enter a valid Host and Port"
+    }
+  }
+}

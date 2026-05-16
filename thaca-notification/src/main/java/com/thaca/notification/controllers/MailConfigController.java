@@ -7,11 +7,11 @@ import com.thaca.framework.core.enums.RequestType;
 import com.thaca.framework.core.services.FwApiProcess;
 import com.thaca.notification.constants.ServiceMethod;
 import com.thaca.notification.dtos.MailConfigDTO;
+import com.thaca.notification.dtos.req.TestConnectionReq;
+import com.thaca.notification.dtos.res.TestConnectionRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/notification/mail-config")
@@ -38,5 +38,24 @@ public class MailConfigController {
     public ResponseEntity<Void> update(MailConfigDTO request) {
         process.process(request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}")
+    @FwRequest(name = ServiceMethod.MAIL_CONFIG_GET, type = RequestType.PROTECTED)
+    public ResponseEntity<MailConfigDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(process.process(id));
+    }
+
+    @DeleteMapping("/{id}")
+    @FwRequest(name = ServiceMethod.MAIL_CONFIG_DELETE, type = RequestType.PROTECTED)
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        process.process(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/test")
+    @FwRequest(name = ServiceMethod.MAIL_CONFIG_TEST_CONNECTION, type = RequestType.PROTECTED)
+    public ResponseEntity<TestConnectionRes> testConnection(TestConnectionReq request) {
+        return ResponseEntity.ok(process.process(request));
     }
 }

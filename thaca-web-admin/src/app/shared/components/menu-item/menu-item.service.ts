@@ -42,7 +42,7 @@ export class MenuService {
         {
           label: 'menu.access_control',
           icon: 'pi pi-shield',
-          path: '/system',
+          path: '/system/access-control',
           items: [
             {
               label: 'menu.system_user_management',
