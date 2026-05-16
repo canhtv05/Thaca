@@ -13,10 +13,11 @@ export const systemRoutes: Routes = [
     path: 'settings',
     children: [
       {
-        path: 'mail',
-        component: SystemSettingsComponent,
+        path: 'mail-config',
+        loadComponent: () =>
+          import('./mail-config/mail-config.component').then((m) => m.MailConfigComponent),
         resolve: { i18n: I18nResolver },
-        data: { i18n: ['common'] },
+        // data: { i18n: ['mail_config'] },
       },
       {
         path: 'storage',

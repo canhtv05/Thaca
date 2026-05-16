@@ -76,3 +76,8 @@ export interface IImportResult {
   errors?: IImportError[];
   preview?: any[];
 }
+
+export enum ECommonStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+}

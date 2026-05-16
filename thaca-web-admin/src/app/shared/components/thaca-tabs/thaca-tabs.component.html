@@ -1,0 +1,33 @@
+@if (tabs.length > 0) {
+  <div [class]="rootClass">
+  <p-tabs
+    [value]="value"
+    (valueChange)="onValueChange($event)"
+    [scrollable]="scrollable"
+    [lazy]="lazy"
+    [selectOnFocus]="selectOnFocus"
+    [showNavigators]="showNavigators"
+  >
+    <p-tablist>
+      @for (tab of tabs; track tab.value) {
+        <p-tab [value]="tab.value" [disabled]="tab.disabled">
+          @if (tab.icon) {
+            <i [class]="tab.icon + ' thaca-tabs__tab-icon'" aria-hidden="true"></i>
+          }
+          <span class="thaca-tabs__tab-label">{{ tab.label | translate }}</span>
+        </p-tab>
+      }
+    </p-tablist>
+
+    <p-tabpanels>
+      @for (tab of tabs; track tab.value) {
+        <p-tabpanel [value]="tab.value">
+          <div class="thaca-tabs__panel">
+            <ng-container *ngTemplateOutlet="tab.bodyTpl" />
+          </div>
+        </p-tabpanel>
+      }
+    </p-tabpanels>
+  </p-tabs>
+  </div>
+}

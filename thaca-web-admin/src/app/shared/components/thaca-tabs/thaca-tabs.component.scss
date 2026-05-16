@@ -1,0 +1,144 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+::ng-deep .thaca-tabs {
+  .p-tabs {
+    gap: 0;
+    width: 100%;
+  }
+
+  .p-tablist {
+    background: transparent;
+  }
+
+  .p-tablist-content {
+    overflow: visible;
+  }
+
+  .p-tablist-tab-list {
+    gap: 2px;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2px;
+  }
+
+  .p-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted-foreground);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: none !important;
+    box-shadow: none !important;
+
+    &:hover:not(.p-disabled):not(.p-tab-active) {
+      color: var(--foreground);
+      background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    }
+
+    &.p-tab-active {
+      color: var(--primary);
+      background: transparent;
+    }
+
+    &.p-disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  .p-tablist-active-bar {
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .p-tablist-nav-button {
+    width: 28px;
+    height: 28px;
+    color: var(--muted-foreground);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+
+    &:hover:not(:disabled) {
+      color: var(--foreground);
+      background: color-mix(in srgb, var(--foreground) 6%, transparent);
+      border-color: var(--border);
+    }
+  }
+
+  .p-tabpanels {
+    padding: 0;
+    background: transparent;
+  }
+
+  .p-tabs-panel {
+    padding: 16px 0 0;
+    color: var(--foreground);
+  }
+
+  &__tab-icon {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  &__tab-label {
+    white-space: nowrap;
+  }
+
+  &__panel {
+    width: 100%;
+  }
+
+  // ── Pill variant ───────────────────────────────────────────
+  &--pill {
+    .p-tablist-tab-list {
+      gap: 6px;
+      border-bottom: none;
+      padding: 4px;
+      background: color-mix(in srgb, var(--muted) 55%, transparent);
+      border-radius: var(--radius-sm);
+    }
+
+    .p-tab {
+      border-radius: calc(var(--radius-sm) - 2px);
+      padding: 8px 12px;
+
+      &.p-tab-active {
+        color: var(--primary);
+        background: var(--card);
+        box-shadow: 0 1px 2px color-mix(in srgb, var(--foreground) 8%, transparent) !important;
+      }
+    }
+
+    .p-tablist-active-bar {
+      display: none;
+    }
+  }
+
+  // ── Underline variant (no pill background, stronger bar) ───
+  &--underline {
+    .p-tablist-tab-list {
+      gap: 0;
+    }
+
+    .p-tab {
+      padding: 12px 16px;
+    }
+
+    .p-tablist-active-bar {
+      height: 3px;
+    }
+  }
+}

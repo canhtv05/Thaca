@@ -4,6 +4,7 @@
 @import './styles/thaca.scss';
 @import './styles/badge.scss';
 @import './styles/dialog.scss';
+@import './styles/tabs.scss';
 
 @custom-variant dark (&:is(.dark *));
 

@@ -64,7 +64,7 @@ export class MenuService {
             {
               label: 'menu.mail_settings',
               icon: 'pi pi-envelope',
-              routerLink: ['/system/settings/mail'],
+              routerLink: ['/system/settings/mail-config'],
             },
             {
               label: 'menu.storage_settings',

@@ -1,0 +1,33 @@
+<label
+  class="thaca-sw"
+  [ngClass]="hostClasses"
+  [attr.aria-label]="ariaLabel || label"
+  [attr.aria-checked]="state === 'indeterminate' ? 'mixed' : checked"
+  role="switch"
+>
+  <!-- Input chỉ render khi tương tác được -->
+  @if (state !== 'loading' && state !== 'indeterminate') {
+    <input
+      type="checkbox"
+      [checked]="checked"
+      [disabled]="state === 'disabled'"
+      (change)="onInputChange($event)"
+      tabindex="-1"
+    />
+  }
+
+  <span class="sw-track">
+    <!-- Loading spinner -->
+    @if (state === 'loading') {
+      <span class="sw-spinner" aria-hidden="true">
+        <span class="sw-spinner-ring"></span>
+      </span>
+    } @else {
+      <span class="sw-thumb"></span>
+    }
+  </span>
+
+  @if (label) {
+    <span class="sw-label-text">{{ label }}</span>
+  }
+</label>
