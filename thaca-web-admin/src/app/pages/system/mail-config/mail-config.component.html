@@ -1,525 +1,185 @@
-<div class="flex flex-col gap-4 w-full">
+﻿<div class="flex flex-col gap-4 w-full">
   <app-breadcrumb [title]="'mail_config.title' | translate" [items]="breadcrumbItems" />
   <thaca-tabs [value]="activeTab()" (valueChange)="onTabChange($any($event))">
     <thaca-tab value="system" [label]="'mail_config.tab.system' | translate" icon="pi pi-shield">
-      <div class="animate-fadeUp pt-4">
-        <div class="card-primary px-3 py-2 text-xs font-bold mb-4 inline-flex items-center gap-2">
-          <i class="pi pi-shield text-sm"></i>
-          {{ 'mail_config.badge.system' | translate }}
-        </div>
-        <div class="card-primary p-3 mb-6 text-sm flex items-start gap-3">
-          <i class="pi pi-info-circle mt-0.5 shrink-0"></i>
-          <span [innerHTML]="'mail_config.notice.fallback' | translate"></span>
-        </div>
-        <div *ngIf="loading()" class="text-center py-12 text-gray-500">
-          <i class="pi pi-spin pi-spinner text-2xl"></i>
-        </div>
+      <form [formGroup]="configForm" class="pt-4">
+        @if (loading()) {
+          <div class="text-center py-12 text-gray-500">
+            <i class="pi pi-spin pi-spinner text-2xl"></i>
+          </div>
+        } @else {
+          <div class="card flex flex-col gap-4">
+            @if (!systemConfig()) {
+              <div class="flex items-center justify-end">
+                <span class="thaca-badge thaca-badge-neutral">
+                  {{ 'mail_config.state.no_system_config' | translate }}
+                </span>
+              </div>
+            }
 
-        <div *ngIf="!loading() && systemConfig()" class="card-secondary shadow-sm">
-          <div class="flex items-center justify-between p-5 border-b border-gray-200">
-            <div class="flex items-center gap-3">
-              <i class="pi pi-envelope text-blue-600"></i>
-              <div>
-                <h3 class="font-bold text-gray-900">
-                  {{ 'mail_config.card.smtp_title' | translate }}
-                </h3>
-                <p class="text-xs text-gray-600 mt-0.5">
-                  {{ 'mail_config.card.smtp_subtitle' | translate }}
-                </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-control">
+                <thaca-input
+                  type="text"
+                  [label]="'mail_config.form.host' | translate"
+                  formControlName="host"
+                  placeholder="smtp.gmail.com"
+                  [required]="true"
+                />
+                <validation-message [control]="configForm.get('host')"></validation-message>
+              </div>
+
+              <div class="form-control">
+                <thaca-dropdown
+                  [label]="'mail_config.form.port' | translate"
+                  formControlName="port"
+                  [options]="portOptions"
+                  [placeholder]="'mail_config.form.port_placeholder' | translate"
+                  [required]="true"
+                />
+                <validation-message [control]="configForm.get('port')"></validation-message>
+              </div>
+
+              <div class="form-control">
+                <thaca-input
+                  [label]="'mail_config.form.username' | translate"
+                  formControlName="username"
+                  placeholder="system@thaca.io"
+                  [required]="true"
+                />
+                <validation-message [control]="configForm.get('username')"></validation-message>
+              </div>
+
+              <div class="form-control">
+                <thaca-input
+                  type="password"
+                  [label]="'mail_config.form.password' | translate"
+                  formControlName="password"
+                  placeholder="••••••••"
+                  [required]="!systemConfig()"
+                />
+                <validation-message [control]="configForm.get('password')"></validation-message>
+              </div>
+
+              <div class="form-control">
+                <thaca-input
+                  type="text"
+                  [label]="'mail_config.form.sender_name' | translate"
+                  formControlName="fromName"
+                  placeholder="Thaca System"
+                />
+                <validation-message [control]="configForm.get('fromName')"></validation-message>
+              </div>
+
+              <div class="form-control">
+                <thaca-input
+                  type="email"
+                  [label]="'mail_config.form.sender_email' | translate"
+                  formControlName="fromEmail"
+                  placeholder="system@thaca.io"
+                />
+                <validation-message [control]="configForm.get('fromEmail')"></validation-message>
+              </div>
+
+              <div
+                class="flex flex-col col-span-full md:col-span-2 gap-4 border-t border-t-border pt-4"
+              >
+                <div class="flex items-center justify-between">
+                  <label for="isStarttls">
+                    <div class="text-sm font-bold">
+                      {{ 'mail_config.form.tls_toggle' | translate }}
+                    </div>
+                    <div class="text-xs">
+                      {{ 'mail_config.form.tls_desc' | translate }}
+                    </div>
+                  </label>
+                  <thaca-switch
+                    formControlName="isStarttls"
+                    inputId="isStarttls"
+                    name="isStarttls"
+                  />
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <label for="isAuth">
+                    <div class="text-sm font-bold">
+                      {{ 'mail_config.form.enable_auth' | translate }}
+                    </div>
+                    <div class="text-xs">
+                      {{ 'mail_config.form.enable_auth_desc' | translate }}
+                    </div>
+                  </label>
+                  <thaca-switch formControlName="isAuth" inputId="isAuth" name="isAuth" />
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <label for="isDefault">
+                    <div class="text-sm font-bold">
+                      {{ 'mail_config.form.default_fallback_toggle' | translate }}
+                    </div>
+                    <div class="text-xs">
+                      {{ 'mail_config.form.default_fallback_desc' | translate }}
+                    </div>
+                  </label>
+                  <thaca-switch
+                    formControlName="isDefault"
+                    inputId="isDefault"
+                    name="isDefault"
+                  />
+                </div>
               </div>
             </div>
-            <span class="text-xs font-bold px-2 py-1 rounded-full bg-blue-50 text-blue-600"
-              >● {{ 'mail_config.state.configured' | translate }}</span
+
+            <div
+              class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center"
             >
-          </div>
-
-          <div class="p-5 space-y-4">
-            <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="text-xs font-bold text-gray-700 mb-1 block"
-                  >{{ 'mail_config.form.host' | translate }}
-                  <span class="text-red-500">*</span></label
+                <thaca-button
+                  type="button"
+                  [loading]="testingConnection()"
+                  (click)="testConnection()"
+                  variant="outline"
                 >
-                <div class="text-sm text-gray-900">{{ systemConfig()?.host }}</div>
-              </div>
-              <div>
-                <label class="text-xs font-bold text-gray-700 mb-1 block"
-                  >{{ 'mail_config.form.port' | translate }}
-                  <span class="text-red-500">*</span></label
-                >
-                <div class="text-sm text-gray-900">{{ systemConfig()?.port }}</div>
-              </div>
-              <div>
-                <label class="text-xs font-bold text-gray-700 mb-1 block"
-                  >{{ 'mail_config.form.username' | translate }}
-                  <span class="text-red-500">*</span></label
-                >
-                <div class="text-sm text-gray-900">{{ systemConfig()?.username }}</div>
-              </div>
-              <div>
-                <label class="text-xs font-bold text-gray-700 mb-1 block">{{
-                  'mail_config.form.sender_name' | translate
-                }}</label>
-                <div class="text-sm text-gray-900">{{ systemConfig()?.fromName || '—' }}</div>
-              </div>
-              <div class="col-span-2">
-                <label class="text-xs font-bold text-gray-700 mb-1 block">{{
-                  'mail_config.form.sender_email' | translate
-                }}</label>
-                <div class="text-sm text-gray-900">{{ systemConfig()?.fromEmail || '—' }}</div>
-              </div>
-            </div>
-
-            <div class="border-t border-gray-200 pt-4 space-y-3">
-              <div
-                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <div>
-                  <div class="text-sm font-bold text-gray-900">
-                    {{ 'mail_config.form.tls_toggle' | translate }}
-                  </div>
-                  <div class="text-xs text-gray-600">
-                    {{ 'mail_config.form.tls_desc' | translate }}
-                  </div>
-                </div>
-                <div class="flex items-center">
-                  <input
-                    type="checkbox"
-                    [checked]="systemConfig()?.isStarttls"
-                    disabled
-                    class="w-5 h-5"
-                  />
-                </div>
+                  <i class="pi pi-bolt mr-2"></i>
+                  {{ 'mail_config.button.test_connection' | translate }}
+                </thaca-button>
+                @if (testResult()) {
+                  <span
+                    class="ml-3 text-xs font-bold"
+                    [class.text-green-600]="testResult()?.success"
+                    [class.text-red-600]="!testResult()?.success"
+                  >
+                    {{ testResult()?.message }}
+                  </span>
+                }
               </div>
 
-              <div
-                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <div>
-                  <div class="text-sm font-bold text-gray-900">
-                    {{ 'mail_config.form.default_fallback_toggle' | translate }}
-                  </div>
-                  <div class="text-xs text-gray-600">
-                    {{ 'mail_config.form.default_fallback_desc' | translate }}
-                  </div>
-                </div>
-                <div class="flex items-center">
-                  <input
-                    type="checkbox"
-                    [checked]="systemConfig()?.isDefault"
-                    disabled
-                    class="w-5 h-5"
-                  />
-                </div>
+              <div class="flex gap-4 justify-end">
+                <thaca-button type="button" (click)="resetForm()" variant="ghost">
+                  {{ 'common.button.cancel' | translate }}
+                </thaca-button>
+                <thaca-button
+                  type="button"
+                  (click)="saveConfig()"
+                  variant="primary"
+                  [loading]="saving()"
+                  [disabled]="saving() || configForm.invalid"
+                >
+                  {{
+                    systemConfig()
+                      ? ('common.button.save' | translate)
+                      : ('mail_config.button.create_config' | translate)
+                  }}
+                </thaca-button>
               </div>
             </div>
           </div>
-
-          <div class="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-200">
-            <div class="flex items-center gap-3">
-              <thaca-button (click)="testConnection()" variant="outline">
-                <i class="pi pi-bolt" [class.pi-spin]="testingConnection()"></i>
-                {{ 'mail_config.button.test_connection' | translate }}
-              </thaca-button>
-              <div
-                *ngIf="testResult()"
-                [class.card-success]="testResult()?.success"
-                [class.card-error]="!testResult()?.success"
-                class="text-xs font-bold px-3 py-1 flex items-center"
-              >
-                <i
-                  [class.pi-check-circle]="testResult()?.success"
-                  [class.pi-times-circle]="!testResult()?.success"
-                  class="pi mr-1"
-                ></i>
-                {{ testResult()?.message }}
-              </div>
-            </div>
-            <div class="flex gap-2">
-              <thaca-button (click)="openEditForm(systemConfig()!)" variant="outline">
-                {{ 'common.button.edit' | translate }}
-              </thaca-button>
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="!loading() && !systemConfig()" class="text-center py-12">
-          <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
-          <p class="text-gray-600 font-bold">
-            {{ 'mail_config.state.no_system_config' | translate }}
-          </p>
-          <thaca-button (click)="openCreateForm()" variant="primary">
-            <i class="pi pi-plus mr-2"></i>
-            {{ 'mail_config.button.create_config' | translate }}
-          </thaca-button>
-        </div>
-      </div>
+        }
+      </form>
     </thaca-tab>
 
     <thaca-tab value="tenant" [label]="'mail_config.tab.tenant' | translate" icon="pi pi-users">
-      <div class="animate-fadeUp pt-4">
-        <div
-          *ngIf="!selectedTenantId()"
-          class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col gap-4"
-        >
-          <div class="flex items-center gap-4 flex-wrap">
-            <label class="text-xs font-bold text-gray-700 whitespace-nowrap">{{
-              'mail_config.tenant.label' | translate
-            }}</label>
-            <div class="flex-1 max-w-sm">
-              <input
-                type="text"
-                [(ngModel)]="filter().code"
-                (keyup.enter)="onSearch()"
-                placeholder="{{ 'mail_config.tenant.placeholder' | translate }}"
-                class="w-full px-3 py-2 border border-purple-300 bg-purple-50 rounded-lg text-sm font-bold text-gray-900 outline-none focus:border-purple-500"
-              />
-            </div>
-            <thaca-button (click)="onSearch()" variant="primary">
-              <i class="pi pi-search mr-2"></i>
-              {{ 'common.button.search' | translate }}
-            </thaca-button>
-          </div>
-
-          <app-data-table [config]="tableConfig" (onAction)="handleAction($event)"></app-data-table>
-        </div>
-
-        <div *ngIf="selectedTenantId()" class="mb-4">
-          <thaca-button (click)="backToTenantList()" variant="outline">
-            <i class="pi pi-arrow-left"></i>
-            {{ 'common.button.back' | translate }}
-          </thaca-button>
-        </div>
-
-        <div *ngIf="loading() && selectedTenantId()" class="text-center py-12 text-gray-500">
-          <i class="pi pi-spin pi-spinner text-2xl"></i>
-        </div>
-
-        <div *ngIf="!loading() && selectedTenantId() && tenantConfig()" class="space-y-4">
-          <div class="card-secondary shadow-sm">
-            <div class="flex items-center justify-between p-5 border-b border-gray-200">
-              <div class="flex items-center gap-3">
-                <i class="pi pi-envelope text-blue-600"></i>
-                <div>
-                  <h3 class="font-bold text-gray-900">
-                    {{ 'mail_config.card.tenant_config_title' | translate }}
-                  </h3>
-                  <p class="text-xs text-gray-600 mt-0.5">
-                    {{ 'mail_config.card.tenant_config_subtitle' | translate }}
-                  </p>
-                </div>
-              </div>
-              <span class="text-xs font-bold px-2 py-1 rounded-full bg-blue-50 text-blue-600"
-                >● {{ 'mail_config.state.custom_config' | translate }}</span
-              >
-            </div>
-
-            <div class="p-5 space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="text-xs font-bold text-gray-700 mb-1 block"
-                    >{{ 'mail_config.form.host' | translate }}
-                    <span class="text-red-500">*</span></label
-                  >
-                  <div class="text-sm text-gray-900">{{ tenantConfig()?.host }}</div>
-                </div>
-                <div>
-                  <label class="text-xs font-bold text-gray-700 mb-1 block"
-                    >{{ 'mail_config.form.port' | translate }}
-                    <span class="text-red-500">*</span></label
-                  >
-                  <div class="text-sm text-gray-900">{{ tenantConfig()?.port }}</div>
-                </div>
-                <div>
-                  <label class="text-xs font-bold text-gray-700 mb-1 block"
-                    >{{ 'mail_config.form.username' | translate }}
-                    <span class="text-red-500">*</span></label
-                  >
-                  <div class="text-sm text-gray-900">{{ tenantConfig()?.username }}</div>
-                </div>
-                <div>
-                  <label class="text-xs font-bold text-gray-700 mb-1 block">{{
-                    'mail_config.form.sender_name' | translate
-                  }}</label>
-                  <div class="text-sm text-gray-900">{{ tenantConfig()?.fromName || '—' }}</div>
-                </div>
-                <div class="col-span-2">
-                  <label class="text-xs font-bold text-gray-700 mb-1 block">{{
-                    'mail_config.form.sender_email' | translate
-                  }}</label>
-                  <div class="text-sm text-gray-900">{{ tenantConfig()?.fromEmail || '—' }}</div>
-                </div>
-              </div>
-
-              <div class="border-t border-gray-200 pt-4">
-                <div
-                  class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-                >
-                  <div>
-                    <div class="text-sm font-bold text-gray-900">
-                      {{ 'mail_config.form.override_default_toggle' | translate }}
-                    </div>
-                    <div class="text-xs text-gray-600">
-                      {{ 'mail_config.form.override_default_desc' | translate }}
-                    </div>
-                  </div>
-                  <div class="flex items-center">
-                    <input
-                      type="checkbox"
-                      [checked]="tenantConfig()?.isDefault"
-                      disabled
-                      class="w-5 h-5"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-200">
-              <div class="flex items-center gap-3">
-                <thaca-button (click)="testConnection()" variant="outline">
-                  <i class="pi pi-bolt" [class.pi-spin]="testingConnection()"></i>
-                  {{ 'mail_config.button.test_connection' | translate }}
-                </thaca-button>
-                <thaca-button (click)="resetToDefault()" variant="destructive">
-                  <i class="pi pi-refresh"></i>
-                  {{ 'mail_config.button.reset_to_default' | translate }}
-                </thaca-button>
-                <div
-                  *ngIf="testResult()"
-                  [class.card-success]="testResult()?.success"
-                  [class.card-error]="!testResult()?.success"
-                  class="text-xs font-bold px-3 py-1 flex items-center"
-                >
-                  <i
-                    [class.pi-check-circle]="testResult()?.success"
-                    [class.pi-times-circle]="!testResult()?.success"
-                    class="pi mr-1"
-                  ></i>
-                  {{ testResult()?.message }}
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <thaca-button (click)="openEditForm(tenantConfig()!)" variant="outline">
-                  {{ 'common.button.edit' | translate }}
-                </thaca-button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="!loading() && selectedTenantId() && !tenantConfig()" class="space-y-4">
-          <div class="card-warning p-4 text-sm flex items-start gap-3">
-            <i class="pi pi-exclamation-triangle mt-0.5 shrink-0"></i>
-            <span>
-              {{ 'mail_config.state.no_tenant_config' | translate }}
-              <strong>{{ 'mail_config.state.using_default_fallback' | translate }}</strong>
-            </span>
-          </div>
-
-          <div class="card-secondary shadow-sm">
-            <div class="flex items-center justify-between p-5 border-b border-gray-200">
-              <div class="flex items-center gap-3">
-                <i class="pi pi-envelope text-yellow-600"></i>
-                <div>
-                  <h3 class="font-bold text-gray-900">
-                    {{ 'mail_config.card.create_tenant_config_title' | translate }}
-                  </h3>
-                  <p class="text-xs text-gray-600 mt-0.5">
-                    {{ 'mail_config.card.create_tenant_config_subtitle' | translate }}
-                  </p>
-                </div>
-              </div>
-              <span class="text-xs font-bold px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-                {{ 'mail_config.state.using_default' | translate }}</span
-              >
-            </div>
-
-            <div class="p-5">
-              <thaca-button (click)="openCreateForm()" variant="primary">
-                <i class="pi pi-plus"></i>
-                {{ 'mail_config.button.create_tenant_config' | translate }}
-              </thaca-button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="pt-4"></div>
     </thaca-tab>
   </thaca-tabs>
 </div>
-
-<thaca-modal
-  #configModal
-  size="md"
-  [title]="
-    (canShowEditForm ? 'mail_config.form.edit_title' : 'mail_config.form.create_title') | translate
-  "
-  [formGroup]="configForm"
-  [loading]="loading()"
-  (onSubmit)="saveConfig()"
-  (onCancel)="closeForm()"
->
-  <div class="grid grid-cols-1 gap-4 mt-2">
-    <div>
-      <label class="text-xs font-bold text-gray-700 mb-1 block"
-        >{{ 'mail_config.form.host' | translate }} <span class="text-red-500">*</span></label
-      >
-      <input
-        type="text"
-        formControlName="host"
-        placeholder="smtp.gmail.com"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-      />
-      <p
-        *ngIf="configForm.get('host')?.invalid && configForm.get('host')?.touched"
-        class="text-xs text-red-600 mt-1"
-      >
-        {{ 'common.error.required' | translate }}
-      </p>
-    </div>
-
-    <div>
-      <label class="text-xs font-bold text-gray-700 mb-1 block"
-        >{{ 'mail_config.form.port' | translate }} <span class="text-red-500">*</span></label
-      >
-      <select
-        formControlName="port"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-      >
-        <option value="587">587 — STARTTLS</option>
-        <option value="465">465 — SSL/TLS</option>
-        <option value="25">25</option>
-      </select>
-    </div>
-
-    <div>
-      <label class="text-xs font-bold text-gray-700 mb-1 block"
-        >{{ 'mail_config.form.username' | translate }} <span class="text-red-500">*</span></label
-      >
-      <input
-        type="text"
-        formControlName="username"
-        placeholder="system@thaca.io"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-      />
-      <p
-        *ngIf="configForm.get('username')?.invalid && configForm.get('username')?.touched"
-        class="text-xs text-red-600 mt-1"
-      >
-        {{ 'common.error.required' | translate }}
-      </p>
-    </div>
-
-    <div>
-      <label class="text-xs font-bold text-gray-700 mb-1 block"
-        >{{ 'mail_config.form.password' | translate }} <span class="text-red-500">*</span></label
-      >
-      <div class="relative">
-        <input
-          type="password"
-          formControlName="password"
-          [placeholder]="canShowEditForm ? '••••••••' : ''"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono tracking-widest"
-        />
-      </div>
-      <p
-        *ngIf="configForm.get('password')?.invalid && configForm.get('password')?.touched"
-        class="text-xs text-red-600 mt-1"
-      >
-        {{ 'common.error.required' | translate }}
-      </p>
-    </div>
-
-    <div>
-      <label class="text-xs font-bold text-gray-700 mb-1 block">{{
-        'mail_config.form.sender_name' | translate
-      }}</label>
-      <input
-        type="text"
-        formControlName="fromName"
-        placeholder="Thaca System"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-      />
-    </div>
-
-    <div>
-      <label class="text-xs font-bold text-gray-700 mb-1 block">{{
-        'mail_config.form.sender_email' | translate
-      }}</label>
-      <input
-        type="email"
-        formControlName="fromEmail"
-        placeholder="system@thaca.io"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-      />
-      <p
-        *ngIf="configForm.get('fromEmail')?.invalid && configForm.get('fromEmail')?.touched"
-        class="text-xs text-red-600 mt-1"
-      >
-        {{ 'common.error.invalid_email' | translate }}
-      </p>
-    </div>
-
-    <div class="space-y-2 border-t border-gray-200 pt-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-sm font-bold text-gray-900">
-            {{ 'mail_config.form.tls_toggle' | translate }}
-          </div>
-          <div class="text-xs text-gray-600">{{ 'mail_config.form.tls_desc' | translate }}</div>
-        </div>
-        <input type="checkbox" formControlName="isStarttls" class="w-5 h-5" />
-      </div>
-
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-sm font-bold text-gray-900">
-            {{ 'mail_config.form.enable_auth' | translate }}
-          </div>
-          <div class="text-xs text-gray-600">
-            {{ 'mail_config.form.enable_auth_desc' | translate }}
-          </div>
-        </div>
-        <input type="checkbox" formControlName="isAuth" class="w-5 h-5" />
-      </div>
-
-      <div *ngIf="isSystemTab" class="flex items-center justify-between">
-        <div>
-          <div class="text-sm font-bold text-gray-900">
-            {{ 'mail_config.form.default_fallback_toggle' | translate }}
-          </div>
-          <div class="text-xs text-gray-600">
-            {{ 'mail_config.form.default_fallback_desc' | translate }}
-          </div>
-        </div>
-        <input type="checkbox" formControlName="isDefault" class="w-5 h-5" />
-      </div>
-    </div>
-  </div>
-  <ng-template #customFooter>
-    <div class="flex items-center justify-between gap-2 w-full">
-      <thaca-button
-        (click)="testConnection()"
-        variant="outline"
-        [disabled]="testingConnection() || configForm.invalid"
-        class="mr-auto"
-      >
-        <i class="pi pi-bolt" [class.pi-spin]="testingConnection()"></i>
-        {{ 'mail_config.button.test_connection' | translate }}
-      </thaca-button>
-      <div class="flex gap-2">
-        <thaca-button (click)="closeForm()" variant="outline">
-          {{ 'common.button.cancel' | translate }}
-        </thaca-button>
-        <thaca-button
-          (click)="saveConfig()"
-          variant="primary"
-          [loading]="loading()"
-          [disabled]="loading() || configForm.invalid"
-        >
-          {{ 'common.button.save' | translate }}
-        </thaca-button>
-      </div>
-    </div>
-  </ng-template>
-</thaca-modal>

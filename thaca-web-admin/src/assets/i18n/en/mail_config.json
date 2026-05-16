@@ -40,7 +40,8 @@
       "override_default_toggle": "Override Default Fallback",
       "override_default_desc": "Use this custom config instead of system config",
       "enable_auth": "Enable Authentication",
-      "enable_auth_desc": "Require username and password"
+      "enable_auth_desc": "Require username and password",
+      "port_placeholder": "Select port"
     },
     "button": {
       "test_connection": "Test Connection",

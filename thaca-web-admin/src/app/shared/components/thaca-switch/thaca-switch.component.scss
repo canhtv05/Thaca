@@ -31,13 +31,12 @@
     box-sizing: border-box;
     border-radius: 999px;
     background: color-mix(in srgb, var(--border) 70%, var(--muted));
-    transition: background-color 0.2s ease;
   }
 
   .sw-thumb {
     display: block;
     border-radius: 50%;
-    background: var(--card, #fff);
+    background: #fff;
     box-shadow: 0 1px 3px color-mix(in srgb, var(--foreground) 18%, transparent);
     transition: transform 0.2s ease;
   }

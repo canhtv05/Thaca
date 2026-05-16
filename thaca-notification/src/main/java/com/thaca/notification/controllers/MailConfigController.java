@@ -40,19 +40,6 @@ public class MailConfigController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}")
-    @FwRequest(name = ServiceMethod.MAIL_CONFIG_GET, type = RequestType.PROTECTED)
-    public ResponseEntity<MailConfigDTO> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(process.process(id));
-    }
-
-    @DeleteMapping("/{id}")
-    @FwRequest(name = ServiceMethod.MAIL_CONFIG_DELETE, type = RequestType.PROTECTED)
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        process.process(id);
-        return ResponseEntity.ok().build();
-    }
-
     @PostMapping("/test")
     @FwRequest(name = ServiceMethod.MAIL_CONFIG_TEST_CONNECTION, type = RequestType.PROTECTED)
     public ResponseEntity<TestConnectionRes> testConnection(TestConnectionReq request) {

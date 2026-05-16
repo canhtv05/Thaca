@@ -33,6 +33,8 @@ export type SwitchState = 'idle' | 'loading' | 'indeterminate' | 'disabled';
 export class ThacaSwitchComponent implements ControlValueAccessor {
   private readonly cdr = inject(ChangeDetectorRef);
 
+  @Input() inputId: string = `thaca-switch-${Math.random().toString(36).substring(2, 15)}`;
+  @Input() name?: string;
   @Input() size: SwitchSize = 'md';
   @Input() variant: SwitchVariant = 'primary';
   @Input() state: SwitchState = 'idle';
@@ -55,6 +57,20 @@ export class ThacaSwitchComponent implements ControlValueAccessor {
       'sw-loading': this.state === 'loading',
       'sw-indeterminate': this.state === 'indeterminate',
     };
+  }
+
+  onHostClick(event: MouseEvent): void {
+    if (this.state === 'disabled' || this.state === 'loading' || this.state === 'indeterminate') {
+      return;
+    }
+    if ((event.target as HTMLElement).tagName === 'INPUT') {
+      return;
+    }
+    this.checked = !this.checked;
+    this.onChange(this.checked);
+    this.onTouched();
+    this.checkedChange.emit(this.checked);
+    this.cdr.markForCheck();
   }
 
   onInputChange(event: Event): void {
