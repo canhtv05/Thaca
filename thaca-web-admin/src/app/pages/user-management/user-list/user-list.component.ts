@@ -27,6 +27,7 @@ import { ThacaTextareaComponent } from '../../../shared/components/thaca-textare
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
 import { Popup } from '../../../core/global/popup-notify';
 import { CheckPermissionDirective } from '../../../shared/directives/check-permission.directive';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
@@ -46,6 +47,7 @@ import { AuthService } from '../../auth/auth.service';
     ThacaTextareaComponent,
     ValidationMessageComponent,
     CheckPermissionDirective,
+    PageHintComponent,
   ],
   templateUrl: './user-list.component.html',
 })
@@ -121,7 +123,14 @@ export class UserListComponent implements OnInit {
     actionFixed: true,
     showStt: true,
     columns: [
-      { field: 'username', header: 'user.username', sortable: true, width: '150px' },
+      {
+        field: 'username',
+        header: 'user.username',
+        sortable: true,
+        width: '150px',
+        render: (row: IUserDTO) =>
+          `<span class="inline-flex items-center gap-2 font-semibold"><i class="pi pi-user text-sm opacity-70"></i>${row.username ?? ''}</span>`,
+      },
       { field: 'email', header: 'user.email', sortable: true },
       {
         field: 'tenantInfos',

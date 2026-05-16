@@ -82,7 +82,6 @@ public class DynamicMailSenderService {
     @FwMode(name = ServiceMethod.MAIL_CONFIG_CREATE)
     public void createConfig(MailConfigDTO request) {
         MailConfig saved = new MailConfig();
-        saved.setTenantId(request.getTenantId());
         mappingMailConfig(saved, request);
         mailConfigRepository.save(saved);
         normalizeDefault(saved);
@@ -398,20 +397,30 @@ public class DynamicMailSenderService {
             );
             props.put("mail.smtp.connectiontimeout", 10000);
             props.put("mail.smtp.timeout", 10000);
-
             mailSender.testConnection();
-            log.info(
-                "[DynamicMailSenderService] SMTP connection test successful: {}:{}",
-                request.getHost(),
-                request.getPort()
-            );
-            return new TestConnectionRes(true, "SMTP connection successful");
+            return TestConnectionRes.builder()
+                .success(true)
+                .titleVi("Kết nối thành công")
+                .messageVi("Kết nối SMTP thành công")
+                .titleEn("Connection Successful")
+                .messageEn("SMTP connection successful")
+                .build();
         } catch (MessagingException e) {
-            log.warn("[DynamicMailSenderService] SMTP connection test failed: {}", e.getMessage());
-            return new TestConnectionRes(false, "Connection failed: " + e.getMessage());
+            return TestConnectionRes.builder()
+                .success(false)
+                .titleVi("Kết nối thất bại")
+                .messageVi("Không thể kết nối SMTP: " + e.getMessage())
+                .titleEn("Connection Failed")
+                .messageEn("Unable to connect to SMTP: " + e.getMessage())
+                .build();
         } catch (Exception e) {
-            log.error("[DynamicMailSenderService] SMTP connection test error: ", e);
-            return new TestConnectionRes(false, "Error: " + e.getMessage());
+            return TestConnectionRes.builder()
+                .success(false)
+                .titleVi("Có lỗi xảy ra")
+                .messageVi("Lỗi hệ thống: " + e.getMessage())
+                .titleEn("System Error")
+                .messageEn("System error: " + e.getMessage())
+                .build();
         }
     }
 }

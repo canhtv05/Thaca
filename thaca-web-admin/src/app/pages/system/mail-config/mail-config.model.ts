@@ -16,3 +16,20 @@ export interface IMailConfigDTO extends IBaseAuditResponse {
   status?: ECommonStatus;
   isDefault?: boolean;
 }
+
+export interface ITestConnectionReq {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  isAuth?: boolean;
+  isStarttls?: boolean;
+}
+
+export interface ITestConnectionRes {
+  success: boolean;
+  messageVi: string;
+  messageEn: string;
+  titleVi: string;
+  titleEn: string;
+}

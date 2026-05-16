@@ -13,6 +13,7 @@ import { ThacaButtonComponent } from '../../../shared/components/thaca-button/th
 import { MenuItem } from 'primeng/api';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { TranslateService } from '@ngx-translate/core';
 import { PermissionService } from './permission.service';
@@ -29,6 +30,7 @@ import { PermissionService } from './permission.service';
     DataTableComponent,
     ThacaButtonComponent,
     ThacaInputComponent,
+    PageHintComponent,
   ],
   templateUrl: './permission.component.html',
 })

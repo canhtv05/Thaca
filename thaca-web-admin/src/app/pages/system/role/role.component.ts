@@ -14,6 +14,7 @@ import { ThacaButtonComponent } from '../../../shared/components/thaca-button/th
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
 import { RoleService } from './role.service';
 
 @Component({
@@ -28,6 +29,7 @@ import { RoleService } from './role.service';
     DataTableComponent,
     ThacaButtonComponent,
     ThacaInputComponent,
+    PageHintComponent,
   ],
   templateUrl: './role.component.html',
 })

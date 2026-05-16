@@ -20,6 +20,7 @@ import { AppConfigService } from '../../../core/configs/app-config.service';
 import { PlanService } from './plan.service';
 import { IPlanDTO } from './plan.model';
 import { ValidationMessageComponent } from '../../../shared/components/validation-message/validation-message.component';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
 import { Popup } from '../../../core/global/popup-notify';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { isLoading } from '../../../core/stores/app.store';
@@ -39,6 +40,7 @@ import { isLoading } from '../../../core/stores/app.store';
     ThacaDropdownComponent,
     ThacaModalComponent,
     ValidationMessageComponent,
+    PageHintComponent,
   ],
   templateUrl: './plan.component.html',
 })
@@ -101,7 +103,14 @@ export class PlanComponent {
     showStt: true,
     withAudit: true,
     columns: [
-      { field: 'code', header: 'plan.code', sortable: true, width: '150px' },
+      {
+        field: 'code',
+        header: 'plan.code',
+        sortable: true,
+        width: '150px',
+        render: (row: IPlanDTO) =>
+          `<span class="inline-flex items-center gap-2 font-semibold"><i class="pi pi-box text-sm opacity-70"></i>${row.code ?? ''}</span>`,
+      },
       { field: 'name', header: 'plan.name', sortable: true },
       {
         field: 'type',

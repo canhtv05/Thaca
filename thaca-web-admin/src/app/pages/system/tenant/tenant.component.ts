@@ -28,6 +28,7 @@ import { GlobalToast } from '../../../core/global/global-toast';
 import { isLoading } from '../../../core/stores/app.store';
 import { CommonUtils } from '../../../shared/utils/common.utils';
 import { Router } from '@angular/router';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
 
 @Component({
   selector: 'app-tenant',
@@ -46,6 +47,7 @@ import { Router } from '@angular/router';
     ValidationMessageComponent,
     ThacaDatepickerComponent,
     ThacaTextareaComponent,
+    PageHintComponent,
   ],
   templateUrl: './tenant.component.html',
 })
@@ -112,7 +114,14 @@ export class TenantComponent implements OnInit {
     withAudit: true,
     actionFixed: true,
     columns: [
-      { field: 'code', header: 'tenant.code', sortable: true, width: '150px' },
+      {
+        field: 'code',
+        header: 'tenant.code',
+        sortable: true,
+        width: '150px',
+        render: (row: ITenantDTO) =>
+          `<span class="inline-flex items-center gap-2 font-semibold"><i class="pi pi-building text-sm opacity-70"></i>${row.code ?? ''}</span>`,
+      },
       { field: 'name', header: 'tenant.name', sortable: true },
       { field: 'domain', header: 'tenant.domain' },
       { field: 'contactEmail', header: 'tenant.contact_email' },

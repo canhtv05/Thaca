@@ -28,6 +28,7 @@ import { isLoading } from '../../../core/stores/app.store';
 import { IRoleDTO } from '../role/role.model';
 import { ITenantInfoPrj } from '../tenant/tenant.model';
 import { ThacaTextareaComponent } from '../../../shared/components/thaca-textarea/thaca-textarea.component';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
 import { IPermissionDTO } from '../permission/permission.model';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
@@ -48,6 +49,7 @@ import { AuthService } from '../../auth/auth.service';
     ThacaModalComponent,
     ValidationMessageComponent,
     ThacaTextareaComponent,
+    PageHintComponent,
   ],
   templateUrl: './system-user.component.html',
 })
@@ -126,7 +128,13 @@ export class SystemUserComponent implements OnInit {
     withAudit: true,
     actionFixed: true,
     columns: [
-      { field: 'username', header: 'system_user.username', sortable: true },
+      {
+        field: 'username',
+        header: 'system_user.username',
+        sortable: true,
+        render: (row: ISystemUserDTO) =>
+          `<span class="inline-flex items-center gap-2 font-semibold"><i class="pi pi-user text-sm opacity-70"></i>${row.username ?? ''}</span>`,
+      },
       { field: 'fullname', header: 'system_user.fullname', sortable: true },
       { field: 'email', header: 'system_user.email', sortable: true },
       {

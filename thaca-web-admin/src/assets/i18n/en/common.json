@@ -60,6 +60,24 @@
     "infinite": "Infinite",
     "audit": "Audit Information",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "page_hint": {
+      "user_list_title": "User management",
+      "user_list_desc": "Search, create, import/export users. Status badges show activation and lock state; use row actions to edit or lock accounts.",
+      "tenant_title": "Tenant management",
+      "tenant_desc": "Manage customer workspaces: plan, domain, expiry and status. Active tenants can be edited; inactive ones can be unlocked.",
+      "plan_title": "Subscription plans",
+      "plan_desc": "Define service packages (code, type, limits). Lock a plan to stop assigning it to new tenants.",
+      "system_user_title": "System administrators",
+      "system_user_desc": "Accounts with access to this admin portal. Assign roles and control activation or lock status.",
+      "role_title": "Roles",
+      "role_desc": "Browse roles and open permissions mapping for each role code.",
+      "permission_title": "Permissions",
+      "permission_desc": "Catalog of API/menu permissions used when configuring roles.",
+      "login_history_title": "Login history",
+      "login_history_desc": "Audit sign-in attempts: device, location, risk score and success/failure. Filter by date range and channel.",
+      "lock_history_title": "Lock / unlock history",
+      "lock_history_desc": "Track who locked or unlocked accounts and why — useful for security reviews."
+    }
   }
 }

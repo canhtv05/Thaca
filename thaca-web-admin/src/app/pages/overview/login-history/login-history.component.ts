@@ -19,6 +19,7 @@ import { ILoginHistoryDTO } from '../../../core/models/login-history.model';
 import { ThacaDatepickerComponent } from '../../../shared/components/thaca-datepicker/thaca-datepicker.component';
 import { MenuItem } from 'primeng/api';
 import { ActivatedRoute } from '@angular/router';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
 
 @Component({
   selector: 'app-login-history',
@@ -34,6 +35,7 @@ import { ActivatedRoute } from '@angular/router';
     ThacaDropdownComponent,
     ThacaButtonComponent,
     ThacaDatepickerComponent,
+    PageHintComponent,
   ],
   templateUrl: './login-history.component.html',
 })
@@ -125,7 +127,9 @@ export class LoginHistoryComponent implements OnInit {
           const isSuccess = row.status === 'SUCCESS';
           const label = this.translate.instant(isSuccess ? 'auth.success' : 'auth.failed');
           const variant = isSuccess ? 'success' : 'danger';
-          return `<span class="thaca-badge thaca-badge-${variant}">
+          const icon = isSuccess ? 'pi-check' : 'pi-times';
+          return `<span class="thaca-badge thaca-badge-${variant} inline-flex items-center gap-1.5">
+                    <i class="pi ${icon} text-[10px]"></i>
                     <span class="thb-dot"></span>${label}
                   </span>`;
         },

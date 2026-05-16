@@ -1,6 +1,10 @@
 <div class="flex flex-col gap-4 w-full">
   <app-breadcrumb [title]="'menu.role_permission'" [items]="breadcrumbItems" />
 
+  <app-page-hint variant="secondary" icon="pi pi-id-card" [title]="'common.page_hint.role_title' | translate">
+    {{ 'common.page_hint.role_desc' | translate }}
+  </app-page-hint>
+
   <app-data-table
     [config]="tableConfig"
     [externalFilter]="filter()"
@@ -15,14 +19,20 @@
           (keyup.enter)="onSearch()"
         />
         <thaca-button variant="primary" (clicked)="onSearch()">
-          <span class="text-white"> {{ 'common.button.search' | translate }} </span>
+          <span class="inline-flex items-center gap-2 text-white">
+            <i class="pi pi-search"></i>
+            {{ 'common.button.search' | translate }}
+          </span>
         </thaca-button>
       </div>
     </ng-template>
     <ng-template #headerActions>
       <div class="flex justify-end items-center gap-4 leading-none">
         <thaca-button variant="outline" (click)="onExport()">
-          <span class="text-primary"> {{ 'common.button.export' | translate }} </span>
+          <span class="inline-flex items-center gap-2">
+            <i class="pi pi-download"></i>
+            {{ 'common.button.export' | translate }}
+          </span>
         </thaca-button>
       </div>
     </ng-template>

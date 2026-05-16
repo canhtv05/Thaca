@@ -14,6 +14,7 @@ import {
 } from '../../../shared/components/thaca-dropdown/thaca-dropdown.component';
 import { BreadcrumbComponent } from '../../../shared/components/breadcrumb/breadcrumb.component';
 import { ThacaInputComponent } from '../../../shared/components/thaca-input/thaca-input.component';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GlobalToast } from '../../../core/global/global-toast';
@@ -32,6 +33,7 @@ import { IUserLockHistoryDTO } from './lock-history.model';
     ThacaButtonComponent,
     ThacaDropdownComponent,
     ThacaInputComponent,
+    PageHintComponent,
   ],
   templateUrl: './lock-history.component.html',
 })

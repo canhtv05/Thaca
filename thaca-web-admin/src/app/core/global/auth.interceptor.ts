@@ -4,15 +4,18 @@ import {
   HttpHandlerFn,
   HttpInterceptorFn,
   HttpRequest,
+  HttpResponse,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { from, Observable, throwError } from 'rxjs';
-import { catchError, finalize, switchMap } from 'rxjs/operators';
+import { catchError, finalize, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from '../../pages/auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { currentLang, isLoading } from '../stores/app.store';
 import { SKIP_LOADING } from './http-context';
+import { logger } from '../../utils/logger';
+import { IApiPayload } from '../models/common.model';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<any>,
@@ -40,61 +43,75 @@ export const authInterceptor: HttpInterceptorFn = (
     isLoading.set(true);
   }
 
-  return next(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      return from(extractBackendError(error)).pipe(
-        switchMap((backendError) => {
-          const lang = currentLang() || 'vi';
-          let title = lang === 'vi' ? 'Lỗi hệ thống' : 'System error';
-          let message =
-            lang === 'vi' ? 'Đã xảy ra lỗi không xác định' : 'Unknown internal server error';
+  return next(authReq)
+    .pipe(
+      tap((event) => {
+        if (
+          event instanceof HttpResponse &&
+          event.body &&
+          'header' in (event?.body as IApiPayload<any>) &&
+          'body' in (event?.body as IApiPayload<any>)
+        ) {
+          const url = event.url?.substring(event.url.indexOf('/api/') + 5, event.url.length) || '';
+          logger.log(`[HttpResponse - ${url}]::`, event?.body as IApiPayload<any>);
+        }
+      }),
+    )
+    .pipe(
+      catchError((error: HttpErrorResponse) => {
+        return from(extractBackendError(error)).pipe(
+          switchMap((backendError) => {
+            const lang = currentLang() || 'vi';
+            let title = lang === 'vi' ? 'Lỗi hệ thống' : 'System error';
+            let message =
+              lang === 'vi' ? 'Đã xảy ra lỗi không xác định' : 'Unknown internal server error';
 
-          if (backendError) {
-            if (lang === 'vi') {
-              title = backendError.titleVi || title;
-              message = backendError.messageVi || message;
-            } else {
-              title = backendError.titleEn || title;
-              message = backendError.messageEn || message;
-            }
-          }
-
-          switch (error.status) {
-            case 401:
-              authService.logout();
-              router.navigate(['/auth/platform'], {
-                queryParams: { returnUrl: router.routerState.snapshot.url },
-              });
-              toastrService.error(message, title);
-              break;
-            case 403:
-              router.navigate(['/403']);
-              toastrService.warning(message, title);
-              break;
-            case 0:
-              title = lang === 'vi' ? 'Lỗi mạng' : 'Network error';
-              message =
-                lang === 'vi' ? 'Không thể kết nối đến máy chủ' : 'Cannot connect to server';
-              toastrService.error(message, title);
-              break;
-            default:
-              if (error.status >= 500) {
-                toastrService.error(message, title);
+            if (backendError) {
+              if (lang === 'vi') {
+                title = backendError.titleVi || title;
+                message = backendError.messageVi || message;
               } else {
-                toastrService.warning(message, title);
+                title = backendError.titleEn || title;
+                message = backendError.messageEn || message;
               }
-              break;
-          }
-          return throwError(() => error);
-        }),
-      );
-    }),
-    finalize(() => {
-      if (!skipLoading) {
-        isLoading.set(false);
-      }
-    }),
-  );
+            }
+
+            switch (error.status) {
+              case 401:
+                authService.logout();
+                router.navigate(['/auth/platform'], {
+                  queryParams: { returnUrl: router.routerState.snapshot.url },
+                });
+                toastrService.error(message, title);
+                break;
+              case 403:
+                router.navigate(['/403']);
+                toastrService.warning(message, title);
+                break;
+              case 0:
+                title = lang === 'vi' ? 'Lỗi mạng' : 'Network error';
+                message =
+                  lang === 'vi' ? 'Không thể kết nối đến máy chủ' : 'Cannot connect to server';
+                toastrService.error(message, title);
+                break;
+              default:
+                if (error.status >= 500) {
+                  toastrService.error(message, title);
+                } else {
+                  toastrService.warning(message, title);
+                }
+                break;
+            }
+            return throwError(() => error);
+          }),
+        );
+      }),
+      finalize(() => {
+        if (!skipLoading) {
+          isLoading.set(false);
+        }
+      }),
+    );
 };
 
 async function extractBackendError(error: HttpErrorResponse): Promise<any> {

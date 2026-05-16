@@ -1,5 +1,10 @@
 <div class="flex flex-col gap-4 w-full">
   <app-breadcrumb [title]="'menu.tenant_management'" [items]="breadcrumbItems"></app-breadcrumb>
+
+  <app-page-hint variant="info" [title]="'common.page_hint.tenant_title' | translate">
+    {{ 'common.page_hint.tenant_desc' | translate }}
+  </app-page-hint>
+
   <app-data-table [config]="tableConfig" (onAction)="handleAction($event)">
     <ng-template #searchTemplate>
       <div
@@ -36,17 +41,26 @@
           [label]="'tenant.status' | translate"
         ></thaca-dropdown>
         <thaca-button (click)="onSearch()" variant="primary" class="w-full">
-          <span class="text-white">{{ 'common.button.search' | translate }}</span>
+          <span class="inline-flex items-center justify-center gap-2 text-white">
+            <i class="pi pi-search"></i>
+            {{ 'common.button.search' | translate }}
+          </span>
         </thaca-button>
       </div>
     </ng-template>
     <ng-template #headerActions>
       <div class="flex justify-end items-center gap-4">
         <thaca-button variant="outline" (click)="onExport()">
-          {{ 'common.button.export' | translate }}
+          <span class="inline-flex items-center gap-2">
+            <i class="pi pi-download"></i>
+            {{ 'common.button.export' | translate }}
+          </span>
         </thaca-button>
         <thaca-button (click)="onCreate()">
-          <span class="text-white">{{ 'common.button.create' | translate }}</span>
+          <span class="inline-flex items-center gap-2 text-white">
+            <i class="pi pi-plus"></i>
+            {{ 'common.button.create' | translate }}
+          </span>
         </thaca-button>
       </div>
     </ng-template>

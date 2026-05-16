@@ -4,6 +4,7 @@ import { catchError } from 'rxjs/operators';
 import { SKIP_LOADING } from '../global/http-context';
 import { createBody, createHeader } from '../../utils/common.utils';
 import { IApiHeader } from '../models/common.model';
+import { signal } from '@angular/core';
 
 export interface IRequestOptions {
   headers?: Record<string, string>;
@@ -11,6 +12,7 @@ export interface IRequestOptions {
 }
 
 export class GlobalHttp {
+  static readonly isLoading = signal<boolean>(false);
   private static get httpClient(): HttpClient | null {
     return (window as any).__appGlobal?.httpClient || null;
   }
@@ -37,51 +39,60 @@ export class GlobalHttp {
     body?: any,
     options: IRequestOptions = {},
   ): Promise<T> {
-    const client = this.httpClient;
-    if (client) {
-      const token = localStorage.getItem('thaca-access-token');
-      if (token) {
-        options.headers = { ...options.headers, Authorization: `Bearer ${token}` };
-      }
-      const httpHeaders = new HttpHeaders(options.headers || {});
-      const context = new HttpContext().set(SKIP_LOADING, !!options.skipLoading);
-      let requestBody = body;
-      if (body instanceof FormData) {
-        const fd = body as FormData;
-        fd.append('header', JSON.stringify(createHeader()));
-        fd.append('body', JSON.stringify(createBody({})));
-        requestBody = fd;
-      }
+    this.isLoading.set(true);
+    try {
+      const client = this.httpClient;
+      if (client) {
+        const token = localStorage.getItem('thaca-access-token');
+        if (token) {
+          options.headers = { ...options.headers, Authorization: `Bearer ${token}` };
+        }
+        const httpHeaders = new HttpHeaders(options.headers || {});
+        const context = new HttpContext().set(SKIP_LOADING, !!options.skipLoading);
+        let requestBody = body;
+        if (body instanceof FormData) {
+          const fd = body as FormData;
+          fd.append('header', JSON.stringify(createHeader()));
+          fd.append('body', JSON.stringify(createBody({})));
+          requestBody = fd;
+        }
 
-      return await firstValueFrom(
-        client
-          .request<T>(method, url, {
-            body: requestBody,
-            headers: httpHeaders,
-            context,
-            withCredentials: true,
-          })
-          .pipe(
-            catchError((error) => {
-              const errorBody = error?.error;
-              if (errorBody && typeof errorBody === 'object') {
-                return of(errorBody as T);
-              }
-              return of({
-                header: createHeader() as IApiHeader,
-                body: {
-                  status: 'FAILED',
-                  data: {
-                    titleVi: 'Lỗi hệ thống',
-                    titleEn: 'System error',
-                    messageVi: error?.message || 'Đã xảy ra lỗi không xác định',
-                    messageEn: error?.message || 'Unknown error',
+        return await firstValueFrom(
+          client
+            .request<T>(method, url, {
+              body: requestBody,
+              headers: httpHeaders,
+              context,
+              withCredentials: true,
+            })
+            .pipe(
+              catchError((error) => {
+                const errorBody = error?.error;
+                if (errorBody && typeof errorBody === 'object') {
+                  return of(errorBody as T);
+                }
+                return of({
+                  header: createHeader() as IApiHeader,
+                  body: {
+                    status: 'FAILED',
+                    data: {
+                      titleVi: 'Lỗi hệ thống',
+                      titleEn: 'System error',
+                      messageVi: error?.message || 'Đã xảy ra lỗi không xác định',
+                      messageEn: error?.message || 'Unknown error',
+                    },
                   },
-                },
-              } as T);
-            }),
-          ),
-      );
+                } as T);
+              }),
+            ),
+        );
+      }
+      this.isLoading.set(false);
+    } catch (error) {
+      this.isLoading.set(false);
+      throw error;
+    } finally {
+      this.isLoading.set(false);
     }
     const token = localStorage.getItem('thaca-access-token');
     const headersWithApi = { ...options.headers };
@@ -97,22 +108,31 @@ export class GlobalHttp {
       console.log(requestBody, fd);
     }
 
-    const response = await fetch(url, {
-      method,
-      credentials: 'include',
-      headers: headersWithApi,
-      body:
-        requestBody instanceof FormData
-          ? requestBody
-          : requestBody
-            ? JSON.stringify(requestBody)
-            : undefined,
-    });
-    const data = await this.parseResponse(response);
-    if (!response.ok) {
+    try {
+      const response = await fetch(url, {
+        method,
+        credentials: 'include',
+        headers: headersWithApi,
+        body:
+          requestBody instanceof FormData
+            ? requestBody
+            : requestBody
+              ? JSON.stringify(requestBody)
+              : undefined,
+      });
+      const data = await this.parseResponse(response);
+      if (!response.ok) {
+        this.isLoading.set(false);
+        return data as T;
+      }
+      this.isLoading.set(false);
       return data as T;
+    } catch (error) {
+      this.isLoading.set(false);
+      throw error;
+    } finally {
+      this.isLoading.set(false);
     }
-    return data as T;
   }
 
   private static async parseResponse(response: Response) {

@@ -60,6 +60,24 @@
     "infinite": "Vô thời hạn",
     "audit": "Thông tin nhật ký",
     "error": "Lỗi",
-    "success": "Thành công"
+    "success": "Thành công",
+    "page_hint": {
+      "user_list_title": "Quản lý người dùng",
+      "user_list_desc": "Tìm kiếm, tạo mới, nhập/xuất danh sách user. Badge trạng thái thể hiện kích hoạt và khóa tài khoản; dùng nút hàng để sửa hoặc khóa.",
+      "tenant_title": "Quản lý tenant",
+      "tenant_desc": "Quản lý không gian làm việc khách hàng: gói dịch vụ, domain, hạn dùng và trạng thái. Tenant đang hoạt động có thể chỉnh sửa; tenant khóa có thể mở lại.",
+      "plan_title": "Gói dịch vụ (Plan)",
+      "plan_desc": "Định nghĩa gói dịch vụ (mã, loại, giới hạn). Khóa plan để không gán cho tenant mới.",
+      "system_user_title": "Quản trị hệ thống",
+      "system_user_desc": "Tài khoản truy cập cổng admin. Gán vai trò và kiểm soát kích hoạt hoặc khóa tài khoản.",
+      "role_title": "Vai trò (Role)",
+      "role_desc": "Danh sách role — bấm xem để cấu hình quyền theo từng mã role.",
+      "permission_title": "Quyền (Permission)",
+      "permission_desc": "Danh mục quyền API/menu dùng khi cấu hình role.",
+      "login_history_title": "Lịch sử đăng nhập",
+      "login_history_desc": "Theo dõi lần đăng nhập: thiết bị, vị trí, điểm rủi ro và thành công/thất bại. Lọc theo thời gian và kênh.",
+      "lock_history_title": "Lịch sử khóa / mở khóa",
+      "lock_history_desc": "Ghi nhận ai khóa hoặc mở khóa tài khoản và lý do — hỗ trợ rà soát bảo mật."
+    }
   }
 }

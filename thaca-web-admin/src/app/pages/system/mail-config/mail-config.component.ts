@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MenuItem } from 'primeng/api';
 import { BreadcrumbComponent } from '../../../shared/components/breadcrumb/breadcrumb.component';
 import { MailConfigService } from './mail-config.service';
-import { IMailConfigDTO } from './mail-config.model';
+import { IMailConfigDTO, ITestConnectionReq } from './mail-config.model';
 import { GlobalToast } from '../../../core/global/global-toast';
 import { ThacaButtonComponent } from '../../../shared/components/thaca-button/thaca-button.component';
 import { ThacaTabsComponent } from '../../../shared/components/thaca-tabs/thaca-tabs.component';
@@ -17,6 +17,9 @@ import {
   ThacaDropdownComponent,
 } from '../../../shared/components/thaca-dropdown/thaca-dropdown.component';
 import { ThacaSwitchComponent } from '../../../shared/components/thaca-switch/thaca-switch.component';
+import { PageHintComponent } from '../../../shared/components/page-hint/page-hint.component';
+import { GlobalHttp } from '../../../core/global/global-http';
+import { currentLang } from '../../../core/stores/app.store';
 
 @Component({
   selector: 'app-mail-config',
@@ -33,6 +36,7 @@ import { ThacaSwitchComponent } from '../../../shared/components/thaca-switch/th
     ValidationMessageComponent,
     ThacaDropdownComponent,
     ThacaSwitchComponent,
+    PageHintComponent,
   ],
   templateUrl: './mail-config.component.html',
 })
@@ -40,13 +44,11 @@ export class MailConfigComponent implements OnInit {
   private mailConfigService = inject(MailConfigService);
   private fb = inject(FormBuilder);
   private translate = inject(TranslateService);
+  readonly isLoading = GlobalHttp.isLoading;
 
   activeTab = signal<'system' | 'tenant'>('system');
   systemConfig = signal<IMailConfigDTO | null>(null);
-  loading = signal<boolean>(false);
   saving = signal<boolean>(false);
-  testingConnection = signal<boolean>(false);
-  testResult = signal<{ success: boolean; message: string } | null>(null);
 
   breadcrumbItems: MenuItem[] = [
     { icon: 'pi pi-cog', label: 'menu.system_administration' },
@@ -90,7 +92,6 @@ export class MailConfigComponent implements OnInit {
   }
 
   async loadSystemConfig() {
-    this.loading.set(true);
     try {
       const result = await this.mailConfigService.search({
         page: { page: 1, size: 1 } as any,
@@ -105,8 +106,6 @@ export class MailConfigComponent implements OnInit {
       }
     } catch (err) {
       console.error('Error loading system config:', err);
-    } finally {
-      this.loading.set(false);
     }
   }
 
@@ -131,7 +130,6 @@ export class MailConfigComponent implements OnInit {
   }
 
   resetForm() {
-    this.testResult.set(null);
     const config = this.systemConfig();
     if (config) {
       this.patchFormFromConfig(config);
@@ -189,38 +187,18 @@ export class MailConfigComponent implements OnInit {
   }
 
   async testConnection() {
-    if (this.configForm.get('host')?.invalid || this.configForm.get('port')?.invalid) {
-      GlobalToast.error(this.translate.instant('mail_config.error.invalid_host_port'));
-      return;
-    }
-
-    this.testingConnection.set(true);
-    this.testResult.set(null);
-
-    try {
-      const testConfig = {
-        host: this.configForm.get('host')?.value,
-        port: this.configForm.get('port')?.value,
-        username: this.configForm.get('username')?.value,
-        password: this.configForm.get('password')?.value,
-        isAuth: this.configForm.get('isAuth')?.value,
-        isStarttls: this.configForm.get('isStarttls')?.value,
-      };
-
-      const result = await this.mailConfigService.testConnection(testConfig);
-      this.testResult.set(result.body?.data || { success: false, message: 'Unknown error' });
-
-      if (result.body?.data?.success) {
-        GlobalToast.success(result.body.data.message);
-      } else {
-        GlobalToast.error(result.body?.data?.message || 'Connection failed');
-      }
-    } catch (err: any) {
-      const message = err?.body?.data?.message || err?.body?.message || 'Connection test failed';
-      this.testResult.set({ success: false, message });
-      GlobalToast.error(message);
-    } finally {
-      this.testingConnection.set(false);
+    const payload = this.configForm.getRawValue() as ITestConnectionReq;
+    const result = await this.mailConfigService.testConnection(payload);
+    if (result.body?.data?.success && result.body.status === 'OK') {
+      GlobalToast.success(
+        result.body.data?.[currentLang() === 'vi' ? 'messageVi' : 'messageEn'] || '',
+        result.body.data?.[currentLang() === 'vi' ? 'titleVi' : 'titleEn'] || '',
+      );
+    } else {
+      GlobalToast.error(
+        result.body.data?.[currentLang() === 'vi' ? 'messageVi' : 'messageEn'] || '',
+        result.body.data?.[currentLang() === 'vi' ? 'titleVi' : 'titleEn'] || '',
+      );
     }
   }
 }
